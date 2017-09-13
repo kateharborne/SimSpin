@@ -1,0 +1,10 @@
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
+useDynLib(SimSpin)
+
+import("magicaxis")
+import("RColorBrewer")
+importFrom("snapshot", "snapread")
+importFrom("celestial", "cosdistAngScale")
+importFrom("LearnBayes", "rmnorm")
+importFrom("ProFit", "profitMakeGaussianPSF", "profitBruteConv", "profitCubaMoffat")
