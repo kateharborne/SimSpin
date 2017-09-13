@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 12/09/2017)
+# Kate Harborne (last edit - 13/09/2017)
 #'Creating a set of mock IFU observational images.
 #'
 #'The purpose of this function is to construct an IFU images. It accepts output parameters from \code{obs_data_prep()} and returns
@@ -50,24 +50,22 @@ ifu_img = function(obs_data, threshold) {
   minor        = sqrt(abs(temprad$lo))
   axis_ratio   = data.frame("a" = major, "b" = minor)
   counts_img   = (array(t(as.matrix(counts_flat, ncol=1)), dim=c(sbin,sbin)))
-  appregion    = counts_img
-  appregion[(appregion > 0)] = 1
   counts_img[(counts_img < threshold)] = 0
 
   V_counts = as.data.frame(xtabs(formula = vy_obs ~ binn, data = galaxy_obs))
   V_flat   = data.frame("velocity"=rep(0,sbin*sbin))
-  V_flat[as.integer(as.vector(V_counts$binn)),] = as.integer(as.vector(V_counts$Freq))
+  V_flat[as.integer(as.vector(V_counts$binn)),] = as.numeric(as.vector(V_counts$Freq))
   velocity_img = (array(t(as.matrix(V_flat, ncol=1)), dim=c(sbin,sbin))) / counts_img
   velocity_img[is.nan(velocity_img) | is.infinite(velocity_img)] = 0
 
   V2_counts = as.data.frame(xtabs(formula = (vy_obs * vy_obs) ~ binn, data = galaxy_obs))
   V2_flat   = data.frame("velocity2"=rep(0,sbin*sbin))
-  V2_flat[as.integer(as.vector(V2_counts$binn)),] = as.integer(as.vector(V2_counts$Freq))
+  V2_flat[as.integer(as.vector(V2_counts$binn)),] = as.numeric(as.vector(V2_counts$Freq))
   velocity2_img = (array(t(as.matrix(V2_flat, ncol=1)), dim=c(sbin,sbin))) / counts_img
   velocity2_img[is.nan(velocity2_img) | is.infinite(velocity2_img)] = 0
   dispersion_img = sqrt(velocity2_img - (velocity_img)^2)
 
-  output = list("counts_img" = counts_img, "velocity_img" = velocity_img, "dispersion_img" = dispersion_img, "appregion" = appregion, "axis_ratio" = axis_ratio)
+  output = list("counts_img" = counts_img, "velocity_img" = velocity_img, "dispersion_img" = dispersion_img, "appregion" = obs_data$appregion, "axis_ratio" = axis_ratio)
 
   return(output)
 

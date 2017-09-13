@@ -86,6 +86,37 @@ obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, fibres, piv
   vbinsize     = (pixel_res / pivot_wvl) * (3e8 / 1e3)
   pixsize      = sbinsize / ang_size # arcscond per bin
 
+  appregion    = matrix(data = 0, ncol = sbin, nrow = sbin)
+  xcentre = sbin/2 + 0.5
+  ycentre = sbin/2 + 0.5
+  if (ap_shape == "circular"){
+    for (x in 1:sbin){
+      for (y in 1:sbin){
+        xx = x - xcentre
+        yy = y - ycentre
+        rr = sqrt(xx^2 + yy^2)
+        if (rr <= fov){
+          appregion[x,y] = rr
+        }
+      }
+    }
+  }
+  if (ap_shape == "square"){
+    appregion = matrix(data = 1, ncol = sbin, nrow = sbin)
+  }
+  if (ap_shape == "hexagonal"){
+    for (x in 1:sbin){
+      for (y in 1:sbin){
+        xx = x - xcentre
+        yy = y - ycentre
+        rr = (2 * (sbin / 4) * (sbin * sqrt(3) / 4)) - ((sbin / 4) ) * abs(yy) - ((sbin * sqrt(3) / 4)) * abs(xx)
+        if ((rr >= 0) && (abs(xx) < sbin/2) && (abs(yy) < (sbin  * sqrt(3) / 4))){
+          appregion[x,y] = 1
+        }
+      }
+    }
+  }
+
   galaxy_df   = obs_galaxy(galaxy_data$part, centre=TRUE, inc_rad) # extracting the position and line of sight of galaxy particles for a given inclination
   galaxy_df   = galaxy_df[(galaxy_df$r < r200),]
 
@@ -110,7 +141,8 @@ obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, fibres, piv
                 "sbinsize"    = sbinsize,
                 "pixsize"     = pixsize,
                 "angular_size"= ang_size,
-                "vbinsize"    = vbinsize)
+                "vbinsize"    = vbinsize,
+                "appregion"   = appregion)
 
   return(output)
 }

@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 29/08/2017)
+# Kate Harborne (last edit - 13/09/2017)
 #'Find the effective radius of a simulated galaxy.
 #'
 #'The purpose of this function is to find the observed effective radius of a simulated galaxy projected at a user supplied inclination. It works

@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 29/08/2017)
+# Kate Harborne (last edit - 13/09/2017)
 # Utilities functions
 
 .meanwt=function(x, wt){
