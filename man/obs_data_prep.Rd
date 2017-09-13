@@ -48,9 +48,7 @@ obs_data_prep(filename  = "path/to/some/snapshot_XXX",
               fibres    = 793,
               pivot_wvl = 4500,
               pixel_res = 1.04,
-              inc_deg   = 0,
-              m2l_disc  = 2,
-              m2l_bulge = 4)
+              inc_deg   = 0)
 
 obs_data_prep(filename  = "path/to/some/snapshot_XXX",
               ptype     = c(3,4),
@@ -61,9 +59,7 @@ obs_data_prep(filename  = "path/to/some/snapshot_XXX",
               fibres    = 793,
               pivot_wvl = 4500,
               pixel_res = 1.04,
-              inc_deg   = 0,
-              m2l_disc  = 2,
-              m2l_bulge = 4)
+              inc_deg   = 0)
 }
 
 }
