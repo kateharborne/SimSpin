@@ -4,15 +4,12 @@
 \alias{ifu_img}
 \title{Creating a set of mock IFU observational images.}
 \usage{
-ifu_img(obs_data, threshold, type = "physical")
+ifu_img(obs_data, threshold)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
 
 \item{threshold}{The minimum number of counts in the image.}
-
-\item{type}{\emph{Optional} The type of data returned. The option \code{type = "physical"} returns distances in units of kpc,
-but specifying \code{type = "observer"} will return distances in arcseconds.}
 }
 \value{
 Returns a list containing a mock IFU data images including a counts image (\code{$counts_img}), a velocity image (\code{$velocity_img})
@@ -32,8 +29,7 @@ ifu_img(obs_data  = data,
         threshold = 0)
 
 ifu_img(obs_data  = data,
-        threshold = 20,
-        type      = "observer")
+        threshold = 20)
 }
 
 }
