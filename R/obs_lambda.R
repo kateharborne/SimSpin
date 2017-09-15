@@ -116,7 +116,7 @@ obs_lambda = function(ifu_images, reff_axisratio, sbinsize, psf = "Gaussian", fw
     counts         = counts_img * calcregion_reff
     velocity       = velocity_img * calcregion_reff
     dispersion     = dispersion_img * calcregion_reff
-    lambda     = sum(counts * radius * abs(velocity))/sum(counts * radius * (sqrt((velocity * velocity) + (dispersion * dispersion))))
+    lambda         = sum(counts * radius * abs(velocity))/sum(counts * radius * (sqrt((velocity * velocity) + (dispersion * dispersion))))
 
     elli_x = seq(-a, a, length.out = 500)
     elli_y = (b / a) * sqrt(a^2 - elli_x^2)

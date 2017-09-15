@@ -95,8 +95,8 @@ obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, fibres, piv
         xx = x - xcentre
         yy = y - ycentre
         rr = sqrt(xx^2 + yy^2)
-        if (rr <= fov){
-          appregion[x,y] = rr
+        if (rr <= fov+0.5){
+          appregion[x,y] = 1
         }
       }
     }
