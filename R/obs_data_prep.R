@@ -14,6 +14,7 @@
 #'@param pivot_wvl The central filter wavelength used for the observation, given in angstroms.
 #'@param pixel_res The corresponding velocity pixel resolution associated with a given telescope filter in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
+#'@param beam_smear \emph{Optional} Factor by which velocity disibution is blurred in excess of the velocity resolution of the instrument.
 #'@return Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} containing the galaxy particle info
 #' \code{$ID}, \code{$x}, \code{$z_obs}, \code{$r_obs}, \code{$vy_obs} and observed luminosity \code{$L}), and then numerical factors including the number of spatial bins (\code{$sbin}),
 #' the size of those spatial bins in kpc (\code{$sbinsize}) and arcseconds (\code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
@@ -42,20 +43,20 @@
 #'               inc_deg   = 0)
 #' }
 #'
-obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, fibres, pivot_wvl, pixel_res, inc_deg){
+obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, fibres, pivot_wvl, pixel_res, inc_deg, beam_smear = 1){
 
   set.seed(42);
 
   galaxy_data  = snapshot::snapread(filename) # reading in the snapshot data into large list
   galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))
   p = seq(1,6) # all possible particle values
-  ppart = galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)] # present particles
+  ppart = cumsum(galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)]) # present particles
 
   for (i in 1:length(ppart)){
     if (i == 1){
-      galaxy_data$part$part_type[1:ppart[i]] =  which(galaxy_data$head$Nall[p] != 0)[i]
+      galaxy_data$part[1:as.integer(ppart[i]),]$part_type =  which(galaxy_data$head$Nall[p] != 0)[i]
     } else {
-      galaxy_data$part$part_type[ppart[i-1]+1:ppart[i]] = which(galaxy_data$head$Nall[p] != 0)[i]
+      galaxy_data$part[as.integer(ppart[i-1]+1):as.integer(ppart[i]),]$part_type = which(galaxy_data$head$Nall[p] != 0)[i]
     }
   } # labelling the data frame with particle types
 
@@ -134,7 +135,7 @@ obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, fibres, piv
     galaxy_cdf  = galaxy_cdf[dotprod >= 0,]
   } # cutting the number of particles to only contain those within the telescope aperture
 
-  galaxy_cdf$vy_obs = galaxy_cdf$vy_obs + rnorm(galaxy_cdf$vy_obs, mean = 0, sd = vbinsize) # adding noise to the velocities to constraints due to velocity resolution
+  galaxy_cdf$vy_obs = galaxy_cdf$vy_obs + rnorm(galaxy_cdf$vy_obs, mean = 0, sd = vbinsize * beam_smear) # adding noise to the velocities to constraints due to velocity resolution
 
   output = list("galaxy_obs"  = galaxy_cdf,
                 "sbin"        = sbin,

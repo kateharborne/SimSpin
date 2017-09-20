@@ -39,13 +39,13 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, sa
   galaxy_data = snapshot::snapread(filename) # reading in the snapshot data into large list
   galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))
   p = seq(1,6) # all possible particle values
-  ppart = galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)] # present particles
+  ppart = cumsum(galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)]) # present particles
 
   for (i in 1:length(ppart)){
     if (i == 1){
-      galaxy_data$part$part_type[1:ppart[i]] =  which(galaxy_data$head$Nall[p] != 0)[i]
+      galaxy_data$part[1:as.integer(ppart[i]),]$part_type =  which(galaxy_data$head$Nall[p] != 0)[i]
     } else {
-      galaxy_data$part$part_type[ppart[i-1]+1:ppart[i]] = which(galaxy_data$head$Nall[p] != 0)[i]
+      galaxy_data$part[as.integer(ppart[i-1]+1):as.integer(ppart[i]),]$part_type = which(galaxy_data$head$Nall[p] != 0)[i]
     }
   } # labelling the data frame with particle types
 
