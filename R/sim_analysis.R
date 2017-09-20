@@ -17,7 +17,6 @@
 #'@param rbin The number of radial bins considered.
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars,
 #'6 - boundary.
-#'@param samplerate \emph{Optional} If specified, the particle data will be randomly sampled with the number specified here.
 #'@return A data frame containing kinematic features of radial bins including (at least) the outer radius of each bin (\code{$r}/\code{$cr}/\code{$z}), contained mass
 #'(\code{$Mass}), logarithmic density (\code{$logp}), velocities and velocity dispersions (\code{$vr}/\code{$vcr}/\code{$vz} and \code{$sigma_vr}/\code{$sigma_vcr}/
 #'\code{$sigma_vz}) and angular momentum magnitude (\code{$J}). In the case of \code{bin_dir = "r"} additionally the circular velocity (\code{$vc}), the velocity
@@ -58,10 +57,6 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, sa
   galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,] # leaving only particles of requested ptype
   galaxy_data$head$Npart[p[!p %in% ptype]] = as.integer(0)
   galaxy_data$head$Nall[p[!p %in% ptype]] = as.integer(0) # removing record of the removed particles in the header
-
-  if (is.na(samplerate) == FALSE){
-    galaxy_data$part = galaxy_data$part[sample(nrow(galaxy_data$part), size = samplerate),]
-  } # taking a sample of particles according to samplerate
 
   galaxy_df  = sim_galaxy(galaxy_data$part, centre=TRUE)
   grp        = matrix()
