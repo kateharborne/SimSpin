@@ -33,7 +33,7 @@
 #' }
 #'
 
-sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, samplerate=NA){
+sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
 
   galaxy_data = snapshot::snapread(filename) # reading in the snapshot data into large list
   galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))
@@ -67,12 +67,12 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, sa
   G = 4.516e-29 # gravitational constant in units of kpc^3/([1e10 Msolar]s^2)
 
   if (bin_type == "r"){
-    galaxy_cdf       = galaxy_df[galaxy_df$r < rmax,]
-    galaxy_cdf$group = as.integer(cut(galaxy_cdf$r, breaks=seq(0,rmax,by=rmax/rbin), labels=seq(1,rbin)))
+    galaxy_cdf       = galaxy_df[galaxy_df$r < rmax,] # removed particles further than rmax
+    galaxy_cdf$group = as.integer(cut(galaxy_cdf$r, breaks=seq(0,rmax,by=rmax/rbin), labels=seq(1,rbin))) # assigns each particle into an rbin
     grp_num          = data.frame("rbin" = seq(1, rmax, length.out=rbin), "Freq" = integer(rbin))
-    grp_obins        = as.data.frame(table(with(galaxy_cdf, group)))
-    grp_num[as.integer(levels(grp_obins$Var1)),2] = grp_obins$Freq
-    grp_num$cumsum   = cumsum(grp_num$Freq)
+    grp_obins        = as.data.frame(table(with(galaxy_cdf, group))) # produces a DF containing the number of particles in each occupied bin
+    grp_num[as.integer(levels(grp_obins$Var1)),2] = grp_obins$Freq # fills empty data frame with the number of particles in each possible bin
+    grp_num$cumsum   = cumsum(grp_num$Freq) # total number of particles contained within bins
     galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]
     rbin_labels      = seq(0,rmax,rmax/rbin)
     profile = data.frame("r"        = numeric(rbin),
@@ -88,9 +88,9 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, sa
                          "lambda"   = numeric(rbin))
     for (j in 1:rbin){
       if (j == 1){
-        grp = galaxy_odf[1:grp_num$cumsum[j],]
+        grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
       } else {
-        grp = galaxy_odf[grp_num$cumsum[j-1]:grp_num$cumsum[j],]
+        grp = galaxy_odf[as.integer(grp_num$cumsum[j-1]+1):as.integer(grp_num$cumsum[j]),]
       } # all data in an individual radius bin
       profile$r[j] = rbin_labels[j+1] # the outer edge of each radial bin
       grp_mass = sum(grp$Mass)
@@ -135,9 +135,9 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, sa
                          "sigma_vcr"= numeric(rbin))
     for (j in 1:rbin){
       if (j == 1){
-        grp = galaxy_odf[1:grp_num$cumsum[j],]
+        grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
       } else {
-        grp = galaxy_odf[grp_num$cumsum[j-1]:grp_num$cumsum[j],]
+        grp = galaxy_odf[as.integer(grp_num$cumsum[j-1]+1):as.integer(grp_num$cumsum[j]),]
       } # all data in an individual radius bin
       profile$cr[j] = rbin_labels[j+1] # the outer edge of each radial bin
       grp_mass = sum(grp$Mass)
@@ -173,9 +173,9 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, sa
                          "sigma_vz"= numeric(rbin))
     for (j in 1:rbin){
       if (j == 1){
-        grp = galaxy_odf[1:grp_num$cumsum[j],]
+        grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
       } else {
-        grp = galaxy_odf[grp_num$cumsum[j-1]:grp_num$cumsum[j],]
+        grp = galaxy_odf[as.integer(grp_num$cumsum[j-1]+1):as.integer(grp_num$cumsum[j]),]
       } # all data in an individual radius bin
       profile$z[j] = rbin_labels[j+1] # the outer edge of each radial bin
       grp_mass = sum(grp$Mass)
