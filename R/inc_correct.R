@@ -41,21 +41,15 @@
 
 inc_correct = function(inc_deg, galaxy_class, axis_ratio, obs_lambdar, v_aniso = c(0, 0.2, 0.4, 0.6)){
   inc_rad     = inc_deg * (pi / 180)
-  if (galaxy_class == "S0"){
+  if (galaxy_class == "early"){
     fac = 0.6
-  } else if (galaxy_class == "Sa"){
-      fac = 0.7
-  } else if (galaxy_class == "Sb"){
-      fac = 0.8
-  } else if (galaxy_class == "Sc"){
-      fac = 0.91
-  } else if (galaxy_class == "Sd"){
-      fac = 0.92
+  } else if (galaxy_class == "late"){
+      fac = 0.2
   } else {
-      cat("galaxy_class is not recognised. Please select from c(\"S0\", \"Sa\", \"Sb\", \"Sc\", \"Sd\") and run again.")
+      cat("galaxy_class is not recognised. Please select from \"early\" or \"late\" and run again.")
       stop("galaxy_class Error")
     }
-  obs_inc_rad = acos(axis_ratio$b / axis_ratio$a) / fac
+  obs_inc_rad = acos(sqrt(((axis_ratio$b / axis_ratio$a)^2 - fac^2) / (1 - fac^2))) # inclination from axis ratio as in 2016_cortese
   c_true      = sin(inc_rad) / (sqrt(1 - v_aniso * (cos(inc_rad)^2)))
   c_obs       = sin(obs_inc_rad) / (sqrt(1 - v_aniso * (cos(obs_inc_rad)^2)))
   lr_true     = (obs_lambdar / c_true) * (1 / (sqrt(1 - (obs_lambdar^2) * (1 - 1 / (c_true^2)))))

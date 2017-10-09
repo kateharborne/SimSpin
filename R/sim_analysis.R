@@ -61,7 +61,9 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
   galaxy_df  = sim_galaxy(galaxy_data$part, centre=TRUE)
   grp        = matrix()
   grp_mass   = 0
-  grp_J      = 0
+  grp_Jx     = 0
+  grp_Jy     = 0
+  grp_Jz     = 0
   grp_vtheta = 0
   grp_vphi   = 0 # empty placeholders for loops
   G = 4.516e-29 # gravitational constant in units of kpc^3/([1e10 Msolar]s^2)
@@ -79,6 +81,9 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
                          "Mass"     = numeric(rbin),
                          "logp"     = numeric(rbin),
                          "vc"       = numeric(rbin),
+                         "Jx"       = numeric(rbin),
+                         "Jy"       = numeric(rbin),
+                         "Jz"       = numeric(rbin),
                          "J"        = numeric(rbin),
                          "vr"       = numeric(rbin),
                          "sigma_vr" = numeric(rbin),
@@ -101,12 +106,20 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
       } # finding the enclosed mass
       profile$logp[j] = log10(grp_mass / ((4 / 3) * pi * ((profile$r[j] * profile$r[j] * profile$r[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j])))) # finding the log10 of shell density
       profile$vc[j] = (sqrt((G  * profile$Mass[j]) / profile$r[j])) * 3.086e16 # the circular velocity of particles at this radius, km/s
-      grp_J = sum(grp$J)
+      grp_Jx = sum(grp$Jx)
+      grp_Jy = sum(grp$Jy)
+      grp_Jz = sum(grp$Jz)
+      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz))
       if (j == 1){
-        profile$J[j] = grp_J
+        profile$Jx[j] = grp_Jx
+        profile$Jy[j] = grp_Jy
+        profile$Jz[j] = grp_Jz
       } else {
-        profile$J[j] = grp_J + profile$J[j-1]
-      } # finding the enclosed angular momentum
+        profile$Jx[j] = grp_Jx + profile$Jx[j-1]
+        profile$Jy[j] = grp_Jy + profile$Jy[j-1]
+        profile$Jz[j] = grp_Jz + profile$Jz[j-1]
+      } # finding the enclosed angular momentum components
+      profile$J[j]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j])) # finding the enclosed angular momentum
       profile$vr[j] = mean(grp$vr) # finding the mean radial velocity in the shell, km/s
       grp_vtheta = mean(grp$vtheta)
       grp_vphi   = mean(grp$vphi)
@@ -131,6 +144,9 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
                          "Mass"     = numeric(rbin),
                          "logp"     = numeric(rbin),
                          "J"        = numeric(rbin),
+                         "Jx"       = numeric(rbin),
+                         "Jy"       = numeric(rbin),
+                         "Jz"       = numeric(rbin),
                          "vcr"      = numeric(rbin),
                          "sigma_vcr"= numeric(rbin))
     for (j in 1:rbin){
@@ -147,11 +163,20 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
         profile$Mass[j] = grp_mass + profile$Mass[j-1]
       } # finding the enclosed mass
       profile$logp[j] = log10(grp_mass / ((4 / 3) * pi * ((profile$cr[j] * profile$cr[j] * profile$cr[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j])))) # finding the log10 of shell density
+      grp_Jx = sum(grp$Jx)
+      grp_Jy = sum(grp$Jy)
+      grp_Jz = sum(grp$Jz)
+      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz))
       if (j == 1){
-        profile$J[j] = sum(grp$J)
+        profile$Jx[j] = grp_Jx
+        profile$Jy[j] = grp_Jy
+        profile$Jz[i] = grp_Jz
       } else {
-        profile$J[j] = sum(grp$J) + profile$J[j-1]
-      } # finding the enclosed angular momentum
+        profile$Jx[j] = grp_Jx + profile$Jx[j-1]
+        profile$Jy[j] = grp_Jy + profile$Jy[j-1]
+        profile$Jz[j] = grp_Jz + profile$Jz[j-1]
+      } # finding the enclosed angular momentum components
+      profile$J[i]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j])) # finding the enclosed angular momentum
       profile$vcr[j] = mean(grp$vcr) # finding the mean radial velocity in the shell, km/s
       profile$sigma_vcr[j] = sqrt(mean(grp$vcr * grp$vcr) - (profile$vcr[j] * profile$vcr[j])) # radial velocity dispersion, (km/s)
     }
@@ -169,6 +194,9 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
                          "Mass"     = numeric(rbin),
                          "logp"     = numeric(rbin),
                          "J"        = numeric(rbin),
+                         "Jx"       = numeric(rbin),
+                         "Jy"       = numeric(rbin),
+                         "Jz"       = numeric(rbin),
                          "vz"      = numeric(rbin),
                          "sigma_vz"= numeric(rbin))
     for (j in 1:rbin){
@@ -185,11 +213,20 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
         profile$Mass[j] = grp_mass + profile$Mass[j-1]
       } # finding the enclosed mass
       profile$logp[j] = log10(grp_mass / ((4 / 3) * pi * ((profile$z[j] * profile$z[j] * profile$z[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j])))) # finding the log10 of shell density
+      grp_Jx = sum(grp$Jx)
+      grp_Jy = sum(grp$Jy)
+      grp_Jz = sum(grp$Jz)
+      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz))
       if (j == 1){
-        profile$J[j] = sum(grp$J)
+        profile$Jx[j] = grp_Jx
+        profile$Jy[j] = grp_Jy
+        profile$Jz[i] = grp_Jz
       } else {
-        profile$J[j] = sum(grp$J) + profile$J[j-1]
-      } # finding the enclosed angular momentum
+        profile$Jx[j] = grp_Jx + profile$Jx[j-1]
+        profile$Jy[j] = grp_Jy + profile$Jy[j-1]
+        profile$Jz[j] = grp_Jz + profile$Jz[j-1]
+      } # finding the enclosed angular momentum components
+      profile$J[i]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j])) # finding the enclosed angular momentum
       profile$vz[j] = mean(grp$vz) # finding the mean radial velocity in the shell, km/s
       profile$sigma_vz[j] = sqrt(mean(grp$vz * grp$vz) - (profile$vz[j] * profile$vz[j])) # radial velocity dispersion, (km/s)
     }

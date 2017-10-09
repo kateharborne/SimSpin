@@ -45,7 +45,7 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
     y = y-ycen;
     z = z-zcen;
   }
-  Rcpp::NumericVector r(n), cr(n), theta(n), phi(n), vr(n), vcr(n), vtheta(n), vphi(n), J(n);
+  Rcpp::NumericVector r(n), cr(n), theta(n), phi(n), vr(n), vcr(n), vtheta(n), vphi(n), Jx(n), Jy(n), Jz(n);
   for(int i=0; i<n; i++){
     r[i]      = ::sqrt((x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]));
     cr[i]     = ::sqrt((x[i] * x[i]) + (y[i] * y[i]));
@@ -55,8 +55,9 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
     vcr[i]    = (x[i] * vx[i] + y[i] * vy[i]) /cr[i];
     vtheta[i] = -(r[i] / ::sqrt(1 - ((z[i] * z[i]) / (r[i] * r[i])))) * ((vz[i] / r[i]) - (vr[i] * z[i] / (r[i] * r[i])));
     vphi[i]   = (r[i] / (((y[i] * y[i]) / (x[i] * x[i])) + 1)) * ::sin(theta[i]) * ((vy[i] / x[i]) - (vx[i] * y[i] / (x[i] * x[i])));
-    J[i]      = Mass[i] * ::sqrt(((y[i] * vz[i] - z[i] * vy[i]) * (y[i] * vz[i] - z[i] * vy[i])) + ((z[i] * vx[i] - x[i] * vz[i]) *
-      (z[i] * vx[i] - x[i] * vz[i])) + ((x[i] * vy[i] - y[i] * vx[i]) * (x[i] * vy[i] - y[i] * vx[i]))) * 3.086e16;
+    Jx[i]     = Mass[i] * ((y[i] * vz[i]) - (z[i] * vy[i])) * 3.086e16;
+    Jy[i]     = Mass[i] * ((z[i] * vx[i]) - (x[i] * vz[i])) * 3.086e16;
+    Jz[i]     = Mass[i] * ((x[i] * vy[i]) - (y[i] * vx[i])) * 3.086e16;
   }
 
   Rcpp::DataFrame df =
@@ -76,7 +77,9 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
                             Rcpp::Named("vtheta")    = vtheta,
                             Rcpp::Named("vphi")      = vphi,
                             Rcpp::Named("Mass")      = Mass,
-                            Rcpp::Named("J")         = J,
+                            Rcpp::Named("Jx")        = Jx,
+                            Rcpp::Named("Jy")        = Jy,
+                            Rcpp::Named("Jz")        = Jz,
                             Rcpp::Named("part_type") = part_type);
 
   return(df);

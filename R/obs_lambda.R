@@ -130,7 +130,7 @@ obs_lambda = function(ifu_images, reff_axisratio, sbinsize, psf = "Gaussian", fw
                   "counts_img"     = counts_img,
                   "velocity_img"   = velocity_img,
                   "dispersion_img" = dispersion_img,
-                  "reff_ellipse"      = reff_elli)
+                  "reff_ellipse"   = reff_elli)
   }
 
   return(output)
