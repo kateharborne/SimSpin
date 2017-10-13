@@ -10,11 +10,11 @@
 #'@param z The galaxy redshift.
 #'@param fov The field of view of the IFU diameter in arcseconds.
 #'@param ap_shape The shape of the field of view, with options "circular", "square" or "hexagonal".
-#'@param pivot_wvl The central filter wavelength used for the observation, given in angstroms.
+#'@param central_wvl The central filter wavelength used for the observation, given in angstroms.
+#'@param lsf_fwhm The line spread function full-width half-max, given in angstroms.
 #'@param pixel_sscale The corresponding spatial pixel scale associated with a given telescope in arcseconds.
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope filter in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
-#'@param beam_smear \emph{Optional} Factor by which velocity disibution is blurred in excess of the velocity resolution of the instrument.
 #'@return Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} containing the galaxy particle info
 #' \code{$ID}, \code{$x}, \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs}, and then numerical factors including the number of spatial bins (\code{$sbin}),
 #' the size of those spatial bins in kpc (\code{$sbinsize}) and arcseconds (\code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
@@ -26,10 +26,11 @@
 #'               z            = 0.1,
 #'               fov          = 15,
 #'               ap_shape     = "circular",
-#'               pivot_wvl    = 4500,
+#'               central_wvl  = 4800,
+#'               lsf_fwhm     = 2.65,
 #'               pixel_sscale = 0.5,
 #'               pixel_vscale = 1.04,
-#'               inc_deg   = 0)
+#'               inc_deg      = 0)
 #'
 #' obs_data_prep(filename  = "path/to/some/snapshot_XXX",
 #'               ptype     = c(3,4),
@@ -37,13 +38,14 @@
 #'               z         = 0.1,
 #'               fov       = 15,
 #'               ap_shape  = "hexagonal",
-#'               pivot_wvl = 4500,
+#'               central_wvl  = 4800,
+#'               lsf_fwhm     = 2.65,
 #'               pixel_sscale = 0.5,
 #'               pixel_vscale = 1.04,
 #'               inc_deg   = 0)
 #' }
 #'
-obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, pivot_wvl, pixel_sscale, pixel_vscale, inc_deg, beam_smear = 1){
+obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg){
 
   set.seed(42);
 
@@ -75,7 +77,8 @@ obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, pivot_wvl, 
   ap_size      = ang_size * fov # aperture diameter size of the telescope in kpc
   sbin         = floor(fov / pixel_sscale) # number of spatial bins in the x- and y/z_obs- directions
   sbinsize     = ap_size / sbin # kpc per bin
-  vbinsize     = (pixel_vscale / pivot_wvl) * (3e8 / 1e3)
+  vbinsize     = (pixel_vscale / central_wvl) * (3e8 / 1e3) # km/s per velocity bin
+  lsf_size     = ((lsf_fwhm / central_wvl) * (3e8 / 1e3)) / (2 * sqrt(2*log(2))) # velocity uncertainty due to LSF
 
   appregion    = matrix(data = 0, ncol = sbin, nrow = sbin)
   xcentre = sbin/2 + 0.5
@@ -125,14 +128,13 @@ obs_data_prep = function(filename, ptype=NA, r200, z, fov, ap_shape, pivot_wvl, 
     galaxy_cdf  = galaxy_cdf[dotprod >= 0,]
   } # cutting the number of particles to only contain those within the telescope aperture
 
-  galaxy_cdf$vy_obs = galaxy_cdf$vy_obs + rnorm(galaxy_cdf$vy_obs, mean = 0, sd = vbinsize * beam_smear) # adding noise to the velocities to constraints due to velocity resolution
-
   output = list("galaxy_obs"  = galaxy_cdf,
                 "sbin"        = sbin,
                 "sbinsize"    = sbinsize,
-                "pixsize"     = pixel_sscale,
                 "angular_size"= ang_size,
+                "vbin"        = vbin,
                 "vbinsize"    = vbinsize,
+                "lsf_size"    = lsf_size,
                 "appregion"   = appregion)
 
   return(output)

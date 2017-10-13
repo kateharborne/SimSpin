@@ -44,7 +44,7 @@ inc_correct = function(inc_deg, galaxy_class, axis_ratio, obs_lambdar, v_aniso =
   if (galaxy_class == "early"){
     fac = 0.6
   } else if (galaxy_class == "late"){
-      fac = 0.2
+      fac = 0.1
   } else {
       cat("galaxy_class is not recognised. Please select from \"early\" or \"late\" and run again.")
       stop("galaxy_class Error")
