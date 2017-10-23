@@ -4,8 +4,8 @@
 \alias{obs_data_prep}
 \title{Prepare simulation data for observational kinematic analysis.}
 \usage{
-obs_data_prep(filename, ptype = NA, r200, z, fov, ap_shape, fibres, pivot_wvl,
-  pixel_res, inc_deg)
+obs_data_prep(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
+  central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg)
 }
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
@@ -16,50 +16,55 @@ obs_data_prep(filename, ptype = NA, r200, z, fov, ap_shape, fibres, pivot_wvl,
 
 \item{z}{The galaxy redshift.}
 
-\item{fov}{The field of view of the telescope in arcseconds.}
+\item{fov}{The field of view of the IFU, diameter in arcseconds.}
 
 \item{ap_shape}{The shape of the field of view, with options "circular", "square" or "hexagonal".}
 
-\item{fibres}{The number of observing fibres active in the telescope.}
+\item{central_wvl}{The central filter wavelength used for the observation, given in angstroms.}
 
-\item{pivot_wvl}{The central filter wavelength used for the observation, given in angstroms.}
+\item{lsf_fwhm}{The line spread function full-width half-max, given in angstroms.}
 
-\item{pixel_res}{The corresponding velocity pixel resolution associated with a given telescope filter in angstroms.}
+\item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope output in arcseconds.}
+
+\item{pixel_vscale}{The corresponding velocity pixel scale associated with a given telescope filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
 }
 \value{
-Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} containing the galaxy particle info
-\code{$ID}, \code{$x}, \code{$z_obs}, \code{$r_obs}, \code{$vy_obs} and observed luminosity \code{$L}), and then numerical factors including the number of spatial bins (\code{$sbin}),
-the size of those spatial bins in kpc (\code{$sbinsize}) and arcseconds (\code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
-(\code{$vbinsize}), the angular size in kpc/arcecond at the provided redshift (\code{$angular_size}) and the luminosity distance of the galaxy given in Mpc (\code{lum_dist}).
+Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} (which contains the galaxy particle info from the GADGET file,
+with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs}) and numerical factors including the number of spatial bins (\code{$sbin}),
+the size of those spatial bins in kpc and arcseconds (\code{$sbinsize} and \code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
+(\code{$vbinsize}), the gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size of the galaxy in kpc/arcecond at the provided
+redshift (\code{$angular_size}).
 }
 \description{
 The purpose of this function is to calculate the factors necessary for constructing an IFU observation data cube of a simulated galaxy at a user
-specified inclination.
+specified inclination and redshift.
 }
 \examples{
 \dontrun{
-obs_data_prep(filename  = "path/to/some/snapshot_XXX",
-              r200      = 200,
-              z         = 0.1,
-              fov       = 15,
-              ap_shape  = "circular",
-              fibres    = 793,
-              pivot_wvl = 4500,
-              pixel_res = 1.04,
-              inc_deg   = 0)
+obs_data_prep(filename     = "path/to/some/snapshot_XXX",
+              r200         = 200,
+              z            = 0.1,
+              fov          = 15,
+              ap_shape     = "circular",
+              central_wvl  = 4800,
+              lsf_fwhm     = 2.65,
+              pixel_sscale = 0.5,
+              pixel_vscale = 1.04,
+              inc_deg      = 0)
 
-obs_data_prep(filename  = "path/to/some/snapshot_XXX",
-              ptype     = c(3,4),
-              r200      = 200,
-              z         = 0.1,
-              fov       = 15,
-              ap_shape  = "hexagonal",
-              fibres    = 793,
-              pivot_wvl = 4500,
-              pixel_res = 1.04,
-              inc_deg   = 0)
+obs_data_prep(filename     = "path/to/some/snapshot_XXX",
+              ptype        = c(3,4),
+              r200         = 200,
+              z            = 0.1,
+              fov          = 15,
+              ap_shape     = "hexagonal",
+              central_wvl  = 4800,
+              lsf_fwhm     = 2.65,
+              pixel_sscale = 0.5,
+              pixel_vscale = 1.04,
+              inc_deg      = 0)
 }
 
 }

@@ -15,10 +15,11 @@
 #'@param pixel_sscale The corresponding spatial pixel scale associated with a given telescope output in arcseconds.
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
-#'@return Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} containing the galaxy particle info
-#' \code{$ID}, \code{$x}, \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs}, and then numerical factors including the number of spatial bins (\code{$sbin}),
-#' the size of those spatial bins in kpc (\code{$sbinsize}) and arcseconds (\code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
-#' (\code{$vbinsize}), the gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size in kpc/arcecond at the provided redshift (\code{$angular_size}).
+#'@return Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} (which contains the galaxy particle info from the GADGET file,
+#' with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs}) and numerical factors including the number of spatial bins (\code{$sbin}),
+#' the size of those spatial bins in kpc and arcseconds (\code{$sbinsize} and \code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
+#' (\code{$vbinsize}), the gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size of the galaxy in kpc/arcecond at the provided
+#' redshift (\code{$angular_size}).
 #'@examples
 #' \dontrun{
 #' obs_data_prep(filename     = "path/to/some/snapshot_XXX",
@@ -32,17 +33,17 @@
 #'               pixel_vscale = 1.04,
 #'               inc_deg      = 0)
 #'
-#' obs_data_prep(filename  = "path/to/some/snapshot_XXX",
-#'               ptype     = c(3,4),
-#'               r200      = 200,
-#'               z         = 0.1,
-#'               fov       = 15,
-#'               ap_shape  = "hexagonal",
+#' obs_data_prep(filename     = "path/to/some/snapshot_XXX",
+#'               ptype        = c(3,4),
+#'               r200         = 200,
+#'               z            = 0.1,
+#'               fov          = 15,
+#'               ap_shape     = "hexagonal",
 #'               central_wvl  = 4800,
 #'               lsf_fwhm     = 2.65,
 #'               pixel_sscale = 0.5,
 #'               pixel_vscale = 1.04,
-#'               inc_deg   = 0)
+#'               inc_deg      = 0)
 #' }
 #'
 obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg){

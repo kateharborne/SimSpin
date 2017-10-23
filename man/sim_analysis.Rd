@@ -5,7 +5,7 @@
 \title{Kinematic analysis of simulation data.}
 \usage{
 sim_analysis(filename, bin_type = "r", rmax = 200, rbin = 200,
-  ptype = NA, samplerate = NA)
+  ptype = NA)
 }
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
@@ -19,8 +19,6 @@ sim_analysis(filename, bin_type = "r", rmax = 200, rbin = 200,
 
 \item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars,
 6 - boundary.}
-
-\item{samplerate}{\emph{Optional} If specified, the particle data will be randomly sampled with the number specified here.}
 }
 \value{
 A data frame containing kinematic features of radial bins including (at least) the outer radius of each bin (\code{$r}/\code{$cr}/\code{$z}), contained mass

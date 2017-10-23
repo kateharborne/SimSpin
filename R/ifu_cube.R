@@ -7,18 +7,18 @@
 #'
 #'@param obs_data The list output from the \code{obs_data_prep()} function.
 #'@param threshold The minimum number of counts in the image.
-#'@return Returns a list containing a mock IFU data cube including a counts image (\code{$counts_img}), a velocity image (\code{$velocity_img})
-#' and a dispersion image (\code{$dispersion_img}) as required for calculating the observed spin parameter. Also contained is an image that
+#'@return Returns a list containing a mock IFU data cube as required for calculating the observed spin parameter. Also contained is an image that
 #' describes the shape of the apperture (\code{$appregion}) such that any further convolutions that are applied to mimic beam smearing or seeing
-#' can be trimmed to the appropriate apperture shape.
+#' can be trimmed to the appropriate apperture shape. The bin labels for each dimension are supplied as \code{$xbin_labels}, \code{$ybin_labels}, \code{$vbin_labels}.
+#' The axis ratio of the galaxy is calculated in this fuction and output in the list as \code{$axis_ratio$a} and \code{$axis_ratio$b}.
 #'@examples
 #' \dontrun{
 #' data = obs_data_prep()
 #'
-#' ifu_cube(obs_data  = data,
+#' ifu_cube(obs_data = data,
 #'         threshold = 0)
 #'
-#' ifu_cube(obs_data  = data,
+#' ifu_cube(obs_data = data,
 #'         threshold = 20)
 #' }
 #'
@@ -88,7 +88,7 @@ ifu_cube = function(obs_data, threshold) {
   appcube = array(data = obs_data$appregion, dim = c(sbin,sbin,vbin))
   cube = cube * appcube
 
-  output = list("cube" = cube, "vbin_labels" = vbin_ls, "xbin_labels" = xbin_ls, "zbin_labels" = zbin_ls, "appregion" = appcube, "axis_ratio" = axis_ratio)
+  output = list("cube" = cube, "xbin_labels" = xbin_ls, "ybin_labels" = zbin_ls, "vbin_labels" = vbin_ls, "appregion" = appcube, "axis_ratio" = axis_ratio)
 
   return(output)
 

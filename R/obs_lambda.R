@@ -4,8 +4,7 @@
 #'The purpose of this function is to calculate the spin parameter that would be observed given an IFU data cube.
 #'This function will also mimic the spatial blurring caused by seeing and beam smearing if the \code{fwhm} parameter is supplied.
 #'
-#'@param ifu_datacube The list output from the function \code{ifu_cube()} containing the mock IFU cube (\code{$counts_img},
-#'\code{$velocity_img}, \code{$dispersion_img}) and the apperture region image (\code{$appregion}).
+#'@param ifu_datacube The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region image (\code{$appregion}).
 #'@param reff_axisratio The semi-major and semi-minor axes output from the \code{find_reff()} function.
 #'@param sbinsize The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.
 #'@param psf \emph{Optional} This parameter gives the user choice between a "Gaussian" or "Moffat" PSF. The default is Gaussian.
@@ -15,18 +14,18 @@
 #' kpc and arcseconds as produced by the \code{obs_data_prep()} function.
 #'@return Returns a list that contains the observed \eqn{\lambda}_R value (\code{$obs_lambdar}), and three matricies reflecting the images produced
 #' in IFU surveys - a luminosity counts image (\code{$counts_img}), a velocity image (\code{$velocity_img}) and a velocity dispersion image
-#' (\code{$dispersion_img}) and the coordinates of the effective radius ellipse within which \eqn{\lambda}_R is measured.
+#' (\code{$dispersion_img}) - and the coordinates of the effective radius ellipse within which \eqn{\lambda}_R is measured.
 #'@examples
 #' \dontrun{
 #'  data      = obs_data_prep()
-#'  ifu_imgs  = ifu_img()
+#'  ifucube   = ifu_cube()
 #'  reff_data = find_reff()
 #'
-#'  obs_lambda(ifu_images     = ifu_imgs,
+#'  obs_lambda(ifu_datacube   = ifucube,
 #'             reff_axisratio = reff_data,
 #'             sbinsize       = data$sbinsize)
 #'
-#'  obs_lambda(ifu_images     = ifu_imgs,
+#'  obs_lambda(ifu_datacube   = ifucube,
 #'             reff_axisratio = reff_data,
 #'             sbinsize       = data$sbinsize,
 #'             psf            = "Moffat",

@@ -11,7 +11,7 @@ find_reff(filename, ptype = NA, r200, inc_deg, axis_ratio)
 
 \item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
 
-\item{r200}{The virial radis}
+\item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{inc_deg}{The observed inclination of the simulated galaxy in degrees.}
 

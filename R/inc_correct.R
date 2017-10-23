@@ -7,8 +7,8 @@
 #'in \code{sim_analysis()}. Else, the inclination correction will be calculated for 4 anisotropy values between 0 and 0.6.
 #'
 #'@param inc_deg The true inclination at which the galaxy was observed (as specified in \code{obs_data_prep()}).
-#'@param galaxy_class The Hubble type of the galaxy with options \code{c("S0","Sa", "Sb", "Sc", "Sd")}.
-#'@param axis_ratio A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_img().
+#'@param galaxy_class The Hubble type of the galaxy with options \code{c("early","late")}.
+#'@param axis_ratio A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_cube().
 #'@param obs_lambdar The observed \eqn{\lambda}_R value as produced by the \code{obs_lambda()} function.
 #'@param v_aniso \emph{Optional} parameter that specifies the velocity anisotropy at which the inclination correction is made.
 #' If missing, the correction will be applied for \code{v_aniso = c(0, 0.2, 0.4, 0.6)}.
@@ -17,22 +17,22 @@
 #' anisotropy.
 #'@examples
 #' \dontrun{
-#' images      = ifu_img()
+#' images      = ifu_cube()
 #' lambda_data = obs_lambda()
 #'
 #' inc_correct(inc_deg      = 0,
-#'             galaxy_class = "S0",
+#'             galaxy_class = "late",
 #'             axis_ratio   = images$axis_ratio,
 #'             obs_lambdar  = lambda_data$obs_lambdar)
 #'
 #' inc_correct(inc_deg      = 0,
-#'             galaxy_class = "S0",
+#'             galaxy_class = "early",
 #'             axis_ratio   = images$axis_ratio,
 #'             obs_lambdar  = lambda_data$obs_lambdar,
 #'             v_aniso      = 0.1)
 #'
 #' inc_correct(inc_deg      = 0,
-#'             galaxy_class = "S0",
+#'             galaxy_class = "late",
 #'             axis_ratio   = images$axis_ratio,
 #'             obs_lambdar  = lambda_data$obs_lambdar,
 #'             v_aniso     = c(0, 0.1, 0.2, 0.3))
