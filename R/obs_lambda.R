@@ -4,7 +4,7 @@
 #'The purpose of this function is to calculate the spin parameter that would be observed given an IFU data cube.
 #'This function will also mimic the spatial blurring caused by seeing and beam smearing if the \code{fwhm} parameter is supplied.
 #'
-#'@param ifu_images The list output from the function \code{ifu_img()} containing the mock IFU images (\code{$counts_img},
+#'@param ifu_datacube The list output from the function \code{ifu_cube()} containing the mock IFU cube (\code{$counts_img},
 #'\code{$velocity_img}, \code{$dispersion_img}) and the apperture region image (\code{$appregion}).
 #'@param reff_axisratio The semi-major and semi-minor axes output from the \code{find_reff()} function.
 #'@param sbinsize The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.
@@ -35,10 +35,11 @@
 #' }
 #'
 
-obs_lambda = function(ifu_images, reff_axisratio, sbinsize, psf = "Gaussian", fwhm, angular_size = NULL){
+obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, psf = "Gaussian", fwhm, angular_size = NULL){
   if (missing(fwhm)) {
-    sbin            = nrow(ifu_images$appregion) # number of spatial bins in data cube
-    calcregion_reff = array(data = rep(0,(sbin*sbin)), dim=c(sbin,sbin)) # for calculating lambdaR within the specified reff
+    sbin            = length(ifu_datacube$xbin_labels) # number of spatial bins in data cube
+    vbin            = length(ifu_datacube$vbin_labels)
+    calcregion_reff = array(data = rep(0,(sbin*sbin*vbin)), dim=c(sbin,sbin,vbin)) # for calculating lambdaR within the specified reff
     radius          = matrix(data = 0, nrow=sbin, ncol=sbin) # creating the radial positions within the calcregion
 
     xcentre = sbin/2 + 0.5
@@ -52,17 +53,34 @@ obs_lambda = function(ifu_images, reff_axisratio, sbinsize, psf = "Gaussian", fw
         yy = y - ycentre
         rr = (xx^2 / a^2) + (yy^2 / b^2)
         if (rr <= 1){
-          calcregion_reff[x,y] = 1
-          radius[x,y]          = sqrt(xx^2 + yy^2) * sbinsize
+          calcregion_reff[x,y,] = 1
+          radius[x,y]           = sqrt(xx^2 + yy^2) * sbinsize
         }
       }
     } # creating two arrays - one of a multiplier to consider lambdaR within Reff,
     # and one of the radial values within Reff
 
-    counts     = ifu_images$counts_img * calcregion_reff
-    velocity   = ifu_images$velocity_img * calcregion_reff
-    dispersion = ifu_images$dispersion_img * calcregion_reff
-    lambda     = sum(counts * radius * abs(velocity))/sum(counts * radius * (sqrt((velocity * velocity) + (dispersion * dispersion))))
+    cube_reff  = ifu_datacube$cube * calcregion_reff
+    counts     = apply(cube_reff, c(1,2), sum)
+    counts_img = apply(ifu_datacube$cube, c(1,2), sum)
+    velocity       = matrix(data=0, nrow=sbin, ncol=sbin)
+    velocity_img   = matrix(data=0, nrow=sbin, ncol=sbin)
+    standard_dev   = matrix(data=0, nrow=sbin, ncol=sbin)
+    dispersion_img = matrix(data=0, nrow=sbin, ncol=sbin)
+    for (c in 1:sbin){
+      for (d in 1:sbin){
+        velocity[c,d]       = .meanwt(ifu_datacube$vbin_labels, cube_reff[c,d,])
+        standard_dev[c,d]   = sqrt(.varwt(ifu_datacube$vbin_labels, cube_reff[c,d,], velocity[c,d]))
+        velocity_img[c,d]   = .meanwt(ifu_datacube$vbin_labels, ifu_datacube$cube[c,d,])
+        dispersion_img[c,d] = sqrt(.varwt(ifu_datacube$vbin_labels, ifu_datacube$cube[c,d,], velocity_img[c,d]))
+      }
+    } # building the velocity and dispersion images
+    velocity[(is.na(velocity))]             = 0 # mean velocity
+    velocity_img[(is.na(velocity_img))]     = 0 # mean velocity image
+    standard_dev[(is.na(standard_dev))]     = 0 # velocity dispersion
+    dispersion_img[(is.na(dispersion_img))] = 0 # velocity dispersion image
+
+    lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
 
     elli_x = seq(-a, a, length.out = 500)
     elli_y = (b / a) * sqrt(a^2 - elli_x^2)
@@ -73,16 +91,17 @@ obs_lambda = function(ifu_images, reff_axisratio, sbinsize, psf = "Gaussian", fw
     if (max(reff_elli)>sbin){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.")}
 
     output = list("obs_lambdar"    = lambda,
-                  "counts_img"     = ifu_images$counts_img,
-                  "velocity_img"   = ifu_images$velocity_img,
-                  "dispersion_img" = ifu_images$dispersion_img,
+                  "counts_img"     = counts_img,
+                  "velocity_img"   = velocity_img,
+                  "dispersion_img" = dispersion_img,
                   "reff_ellipse"   = reff_elli)
 
   } else {
     if (is.null(angular_size)){stop("Please enter an angular_size and re-run obs_lambda()")}
-    sbin            = nrow(ifu_images$appregion) # number of spatial bins in data cube
+    sbin            = length(ifu_datacube$xbin_labels) # number of spatial bins in data cube
+    vbin            = length(ifu_datacube$vbin_labels) # numder of velocity bins in data cube
     fwhm_scaled     = (fwhm * angular_size)/ sbinsize # the fwhm of the beam smearing scaled to the image pixel dimensions
-    calcregion_reff = array(data = rep(0,(sbin*sbin)), dim=c(sbin,sbin)) # for calculating lambdaR within the specified reff
+    calcregion_reff = array(data = rep(0,(sbin*sbin*vbin)), dim=c(sbin,sbin, vbin)) # for calculating lambdaR within the specified reff
     radius          = matrix(data = 0, nrow=sbin, ncol=sbin) # creating the radial positions within the calcregion
 
     xcentre = sbin/2 + 0.5
@@ -96,7 +115,7 @@ obs_lambda = function(ifu_images, reff_axisratio, sbinsize, psf = "Gaussian", fw
         yy = y - ycentre
         rr = (xx^2 / a^2) + (yy^2 / b^2)
         if (rr <= 1){
-          calcregion_reff[x,y] = 1
+          calcregion_reff[x,y,] = 1
           radius[x,y]          = sqrt(xx^2 + yy^2) * sbinsize
         }
       }
@@ -109,14 +128,35 @@ obs_lambda = function(ifu_images, reff_axisratio, sbinsize, psf = "Gaussian", fw
     if (psf == "Moffat"){
       psf_k         = ProFit::profitCubaMoffat(fwhm = fwhm_scaled, mag = 1, con = 5, dim = c(25,25))
     }
+    blurcube        = array(data = 0, dim = c(sbin, sbin, vbin))
+    for (c in 1:vbin){
+      blurcube[,,c] = ProFit::profitBruteConv(ifu_datacube$cube[,,c], psf_k)
+    }
+    blurcube       = blurcube * ifu_datacube$appregion
+    blurcube_reff  = blurcube * calcregion_reff
 
-    counts_img     = ProFit::profitBruteConv(ifu_images$counts_img, psf_k) * ifu_images$appregion
-    velocity_img   = ProFit::profitBruteConv(ifu_images$velocity_img, psf_k) * ifu_images$appregion
-    dispersion_img = ProFit::profitBruteConv(ifu_images$dispersion_img, psf_k) * ifu_images$appregion
-    counts         = counts_img * calcregion_reff
-    velocity       = velocity_img * calcregion_reff
-    dispersion     = dispersion_img * calcregion_reff
-    lambda         = sum(counts * radius * abs(velocity))/sum(counts * radius * (sqrt((velocity * velocity) + (dispersion * dispersion))))
+    counts          = apply(blurcube_reff, c(1,2), sum) # summed counts
+    counts_img      = apply(blurcube, c(1,2), sum) # summed counts image
+    velocity        = matrix(data=0, nrow=sbin, ncol=sbin)
+    velocity_img    = matrix(data=0, nrow=sbin, ncol=sbin)
+    standard_dev    = matrix(data=0, nrow=sbin, ncol=sbin)
+    dispersion_img  = matrix(data=0, nrow=sbin, ncol=sbin)
+
+    for (d in 1:sbin){
+      for (e in 1:sbin){
+        velocity[d,e]       = .meanwt(ifu_datacube$vbin_labels, blurcube_reff[d,e,])
+        velocity_img[d,e]   = .meanwt(ifu_datacube$vbin_labels, blurcube[d,e,])
+        standard_dev[d,e]   = sqrt(.varwt(ifu_datacube$vbin_labels, blurcube_reff[d,e,], velocity[d,e]))
+        dispersion_img[d,e] = sqrt(.varwt(ifu_datacube$vbin_labels, blurcube[d,e,], velocity_img[d,e]))
+      }
+    } # building the velocity and dispersion images
+
+    velocity[(is.na(velocity))]             = 0 # mean velocity
+    velocity_img[(is.na(velocity_img))]     = 0 # mean velocity image
+    standard_dev[(is.na(standard_dev))]     = 0 # velocity dispersion
+    dispersion_img[(is.na(dispersion_img))] = 0 # velocity dispersion image
+
+    lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
 
     elli_x = seq(-a, a, length.out = 500)
     elli_y = (b / a) * sqrt(a^2 - elli_x^2)

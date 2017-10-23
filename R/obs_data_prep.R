@@ -1,24 +1,24 @@
-# Kate Harborne (last edit - 13/09/2017)
+# Kate Harborne (last edit - 20/10/2017)
 #'Prepare simulation data for observational kinematic analysis.
 #'
 #'The purpose of this function is to calculate the factors necessary for constructing an IFU observation data cube of a simulated galaxy at a user
-#'specified inclination.
+#'specified inclination and redshift.
 #'
 #'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param z The galaxy redshift.
-#'@param fov The field of view of the IFU diameter in arcseconds.
+#'@param fov The field of view of the IFU, diameter in arcseconds.
 #'@param ap_shape The shape of the field of view, with options "circular", "square" or "hexagonal".
 #'@param central_wvl The central filter wavelength used for the observation, given in angstroms.
 #'@param lsf_fwhm The line spread function full-width half-max, given in angstroms.
-#'@param pixel_sscale The corresponding spatial pixel scale associated with a given telescope in arcseconds.
-#'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope filter in angstroms.
+#'@param pixel_sscale The corresponding spatial pixel scale associated with a given telescope output in arcseconds.
+#'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
 #'@return Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} containing the galaxy particle info
 #' \code{$ID}, \code{$x}, \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs}, and then numerical factors including the number of spatial bins (\code{$sbin}),
 #' the size of those spatial bins in kpc (\code{$sbinsize}) and arcseconds (\code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
-#' (\code{$vbinsize}), and the angular size in kpc/arcecond at the provided redshift (\code{$angular_size}).
+#' (\code{$vbinsize}), the gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size in kpc/arcecond at the provided redshift (\code{$angular_size}).
 #'@examples
 #' \dontrun{
 #' obs_data_prep(filename     = "path/to/some/snapshot_XXX",
@@ -78,7 +78,7 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central
   sbin         = floor(fov / pixel_sscale) # number of spatial bins in the x- and y/z_obs- directions
   sbinsize     = ap_size / sbin # kpc per bin
   vbinsize     = (pixel_vscale / central_wvl) * (3e8 / 1e3) # km/s per velocity bin
-  lsf_size     = ((lsf_fwhm / central_wvl) * (3e8 / 1e3)) / (2 * sqrt(2*log(2))) # velocity uncertainty due to LSF
+  lsf_size     = ((lsf_fwhm / central_wvl) * (3e8 / 1e3)) / (2 * sqrt(2*log(2))) # velocity uncertainty (standard deviation, not FWHM) due to LSF
 
   appregion    = matrix(data = 0, ncol = sbin, nrow = sbin)
   xcentre = sbin/2 + 0.5
@@ -127,6 +127,8 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central
     dotprod     = (2 * (sbin / 4) * sbinsize * (sbin * sqrt(3) / 4) * sbinsize) - ((sbin / 4) * sbinsize) * abs(galaxy_cdf$z_obs) - ((sbin * sqrt(3) / 4) * sbinsize) * abs(galaxy_cdf$x)
     galaxy_cdf  = galaxy_cdf[dotprod >= 0,]
   } # cutting the number of particles to only contain those within the telescope aperture
+
+  vbin = ceiling((max(galaxy_cdf$vy_obs) - min(galaxy_cdf$vy_obs)) / vbinsize) # the number of velocity bins
 
   output = list("galaxy_obs"  = galaxy_cdf,
                 "sbin"        = sbin,
