@@ -87,7 +87,7 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, psf = "Gaussian", 
     reff_elli[1:1000,1] = c(elli_x, rev(elli_x)) + rep(sbin/2, 1000)
     reff_elli[1:1000,2] = c(elli_y, rev(elli_y)*-1) + rep(sbin/2, 1000)
 
-    if (max(reff_elli)>sbin){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.")}
+    if (max(reff_elli)>sbin){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
     output = list("obs_lambdar"    = lambda,
                   "counts_img"     = counts_img,
@@ -163,7 +163,7 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, psf = "Gaussian", 
     reff_elli[1:1000,1] = c(elli_x, rev(elli_x)) + rep(sbin/2, 1000)
     reff_elli[1:1000,2] = c(elli_y, rev(elli_y)*-1) + rep(sbin/2, 1000)
 
-    if (max(reff_elli)>sbin){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.")}
+    if (max(reff_elli)>sbin){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
     output = list("obs_lambdar"    = lambda,
                   "counts_img"     = counts_img,
