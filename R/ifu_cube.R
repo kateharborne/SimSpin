@@ -27,6 +27,7 @@ ifu_cube = function(obs_data, threshold) {
 
   galaxy_obs      = obs_data$galaxy_obs # data to populate the aperture
   sbin            = obs_data$sbin # number of spatial bins along the x and z axes
+  pixel_sscale    = obs_data$pixel_sscale
   sbin_breaks     = seq(-(sbin * obs_data$sbinsize) / 2, (sbin * obs_data$sbinsize) / 2, by=obs_data$sbinsize)
   vbin            = obs_data$vbin
   vbinsize        = obs_data$vbinsize
@@ -35,6 +36,7 @@ ifu_cube = function(obs_data, threshold) {
   galaxy_obs$binx = cut(galaxy_obs$x, breaks=sbin_breaks, labels=F)
   galaxy_obs$binz = cut(galaxy_obs$z_obs, breaks=sbin_breaks, labels=F)
   galaxy_obs$binn = galaxy_obs$binx + (sbin * galaxy_obs$binz) - sbin # labelling data based on it's position in the aperture
+  threshold_flux  = 1.3608e22 * 10^((threshold + 26.832) / -2.5) * (pixel_sscale^2)
 
   xbins           = levels(cut(galaxy_obs$x, breaks=sbin_breaks))
   zbins           = levels(cut(galaxy_obs$z_obs, breaks=sbin_breaks))
@@ -61,10 +63,11 @@ ifu_cube = function(obs_data, threshold) {
   minor      = sqrt(abs(temprad$lo))
   axis_ratio = data.frame("a" = major, "b" = minor)
 
-  vel_obs = data.frame("binn" = galaxy_obs$binn, "vz" = galaxy_obs$vy_obs)
+  vel_obs = data.frame("binn" = galaxy_obs$binn, "vz" = galaxy_obs$vy_obs, "flux" = galaxy_obs$flux)
   vel_obs = vel_obs[order(vel_obs$binn),]
   cum_counts = cumsum(counts_flat)
   cell_counts = array(data = 0, dim = 1)
+  cell_flux = array(data = 0, dim = 1)
   cube = array(data = 0, dim = c(sbin, sbin, vbin))
 
   for (i in 1:nr){
@@ -74,21 +77,24 @@ ifu_cube = function(obs_data, threshold) {
       coord = c((i%/%sbin + 1), i%%sbin) # determining coordinates to fill
       if (i%%sbin == 0){coord = c((i%/%sbin), sbin)} # if at the end of a row, setting the coordinate correctly
       cell_counts = vel_obs$vz[(cum_counts$counts[i-1] + 1): cum_counts$counts[i]] # all the velocities in that spatial bin
-      if (length(cell_counts) < threshold){
+      cell_flux = vel_obs$flux[(cum_counts$counts[i-1] + 1): cum_counts$counts[i]] # all the flux in that spatial bin
+      if (sum(cell_flux) < threshold_flux){
         cube[coord[2], coord[1],] = 0 # if there are too few counts in that cell, set the cube cell to zero and skipping to the next cell
       } else {
         for (j in 1:length(cell_counts)){
-          cube[coord[2], coord[1],] = cube[coord[2], coord[1],] + diff(pnorm(vseq, mean=cell_counts[j], sd=lsf_size)) # adding the "gaussians" of each particle to the velocity bins
+          cube[coord[2], coord[1],] = cube[coord[2], coord[1],] + diff(cell_flux[j] * pnorm(vseq, mean=cell_counts[j], sd=lsf_size)) # adding the "gaussians" of each particle to the velocity bins
         }
       }
       cell_counts = array(data = 0, dim = 1) # reset for the next iteration
+      flux_counts = array(data = 0, dim = 1) # reset for the next iteration
     }
   }
 
   appcube = array(data = obs_data$appregion, dim = c(sbin,sbin,vbin))
   cube = cube * appcube
+  blur_info = data.frame("xbins" = xbin_labels, "ybins" = zbin_labels)
 
-  output = list("cube" = cube, "xbin_labels" = xbin_ls, "ybin_labels" = zbin_ls, "vbin_labels" = vbin_ls, "appregion" = appcube, "axis_ratio" = axis_ratio)
+  output = list("cube" = cube, "xbin_labels" = xbin_ls, "ybin_labels" = zbin_ls, "vbin_labels" = vbin_ls, "appregion" = appcube, "axis_ratio" = axis_ratio, "blur_info" = blur_info)
 
   return(output)
 

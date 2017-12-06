@@ -8,7 +8,7 @@
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param inc_deg The observed inclination of the simulated galaxy in degrees.
-#'@param axis_ratio A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_img().
+#'@param axis_ratio A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_cube() or blur_cube().
 #'@return Returned is a scaled axis ratio that describes the semimajor and semiminor axes of an ellipse that contains half the total number of particles.
 #'@examples
 #' \dontrun{

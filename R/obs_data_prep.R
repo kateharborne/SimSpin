@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 20/10/2017)
+# Kate Harborne (last edit - 29/11/2017)
 #'Prepare simulation data for observational kinematic analysis.
 #'
 #'The purpose of this function is to calculate the factors necessary for constructing an IFU observation data cube of a simulated galaxy at a user
@@ -15,8 +15,10 @@
 #'@param pixel_sscale The corresponding spatial pixel scale associated with a given telescope output in arcseconds.
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
+#'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
+#'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@return Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} (which contains the galaxy particle info from the GADGET file,
-#' with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs}) and numerical factors including the number of spatial bins (\code{$sbin}),
+#' with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs} nad particle fluxes in units of 1e-16 erg s-1 cm-2) and numerical factors including the number of spatial bins (\code{$sbin}),
 #' the size of those spatial bins in kpc and arcseconds (\code{$sbinsize} and \code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
 #' (\code{$vbinsize}), the gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size of the galaxy in kpc/arcecond at the provided
 #' redshift (\code{$angular_size}).
@@ -31,7 +33,9 @@
 #'               lsf_fwhm     = 2.65,
 #'               pixel_sscale = 0.5,
 #'               pixel_vscale = 1.04,
-#'               inc_deg      = 0)
+#'               inc_deg      = 0,
+#'               m2l_disc     = 2,
+#'               m2l_bulge    = 1)
 #'
 #' obs_data_prep(filename     = "path/to/some/snapshot_XXX",
 #'               ptype        = c(3,4),
@@ -43,12 +47,15 @@
 #'               lsf_fwhm     = 2.65,
 #'               pixel_sscale = 0.5,
 #'               pixel_vscale = 1.04,
-#'               inc_deg      = 0)
+#'               inc_deg      = 0,
+#'               m2l_disc     = 2,
+#'               m2l_bulge    = 1)
 #' }
 #'
-obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg){
+obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge){
 
   set.seed(42);
+  sol_lum = 3.827e33; # solar luminosity in erg s-1
 
   galaxy_data  = snapshot::snapread(filename) # reading in the snapshot data into large list
   galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))
@@ -75,6 +82,7 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central
 
   inc_rad      = inc_deg * (pi / 180) # the galaxy inclination in radians
   ang_size     = celestial::cosdistAngScale(z, ref="Planck15") # the angular size of the galaxy given the redshift, kpc/arcsecond
+  lum_dist     = celestial::cosdistLumDist(z, ref="Planck15") # the angular size of the galaxy given the redshift, kpc/arcsecond
   ap_size      = ang_size * fov # aperture diameter size of the telescope in kpc
   sbin         = floor(fov / pixel_sscale) # number of spatial bins in the x- and y/z_obs- directions
   sbinsize     = ap_size / sbin # kpc per bin
@@ -130,6 +138,10 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central
   } # cutting the number of particles to only contain those within the telescope aperture
 
   vbin = ceiling((max(galaxy_cdf$vy_obs) - min(galaxy_cdf$vy_obs)) / vbinsize) # the number of velocity bins
+  galaxy_cdf$flux = rep(0, nrow(galaxy_cdf))
+  galaxy_cdf[(galaxy_cdf$part_type== 3),]$flux = ((galaxy_cdf[(galaxy_cdf$part_type== 3),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_disc)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2) # calculating the flux from each disc particle
+  galaxy_cdf[(galaxy_cdf$part_type== 4),]$flux = ((galaxy_cdf[(galaxy_cdf$part_type== 4),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_bulge)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2) # calculating the flux from each bulge particle
+  # fluxes in units of (1e-16 erg s-1 cm-2)
 
   output = list("galaxy_obs"  = galaxy_cdf,
                 "sbin"        = sbin,
@@ -138,6 +150,7 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central
                 "vbin"        = vbin,
                 "vbinsize"    = vbinsize,
                 "lsf_size"    = lsf_size,
+                "pixel_sscale"= pixel_sscale,
                 "appregion"   = appregion)
 
   return(output)
