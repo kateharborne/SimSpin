@@ -15,7 +15,7 @@ find_reff(filename, ptype = NA, r200, inc_deg, axis_ratio)
 
 \item{inc_deg}{The observed inclination of the simulated galaxy in degrees.}
 
-\item{axis_ratio}{A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_img().}
+\item{axis_ratio}{A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_cube() or blur_cube().}
 }
 \value{
 Returned is a scaled axis ratio that describes the semimajor and semiminor axes of an ellipse that contains half the total number of particles.

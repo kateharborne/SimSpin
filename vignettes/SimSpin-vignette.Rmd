@@ -172,6 +172,31 @@ The animation above demonstrates the sequential planes of the IFU data cube that
 
 The spatial and velocity midpoints of each bin are stored in `$xbin_labels`, `$zbin_labels` and `$vbin_labels`. These outputs can then be fed into further functions to calculate the observed spin parameter $\lambda_R$. 
 
+### Applying seeing conditions
+
+It is possible to introduce blurring due to beam smearing and seeing conditions at this point in the process. This blurring is introduced by convolving each velocity frame of the IFU data cube with a Gaussian or Moffat PSF kernel. 
+
+```{r} 
+SAMI_blur = blur_cube(ifu_datacube   = SAMI_cube_phys,        # output from ifu_cube() function
+                      sbinsize       = SAMI_obs$sbinsize,     # sbin size, kpc
+                      psf            = "Gaussian",            # or "Moffat" 
+                      fwhm           = 1.0,                   # arcseconds
+                      angular_size   = SAMI_obs$angular_size) # kpc/arcsecond
+                                      
+```
+
+The output of this function is in the same format as `ifu_cube()`, but with the data cube convolved such that the images produced are blurred by the degree specified by `FWHM`. If blurring has been applied, the axis ratio produced by this function then should be supplied to `find_reff()` (see the next step) in order to calculate the correctly observed ellipticity. 
+
+``` {r, echo=FALSE, fig.width=3.25, fig.height=3.85} 
+magicaxis::magimage(apply(SAMI_cube_phys$cube, c(1,2), sum), xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)))
+legend("topleft", "W/O Beam Smear", text.col = "white", bty="n", cex=0.9)
+fields::image.plot(legend.only = TRUE, zlim = range(c(apply(SAMI_cube_phys$cube, c(1,2), sum))), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), horizontal = TRUE)
+
+magicaxis::magimage(apply(SAMI_blur$cube, c(1,2), sum), xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)))
+legend("topleft", "W/ Beam Smear", text.col = "white", bty="n", cex=0.9)
+fields::image.plot(legend.only = TRUE, zlim = range(c(apply(SAMI_blur$cube, c(1,2), sum))), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), horizontal = TRUE)
+```
+
 ### Finding the effective radius, $R_{eff}$
 
 First, however, it is necessary to find the effective radius of the observed galaxy in order to know what radius $\lambda_R$ should be measured at. This can be done using the `find_reff()` function and the output axis ratio from the `ifu_cube()` function. 
@@ -185,6 +210,16 @@ SAMI_reff = find_reff(filename   = "~/LambdaR/inst/extdata/S0_vignette",
 ```
 
 The output of this is the equivilant of the half light radius at which half of the total luminosity output of the galaxy is emitted. As we have only particle data, we use particle counts to define this effective radius. 
+
+As stated above, the seeing conditions will effect the axis ratio that is recovered. Hence, if the function `ifu_blur()` has been used, the output axis ratio of this should be supplied to `find_reff()`.
+
+```{r} 
+SAMI_reff_blur = find_reff(filename   = "~/LambdaR/inst/extdata/S0_vignette", 
+                           ptype      = NA,                        # considering all particles
+                           r200       = 200,                       # virial radius, kpc
+                           inc_deg    = 75,                        # inclination of galaxy, degrees
+                           axis_ratio = SAMI_blur$axis_ratio)      # axis ratio of the galaxy, kpc
+```
 
 ### Calculating $\lambda_R$
 
@@ -226,27 +261,6 @@ SAMI_lambda_warning = obs_lambda(ifu_datacube   = SAMI_cube_phys,    # output fr
                                  sbinsize       = SAMI_obs$sbinsize) # sbin size, kpc
 ```
 
-It is possible to introduce blurring due to beam smearing and seeing conditions at this point in the process. This blurring is introduced by convolving each velocity frame of the IFU data cube with a Gaussian or Moffat PSF kernel. 
-
-```{r} 
-SAMI_lambda_blur = obs_lambda(ifu_datacube   = SAMI_cube_phys,        # output from ifu_cube() function
-                              reff_axisratio = SAMI_reff,             # reff at given inclination, kpc
-                              sbinsize       = SAMI_obs$sbinsize,     # sbin size, kpc
-                              psf            = "Gaussian",            # or "Moffat" 
-                              fwhm           = 1.0,                   # arcseconds
-                              angular_size   = SAMI_obs$angular_size) # kpc/arcsecond
-                                      
-```
-``` {r, echo=FALSE, fig.width=3.25, fig.height=3.85} 
-magicaxis::magimage(SAMI_lambda$counts_img, xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)))
-legend("topleft", "W/O Beam Smear", text.col = "white", bty="n", cex=0.9)
-fields::image.plot(legend.only = TRUE, zlim = range(c(SAMI_lambda$counts_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), horizontal = TRUE)
-
-magicaxis::magimage(SAMI_lambda_blur$counts_img, xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)))
-legend("topleft", "W/ Beam Smear", text.col = "white", bty="n", cex=0.9)
-fields::image.plot(legend.only = TRUE, zlim = range(c(SAMI_lambda$counts_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), horizontal = TRUE)
-```
-
 ### Correcting $\lambda_R$ for inclination
 
 It is well understood that the observed value of $\lambda_R$ is very sensitive to the inclination at which the galaxy is observed. Due to this, there is an "inclination correction" that can be applied to help mitigate the impact of the inclination.
@@ -272,7 +286,7 @@ $v_{aniso}$ is the velocity anisotropy and $i$ is the inclination.
 SAMI_inc_lambda = inc_correct(inc_deg      = 75,                           # true inclination, degees
                               galaxy_class = "late",                       # or "early"
                               axis_ratio   = SAMI_cube_phys$axis_ratio,    # axis ratio of galaxy
-                              obs_lambdar  = SAMI_lambda_blur$obs_lambdar) # measured lambda_R
+                              obs_lambdar  = SAMI_lambda$obs_lambdar) # measured lambda_R
 ```
 
 If `v_aniso` is not specified, the function will return an array containing the true and observationally corrected $\lambda_R$ values at 4 different values, $v_{aniso} = 0, 0.2, 0.4, 0.6$. If, instead, this parameter is directly specified, a vector is returned containing the true and observationally corrected values at those chosen values of `v_aniso`:
@@ -281,7 +295,7 @@ If `v_aniso` is not specified, the function will return an array containing the 
 inc_correct(inc_deg      = 75,                           # true inclination, degees
             galaxy_class = "late",                       # or "early"
             axis_ratio   = SAMI_cube_phys$axis_ratio,    # axis ratio of galaxy
-            obs_lambdar  = SAMI_lambda_blur$obs_lambdar, # measured lambda_R
+            obs_lambdar  = SAMI_lambda$obs_lambdar,      # measured lambda_R
             v_aniso      = 0.3)                          # velocity anisotropy
 ```
 
@@ -293,7 +307,7 @@ Once we have calculated all of these parameters, we can see how the measured $\l
 magicaxis::magplot(sim_data$r, sim_data$lambda, type="l", lwd=3, col="green", xlab="r, kpc", ylab=expression(paste(lambda)), ylim = c(0, 0.7))
 abline(h=SAMI_inc_lambda$obs_lambda[1], col = "blue", lwd=3)
 abline(h=SAMI_inc_lambda$obs_lambda[2], col = "red", lwd=3)
-abline(h=SAMI_lambda_blur$obs_lambdar, col="black", lwd=3)
+abline(h=SAMI_lambda$obs_lambdar, col="black", lwd=3)
 legend("topright", inset=c(0.05,0.05), c(expression("Observed "*paste(lambda)[R]), expression("True inc correct "*paste(lambda)[R]), expression("Obs inc correct "*paste(lambda)[R])), lty = c(1,1,1), col = c("black", "blue", "red"), bty="n", lwd=c(3,3,3), cex=0.9)
 ```
 

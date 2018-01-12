@@ -6,7 +6,7 @@
 #' of an IFU data cube.
 #'
 #'@param obs_data The list output from the \code{obs_data_prep()} function.
-#'@param threshold The minimum number of counts in the image.
+#'@param threshold The flux threshold of the observation.
 #'@return Returns a list containing a mock IFU data cube as required for calculating the observed spin parameter. Also contained is an image that
 #' describes the shape of the apperture (\code{$appregion}) such that any further convolutions that are applied to mimic beam smearing or seeing
 #' can be trimmed to the appropriate apperture shape. The bin labels for each dimension are supplied as \code{$xbin_labels}, \code{$ybin_labels}, \code{$vbin_labels}.

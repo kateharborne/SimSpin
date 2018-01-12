@@ -26,9 +26,10 @@ anisotropy.
 }
 \description{
 The purpose of this function is to take the \eqn{\lambda}_R value observed via the \code{obs_lambda()} function and correct
-it for inclination, as done for true IFU observations. You supply both the true and observed inclinations, as calculated
-by the \code{obs_inclination()} function. The true anisotropy can also be supplied, as calculated from the simulation data
-in \code{sim_analysis()}. Else, the inclination correction will be calculated for 4 anisotropy values between 0 and 0.6.
+it for inclination, as done for true IFU observations. You supply both the true inclination, the galaxy class (\code{"early"} or \code{"late"}),
+the observed axis ratio of the galaxy as calculated by the \code{ifu_cube()} function and the observed \eqn{\lambda}_R from the \code{obs_lambda()} function.
+The true anisotropy can also be supplied, as calculated from the simulation data in \code{sim_analysis()}. Else, the inclination correction
+will be calculated for 4 anisotropy values between 0 and 0.6.
 }
 \examples{
 \dontrun{

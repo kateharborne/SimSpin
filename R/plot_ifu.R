@@ -18,7 +18,6 @@
 
 plot_ifu = function(lambda, appregion){
 
-  appregion      = observe_data$appregion
   appregion[appregion == 0] = NA
   counts_img     = lambda$counts_img * appregion
   velocity_img   = lambda$velocity_img * appregion

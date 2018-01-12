@@ -23,28 +23,27 @@ sim_analysis(filename, bin_type = "r", rmax = 200, rbin = 200,
 \value{
 A data frame containing kinematic features of radial bins including (at least) the outer radius of each bin (\code{$r}/\code{$cr}/\code{$z}), contained mass
 (\code{$Mass}), logarithmic density (\code{$logp}), velocities and velocity dispersions (\code{$vr}/\code{$vcr}/\code{$vz} and \code{$sigma_vr}/\code{$sigma_vcr}/
-\code{$sigma_vz}) and angular momentum magnitude (\code{$J}). In the case of \code{bin_dir = "r"} additionally the circular velocity (\code{$vc}), the velocity
-anisotropy (\code{$B}), rotational velocity ($vrot) and the spin parameter (\code{$lambda}) are included in the output data frame.
+\code{$sigma_vz}) and angular momentum magnitude (\code{$J}). In the case of \code{bin_type = "r"} additionally the circular velocity (\code{$vc}), the velocity
+anisotropy (\code{$B}), rotational velocity (\code{$vrot}) and the spin parameter (\code{$lambda}) are included in the output data frame.
 }
 \description{
 The purpose of this function is to calculate the kinematic properties of a simulated galaxy, specifically the velocity and dispersion of particles within
-certain user defined bins. The user must specify which direction they wish to study the kinematics using \code{bin_dir} (where \code{= "r"} specifies out
+certain user defined bins. The user must specify which direction they wish to study the kinematics using \code{bin_type} (where \code{= "r"} specifies out
 radially in 3D spherical bins, \code{= "cr"} specifies radially in 2D circular bins, and \code{= "z"} specifies directly in 1D out of the plane of the galaxy).
-The default, \code{bin_dir = "r"} will return a comprehensive list of the simulation's kinematic properties (i.e. contained radial mass
+The default, \code{bin_type = "r"} will return a comprehensive list of the simulation's kinematic properties (i.e. contained radial mass
 and densities, velocities, velocity dispersions, anisotropy, rotational and circular velocities and spin parameter).
-Other options for \code{bin_dir} will not contain the anisotropy, rotational and circular velocities or spin parameter as these are only physical when defined
-using 3D spherical shells. If a simulation contains a vary large number of particles, it is possible to extract and analyse a sample of these to reduce
-computational expense. This can be dome by specifying \code{samplerate = #a reduced number of particles}.
+Other options for \code{bin_type} will not contain the anisotropy, rotational and circular velocities or spin parameter as these are only physical when defined
+using 3D spherical shells.
 }
 \examples{
 \dontrun{
  sim_analysis(filename = "path/to/some/snapshot_XXX")
 
- sim_analysis(filename    = "path/to/some/snapshot_XXX",
-              pype        = c(3,4),
-              rmax        = 300,
-              rbin        = 100,
-              samplerate  = 1000000)
+ sim_analysis(filename = "path/to/some/snapshot_XXX",
+              pype     = c(3,4),
+              bin_type = "cr"
+              rmax     = 300,
+              rbin     = 100)
 }
 
 }

@@ -4,8 +4,7 @@
 \alias{obs_lambda}
 \title{Calculating the observable spin parameter, \eqn{\lambda}_R.}
 \usage{
-obs_lambda(ifu_datacube, reff_axisratio, sbinsize, psf = "Gaussian", fwhm,
-  angular_size = NULL)
+obs_lambda(ifu_datacube, reff_axisratio, sbinsize, data_analysis = FALSE)
 }
 \arguments{
 \item{ifu_datacube}{The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region image (\code{$appregion}).}
@@ -14,13 +13,7 @@ obs_lambda(ifu_datacube, reff_axisratio, sbinsize, psf = "Gaussian", fwhm,
 
 \item{sbinsize}{The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.}
 
-\item{psf}{\emph{Optional} This parameter gives the user choice between a "Gaussian" or "Moffat" PSF. The default is Gaussian.}
-
-\item{fwhm}{\emph{Optional} This parameter will blur the observation using the specified PSF with full width half maximum as
-specified here in arcseconds, in order to mimic the effects caused by beam smearing and seeing.}
-
-\item{angular_size}{\emph{Optional} This parameter only needs to be specified if a fwhm is given. The conversion factor for a given redshift between
-kpc and arcseconds as produced by the \code{obs_data_prep()} function.}
+\item{data_analysis}{(Optional) If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.}
 }
 \value{
 Returns a list that contains the observed \eqn{\lambda}_R value (\code{$obs_lambdar}), and three matricies reflecting the images produced
@@ -28,25 +21,25 @@ in IFU surveys - a luminosity counts image (\code{$counts_img}), a velocity imag
 (\code{$dispersion_img}) - and the coordinates of the effective radius ellipse within which \eqn{\lambda}_R is measured.
 }
 \description{
-The purpose of this function is to calculate the spin parameter that would be observed given an IFU data cube.
-This function will also mimic the spatial blurring caused by seeing and beam smearing if the \code{fwhm} parameter is supplied.
+The purpose of this function is to calculate the spin parameter that would be observed given an IFU data cube. You can either supply the cube created
+by the \code{ifu_cube()} function directly, or the blurred cube created by \code{blur_cube()}.
 }
 \examples{
 \dontrun{
  data      = obs_data_prep()
  ifucube   = ifu_cube()
+ blurcube  = blur_cube()
  reff_data = find_reff()
 
  obs_lambda(ifu_datacube   = ifucube,
             reff_axisratio = reff_data,
             sbinsize       = data$sbinsize)
 
- obs_lambda(ifu_datacube   = ifucube,
+ obs_lambda(ifu_datacube   = blurcube,
             reff_axisratio = reff_data,
             sbinsize       = data$sbinsize,
-            psf            = "Moffat",
-            fwhm           = 0.5,
-            angular_size   = data$angular_size)
+            data_analysis  = TRUE)
+
 }
 
 }
