@@ -7,7 +7,7 @@
 #'@param ifu_datacube The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region image (\code{$appregion}).
 #'@param reff_axisratio The semi-major and semi-minor axes output from the \code{find_reff()} function.
 #'@param sbinsize The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.
-#'@param data_analysis (Optional) If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.
+#'@param dispersion_analysis (Optional) If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.
 #'@return Returns a list that contains the observed \eqn{\lambda}_R value (\code{$obs_lambdar}), and three matricies reflecting the images produced
 #' in IFU surveys - a luminosity counts image (\code{$counts_img}), a velocity image (\code{$velocity_img}) and a velocity dispersion image
 #' (\code{$dispersion_img}) - and the coordinates of the effective radius ellipse within which \eqn{\lambda}_R is measured.
@@ -25,12 +25,12 @@
 #'  obs_lambda(ifu_datacube   = blurcube,
 #'             reff_axisratio = reff_data,
 #'             sbinsize       = data$sbinsize,
-#'             data_analysis  = TRUE)
+#'             dispersion_analysis  = TRUE)
 #'
 #' }
 #'
 
-obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, data_analysis = FALSE){
+obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysis = FALSE){
 
     sbin            = length(ifu_datacube$xbin_labels) # number of spatial bins in data cube
     vbin            = length(ifu_datacube$vbin_labels)
@@ -85,16 +85,16 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, data_analysis = FA
 
     if (max(reff_elli)>sbin){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
-    if (data_analysis == TRUE) {
+    if (dispersion_analysis == TRUE) {
       mean_dispersion = mean(standard_dev)
       med_dispersion = median(standard_dev)
-      data_analysis = list("mean_dispersion" = mean_dispersion, "median_dispersion" = med_dispersion)
+      dispersion_analysis = list("mean_dispersion" = mean_dispersion, "median_dispersion" = med_dispersion)
       output = list("obs_lambdar"          = lambda,
                     "counts_img"           = counts_img,
                     "velocity_img"         = velocity_img,
                     "dispersion_img"       = dispersion_img,
                     "reff_ellipse"         = reff_elli,
-                    "dispersion_analysis"  = data_analysis)
+                    "dispersion_analysis"  = dispersion_analysis)
       } else {
         output = list("obs_lambdar"    = lambda,
                       "counts_img"     = counts_img,

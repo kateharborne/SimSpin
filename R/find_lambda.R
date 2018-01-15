@@ -25,12 +25,12 @@
 #'@param blur \emph{Optional} Specify if you wish to apply observational seeing effects to the cube. A list of the form
 #'\code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the PSF chosen and may be either \code{"Moffat"}
 #'or \code{"Gaussian"}. \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.
-#'@param data_analysis \emph{Optional} If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity
+#'@param dispersion_analysis \emph{Optional} If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity
 #'dispersion. Default is \code{FALSE}.
 #'@return A list containing the 3D array corresponding to the kinematic data cube (\code{$datacube}), the corresponding axes labels
 #'(\code{$xbin_labels, $ybin_labels, $vbin_labels}), the axis ratio of the observed galaxy (\code{$axis_ratio}), observed $\lambda_R$
 #'(\code{$lambda_R$}), the observational images (\code{$counts_img, $velocity_img, $dispersion_img}), the observed measurement radius
-#'(\code{$reff_ellipse}) and optionally, specified by data_analysis, the mean and median values of the LOS velocity dispersion
+#'(\code{$reff_ellipse}) and optionally, specified by dispersion_analysis, the mean and median values of the LOS velocity dispersion
 #'(\code{$dispersion_analysis}). The observational images will also be plotted.
 #'@examples
 #' \dontrun{
@@ -63,7 +63,7 @@
 #'                       m2l_bulge       = 1,
 #'                       threshold       = 25,
 #'                       measurement_rad = 1,
-#'                       data_analysis   = TRUE)
+#'                       dispersion_analysis   = TRUE)
 #'
 #' lambdar = find_lambda(filename        = "path/to/some/snapshot_XXX",
 #'                       r200            = 200,
@@ -80,12 +80,12 @@
 #'                       threshold       = 25,
 #'                       measurement_rad = 1,
 #'                       blur            = list("psf" = "Moffat", "fwhm" = 2)
-#'                       data_analysis   = FALSE)
+#'                       dispersion_analysis   = FALSE)
 #'
 #' }
 
 find_lambda = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg,
-                          m2l_disc, m2l_bulge, threshold, measurement_rad, blur, data_analysis = FALSE){
+                          m2l_disc, m2l_bulge, threshold, measurement_rad, blur, dispersion_analysis = FALSE){
 
   if (missing(blur)) {
 
@@ -93,10 +93,10 @@ find_lambda = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
                                  m2l_disc, m2l_bulge)
     ifu_imgs     = ifu_cube(observe_data, threshold)
     reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg, ifu_imgs$axis_ratio)
-    lambda       = obs_lambda(ifu_datacube = ifu_imgs, reff_axisratio = measurement_rad * reff_ar, sbinsize = observe_data$sbinsize, data_analysis)
+    lambda       = obs_lambda(ifu_datacube = ifu_imgs, reff_axisratio = measurement_rad * reff_ar, sbinsize = observe_data$sbinsize, dispersion_analysis)
     plot_ifu(lambda, appregion = observe_data$appregion)
 
-    if (data_analysis == TRUE) {
+    if (dispersion_analysis == TRUE) {
       output       = list("datacube" = ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels, "ybin_labels" = ifu_imgs$ybin_labels,
                           "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "lambda_r" = lambda$obs_lambdar,
                           "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img, "dispersion_img" = lambda$dispersion_img,
@@ -117,9 +117,9 @@ find_lambda = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
     ifu_imgs     = ifu_cube(observe_data, threshold)
     blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf, fwhm = blur$fwhm, angular_size = observe_data$angular_size)
     reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg, blur_imgs$axis_ratio)
-    lambda       = obs_lambda(ifu_datacube = blur_imgs, reff_axisratio = measurement_rad * reff_ar, sbinsize = observe_data$sbinsize, data_analysis)
+    lambda       = obs_lambda(ifu_datacube = blur_imgs, reff_axisratio = measurement_rad * reff_ar, sbinsize = observe_data$sbinsize, dispersion_analysis)
     plot_ifu(lambda, appregion = observe_data$appregion)
-    if (data_analysis == TRUE) {
+    if (dispersion_analysis == TRUE) {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels, "ybin_labels" = blur_imgs$ybin_labels,
                     "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "lambda_r" = lambda$obs_lambdar,
                     "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img, "dispersion_img" = lambda$dispersion_img,
