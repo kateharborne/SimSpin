@@ -85,7 +85,7 @@
 #' }
 
 find_lambda = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg,
-                          m2l_disc, m2l_bulge, threshold, measurement_rad, blur, dispersion_analysis = FALSE){
+                          m2l_disc, m2l_bulge, threshold, measurement_rad = 1, blur, dispersion_analysis = FALSE){
 
   if (missing(blur)) {
 
@@ -100,12 +100,12 @@ find_lambda = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
       output       = list("datacube" = ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels, "ybin_labels" = ifu_imgs$ybin_labels,
                           "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "lambda_r" = lambda$obs_lambdar,
                           "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img, "dispersion_img" = lambda$dispersion_img,
-                          "reff_ellipse" = lambda$reff_ellipse, "dispersion_analysis" = lambda$dispersion_analysis)
+                          "reff_ellipse" = lambda$reff_ellipse, "appregion" = observe_data$appregion, "dispersion_analysis" = lambda$dispersion_analysis)
     } else {
       output       = list("datacube" = ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels, "ybin_labels" = ifu_imgs$ybin_labels,
                           "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "lambda_r" = lambda$obs_lambdar,
                           "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img, "dispersion_img" = lambda$dispersion_img,
-                          "reff_ellipse" = lambda$reff_ellipse)
+                          "reff_ellipse" = lambda$reff_ellipse, "appregion" = observe_data$appregion)
     }
 
     return(output)
@@ -123,12 +123,12 @@ find_lambda = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels, "ybin_labels" = blur_imgs$ybin_labels,
                     "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "lambda_r" = lambda$obs_lambdar,
                     "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img, "dispersion_img" = lambda$dispersion_img,
-                    "reff_ellipse" = lambda$reff_ellipse, "dispersion_analysis" = lambda$dispersion_analysis)
+                    "reff_ellipse" = lambda$reff_ellipse, "appregion" = observe_data$appregion, "dispersion_analysis" = lambda$dispersion_analysis)
     } else {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels, "ybin_labels" = blur_imgs$ybin_labels,
                     "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "lambda_r" = lambda$obs_lambdar,
                     "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img, "dispersion_img" = lambda$dispersion_img,
-                    "reff_ellipse" = lambda$reff_ellipse)
+                    "reff_ellipse" = lambda$reff_ellipse, "appregion" = observe_data$appregion)
     }
 
     return(output)
