@@ -18,6 +18,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pot_galaxy
+double pot_galaxy(Rcpp::DataFrame part_data, double soft);
+RcppExport SEXP SimSpin_pot_galaxy(SEXP part_dataSEXP, SEXP softSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type part_data(part_dataSEXP);
+    Rcpp::traits::input_parameter< double >::type soft(softSEXP);
+    rcpp_result_gen = Rcpp::wrap(pot_galaxy(part_data, soft));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sim_galaxy
 Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre);
 RcppExport SEXP SimSpin_sim_galaxy(SEXP part_dataSEXP, SEXP centreSEXP) {

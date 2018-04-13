@@ -6,7 +6,7 @@
 \usage{
 find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
   lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
-  measurement_rad, blur, data_analysis = FALSE)
+  measurement_rad = 1, blur, dispersion_analysis = FALSE)
 }
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
@@ -38,26 +38,26 @@ find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
 
 \item{threshold}{The flux threshold of the observation.}
 
-\item{measurement_rad}{The radius within which $\lambda_R$ is measured in units of $R_{eff}$.}
+\item{measurement_rad}{The radius within which \eqn{\lambda_R} is measured in units of $R_{eff}$.}
 
 \item{blur}{\emph{Optional} Specify if you wish to apply observational seeing effects to the cube. A list of the form
 \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the PSF chosen and may be either \code{"Moffat"}
 or \code{"Gaussian"}. \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.}
 
-\item{data_analysis}{\emph{Optional} If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity
+\item{dispersion_analysis}{\emph{Optional} If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity
 dispersion. Default is \code{FALSE}.}
 }
 \value{
 A list containing the 3D array corresponding to the kinematic data cube (\code{$datacube}), the corresponding axes labels
-(\code{$xbin_labels, $ybin_labels, $vbin_labels}), the axis ratio of the observed galaxy (\code{$axis_ratio}), observed $\lambda_R$
+(\code{$xbin_labels, $ybin_labels, $vbin_labels}), the axis ratio of the observed galaxy (\code{$axis_ratio}), observed \eqn{\lambda_R}
 (\code{$lambda_R$}), the observational images (\code{$counts_img, $velocity_img, $dispersion_img}), the observed measurement radius
-(\code{$reff_ellipse}) and optionally, specified by data_analysis, the mean and median values of the LOS velocity dispersion
+(\code{$reff_ellipse}) and optionally, specified by dispersion_analysis, the mean and median values of the LOS velocity dispersion
 (\code{$dispersion_analysis}). The observational images will also be plotted.
 }
 \description{
-The purpose of this basic function is to use the \code{SimSpin} package sub-functions to measure the observable spin parameter, $\lambda_R$,
+The purpose of this basic function is to use the \code{SimSpin} package sub-functions to measure the observable spin parameter, \eqn{\lambda_R},
 of a simulated galaxy model. \code{find_lambdar()} will call each required sub-function (\code{obs_data_prep()}, \code{ifu_cube()},
-\code{blur_cube()}, \code{find_reff()}, \code{obs_lambda()} and \code{plot_ifu()}) and return the $\lambda_R$ within a user specified
+\code{blur_cube()}, \code{find_reff()}, \code{obs_lambda()} and \code{plot_ifu()}) and return the \eqn{\lambda_R} within a user specified
 measurement radius.
 }
 \examples{
@@ -91,7 +91,7 @@ lambdar = find_lambda(filename        = "path/to/some/snapshot_XXX",
                       m2l_bulge       = 1,
                       threshold       = 25,
                       measurement_rad = 1,
-                      data_analysis   = TRUE)
+                      dispersion_analysis   = TRUE)
 
 lambdar = find_lambda(filename        = "path/to/some/snapshot_XXX",
                       r200            = 200,
@@ -108,7 +108,7 @@ lambdar = find_lambda(filename        = "path/to/some/snapshot_XXX",
                       threshold       = 25,
                       measurement_rad = 1,
                       blur            = list("psf" = "Moffat", "fwhm" = 2)
-                      data_analysis   = FALSE)
+                      dispersion_analysis   = FALSE)
 
 }
 }

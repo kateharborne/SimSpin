@@ -5,20 +5,25 @@
 \title{Kinematic analysis of simulation data.}
 \usage{
 sim_analysis(filename, bin_type = "r", rmax = 200, rbin = 200,
-  ptype = NA)
+  ptype = NA, DM_profile = NA)
 }
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
 
-\item{bin_type}{The direction in which to bin the simulation model - "r" (default) bins radially in 3D spherical shells, "cr" bins radially in 2D circular rings,
-"z" bins in 1D off the plane of the galaxy.}
+\item{bin_type}{The direction in which to bin the simulation model - \code{"r"} (default) bins radially in 3D spherical shells, \code{"cr"} bins radially in 2D
+circular rings, \code{"z"} bins in 1D off the plane of the galaxy.}
 
 \item{rmax}{The maximum radial coordinate considered within the simulated galaxy in kpc.}
 
 \item{rbin}{The number of radial bins considered.}
 
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars,
+\item{ptype}{The particle type/types to be extracted - \code{NA} (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars,
 6 - boundary.}
+
+\item{DM_profile}{If dark matter particles are not included in the analysis, this option allows you to use the DM profile for the mass distribution such that the
+circular velocity can be correctly determined. Options include \code{NA} (default), \code{list(profile="NFW", DM_vm, DM_a, DM_rho0)} - where DM_vm is the virial mass, DM_a is the scale radius,
+and DM_rho0 is the density evaluated at the flattening radius - and \code{list(profile="Hernquist", DM_mass, DM_a)} - where DM_mass is the total mass of the dark matter
+component and DM_a is the scale radius of the halo.}
 }
 \value{
 A data frame containing kinematic features of radial bins including (at least) the outer radius of each bin (\code{$r}/\code{$cr}/\code{$z}), contained mass
@@ -29,7 +34,7 @@ anisotropy (\code{$B}), rotational velocity (\code{$vrot}) and the spin paramete
 \description{
 The purpose of this function is to calculate the kinematic properties of a simulated galaxy, specifically the velocity and dispersion of particles within
 certain user defined bins. The user must specify which direction they wish to study the kinematics using \code{bin_type} (where \code{= "r"} specifies out
-radially in 3D spherical bins, \code{= "cr"} specifies radially in 2D circular bins, and \code{= "z"} specifies directly in 1D out of the plane of the galaxy).
+radial 3D spherical bins, \code{= "cr"} specifies radial 2D circular bins, and \code{= "z"} specifies directly in 1D out of the plane of the galaxy).
 The default, \code{bin_type = "r"} will return a comprehensive list of the simulation's kinematic properties (i.e. contained radial mass
 and densities, velocities, velocity dispersions, anisotropy, rotational and circular velocities and spin parameter).
 Other options for \code{bin_type} will not contain the anisotropy, rotational and circular velocities or spin parameter as these are only physical when defined

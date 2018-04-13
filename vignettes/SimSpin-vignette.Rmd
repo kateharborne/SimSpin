@@ -18,7 +18,7 @@ The purpose of this package is to measure the observable spin parameter $\lambda
 This notebook will walk through a few of the basic steps that we can use to analyse a galaxy model. Here, we will use `filename = "~/SimSpin/inst/extdata/S0_vignette"` to explore the three basic functions available in this package. This is the Gadget snapshot for a $10^{10} M_{\odot}$, S0 galaxy containing 50,000 disk and 75,000 bulge particles of equal mass. This is shown below. 
 
 ``` {r} 
-galaxy_data = snapshot::snapread("~/LambdaR/inst/extdata/S0_vignette")
+galaxy_data = snapshot::snapread("~/SimSpin/inst/extdata/S0_vignette")
 ```
 
 ``` {r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}

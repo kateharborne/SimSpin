@@ -39,8 +39,8 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
 
     xcentre = sbin/2 + 0.5
     ycentre = sbin/2 + 0.5 # finding the centre pixel of the image
-    a = reff_axisratio$a / sbinsize
-    b = reff_axisratio$b / sbinsize
+    a = reff_axisratio$a_kpc / sbinsize
+    b = reff_axisratio$b_kpc / sbinsize
 
     for (x in 1:sbin){
       for (y in 1:sbin){

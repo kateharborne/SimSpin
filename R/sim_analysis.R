@@ -1,25 +1,31 @@
-# Kate Harborne (last edit - 13/09/2017)
+# Kate Harborne (last edit - 13/04/2018)
 #'Kinematic analysis of simulation data.
 #'
-#'The purpose of this function is to calculate the kinematic properties of a simulated galaxy, specifically the velocity and dispersion of particles within
-#'certain user defined bins. The user must specify which direction they wish to study the kinematics using \code{bin_type} (where \code{= "r"} specifies out
-#'radially in 3D spherical bins, \code{= "cr"} specifies radially in 2D circular bins, and \code{= "z"} specifies directly in 1D out of the plane of the galaxy).
-#'The default, \code{bin_type = "r"} will return a comprehensive list of the simulation's kinematic properties (i.e. contained radial mass
-#'and densities, velocities, velocity dispersions, anisotropy, rotational and circular velocities and spin parameter).
-#'Other options for \code{bin_type} will not contain the anisotropy, rotational and circular velocities or spin parameter as these are only physical when defined
-#'using 3D spherical shells.
+#'The purpose of this function is to calculate the kinematic properties of a simulated galaxy, specifically the velocity and dispersion of particles
+#'within certain user defined bins. The user must specify which direction they wish to study the kinematics using \code{bin_type} (where \code{= "r"}
+#'specifies out radial 3D spherical bins, \code{= "cr"} specifies radial 2D circular bins, and \code{= "z"} specifies directly in 1D out of the plane
+#'of the galaxy). The default, \code{bin_type = "r"} will return a comprehensive list of the simulation's kinematic properties (i.e. contained radial
+#'mass and densities, velocities, velocity dispersions, anisotropy, rotational and circular velocities and spin parameter).
+#'Other options for \code{bin_type} will not contain the anisotropy, rotational and circular velocities or spin parameter as these are only physical
+#'when defined using 3D spherical shells.
 #'
 #'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
-#'@param bin_type The direction in which to bin the simulation model - "r" (default) bins radially in 3D spherical shells, "cr" bins radially in 2D circular rings,
-#' "z" bins in 1D off the plane of the galaxy.
+#'@param bin_type The direction in which to bin the simulation model - \code{"r"} (default) bins radially in 3D spherical shells, \code{"cr"} bins
+#'radially in 2D circular rings, \code{"z"} bins in 1D off the plane of the galaxy.
 #'@param rmax The maximum radial coordinate considered within the simulated galaxy in kpc.
 #'@param rbin The number of radial bins considered.
-#'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars,
-#'6 - boundary.
-#'@return A data frame containing kinematic features of radial bins including (at least) the outer radius of each bin (\code{$r}/\code{$cr}/\code{$z}), contained mass
-#'(\code{$Mass}), logarithmic density (\code{$logp}), velocities and velocity dispersions (\code{$vr}/\code{$vcr}/\code{$vz} and \code{$sigma_vr}/\code{$sigma_vcr}/
-#'\code{$sigma_vz}) and angular momentum magnitude (\code{$J}). In the case of \code{bin_type = "r"} additionally the circular velocity (\code{$vc}), the velocity
-#'anisotropy (\code{$B}), rotational velocity (\code{$vrot}) and the spin parameter (\code{$lambda}) are included in the output data frame.
+#'@param ptype The particle type/types to be extracted - \code{NA} (default) gives all particles in the simulation, 1 - gas, 2 - dark matter,
+#'3 - disc, 4 - bulge, 5 - stars, 6 - boundary.
+#'@param DM_profile If dark matter particles are not included in the analysis, this option allows you to use the DM profile for the mass distribution
+#'such that the circular velocity can be correctly determined. Options include \code{NA} (default), \code{list(profile="NFW", DM_vm, DM_a, DM_rho0)} -
+#'where DM_vm is the virial mass, DM_a is the scale radius, and DM_rho0 is the density evaluated at the flattening radius - and
+#'\code{list(profile="Hernquist", DM_mass, DM_a)} - where DM_mass is the total mass of the dark matter component and DM_a is the scale radius of
+#'the halo.
+#'@return A data frame containing kinematic features of radial bins including (at least) the outer radius of each bin (\code{$r}/\code{$cr}/\code{$z}),
+#'contained mass (\code{$Mass}), logarithmic density (\code{$logp}), velocities and velocity dispersions (\code{$vr}/\code{$vcr}/\code{$vz} and
+#'\code{$sigma_vr}/\code{$sigma_vcr}/\code{$sigma_vz}) and angular momentum magnitude (\code{$J}). In the case of \code{bin_type = "r"} additionally
+#'the circular velocity (\code{$vc}), the velocity anisotropy (\code{$B}), rotational velocity (\code{$vrot}) and the spin parameter (\code{$lambda})
+#'are included in the output data frame.
 #'@examples
 #' \dontrun{
 #'  sim_analysis(filename = "path/to/some/snapshot_XXX")
@@ -32,50 +38,59 @@
 #' }
 #'
 
-sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
+sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM_profile=NA){
 
-  galaxy_data = snapshot::snapread(filename) # reading in the snapshot data into large list
-  galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))
-  p = seq(1,6) # all possible particle values
-  ppart = cumsum(galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)]) # present particles
-
+  galaxy_data = snapshot::snapread(filename)                                   # reading in the snapshot data into large list
+  galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))                  # add a "particle type" column
+  p = seq(1,6)                                                                 # all possible particle values
+  ppart = cumsum(galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)]) # number of present particles
   for (i in 1:length(ppart)){
     if (i == 1){
       galaxy_data$part[1:as.integer(ppart[i]),]$part_type =  which(galaxy_data$head$Nall[p] != 0)[i]
     } else {
       galaxy_data$part[as.integer(ppart[i-1]+1):as.integer(ppart[i]),]$part_type = which(galaxy_data$head$Nall[p] != 0)[i]
     }
-  } # labelling the data frame with particle types
-
-  if (is.na(ptype[1])){ptype = which(galaxy_data$head$Nall[p] != 0)} # for all particles, leave ptype = NA
+  }                                              # labelling the data frame with particle types
+  if (is.na(ptype[1])){ptype = which(galaxy_data$head$Nall[p] != 0)}           # for all particles, leave ptype = NA
   if (0 %in% galaxy_data$head$Nall[ptype]){
     cat("Particles of ptype = c(", ptype[which(galaxy_data$head$Nall[ptype] == 0)], ") are missing in this model. \n")
     stop("Npart Error")
-  } # error returned if a requested ptype is not present in the simulation
-
-  galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,] # leaving only particles of requested ptype
+  }                                # error returned if a requested ptype is not present in the simulation
+  galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,]  # leaving only particles of requested ptype
   galaxy_data$head$Npart[p[!p %in% ptype]] = as.integer(0)
-  galaxy_data$head$Nall[p[!p %in% ptype]] = as.integer(0) # removing record of the removed particles in the header
-
-  galaxy_df  = sim_galaxy(galaxy_data$part, centre=TRUE)
-  grp        = matrix()
+  galaxy_data$head$Nall[p[!p %in% ptype]] = as.integer(0)                      # removing record of the removed particles in the header
+  galaxy_df  = sim_galaxy(galaxy_data$part, centre=TRUE)                       # adding spherical coordinates and J
+  grp        = matrix()                                                        # empty placeholders for loops
   grp_mass   = 0
   grp_Jx     = 0
   grp_Jy     = 0
   grp_Jz     = 0
   grp_vtheta = 0
-  grp_vphi   = 0 # empty placeholders for loops
-  G = 4.516e-29 # gravitational constant in units of kpc^3/([1e10 Msolar]s^2)
+  grp_vphi   = 0
+  G = 4.516e-29                                                                # gravitational constant in units of kpc^3/([1e10 Msolar]s^2)
 
+  ## For 3D spherical shells ## ----------------------------------------------------------------------------------------------------------------------
   if (bin_type == "r"){
-    galaxy_cdf       = galaxy_df[galaxy_df$r < rmax,] # removed particles further than rmax
-    galaxy_cdf$group = as.integer(cut(galaxy_cdf$r, breaks=seq(0,rmax,by=rmax/rbin), labels=seq(1,rbin))) # assigns each particle into an rbin
-    grp_num          = data.frame("rbin" = seq(1, rmax, length.out=rbin), "Freq" = integer(rbin))
-    grp_obins        = as.data.frame(table(with(galaxy_cdf, group))) # produces a DF containing the number of particles in each occupied bin
-    grp_num[as.integer(levels(grp_obins$Var1)),2] = grp_obins$Freq # fills empty data frame with the number of particles in each possible bin
-    grp_num$cumsum   = cumsum(grp_num$Freq) # total number of particles contained within bins
-    galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]
+    galaxy_cdf       = galaxy_df[galaxy_df$r < rmax,]                          # remove particles further than rmax (spherical)
+    galaxy_cdf$group = as.integer(cut(galaxy_cdf$r,
+                                      breaks=seq(0,rmax,by=rmax/rbin),
+                                      labels=seq(1,rbin)))                     # assigns each particle into an rbin
+    grp_num          = data.frame("rbin"   = seq(1, rmax, length.out=rbin),
+                                  "Freq"   = integer(rbin),
+                                  "cumsum" = integer(rbin))                    # sets up DF with each radial bin and number of particles in each
+    grp_num$Freq     = as.data.frame(table(with(galaxy_cdf, group)))$Freq      # fills in the number of particles in each occupied bin
+    grp_num$cumsum   = cumsum(grp_num$Freq)                                    # total number of particles contained within rbin to the centre
+    galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]                    # ordering particles by group
     rbin_labels      = seq(0,rmax,rmax/rbin)
+    DM_mass_profile = rep(0, rbin)
+    if (is.list(DM_profile)){
+      if (DM_profile$profile == "hernquist"){
+        DM_mass_profile = DM_profile$DM_mass * rbin_labels[2:length(rbin_labels)]^2 / (DM_profile$DM_a + rbin_labels[2:length(rbin_labels)])^2
+      }
+      if (DM_profile$profile == "NFW"){
+        DM_mass_profile = 4 * pi * DM_profile$DM_rho0 * DM_profile$DM_a^3 * (log(1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a)) - ((rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a) / (1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a))))
+      }
+    }                                              # if a DM profile is assigned, assigning the radial mass profile
     profile = data.frame("r"        = numeric(rbin),
                          "Mass"     = numeric(rbin),
                          "logp"     = numeric(rbin),
@@ -89,26 +104,32 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
                          "sigma_vt" = numeric(rbin),
                          "B"        = numeric(rbin),
                          "vrot"     = numeric(rbin),
-                         "lambda"   = numeric(rbin))
+                         "lambda"   = numeric(rbin))                           # empty placeholders for output profile variables
     for (j in 1:rbin){
       if (j == 1){
         grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
       } else {
         grp = galaxy_odf[as.integer(grp_num$cumsum[j-1]+1):as.integer(grp_num$cumsum[j]),]
-      } # all data in an individual radius bin
-      profile$r[j] = rbin_labels[j+1] # the outer edge of each radial bin
-      grp_mass = sum(grp$Mass)
+      }
+                                                                               # all data in an individual radius bin
+      profile$r[j] = rbin_labels[j+1]                                          # the outer edge of each radial bin
+      grp_mass = sum(grp$Mass)                                                 # mass in radial bin
       if (j == 1){
         profile$Mass[j] = grp_mass
       } else {
         profile$Mass[j] = grp_mass + profile$Mass[j-1]
-      } # finding the enclosed mass
-      profile$logp[j] = log10(grp_mass / ((4 / 3) * pi * ((profile$r[j] * profile$r[j] * profile$r[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j])))) # finding the log10 of shell density
-      profile$vc[j] = (sqrt((G  * profile$Mass[j]) / profile$r[j])) * 3.086e16 # the circular velocity of particles at this radius, km/s
-      grp_Jx = sum(grp$Jx)
+      }
+                                                                               # enclosed mass within outer radius
+      profile$logp[j] =
+        log10(grp_mass / ((4 / 3) * pi * ((profile$r[j] * profile$r[j] * profile$r[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j]))))
+                                                                               # log10 of shell density
+      profile$vc[j] =
+        (sqrt((G  * (profile$Mass[j]+DM_mass_profile[j])) / profile$r[j])) * 3.086e16
+                                                                               # the circular velocity of particles at this radius, km/s
+      grp_Jx = sum(grp$Jx)                                                     # angular momentum components of shell
       grp_Jy = sum(grp$Jy)
       grp_Jz = sum(grp$Jz)
-      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz))
+      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz)) # magnitude of angular momentum
       if (j == 1){
         profile$Jx[j] = grp_Jx
         profile$Jy[j] = grp_Jy
@@ -117,29 +138,40 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
         profile$Jx[j] = grp_Jx + profile$Jx[j-1]
         profile$Jy[j] = grp_Jy + profile$Jy[j-1]
         profile$Jz[j] = grp_Jz + profile$Jz[j-1]
-      } # finding the enclosed angular momentum components
-      profile$J[j]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j])) # finding the enclosed angular momentum
-      profile$vr[j] = mean(grp$vr) # finding the mean radial velocity in the shell, km/s
-      grp_vtheta = mean(grp$vtheta)
-      grp_vphi   = mean(grp$vphi)
-      profile$sigma_vr[j] = sqrt(mean(grp$vr * grp$vr) - (profile$vr[j] * profile$vr[j])) # radial velocity dispersion, (km/s)
+      }
+                                                                               # enclosed angular momentum components
+      profile$J[j]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j]))
+                                                                               # enclosed magnitude of angular momentum
+      profile$vr[j] = mean(grp$vr)                                             # mean radial velocity in the shell, km/s
+      grp_vtheta = mean(grp$vtheta)                                            # mean velocity along theta in the shell, km/s
+      grp_vphi   = mean(grp$vphi)                                              # mean velocity along phi in the shell, km/s
+      profile$sigma_vr[j] = sqrt(mean(grp$vr * grp$vr) - (profile$vr[j] * profile$vr[j]))
+                                                                               # radial velocity dispersion, km/s
       profile$sigma_vt[j] = sqrt((mean(grp$vtheta * grp$vtheta) - (grp_vtheta * grp_vtheta)) +
-                                   (mean(grp$vphi * grp$vphi) - (grp_vphi * grp_vphi))) # tangential velocity dispersion, (km/s)
-      profile$B[j] = 1 - ((profile$sigma_vt[j] * profile$sigma_vt[j]) / (2 * profile$sigma_vr[j] * profile$sigma_vr[j])) # velocity anisotropy, unitless
-      profile$vrot[j] = grp_J / (grp_mass * profile$r[j] * 3.086e16) # rotational velocity, km/s
-      profile$lambda[j] = profile$J[j] / (1.414214 * profile$Mass[j] * profile$vc[j] * profile$r[j] * 3.086e16) # spin parameter, unitless
+                                   (mean(grp$vphi * grp$vphi) - (grp_vphi * grp_vphi)))
+                                                                               # tangential velocity dispersion, km/s
+      profile$B[j] = 1 - ((profile$sigma_vt[j] * profile$sigma_vt[j]) / (2 * profile$sigma_vr[j] * profile$sigma_vr[j]))
+                                                                               # velocity anisotropy, unitless
+      profile$vrot[j] = grp_J / (grp_mass * profile$r[j] * 3.086e16)           # rotational velocity, km/s
+      profile$lambda[j] = profile$J[j] / (1.414214 * profile$Mass[j] * profile$vc[j] * profile$r[j] * 3.086e16)
+                                                                               # spin parameter, unitless
     }
   }
+  ## For 2D circular radial shells ## ----------------------------------------------------------------------------------------------------------------
   if (bin_type == "cr"){
-    galaxy_cdf       = galaxy_df[(galaxy_df$cr < rmax) & (abs(galaxy_df$z) < rmax),]
-    galaxy_cdf$group = as.integer(cut(galaxy_cdf$cr, breaks=seq(0,rmax,rmax/rbin), labels=seq(1,rbin)))
-    grp_num          = data.frame("rbin" = seq(1, rmax, length.out=rbin), "Freq" = integer(rbin))
-    grp_obins        = as.data.frame(table(with(galaxy_cdf, group)))
-    grp_num[as.integer(levels(grp_obins$Var1)),2] = grp_obins$Freq
-    grp_num$cumsum   = cumsum(grp_num$Freq)
-    galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]
+    galaxy_cdf       = galaxy_df[(galaxy_df$cr < rmax) &
+                                   (abs(galaxy_df$z) < rmax),]                 # remove particles further than rmax (cyclindrical)
+    galaxy_cdf$group = as.integer(cut(galaxy_cdf$cr,
+                                      breaks=seq(0,rmax,rmax/rbin),
+                                      labels=seq(1,rbin)))                     # assigns each particle into an rbin
+    grp_num          = data.frame("rbin"   = seq(1, rmax, length.out=rbin),
+                                  "Freq"   = integer(rbin),
+                                  "cumsum" = integer(rbin))                    # sets up DF with each radial bin and number of particles in each
+    grp_num$Freq     = as.data.frame(table(with(galaxy_cdf, group)))$Freq      # fills in the number of particles in each occupied bin
+    grp_num$cumsum   = cumsum(grp_num$Freq)                                    # total number of particles contained within rbin to the centre
+    galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]                    # ordering particles by group
     rbin_labels      = seq(0,rmax,rmax/rbin)
-    profile = data.frame("cr"        = numeric(rbin),
+    profile = data.frame("cr"       = numeric(rbin),
                          "Mass"     = numeric(rbin),
                          "logp"     = numeric(rbin),
                          "J"        = numeric(rbin),
@@ -147,47 +179,60 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
                          "Jy"       = numeric(rbin),
                          "Jz"       = numeric(rbin),
                          "vcr"      = numeric(rbin),
-                         "sigma_vcr"= numeric(rbin))
+                         "sigma_vcr"= numeric(rbin))                           # empty placeholders for output profile variables
     for (j in 1:rbin){
       if (j == 1){
         grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
       } else {
         grp = galaxy_odf[as.integer(grp_num$cumsum[j-1]+1):as.integer(grp_num$cumsum[j]),]
-      } # all data in an individual radius bin
-      profile$cr[j] = rbin_labels[j+1] # the outer edge of each radial bin
-      grp_mass = sum(grp$Mass)
+      }
+                                                                               # all data in an individual radius bin
+      profile$cr[j] = rbin_labels[j+1]                                         # the outer edge of each radial bin
+      grp_mass = sum(grp$Mass)                                                 # mass in radial bin
       if (j == 1){
         profile$Mass[j] = grp_mass
       } else {
         profile$Mass[j] = grp_mass + profile$Mass[j-1]
-      } # finding the enclosed mass
-      profile$logp[j] = log10(grp_mass / ((4 / 3) * pi * ((profile$cr[j] * profile$cr[j] * profile$cr[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j])))) # finding the log10 of shell density
-      grp_Jx = sum(grp$Jx)
+      }
+                                                                               # enclosed mass within outer radius
+      profile$logp[j] =
+        log10(grp_mass / ((4 / 3) * pi * ((profile$cr[j] * profile$cr[j] * profile$cr[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j]))))
+                                                                               # log10 of shell density
+      grp_Jx = sum(grp$Jx)                                                     # angular momentum components of shell
       grp_Jy = sum(grp$Jy)
       grp_Jz = sum(grp$Jz)
-      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz))
+      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz)) # magnitude of angular momentum
       if (j == 1){
         profile$Jx[j] = grp_Jx
         profile$Jy[j] = grp_Jy
-        profile$Jz[i] = grp_Jz
+        profile$Jz[j] = grp_Jz
       } else {
         profile$Jx[j] = grp_Jx + profile$Jx[j-1]
         profile$Jy[j] = grp_Jy + profile$Jy[j-1]
         profile$Jz[j] = grp_Jz + profile$Jz[j-1]
-      } # finding the enclosed angular momentum components
-      profile$J[i]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j])) # finding the enclosed angular momentum
-      profile$vcr[j] = mean(grp$vcr) # finding the mean radial velocity in the shell, km/s
-      profile$sigma_vcr[j] = sqrt(mean(grp$vcr * grp$vcr) - (profile$vcr[j] * profile$vcr[j])) # radial velocity dispersion, (km/s)
+      }
+                                                                              # enclosed angular momentum components
+      profile$J[j]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j]))
+                                                                              # enclosed magnitude of the angular momentum
+      profile$vcr[j] = mean(grp$vcr)                                          # mean radial velocity in the shell, km/s
+      profile$sigma_vcr[j] = sqrt(mean(grp$vcr * grp$vcr) - (profile$vcr[j] * profile$vcr[j]))
+                                                                              # radial velocity dispersion, (km/s)
     }
   }
+  ## For 2D circular planar shells ## ----------------------------------------------------------------------------------------------------------------
   if (bin_type == "z"){
-    galaxy_cdf       = galaxy_df[(galaxy_df$cr < rmax) & ((galaxy_df$z) < rmax) & ((galaxy_df$z) > 0),]
-    galaxy_cdf$group = as.integer(cut(galaxy_cdf$z, breaks=seq(0,rmax,rmax/rbin), labels=seq(1,rbin)))
-    grp_num          = data.frame("rbin" = seq(1, rmax, length.out=rbin), "Freq" = integer(rbin))
-    grp_obins        = as.data.frame(table(with(galaxy_cdf, group)))
-    grp_num[as.integer(levels(grp_obins$Var1)),2] = grp_obins$Freq
-    grp_num$cumsum   = cumsum(grp_num$Freq)
-    galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]
+    galaxy_cdf       = galaxy_df[(galaxy_df$cr < rmax) &
+                                   ((galaxy_df$z) < rmax) &
+                                   ((galaxy_df$z) > 0),]                       # remove particles further than rmax (off surface of disk) and below 0
+    galaxy_cdf$group = as.integer(cut(galaxy_cdf$z,
+                                      breaks=seq(0,rmax,rmax/rbin),
+                                      labels=seq(1,rbin)))                     # assigns each particle into an rbin
+    grp_num          = data.frame("rbin"   = seq(1, rmax, length.out=rbin),
+                                  "Freq"   = integer(rbin),
+                                  "cumsum" = integer(rbin))                    # sets up DF with each radial bin and number of particles in each
+    grp_num$Freq     = as.data.frame(table(with(galaxy_cdf, group)))$Freq      # fills in the number of particles in each occupied bin
+    grp_num$cumsum   = cumsum(grp_num$Freq)                                    # total number of particles contained within rbin to the centre
+    galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]                    # ordering particles by group
     rbin_labels      = seq(0,rmax,rmax/rbin)
     profile = data.frame("z"        = numeric(rbin),
                          "Mass"     = numeric(rbin),
@@ -197,40 +242,46 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA){
                          "Jy"       = numeric(rbin),
                          "Jz"       = numeric(rbin),
                          "vz"      = numeric(rbin),
-                         "sigma_vz"= numeric(rbin))
+                         "sigma_vz"= numeric(rbin))                            # empty placeholders for output profile variables
     for (j in 1:rbin){
       if (j == 1){
         grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
       } else {
         grp = galaxy_odf[as.integer(grp_num$cumsum[j-1]+1):as.integer(grp_num$cumsum[j]),]
-      } # all data in an individual radius bin
-      profile$z[j] = rbin_labels[j+1] # the outer edge of each radial bin
-      grp_mass = sum(grp$Mass)
+      }
+                                                                               # all data in an individual radius bin
+      profile$z[j] = rbin_labels[j+1]                                          # the outer edge of each radial bin
+      grp_mass = sum(grp$Mass)                                                 # mass in radial bin
       if (j == 1){
         profile$Mass[j] = grp_mass
       } else {
         profile$Mass[j] = grp_mass + profile$Mass[j-1]
-      } # finding the enclosed mass
-      profile$logp[j] = log10(grp_mass / ((4 / 3) * pi * ((profile$z[j] * profile$z[j] * profile$z[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j])))) # finding the log10 of shell density
-      grp_Jx = sum(grp$Jx)
+      }
+                                                                               # enclosed mass within outer radius
+      profile$logp[j] =
+        log10(grp_mass / ((4 / 3) * pi * ((profile$z[j] * profile$z[j] * profile$z[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j]))))
+                                                                               # log10 of shell density
+      grp_Jx = sum(grp$Jx)                                                     # angular momentum components of shell
       grp_Jy = sum(grp$Jy)
       grp_Jz = sum(grp$Jz)
-      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz))
+      grp_J  = sqrt((grp_Jx * grp_Jx) + (grp_Jy * grp_Jy) + (grp_Jz * grp_Jz)) # magnitude of angular momentum
       if (j == 1){
         profile$Jx[j] = grp_Jx
         profile$Jy[j] = grp_Jy
-        profile$Jz[i] = grp_Jz
+        profile$Jz[j] = grp_Jz
       } else {
         profile$Jx[j] = grp_Jx + profile$Jx[j-1]
         profile$Jy[j] = grp_Jy + profile$Jy[j-1]
         profile$Jz[j] = grp_Jz + profile$Jz[j-1]
-      } # finding the enclosed angular momentum components
-      profile$J[i]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j])) # finding the enclosed angular momentum
-      profile$vz[j] = mean(grp$vz) # finding the mean radial velocity in the shell, km/s
-      profile$sigma_vz[j] = sqrt(mean(grp$vz * grp$vz) - (profile$vz[j] * profile$vz[j])) # radial velocity dispersion, (km/s)
+      }
+                                                                              # enclosed angular momentum components
+      profile$J[j]  = sqrt((profile$Jx[j] * profile$Jx[j]) + (profile$Jy[j] * profile$Jy[j]) + (profile$Jz[j] * profile$Jz[j]))
+                                                                              # enclosed magnitude of the angular momentum
+      profile$vz[j] = mean(grp$vz)                                            # mean radial velocity in the shell, km/s
+      profile$sigma_vz[j] = sqrt(mean(grp$vz * grp$vz) - (profile$vz[j] * profile$vz[j]))
+                                                                              # radial velocity dispersion, km/s
     }
-  } # trimming the galaxy to specified rmax and grouping data into bins based on the type of binning
+  }
 
   return(profile)
-
 }

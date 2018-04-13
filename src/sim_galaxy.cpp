@@ -45,13 +45,14 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
     y = y-ycen;
     z = z-zcen;
   }
-  Rcpp::NumericVector r(n), cr(n), theta(n), phi(n), vr(n), vcr(n), vtheta(n), vphi(n), Jx(n), Jy(n), Jz(n);
+  Rcpp::NumericVector r(n), cr(n), theta(n), phi(n), vr(n), vt(n), vcr(n), vtheta(n), vphi(n), Jx(n), Jy(n), Jz(n);
   for(int i=0; i<n; i++){
     r[i]      = ::sqrt((x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]));
     cr[i]     = ::sqrt((x[i] * x[i]) + (y[i] * y[i]));
     theta[i]  = ::acos(z[i] / r[i]);
     phi[i]    = ::atan(y[i] / x[i]);
     vr[i]     = (x[i] * vx[i] + y[i] * vy[i] + z[i] * vz[i]) /r[i];
+    vt[i]     = ::sqrt(((y[i] * vz[i] - z[i] * vy[i]) * (y[i] * vz[i] - z[i] * vy[i])) + ((z[i] * vx[i] - x[i] * vz[i]) * (z[i] * vx[i] - x[i] * vz[i])) + ((x[i] * vy[i] - y[i] * vx[i]) * (x[i] * vy[i] - y[i] * vx[i]))) / r[i];
     vcr[i]    = (x[i] * vx[i] + y[i] * vy[i]) /cr[i];
     vtheta[i] = -(r[i] / ::sqrt(1 - ((z[i] * z[i]) / (r[i] * r[i])))) * ((vz[i] / r[i]) - (vr[i] * z[i] / (r[i] * r[i])));
     vphi[i]   = (r[i] / (((y[i] * y[i]) / (x[i] * x[i])) + 1)) * ::sin(theta[i]) * ((vy[i] / x[i]) - (vx[i] * y[i] / (x[i] * x[i])));
@@ -61,8 +62,7 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
   }
 
   Rcpp::DataFrame df =
-    Rcpp::DataFrame::create(Rcpp::Named("ID")        = ID,
-                            Rcpp::Named("x")         = x,
+    Rcpp::DataFrame::create(Rcpp::Named("x")         = x,
                             Rcpp::Named("y")         = y,
                             Rcpp::Named("z")         = z,
                             Rcpp::Named("vx")        = vx,
@@ -73,6 +73,7 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
                             Rcpp::Named("theta")     = theta,
                             Rcpp::Named("phi")       = phi,
                             Rcpp::Named("vr")        = vr,
+                            Rcpp::Named("vt")        = vt,
                             Rcpp::Named("vcr")       = vcr,
                             Rcpp::Named("vtheta")    = vtheta,
                             Rcpp::Named("vphi")      = vphi,

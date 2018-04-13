@@ -24,6 +24,10 @@ obs_galaxy <- function(part_data, centre, inc_rad) {
     .Call('SimSpin_obs_galaxy', PACKAGE = 'SimSpin', part_data, centre, inc_rad)
 }
 
+pot_galaxy <- function(part_data, soft) {
+    .Call('SimSpin_pot_galaxy', PACKAGE = 'SimSpin', part_data, soft)
+}
+
 #' Constructing galaxy simulation data from the Gadget output file data
 #'
 #' The purpose of this function is to produce the extra kinematic features for simulation data in spherical polar coordinates. It accepts

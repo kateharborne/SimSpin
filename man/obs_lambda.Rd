@@ -4,7 +4,8 @@
 \alias{obs_lambda}
 \title{Calculating the observable spin parameter, \eqn{\lambda}_R.}
 \usage{
-obs_lambda(ifu_datacube, reff_axisratio, sbinsize, data_analysis = FALSE)
+obs_lambda(ifu_datacube, reff_axisratio, sbinsize,
+  dispersion_analysis = FALSE)
 }
 \arguments{
 \item{ifu_datacube}{The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region image (\code{$appregion}).}
@@ -13,7 +14,7 @@ obs_lambda(ifu_datacube, reff_axisratio, sbinsize, data_analysis = FALSE)
 
 \item{sbinsize}{The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.}
 
-\item{data_analysis}{(Optional) If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.}
+\item{dispersion_analysis}{(Optional) If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.}
 }
 \value{
 Returns a list that contains the observed \eqn{\lambda}_R value (\code{$obs_lambdar}), and three matricies reflecting the images produced
@@ -38,7 +39,7 @@ by the \code{ifu_cube()} function directly, or the blurred cube created by \code
  obs_lambda(ifu_datacube   = blurcube,
             reff_axisratio = reff_data,
             sbinsize       = data$sbinsize,
-            data_analysis  = TRUE)
+            dispersion_analysis  = TRUE)
 
 }
 

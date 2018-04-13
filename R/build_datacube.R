@@ -21,7 +21,7 @@
 #'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
 #'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@param threshold The flux threshold of the observation.
-#'@param blur \emph{Optional} Specify if you wish to apply observational seeing effects to the cube. A list of the form
+#'@param blur \emph{Optional} Specified to apply observational seeing effects to the cube. A list of the form
 #'\code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the PSF chosen and may be either \code{"Moffat"}
 #'or \code{"Gaussian"}. \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.
 #'@return A list containing the 3D array corresponding to the kinematic data cube (\code{$datacube}), the corresponding axes labels
@@ -70,7 +70,7 @@ build_datacube = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, ce
                                  m2l_disc, m2l_bulge)
     ifu_imgs     = ifu_cube(observe_data, threshold)
     output       = list("datacube" = ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels, "ybin_labels" = ifu_imgs$ybin_labels,
-                        "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio)
+                        "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "angular_size" = observe_data$angular_size)
     return(output)
 
   } else {
@@ -80,7 +80,7 @@ build_datacube = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, ce
     ifu_imgs     = ifu_cube(observe_data, threshold)
     blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf, fwhm = blur$fwhm, angular_size = observe_data$angular_size)
     output       = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels, "ybin_labels" = blur_imgs$ybin_labels,
-                        "vbin_labels" = blur_imgs$vbin_labels, "axis_ratio" = blur_imgs$axis_ratio)
+                        "vbin_labels" = blur_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "angular_size" = observe_data$angular_size)
     return(output)
 
   }
