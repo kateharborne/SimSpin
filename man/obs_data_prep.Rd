@@ -11,7 +11,8 @@ obs_data_prep(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
 
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc,
+4 - bulge, 5 - stars, 6 - boundary.}
 
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
@@ -36,10 +37,11 @@ obs_data_prep(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
 \item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
 }
 \value{
-Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} (which contains the galaxy particle info from the GADGET file,
-with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs} nad particle fluxes in units of 1e-16 erg s-1 cm-2) and numerical factors including the number of spatial bins (\code{$sbin}),
-the size of those spatial bins in kpc and arcseconds (\code{$sbinsize} and \code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s
-(\code{$vbinsize}), the gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size of the galaxy in kpc/arcecond at the provided
+Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} (which contains the galaxy particle
+info from the GADGET file, with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs} and particle fluxes in units of
+1e-16 erg s-1 cm-2) and numerical factors including the number of spatial bins (\code{$sbin}), the size of those spatial bins in kpc and arcseconds
+(\code{$sbinsize} and \code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s (\code{$vbinsize}), the
+gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size of the galaxy in kpc/arcecond at the provided
 redshift (\code{$angular_size}).
 }
 \description{

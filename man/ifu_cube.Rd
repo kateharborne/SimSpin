@@ -14,8 +14,9 @@ ifu_cube(obs_data, threshold)
 \value{
 Returns a list containing a mock IFU data cube as required for calculating the observed spin parameter. Also contained is an image that
 describes the shape of the apperture (\code{$appregion}) such that any further convolutions that are applied to mimic beam smearing or seeing
-can be trimmed to the appropriate apperture shape. The bin labels for each dimension are supplied as \code{$xbin_labels}, \code{$ybin_labels}, \code{$vbin_labels}.
-The axis ratio of the galaxy is calculated in this fuction and output in the list as \code{$axis_ratio$a} and \code{$axis_ratio$b}.
+can be trimmed to the appropriate apperture shape. The bin labels for each dimension are supplied as \code{$xbin_labels}, \code{$ybin_labels},
+\code{$vbin_labels}. The axis ratio of the galaxy is calculated in this fuction and output in the list as \code{$axis_ratio$a} and
+\code{$axis_ratio$b}.
 }
 \description{
 The purpose of this function is to construct an IFU data cube. It accepts output parameters from \code{obs_data_prep()} and returns

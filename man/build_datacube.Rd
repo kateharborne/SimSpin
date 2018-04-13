@@ -38,7 +38,7 @@ build_datacube(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
 
 \item{threshold}{The flux threshold of the observation.}
 
-\item{blur}{\emph{Optional} Specify if you wish to apply observational seeing effects to the cube. A list of the form
+\item{blur}{\emph{Optional} Specified to apply observational seeing effects to the cube. A list of the form
 \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the PSF chosen and may be either \code{"Moffat"}
 or \code{"Gaussian"}. \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.}
 }
