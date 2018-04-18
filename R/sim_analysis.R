@@ -50,12 +50,14 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     } else {
       galaxy_data$part[as.integer(ppart[i-1]+1):as.integer(ppart[i]),]$part_type = which(galaxy_data$head$Nall[p] != 0)[i]
     }
-  }                                              # labelling the data frame with particle types
+  }
+                                                                               # labelling the data frame with particle types
   if (is.na(ptype[1])){ptype = which(galaxy_data$head$Nall[p] != 0)}           # for all particles, leave ptype = NA
   if (0 %in% galaxy_data$head$Nall[ptype]){
     cat("Particles of ptype = c(", ptype[which(galaxy_data$head$Nall[ptype] == 0)], ") are missing in this model. \n")
     stop("Npart Error")
-  }                                # error returned if a requested ptype is not present in the simulation
+  }
+                                                                               # error returned if a requested ptype is not present in the simulation
   galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,]  # leaving only particles of requested ptype
   galaxy_data$head$Npart[p[!p %in% ptype]] = as.integer(0)
   galaxy_data$head$Nall[p[!p %in% ptype]] = as.integer(0)                      # removing record of the removed particles in the header
@@ -90,7 +92,8 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
       if (DM_profile$profile == "NFW"){
         DM_mass_profile = 4 * pi * DM_profile$DM_rho0 * DM_profile$DM_a^3 * (log(1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a)) - ((rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a) / (1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a))))
       }
-    }                                              # if a DM profile is assigned, assigning the radial mass profile
+    }
+                                                                               # if a DM profile is assigned, assigning the radial mass profile
     profile = data.frame("r"        = numeric(rbin),
                          "Mass"     = numeric(rbin),
                          "logp"     = numeric(rbin),

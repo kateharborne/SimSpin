@@ -7,22 +7,21 @@
 blur_cube(ifu_datacube, sbinsize, psf, fwhm, angular_size)
 }
 \arguments{
-\item{ifu_datacube}{The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region image (\code{$appregion}).}
+\item{ifu_datacube}{The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region
+image (\code{$appregion}).}
 
 \item{sbinsize}{The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.}
 
-\item{psf}{This parameter gives the user choice between a "Gaussian" or "Moffat" PSF. The default is Gaussian.}
+\item{psf}{This parameter gives the user choice between a "Gaussian" or "Moffat" PSF.}
 
 \item{fwhm}{This parameter will blur the observation using the specified PSF with full width half maximum as
 specified here in arcseconds, in order to mimic the effects caused by beam smearing and seeing.}
 
-\item{angular_size}{This parameter only needs to be specified if a fwhm is given. The conversion factor for a given redshift between
-kpc and arcseconds as produced by the \code{obs_data_prep()} function.}
+\item{angular_size}{The conversion factor for a given redshift between kpc and arcseconds as produced by the \code{obs_data_prep()} function.}
 }
 \value{
-Returns a list that contains the observed \eqn{\lambda}_R value (\code{$obs_lambdar}), and three matricies reflecting the images produced
-in IFU surveys - a luminosity counts image (\code{$counts_img}), a velocity image (\code{$velocity_img}) and a velocity dispersion image
-(\code{$dispersion_img}) - and the coordinates of the effective radius ellipse within which \eqn{\lambda}_R is measured.
+Returns a list that contains the original IFU cube produced by the function \code{ifu_cube()}, but blurred with the specified PSF,
+\code{$blurcube}, and the bin labels for each dimension \code{$xbin_labels}, \code{$ybin_labels}, \code{$vbin_labels}.
 }
 \description{
 The purpose of this function is to mimic the spatial blurring caused by seeing and beam smearing.

@@ -6,7 +6,8 @@
 \usage{
 find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
   lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
-  measurement_rad = 1, blur, dispersion_analysis = FALSE)
+  measure_type = list(type = "fit", fac = 1), blur,
+  dispersion_analysis = FALSE)
 }
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
@@ -38,7 +39,10 @@ find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
 
 \item{threshold}{The flux threshold of the observation.}
 
-\item{measurement_rad}{The radius within which \eqn{\lambda_R} is measured in units of $R_{eff}$.}
+\item{measure_type}{A list specifying the radius within which $\lambda_R$ is measured. If \code{list(type = "fit", fac = 1)},
+\eqn{\lambda_R} is measured in a specified multiple of $R_{eff}$, where $R_{eff}$ has been calculated from the unblurred galaxy
+counts image. If \code{list(type = "specified", fac = 1, axis_ratio = data.frame("a" = 2, "b" = 1))}, $\lambda_R$ is calculated
+within some factor of the effective radius, \code{fac *} $R_{eff}$ with specified axis ratio externally as a data frame in units of kpc.}
 
 \item{blur}{\emph{Optional} Specify if you wish to apply observational seeing effects to the cube. A list of the form
 \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the PSF chosen and may be either \code{"Moffat"}
@@ -62,52 +66,52 @@ measurement radius.
 }
 \examples{
 \dontrun{
-lambdar = find_lambda(filename        = "path/to/some/snapshot_XXX",
-                      r200            = 200,
-                      z               = 0.1,
-                      fov             = 15,
-                      ap_shape        = "circular",
-                      central_wvl     = 4800,
-                      lsf_fwhm        = 2.65,
-                      pixel_sscale    = 0.5,
-                      pixel_vscale    = 1.04,
-                      inc_deg         = 0,
-                      m2l_disc        = 2,
-                      m2l_bulge       = 1,
-                      threshold       = 25,
-                      measurement_rad = 1)
+lambdar = find_lambda(filename     = "path/to/some/snapshot_XXX",
+                      r200         = 200,
+                      z            = 0.1,
+                      fov          = 15,
+                      ap_shape     = "circular",
+                      central_wvl  = 4800,
+                      lsf_fwhm     = 2.65,
+                      pixel_sscale = 0.5,
+                      pixel_vscale = 1.04,
+                      inc_deg      = 0,
+                      m2l_disc     = 2,
+                      m2l_bulge    = 1,
+                      threshold    = 25,
+                      measure_type = list(type = "fit", fac = 1))
 
-lambdar = find_lambda(filename        = "path/to/some/snapshot_XXX",
-                      r200            = 200,
-                      z               = 0.1,
-                      fov             = 15,
-                      ap_shape        = "circular",
-                      central_wvl     = 4800,
-                      lsf_fwhm        = 2.65,
-                      pixel_sscale    = 0.5,
-                      pixel_vscale    = 1.04,
-                      inc_deg         = 0,
-                      m2l_disc        = 2,
-                      m2l_bulge       = 1,
-                      threshold       = 25,
-                      measurement_rad = 1,
+lambdar = find_lambda(filename              = "path/to/some/snapshot_XXX",
+                      r200                  = 200,
+                      z                     = 0.1,
+                      fov                   = 15,
+                      ap_shape              = "circular",
+                      central_wvl           = 4800,
+                      lsf_fwhm              = 2.65,
+                      pixel_sscale          = 0.5,
+                      pixel_vscale          = 1.04,
+                      inc_deg               = 0,
+                      m2l_disc              = 2,
+                      m2l_bulge             = 1,
+                      threshold             = 25,
+                      measure_type          = list(type = "specified", axis_ratio = data.frame("a" = 3.5, "b" = 1.7), fac = 1),
                       dispersion_analysis   = TRUE)
 
-lambdar = find_lambda(filename        = "path/to/some/snapshot_XXX",
-                      r200            = 200,
-                      z               = 0.1,
-                      fov             = 15,
-                      ap_shape        = "circular",
-                      central_wvl     = 4800,
-                      lsf_fwhm        = 2.65,
-                      pixel_sscale    = 0.5,
-                      pixel_vscale    = 1.04,
-                      inc_deg         = 0,
-                      m2l_disc        = 2,
-                      m2l_bulge       = 1,
-                      threshold       = 25,
-                      measurement_rad = 1,
-                      blur            = list("psf" = "Moffat", "fwhm" = 2)
+lambdar = find_lambda(filename              = "path/to/some/snapshot_XXX",
+                      r200                  = 200,
+                      z                     = 0.1,
+                      fov                   = 15,
+                      ap_shape              = "circular",
+                      central_wvl           = 4800,
+                      lsf_fwhm              = 2.65,
+                      pixel_sscale          = 0.5,
+                      pixel_vscale          = 1.04,
+                      inc_deg               = 0,
+                      m2l_disc              = 2,
+                      m2l_bulge             = 1,
+                      threshold             = 25,
+                      measure_type          = list(type = "fit", fac = 1),
+                      blur                  = list("psf" = "Moffat", "fwhm" = 2)
                       dispersion_analysis   = FALSE)
 
 }

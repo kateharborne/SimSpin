@@ -1,17 +1,17 @@
-# Kate Harborne (last edit - 13/09/2017)
-#'Creating a set of mock IFU observational images.
+# Kate Harborne (last edit - 16/04/2018)
+#'Creating a mock IFU kinematic data cube.
 #'
 #'The purpose of this function is to construct an IFU data cube. It accepts output parameters from \code{obs_data_prep()} and returns
 #' a 3D array containing the spatial and velocity corrdinates of each particle in the galaxy simulation in order to mimic the arrangement
 #' of an IFU data cube.
 #'
 #'@param obs_data The list output from the \code{obs_data_prep()} function.
-#'@param threshold The flux threshold of the observation.
+#'@param threshold The magnitude limit of the observation.
 #'@return Returns a list containing a mock IFU data cube as required for calculating the observed spin parameter. Also contained is an image that
-#' describes the shape of the apperture (\code{$appregion}) such that any further convolutions that are applied to mimic beam smearing or seeing
-#' can be trimmed to the appropriate apperture shape. The bin labels for each dimension are supplied as \code{$xbin_labels}, \code{$ybin_labels},
-#' \code{$vbin_labels}. The axis ratio of the galaxy is calculated in this fuction and output in the list as \code{$axis_ratio$a} and
-#' \code{$axis_ratio$b}.
+#' describes the shape of the aperture (\code{$appregion}) such that any further convolutions that are applied to mimic beam smearing or seeing
+#' can be trimmed to the appropriate aperture shape. The bin labels for each dimension are supplied as \code{$xbin_labels}, \code{$ybin_labels},
+#' \code{$vbin_labels}. The axis ratio of the galaxy is calculated in this fuction and output in the list as the semi-major and semi-minor axes,
+#' \code{$axis_ratio$a} and \code{$axis_ratio$b}.
 #'@examples
 #' \dontrun{
 #' data = obs_data_prep()
@@ -38,7 +38,7 @@ ifu_cube = function(obs_data, threshold) {
   threshold_flux  = 1.3608e22 * 10^((threshold + 26.832) / -2.5) * (pixel_sscale^2)             # calculating threshold flux in units for ifu cube
   galaxy_obs$binx = cut(galaxy_obs$x, breaks=sbin_breaks, labels=F)
   galaxy_obs$binz = cut(galaxy_obs$z_obs, breaks=sbin_breaks, labels=F)
-  galaxy_obs$binn = galaxy_obs$binx + (sbin * galaxy_obs$binz) - sbin                           # assigning particles to positions in apperture
+  galaxy_obs$binn = galaxy_obs$binx + (sbin * galaxy_obs$binz) - sbin                           # assigning particles to positions in aperture
   xbins           = levels(cut(galaxy_obs$x, breaks=sbin_breaks))
   zbins           = levels(cut(galaxy_obs$z_obs, breaks=sbin_breaks))                           # spatial/velocity bins boundaries required for the
   vbins           = levels(cut(galaxy_obs$vy_obs, breaks=vseq))                                 #    galaxy observation
@@ -81,8 +81,8 @@ ifu_cube = function(obs_data, threshold) {
     }
   }
 
-  appcube = array(data = obs_data$appregion, dim = c(sbin,sbin,vbin))                           # reformatting the 1D apperture array into 3D cube
-  cube = cube * appcube                                                                         # filtering out counts that lie outside the apperture
+  appcube = array(data = obs_data$appregion, dim = c(sbin,sbin,vbin))                           # reformatting the 1D aperture array into 3D cube
+  cube = cube * appcube                                                                         # filtering out counts that lie outside the aperture
 
   ## ellipticity calculation ## -------------------------------------------------------------------------------------------------------------------------------
   xbin_labels     = expand.grid(matrix(data = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)),
@@ -100,15 +100,13 @@ ifu_cube = function(obs_data, threshold) {
   major      = sqrt(abs(temprad$hi))                                                            #    minor axes lengths
   minor      = sqrt(abs(temprad$lo))
   axis_ratio = data.frame("a" = major, "b" = minor)                                             # axis ratio output, kpc
-  blur_info = data.frame("xbins" = xbin_labels, "ybins" = zbin_labels)                          # dimension info for blur_cube() function
 
   output = list("cube"        = cube,
                 "xbin_labels" = xbin_ls,
                 "ybin_labels" = zbin_ls,
                 "vbin_labels" = vbin_ls,
                 "appregion"   = appcube,
-                "axis_ratio"  = axis_ratio,
-                "blur_info"   = blur_info)
+                "axis_ratio"  = axis_ratio)
 
   return(output)
 

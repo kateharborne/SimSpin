@@ -1,10 +1,10 @@
-# Kate Harborne (last edit - 29/11/2017)
+# Kate Harborne (last edit - 16/04/2018)
 #'Prepare simulation data for observational kinematic analysis.
 #'
-#'The purpose of this function is to calculate the factors necessary for constructing an IFU observation data cube of a simulated galaxy at a user
-#'specified inclination and redshift.
+#'The purpose of this function is to calculate the properties necessary for constructing an IFU observation data cube of a simulated galaxy at a user
+#' specified inclination and redshift.
 #'
-#'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
+#'@param filename The Gadget output file containing the particle information of the galaxy to be analysed.
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc,
 #'4 - bulge, 5 - stars, 6 - boundary.
 #'@param r200 The virial radius specified in the simulation, kpc.
@@ -19,11 +19,11 @@
 #'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
 #'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@return Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} (which contains the galaxy particle
-#'info from the GADGET file, with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs} and particle fluxes in units of
-#'1e-16 erg s-1 cm-2) and numerical factors including the number of spatial bins (\code{$sbin}), the size of those spatial bins in kpc and arcseconds
-#'(\code{$sbinsize} and \code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s (\code{$vbinsize}), the
-#'gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size of the galaxy in kpc/arcecond at the provided
-#'redshift (\code{$angular_size}).
+#' info from the GADGET file, with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs} and particle fluxes, \code{$flux}, in units of
+#' 1e-16 erg s-1 cm-2) and numerical factors including the number of spatial bins (\code{$sbin}), the size of those spatial bins in kpc and arcseconds
+#' (\code{$sbinsize} and \code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s (\code{$vbinsize}), the
+#' gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size of the galaxy in kpc/arcecond at the provided
+#' redshift (\code{$angular_size}).
 #'@examples
 #' \dontrun{
 #' obs_data_prep(filename     = "path/to/some/snapshot_XXX",
@@ -50,7 +50,7 @@
 #'               pixel_sscale = 0.5,
 #'               pixel_vscale = 1.04,
 #'               inc_deg      = 0,
-#'               m2l_disc     = 2,
+#'               m2l_disc     = 1,
 #'               m2l_bulge    = 1)
 #' }
 #'
@@ -89,20 +89,16 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central
   vbinsize     = (pixel_vscale / central_wvl) * (3e8 / 1e3)                      # km/s per velocity bin
   lsf_size     = ((lsf_fwhm / central_wvl) * (3e8 / 1e3)) / (2 * sqrt(2*log(2))) # velocity uncertainty (standard deviation, not FWHM) due to LSF
 
-  appregion    = matrix(data = 0, ncol = sbin, nrow = sbin)                      # empty matrix for apperture mask
+  appregion    = matrix(data = 0, ncol = sbin, nrow = sbin)                      # empty matrix for aperture mask
   xcentre = sbin/2 + 0.5
   ycentre = sbin/2 + 0.5
   if (ap_shape == "circular"){
-    for (x in 1:sbin){
-      for (y in 1:sbin){
-        xx = x - xcentre
-        yy = y - ycentre
-        rr = sqrt(xx^2 + yy^2)
-        if (rr <= fov+0.5){
-          appregion[x,y] = 1
-        }
-      }
-    }
+    x = matrix(data = rep(seq(1,sbin), each=sbin), nrow = sbin, ncol = sbin)
+    y = matrix(data = rep(seq(sbin,1), sbin), nrow = sbin, ncol = sbin)
+    xx = x - xcentre
+    yy = y - ycentre
+    rr = sqrt(xx^2 + yy^2)
+    appregion[rr<= sbin/2] = 1
   }
                                                                                  # circular apperture mask
   if (ap_shape == "square"){
@@ -151,7 +147,7 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z, fov, ap_shape, central
   galaxy_cdf[(galaxy_cdf$part_type== 4),]$flux =
     ((galaxy_cdf[(galaxy_cdf$part_type== 4),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_bulge)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
                                                                                  # calculating the flux from each bulge particle
-                                                                                 # fluxes in units of (1e-16 erg s-1 cm-2)
+                                                                                 # fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
 
   output = list("galaxy_obs"  = galaxy_cdf,
                 "sbin"        = sbin,

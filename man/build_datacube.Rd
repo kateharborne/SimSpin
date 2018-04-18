@@ -44,7 +44,7 @@ or \code{"Gaussian"}. \code{"fwhm"} is a numeric specifying the full-width half-
 }
 \value{
 A list containing the 3D array corresponding to the kinematic data cube (\code{$datacube}), the corresponding axes labels
-(\code{$xbin_labels, $ybin_labels, $vbin_labels}) and the axis ratio of the observed galaxy (\code{$axis_ratio})
+(\code{$xbin_labels, $ybin_labels, $vbin_labels}) and the axis ratio of the observed galaxy (\code{$axis_ratio}).
 }
 \description{
 The purpose of this basic function is to use the \code{SimSpin} package sub-functions to construct an IFU kinematic data cube.

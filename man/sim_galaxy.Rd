@@ -13,9 +13,10 @@ sim_galaxy(part_data, centre)
 }
 \value{
 Returns a data frame containing the particle \code{$ID}, \code{$x-}, \code{$y-} and \code{$z-}positions and corresponding
- velocities (\code{$vx, $vy } and \code{$vz}), along with the spherical polar coordinates (\code{$r}, \code{$theta} and \code{$phi}) and
- associated velocities (\code{$vr}, \code{$vtheta} and \code{$vphi}), the cylindrical radial coordinate and its associated velocity (\code{$cr}
- and \code{$vcr})  and the mass of each particle (\code{$Mass}) and their angular momentum magnitude (\code{$J}).
+ velocities (\code{$vx, $vy } and \code{$vz}), along with the spherical polar coordinates (\code{$r}, \code{$theta} and \code{$phi})
+ and associated velocities (\code{$vr}, \code{$vtheta} and \code{$vphi}), the cylindrical radial coordinate and its associated velocity
+ (\code{$cr} and \code{$vcr})  and the mass of each particle (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},
+ \code{$Jz}).
 }
 \description{
 The purpose of this function is to produce the extra kinematic features for simulation data in spherical polar coordinates. It accepts

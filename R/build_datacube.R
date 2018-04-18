@@ -1,10 +1,10 @@
-# Kate Harborne (last edit - 12/01/2018)
+# Kate Harborne (last edit - 16/04/2018)
 #'Constructing kinematic data cubes.
 #'
 #'The purpose of this basic function is to use the \code{SimSpin} package sub-functions to construct an IFU kinematic data cube.
-#'\code{build_datacube()} will call each required sub-function (\code{obs_data_prep()}, \code{ifu_cube()}, \code{blur_cube()}) and
-#'produce a 3D array corresponding to the kinematic data cube for that mock observation, the corresponding axes labels and the
-#'observed axis ratio of the observed galaxy.
+#' \code{build_datacube()} will call each required sub-function (\code{obs_data_prep()}, \code{ifu_cube()}, \code{blur_cube()}) and
+#' produce a 3D array corresponding to the kinematic data cube for that mock observation, the corresponding axes labels and the
+#' observed axis ratio of the observed galaxy.
 #'
 #'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter,
@@ -22,10 +22,10 @@
 #'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@param threshold The flux threshold of the observation.
 #'@param blur \emph{Optional} Specified to apply observational seeing effects to the cube. A list of the form
-#'\code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the PSF chosen and may be either \code{"Moffat"}
-#'or \code{"Gaussian"}. \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.
+#' \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the PSF chosen and may be either \code{"Moffat"}
+#' or \code{"Gaussian"}. \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.
 #'@return A list containing the 3D array corresponding to the kinematic data cube (\code{$datacube}), the corresponding axes labels
-#'(\code{$xbin_labels, $ybin_labels, $vbin_labels}) and the axis ratio of the observed galaxy (\code{$axis_ratio})
+#' (\code{$xbin_labels, $ybin_labels, $vbin_labels}) and the axis ratio of the observed galaxy (\code{$axis_ratio}).
 #'@examples
 #' \dontrun{
 #' ifu_datacube = build_datacube(filename     = "path/to/some/snapshot_XXX",
@@ -64,23 +64,32 @@
 build_datacube = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg,
                           m2l_disc, m2l_bulge, threshold, blur){
 
-  if (missing(blur)) {
+  if (missing(blur)) {                                                                               # IF spatial blurring IS NOT requested
 
-    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg,
-                                 m2l_disc, m2l_bulge)
-    ifu_imgs     = ifu_cube(observe_data, threshold)
-    output       = list("datacube" = ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels, "ybin_labels" = ifu_imgs$ybin_labels,
-                        "vbin_labels" = ifu_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "angular_size" = observe_data$angular_size)
+    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                                 pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge)           # prepare simulation data in observer units
+    ifu_imgs     = ifu_cube(observe_data, threshold)                                                 # construct IFU data cube
+    output       = list("datacube"     = ifu_imgs$cube,
+                        "xbin_labels"  = ifu_imgs$xbin_labels,
+                        "ybin_labels"  = ifu_imgs$ybin_labels,
+                        "vbin_labels"  = ifu_imgs$vbin_labels,
+                        "axis_ratio"   = ifu_imgs$axis_ratio,
+                        "angular_size" = observe_data$angular_size)
     return(output)
 
-  } else {
+  } else {                                                                                           # IF spatial blurring IS requested
 
-    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg,
-                                 m2l_disc, m2l_bulge)
-    ifu_imgs     = ifu_cube(observe_data, threshold)
-    blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf, fwhm = blur$fwhm, angular_size = observe_data$angular_size)
-    output       = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels, "ybin_labels" = blur_imgs$ybin_labels,
-                        "vbin_labels" = blur_imgs$vbin_labels, "axis_ratio" = ifu_imgs$axis_ratio, "angular_size" = observe_data$angular_size)
+    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                                 pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge)           # prepare simulation data in observer units
+    ifu_imgs     = ifu_cube(observe_data, threshold)                                                 # construct IFU data cube
+    blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf,
+                             fwhm = blur$fwhm, angular_size = observe_data$angular_size)             # blur IFU data cube
+    output       = list("datacube"     = blur_imgs$cube,
+                        "xbin_labels"  = blur_imgs$xbin_labels,
+                        "ybin_labels"  = blur_imgs$ybin_labels,
+                        "vbin_labels"  = blur_imgs$vbin_labels,
+                        "axis_ratio"   = ifu_imgs$axis_ratio,
+                        "angular_size" = observe_data$angular_size)
     return(output)
 
   }
