@@ -9,7 +9,7 @@ ifu_cube(obs_data, threshold)
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
 
-\item{threshold}{The flux threshold of the observation.}
+\item{threshold}{The magnitude limit of the observation.}
 }
 \value{
 Returns a list containing a mock IFU data cube as required for calculating the observed spin parameter. Also contained is an image that

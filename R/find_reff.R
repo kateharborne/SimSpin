@@ -10,6 +10,7 @@
 #'@param inc_deg The observed inclination of the simulated galaxy in degrees.
 #'@param fract The fraction of particles to be contained within the radius calculated. Default is 0.5, i.e. Reff.
 #'@param axis_ratio A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_cube() or blur_cube().
+#'@param angular_size The kpc/'' scaling factor output by \code{obs_data_prep()} used to give the axis ratios in both kpc and ''.
 #'@return Returned is a scaled axis ratio that describes the semimajor and semiminor axes of an ellipse that contains half the total number of particles.
 #'@examples
 #' \dontrun{

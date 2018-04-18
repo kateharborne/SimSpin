@@ -19,6 +19,8 @@ find_reff(filename, ptype = NA, r200 = 200, inc_deg, fract = 0.5,
 \item{fract}{The fraction of particles to be contained within the radius calculated. Default is 0.5, i.e. Reff.}
 
 \item{axis_ratio}{A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_cube() or blur_cube().}
+
+\item{angular_size}{The kpc/'' scaling factor output by \code{obs_data_prep()} used to give the axis ratios in both kpc and ''.}
 }
 \value{
 Returned is a scaled axis ratio that describes the semimajor and semiminor axes of an ellipse that contains half the total number of particles.

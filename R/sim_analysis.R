@@ -80,7 +80,8 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     grp_num          = data.frame("rbin"   = seq(1, rmax, length.out=rbin),
                                   "Freq"   = integer(rbin),
                                   "cumsum" = integer(rbin))                    # sets up DF with each radial bin and number of particles in each
-    grp_num$Freq     = as.data.frame(table(with(galaxy_cdf, group)))$Freq      # fills in the number of particles in each occupied bin
+    grp_obins        = as.data.frame(table(with(galaxy_cdf, group)))           # the number of particles in each occupied bin (may be shorter than rbin)
+    grp_num[as.integer(levels(grp_obins$Var1)),2] = grp_obins$Freq             # putting occupied bins into the full rbin
     grp_num$cumsum   = cumsum(grp_num$Freq)                                    # total number of particles contained within rbin to the centre
     galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]                    # ordering particles by group
     rbin_labels      = seq(0,rmax,rmax/rbin)
@@ -170,7 +171,8 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     grp_num          = data.frame("rbin"   = seq(1, rmax, length.out=rbin),
                                   "Freq"   = integer(rbin),
                                   "cumsum" = integer(rbin))                    # sets up DF with each radial bin and number of particles in each
-    grp_num$Freq     = as.data.frame(table(with(galaxy_cdf, group)))$Freq      # fills in the number of particles in each occupied bin
+    grp_obins        = as.data.frame(table(with(galaxy_cdf, group)))           # the number of particles in each occupied bin (may be shorter than rbin)
+    grp_num[as.integer(levels(grp_obins$Var1)),2] = grp_obins$Freq             # putting occupied bins into the full rbin
     grp_num$cumsum   = cumsum(grp_num$Freq)                                    # total number of particles contained within rbin to the centre
     galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]                    # ordering particles by group
     rbin_labels      = seq(0,rmax,rmax/rbin)
@@ -233,7 +235,8 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     grp_num          = data.frame("rbin"   = seq(1, rmax, length.out=rbin),
                                   "Freq"   = integer(rbin),
                                   "cumsum" = integer(rbin))                    # sets up DF with each radial bin and number of particles in each
-    grp_num$Freq     = as.data.frame(table(with(galaxy_cdf, group)))$Freq      # fills in the number of particles in each occupied bin
+    grp_obins        = as.data.frame(table(with(galaxy_cdf, group)))           # the number of particles in each occupied bin (may be shorter than rbin)
+    grp_num[as.integer(levels(grp_obins$Var1)),2] = grp_obins$Freq             # putting occupied bins into the full rbin
     grp_num$cumsum   = cumsum(grp_num$Freq)                                    # total number of particles contained within rbin to the centre
     galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),]                    # ordering particles by group
     rbin_labels      = seq(0,rmax,rmax/rbin)

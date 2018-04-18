@@ -41,11 +41,12 @@ To begin, we can use the `sim_analysis()` function to calculate a few useful qua
 * the Bullock spin parameter ($\lambda$) distribution
 
 ```{r}
-sim_data = sim_analysis(filename = "~/SimSpin/inst/extdata/S0_vignette", 
-                        bin_type = "r",
-                        ptype    = NA,  # considering all particles
-                        rmax     = 200, # maximum radius considered, kpc
-                        rbin     = 200) # number of radial bins considered
+sim_data = sim_analysis(filename   = "~/SimSpin/inst/extdata/S0_vignette", 
+                        bin_type   = "r",
+                        ptype      = NA,  # considering all particles
+                        rmax       = 200, # maximum radius considered, kpc
+                        rbin       = 200, # number of radial bins considered
+                        DM_profile = list(profile="Hernquist", DM_mass=184.97, DM_a=34.51))
 ```
 
 When using `sim_analysis()`, we specify the snapshot `filename`, the type of particle we want to analyse `ptype = NA (all), 1 (gas), 2 (dark matter), 3 (disc), 4 (bulge), 5 (stars), 6 (boundaries)` or any present combination, `c(3,4)`, the maximum radius `rmax` in kpc we want to consider and the number of radial bins that we wish to divide the galaxy into, `rbin`. In the above example, all particles are grouped into bins of width `rmax / rbin = 1` kpc. Because we have specified `binddir = "r"` our bins are spherical shells. If we wished to study the distributions of certain components in cylindrical coordinates, we would specify either `bindir = "cr"` (cylindrical radial coordinated) or `="z"` (for 1D coordinates off the surface of the disc).
@@ -90,8 +91,20 @@ legend("bottomright", inset=c(0.05,0.05),c("Bulge"), bty="n", cex=0.9)
 An important part of this package is to take mock integral field unit (IFU) observations of galaxy models. The output of such an observation is a kinematic data cube, in which the galaxy is binned in 3-dimensions; binned spatially in the projected x-y plane and binned via velocity in the z-direction. The function `build_datacube()` can be used to construct such a data product for simulated galaxy models. 
 
 ```{r} 
-SAMI_cube_phys = build_datacube(filename = "~/SimSpin/inst/extdata/S0_vignette", ptype = NA, r200 = 200, z = 0.06, fov = 15, ap_shape = "circular", central_wvl = 4800,
-                                lsf_fwhm = 2.56, pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70, m2l_disc = 1, m2l_bulge = 1, threshold = 25)       
+SAMI_cube_phys = build_datacube(filename     = "~/SimSpin/inst/extdata/S0_vignette", 
+                                ptype        = NA, 
+                                r200         = 200, 
+                                z            = 0.06, 
+                                fov          = 15, 
+                                ap_shape     = "circular", 
+                                central_wvl  = 4800,
+                                lsf_fwhm     = 2.56, 
+                                pixel_sscale = 0.5, 
+                                pixel_vscale = 1.04, 
+                                inc_deg      = 70, 
+                                m2l_disc     = 1, 
+                                m2l_bulge    = 1, 
+                                threshold    = 25)       
 ```
 
 ``` {r, echo=FALSE, fig.width=5, fig.height=5, message=FALSE, warning=FALSE, results="hide", fig.align="center"}
@@ -120,9 +133,21 @@ As the LSF of IFU instruments can be well approximated by a Gaussian, we model e
 In order to mimic the effects of beam smearing and observational seeing in our mock kinematic data cube, we can optionally specify the `blur` argument. In this, each projected sptial plane in the kinematic data cube will be convolved with a PSF kernel of either "Moffat" or "Gaussian" shape with a FWHM specified in arcseconds. 
 
 ```{r} 
-SAMI_cube_blur = build_datacube(filename = "~/SimSpin/inst/extdata/S0_vignette", ptype = NA, r200 = 200, z = 0.06, fov = 15, ap_shape = "circular", central_wvl = 4800,
-                                lsf_fwhm = 2.56, pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70, m2l_disc = 1, m2l_bulge = 1, threshold = 25, blur = list("psf" = 
-                                "Moffat", "fwhm" = 2))       
+SAMI_cube_blur = build_datacube(filename     = "~/SimSpin/inst/extdata/S0_vignette", 
+                                ptype        = NA, 
+                                r200         = 200, 
+                                z            = 0.06, 
+                                fov          = 15, 
+                                ap_shape     = "circular", 
+                                central_wvl  = 4800,
+                                lsf_fwhm     = 2.56, 
+                                pixel_sscale = 0.5, 
+                                pixel_vscale = 1.04, 
+                                inc_deg      = 70, 
+                                m2l_disc     = 1, 
+                                m2l_bulge    = 1, 
+                                threshold    = 25, 
+                                blur         = list("psf" = "Moffat", "fwhm" = 2))       
 ```
 
 The output of this function is in the same format as before, but with the data cube convolved such that the images produced are blurred by the form ("Moffat") and degree (2'') specified by `list("psf" = "Moffat", "fwhm" = 2)`. 
@@ -151,9 +176,22 @@ where $F_i$ is the observed flux taken from the flux image, $R_i$ is the radial 
 
 
 ```{r} 
-SAMI_lambda = find_lambda(filename = "~/SimSpin/inst/extdata/S0_vignette", ptype = NA, r200 = 200, z = 0.06, fov = 15, ap_shape = "circular", central_wvl = 4800, 
-                          lsf_fwhm = 2.56, pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70, m2l_disc = 1, m2l_bulge = 1, measurement_rad = 1, threshold = 25, 
-                          blur = list("psf" = "Moffat", "fwhm" = 2))
+SAMI_lambda = find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette", 
+                          ptype        = NA, 
+                          r200         = 200, 
+                          z            = 0.06, 
+                          fov          = 15, 
+                          ap_shape     = "circular", 
+                          central_wvl  = 4800, 
+                          lsf_fwhm     = 2.56, 
+                          pixel_sscale = 0.5, 
+                          pixel_vscale = 1.04, 
+                          inc_deg      = 70, 
+                          m2l_disc     = 1, 
+                          m2l_bulge    = 1, 
+                          measure_type = list(type = "fit", fac = 1), 
+                          threshold    = 25, 
+                          blur         = list("psf" = "Moffat", "fwhm" = 2))
                          
 
 SAMI_lambda$lambda_r # the observed lambda_R spin parameter
@@ -164,9 +202,22 @@ This function will return the observed spin parameter (`$obs_lambdar`), three IF
 If the measurement radius specified is larger than the aperture, the function will return a warning.
 
 ```{r}
-SAMI_lambda_warning = find_lambda(filename = "~/SimSpin/inst/extdata/S0_vignette", ptype = NA, r200 = 200, z = 0.06, fov = 15, ap_shape = "circular", central_wvl = 4800, 
-                          lsf_fwhm = 2.56, pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70, m2l_disc = 1, m2l_bulge = 1, measurement_rad = 5, threshold = 25, 
-                          blur = list("psf" = "Moffat", "fwhm" = 2))
+SAMI_lambda_warning = find_lambda(filename = "~/SimSpin/inst/extdata/S0_vignette", 
+                                  ptype = NA, 
+                                  r200 = 200, 
+                                  z = 0.06, 
+                                  fov = 15, 
+                                  ap_shape = "circular", 
+                                  central_wvl = 4800,
+                                  lsf_fwhm = 2.56, 
+                                  pixel_sscale = 0.5, 
+                                  pixel_vscale = 1.04, 
+                                  inc_deg = 70, 
+                                  m2l_disc = 1, 
+                                  m2l_bulge = 1, 
+                                  measure_type = list(type = "fit", fac = 5),  
+                                  threshold = 25, 
+                                  blur = list("psf" = "Moffat", "fwhm" = 2))
 ```
 
 The level of blurring applied and the measurement radius within which $\lambda_R$ is measured can be optionally altered to study the effects that these choices have on the measurement. If the `measurement_radius` or `blur` arguments are missing, no atmospheric seeing conditions will be applied and $\lambda_R$ will, by default, be measured within 1 effective radius. 
