@@ -11,8 +11,8 @@ build_datacube(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
 
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter,
-3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
 
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
@@ -26,9 +26,11 @@ build_datacube(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
 
 \item{lsf_fwhm}{The line spread function full-width half-max, given in angstroms.}
 
-\item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope output in arcseconds.}
+\item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope
+output in arcseconds.}
 
-\item{pixel_vscale}{The corresponding velocity pixel scale associated with a given telescope filter output in angstroms.}
+\item{pixel_vscale}{The corresponding velocity pixel scale associated with a given telescope
+filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
 
@@ -36,52 +38,57 @@ build_datacube(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
 
 \item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
 
-\item{threshold}{The flux threshold of the observation.}
+\item{threshold}{The magnitude limit of the observation.}
 
-\item{blur}{\emph{Optional} Specified to apply observational seeing effects to the cube. A list of the form
-\code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the PSF chosen and may be either \code{"Moffat"}
-or \code{"Gaussian"}. \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.}
+\item{blur}{\emph{Optional} Specified to apply observational seeing effects to the cube. A list
+of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the
+PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}. \code{"fwhm"} is a numeric
+specifying the full-width half-maximum of the PSF given in units of arcseconds.}
 }
 \value{
-A list containing the 3D array corresponding to the kinematic data cube (\code{$datacube}), the corresponding axes labels
-(\code{$xbin_labels, $ybin_labels, $vbin_labels}) and the axis ratio of the observed galaxy (\code{$axis_ratio}).
+A list containing:
+\item{\code{$datacube}}{A 3D array corresponding to the kinematic data cube.}
+\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+\item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
+\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
+\item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
+\code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
 }
 \description{
-The purpose of this basic function is to use the \code{SimSpin} package sub-functions to construct an IFU kinematic data cube.
-\code{build_datacube()} will call each required sub-function (\code{obs_data_prep()}, \code{ifu_cube()}, \code{blur_cube()}) and
-produce a 3D array corresponding to the kinematic data cube for that mock observation, the corresponding axes labels and the
-observed axis ratio of the observed galaxy.
+The purpose of this basic function is to use the \code{SimSpin} package sub-functions to
+construct an IFU kinematic data cube. This function will call each required sub-function
+(\code{\link{obs_data_prep}}, \code{\link{ifu_cube}}, \code{\link{blur_cube}}) and produce a 3D
+array corresponding to the kinematic data cube for that mock observation, the corresponding axes
+labels and the observed axis ratio of the observed galaxy.
 }
 \examples{
-\dontrun{
-ifu_datacube = build_datacube(filename     = "path/to/some/snapshot_XXX",
-                              r200         = 200,
-                              z            = 0.1,
-                              fov          = 15,
-                              ap_shape     = "circular",
-                              central_wvl  = 4800,
-                              lsf_fwhm     = 2.65,
-                              pixel_sscale = 0.5,
-                              pixel_vscale = 1.04,
-                              inc_deg      = 0,
-                              m2l_disc     = 2,
-                              m2l_bulge    = 1,
-                              threshold    = 25)
+cube = build_datacube(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+                      r200         = 200,
+                      z            = 0.1,
+                      fov          = 15,
+                      ap_shape     = "circular",
+                      central_wvl  = 4800,
+                      lsf_fwhm     = 2.65,
+                      pixel_sscale = 0.5,
+                      pixel_vscale = 1.04,
+                      inc_deg      = 0,
+                      m2l_disc     = 2,
+                      m2l_bulge    = 1,
+                      threshold    = 25)
 
-blur_datacube = build_datacube(filename     = "path/to/some/snapshot_XXX",
-                               r200         = 200,
-                               z            = 0.1,
-                               fov          = 15,
-                               ap_shape     = "circular",
-                               central_wvl  = 4800,
-                               lsf_fwhm     = 2.65,
-                               pixel_sscale = 0.5,
-                               pixel_vscale = 1.04,
-                               inc_deg      = 0,
-                               m2l_disc     = 2,
-                               m2l_bulge    = 1,
-                               threshold    = 25,
-                               blur         = list("psf" = "Moffat", "fwhm" = 2))
+blur = build_datacube(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+                      r200         = 200,
+                      z            = 0.1,
+                      fov          = 15,
+                      ap_shape     = "circular",
+                      central_wvl  = 4800,
+                      lsf_fwhm     = 2.65,
+                      pixel_sscale = 0.5,
+                      pixel_vscale = 1.04,
+                      inc_deg      = 0,
+                      m2l_disc     = 2,
+                      m2l_bulge    = 1,
+                      threshold    = 25,
+                      blur         = list("psf" = "Moffat", "fwhm" = 2))
 
-}
 }

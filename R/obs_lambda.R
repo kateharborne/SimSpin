@@ -1,44 +1,51 @@
-# Kate Harborne (last edit - 13/09/2017)
+# Kate Harborne (last edit - 23/04/2018)
 #'Calculating the observable spin parameter, \eqn{\lambda}_R.
 #'
-#'The purpose of this function is to calculate the spin parameter that would be observed given an IFU data cube. You can either supply the cube created
-#'by the \code{ifu_cube()} function directly, or the blurred cube created by \code{blur_cube()}.
+#'The purpose of this function is to calculate the spin parameter that would be observed given an
+#' IFU data cube. You can either supply the cube created by the \code{\link{ifu_cube}} function
+#' directly, or the blurred cube created by \code{\link{blur_cube}}.
 #'
-#'@param ifu_datacube The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region image (\code{$appregion}).
-#'@param reff_axisratio The semi-major and semi-minor axes output from the \code{find_reff()} function.
-#'@param sbinsize The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.
-#'@param dispersion_analysis (Optional) If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.
-#'@return Returns a list that contains the observed \eqn{\lambda}_R value (\code{$obs_lambdar}), and three matricies reflecting the images produced
-#' in IFU surveys - a luminosity counts image (\code{$counts_img}), a velocity image (\code{$velocity_img}) and a velocity dispersion image
-#' (\code{$dispersion_img}) - and the coordinates of the effective radius ellipse within which \eqn{\lambda}_R is measured.
+#'@param ifu_datacube The list output from the function \code{\link{ifu_cube}} containing the mock
+#' IFU cube and the apperture region image (\code{$appregion}).
+#'@param reff_axisratio The semi-major and semi-minor axes output from the \code{\link{find_reff}}
+#' function.
+#'@param sbinsize The size of each spatial bin in kpc, output from the function
+#' \code{\link{obs_data_prep}}.
+#'@param dispersion_analysis (Optional) If specified as \code{TRUE}, the code will output the mean
+#' and median values of the LOS velocity dispersion. Default is \code{FALSE}.
+#'@return Returns a list that contains:
+#' \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R}}
+#' \item{\code{$counts_img}}{The observed flux image.}
+#' \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
+#' \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
+#' \item{\code{$reff_ellipse}}{The coordinates of the effective radius ellipse within which
+#'  \eqn{\lambda}_R is measured}
 #'@examples
-#' \dontrun{
-#'  data      = obs_data_prep()
-#'  ifucube   = ifu_cube()
-#'  blurcube  = blur_cube()
-#'  reff_data = find_reff()
+#'  data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
+#'  ifucube   = ifu_cube(obs_data = data)
+#'  reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'                        ptype        = NA,
+#'                        r200         = 10,
+#'                        inc_deg      = 0,
+#'                        axis_ratio   = ifucube$axis_ratio,
+#'                        angular_size = data$angular_size)
 #'
 #'  obs_lambda(ifu_datacube   = ifucube,
 #'             reff_axisratio = reff_data,
 #'             sbinsize       = data$sbinsize)
 #'
-#'  obs_lambda(ifu_datacube   = blurcube,
-#'             reff_axisratio = reff_data,
-#'             sbinsize       = data$sbinsize,
-#'             dispersion_analysis  = TRUE)
-#'
-#' }
-#'
 
 obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysis = FALSE){
 
-    sbin            = length(ifu_datacube$xbin_labels) # number of spatial bins in data cube
+    sbin            = length(ifu_datacube$xbin_labels)     # number of spatial bins in data cube
     vbin            = length(ifu_datacube$vbin_labels)
-    calcregion_reff = array(data = rep(0,(sbin*sbin*vbin)), dim=c(sbin,sbin,vbin)) # for calculating lambdaR within the specified reff
-    radius          = matrix(data = 0, nrow=sbin, ncol=sbin) # creating the radial positions within the calcregion
+    calcregion_reff = array(data = rep(0,(sbin*sbin*vbin)), dim=c(sbin,sbin,vbin))
+                                                           # calculating lambdaR within reff
+    radius          = matrix(data = 0, nrow=sbin, ncol=sbin)
+                                                           # radial positions within calcregion
 
     xcentre = sbin/2 + 0.5
-    ycentre = sbin/2 + 0.5 # finding the centre pixel of the image
+    ycentre = sbin/2 + 0.5                                 # finding the centre pixel of the image
     a = reff_axisratio$a_kpc / sbinsize
     b = reff_axisratio$b_kpc / sbinsize
 
@@ -52,8 +59,9 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
           radius[x,y]           = sqrt(xx^2 + yy^2) * sbinsize
         }
       }
-    } # creating two arrays - one of a multiplier to consider lambdaR within Reff,
-    # and one of the radial values within Reff
+    }
+    # creating two arrays - one of a multiplier to consider lambdaR within Reff,
+    #  and one of the radial values within Reff
 
     cube_reff  = ifu_datacube$cube * calcregion_reff
     counts     = apply(cube_reff, c(1,2), sum)
@@ -69,11 +77,12 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
         velocity_img[c,d]   = .meanwt(ifu_datacube$vbin_labels, ifu_datacube$cube[c,d,])
         dispersion_img[c,d] = sqrt(.varwt(ifu_datacube$vbin_labels, ifu_datacube$cube[c,d,], velocity_img[c,d]))
       }
-    } # building the velocity and dispersion images
-    velocity[(is.na(velocity))]             = 0 # mean velocity
-    velocity_img[(is.na(velocity_img))]     = 0 # mean velocity image
-    standard_dev[(is.na(standard_dev))]     = 0 # velocity dispersion
-    dispersion_img[(is.na(dispersion_img))] = 0 # velocity dispersion image
+    }
+    # building the velocity and dispersion images
+    velocity[(is.na(velocity))]             = 0            # mean velocity
+    velocity_img[(is.na(velocity_img))]     = 0            # mean velocity image
+    standard_dev[(is.na(standard_dev))]     = 0            # velocity dispersion
+    dispersion_img[(is.na(dispersion_img))] = 0            # velocity dispersion image
 
     lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
 
@@ -88,7 +97,8 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
     if (dispersion_analysis == TRUE) {
       mean_dispersion = mean(standard_dev)
       med_dispersion = median(standard_dev)
-      dispersion_analysis = list("mean_dispersion" = mean_dispersion, "median_dispersion" = med_dispersion)
+      dispersion_analysis = list("mean_dispersion" = mean_dispersion,
+                                 "median_dispersion" = med_dispersion)
       output = list("obs_lambdar"          = lambda,
                     "counts_img"           = counts_img,
                     "velocity_img"         = velocity_img,

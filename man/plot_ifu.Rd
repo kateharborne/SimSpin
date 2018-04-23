@@ -7,23 +7,32 @@
 plot_ifu(lambda, appregion)
 }
 \arguments{
-\item{lambda}{The list output from the function \code{obs_lambda()} containing the flux, velocity and dispersion images.}
+\item{lambda}{The list output from the function \code{\link{obs_lambda}} containing the flux,
+velocity and dispersion images.}
 
-\item{appregion}{The aperture region output from the \code{obs_data_prep()} function.}
+\item{appregion}{The aperture region output from the \code{\link{obs_data_prep}} function.}
 }
 \value{
 Returns three plots - a flux image, a velcoity image and a dispersion image.
 }
 \description{
-The purpose of this function is to plot the useful images expracted from the IFU cube produced. Input the apperture region and images produced by the
-\code{obs_lambda()} function and the output will be the flux, velocity and dispersion maps.
+The purpose of this function is to plot the useful images expracted from the IFU cube produced.
+Input the apperture region and images produced by the \code{\link{obs_lambda}} function and the
+output will be the flux, velocity and dispersion maps.
 }
 \examples{
-\dontrun{
-data = obs_data_prep()
-lambda_obs = obs_lambda()
+data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
+ifucube   = ifu_cube(obs_data = data)
+reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+                      ptype        = NA,
+                      r200         = 10,
+                      inc_deg      = 0,
+                      axis_ratio   = ifucube$axis_ratio,
+                      angular_size = data$angular_size)
+lambda_obs = obs_lambda(ifu_datacube   = ifucube,
+                        reff_axisratio = reff_data,
+                        sbinsize       = data$sbinsize)
 
 plot_ifu(lambda_obs, data$appregion)
-}
 
 }

@@ -7,34 +7,37 @@
 blur_cube(ifu_datacube, sbinsize, psf, fwhm, angular_size)
 }
 \arguments{
-\item{ifu_datacube}{The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region
-image (\code{$appregion}).}
+\item{ifu_datacube}{The list output from the function \code{\link{ifu_cube}} containing the mock
+IFU cube and the aperture region image (\code{$appregion}).}
 
-\item{sbinsize}{The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.}
+\item{sbinsize}{The size of each spatial bin in kpc, output from the function
+\code{\link{obs_data_prep}}.}
 
-\item{psf}{This parameter gives the user choice between a "Gaussian" or "Moffat" PSF.}
+\item{psf}{The type of PSF with choices of "Gaussian" or "Moffat".}
 
-\item{fwhm}{This parameter will blur the observation using the specified PSF with full width half maximum as
-specified here in arcseconds, in order to mimic the effects caused by beam smearing and seeing.}
+\item{fwhm}{The full-width half-maximum size of the chosen PSF specified here in arcseconds.}
 
-\item{angular_size}{The conversion factor for a given redshift between kpc and arcseconds as produced by the \code{obs_data_prep()} function.}
+\item{angular_size}{The conversion factor for a given redshift between kpc and arcseconds as
+produced by the \code{\link{obs_data_prep}} function.}
 }
 \value{
-Returns a list that contains the original IFU cube produced by the function \code{ifu_cube()}, but blurred with the specified PSF,
-\code{$blurcube}, and the bin labels for each dimension \code{$xbin_labels}, \code{$ybin_labels}, \code{$vbin_labels}.
+Returns a list that contains:
+\item{\code{$blurcube}}{The original IFU cube produced by the function \code{\link{ifu_cube}},
+but blurred with the specified PSF.}
+\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+\item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
+\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 }
 \description{
 The purpose of this function is to mimic the spatial blurring caused by seeing and beam smearing.
 }
 \examples{
-\dontrun{
- data      = obs_data_prep()
- ifucube   = ifu_cube()
+ data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
+ ifucube   = ifu_cube(obs_data = data)
 
- blur_cube(ifu_datacube   = ifucube,
-           sbinsize       = data$sbinsize,
-           psf            = "Moffat",
-           fwhm           = 0.5,
-           angular_size   = data$angular_size)
-}
+ blurcube  = blur_cube(ifu_datacube   = ifucube,
+                       sbinsize       = data$sbinsize,
+                       psf            = "Moffat",
+                       fwhm           = 0.5,
+                       angular_size   = data$angular_size)
 }

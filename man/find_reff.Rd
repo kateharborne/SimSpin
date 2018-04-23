@@ -10,31 +10,41 @@ find_reff(filename, ptype = NA, r200 = 200, inc_deg, fract = 0.5,
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
 
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
 
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{inc_deg}{The observed inclination of the simulated galaxy in degrees.}
 
-\item{fract}{The fraction of particles to be contained within the radius calculated. Default is 0.5, i.e. Reff.}
+\item{fract}{The fraction of particles to be contained within the radius calculated. Default is
+0.5, i.e. Reff.}
 
-\item{axis_ratio}{A data frame containing the semi-major and semi-minor axes lengths for the observed galaxy, as given by ifu_cube() or blur_cube().}
+\item{axis_ratio}{A data frame containing the semi-major and semi-minor axes lengths for the
+observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.}
 
-\item{angular_size}{The kpc/'' scaling factor output by \code{obs_data_prep()} used to give the axis ratios in both kpc and ''.}
+\item{angular_size}{The kpc/'' scaling factor output by \code{\link{obs_data_prep}} used to give
+the axis ratios in both kpc and ''.}
 }
 \value{
-Returned is a scaled axis ratio that describes the semimajor and semiminor axes of an ellipse that contains half the total number of particles.
+Returned is a scaled axis ratio that describes the semi-major and semi-minor axes of an
+ellipse that contains half the total number of particles.
 }
 \description{
-The purpose of this function is to find the observed effective radius of a simulated galaxy projected at a user supplied inclination. It works
-by ordering particles by their observed radius and returning the radial coordinate at which half the total number of particles in the galaxy is contained.
+The purpose of this function is to find the observed effective radius of a simulated galaxy
+projected at a user supplied inclination. It works by ordering particles by their observed
+radius and returning the radial coordinate at which half the total number of particles in the
+galaxy is contained.
 }
 \examples{
-\dontrun{
-find_reff(filename = "path/to/some/snapshot_XXX",
-          ptype    = 0,
-          r200     = 10,
-          inc_deg  = 0)
-}
+data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
+ifucube   = ifu_cube(obs_data = data)
+
+find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+          ptype        = NA,
+          r200         = 10,
+          inc_deg      = 0,
+          axis_ratio   = ifucube$axis_ratio,
+          angular_size = data$angular_size)
 
 }

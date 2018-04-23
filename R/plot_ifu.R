@@ -1,19 +1,28 @@
-# Kate Harborne (last edit - 13/09/2017)
+# Kate Harborne (last edit - 23/04/2018)
 #'Plotting the flux, velocity and dipsersion image output from the IFU kinematic cube.
 #'
-#'The purpose of this function is to plot the useful images expracted from the IFU cube produced. Input the apperture region and images produced by the
-#'\code{obs_lambda()} function and the output will be the flux, velocity and dispersion maps.
+#'The purpose of this function is to plot the useful images expracted from the IFU cube produced.
+#' Input the apperture region and images produced by the \code{\link{obs_lambda}} function and the
+#' output will be the flux, velocity and dispersion maps.
 #'
-#'@param lambda The list output from the function \code{obs_lambda()} containing the flux, velocity and dispersion images.
-#'@param appregion The aperture region output from the \code{obs_data_prep()} function.
+#'@param lambda The list output from the function \code{\link{obs_lambda}} containing the flux,
+#' velocity and dispersion images.
+#'@param appregion The aperture region output from the \code{\link{obs_data_prep}} function.
 #'@return Returns three plots - a flux image, a velcoity image and a dispersion image.
 #'@examples
-#' \dontrun{
-#' data = obs_data_prep()
-#' lambda_obs = obs_lambda()
+#' data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
+#' ifucube   = ifu_cube(obs_data = data)
+#' reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'                       ptype        = NA,
+#'                       r200         = 10,
+#'                       inc_deg      = 0,
+#'                       axis_ratio   = ifucube$axis_ratio,
+#'                       angular_size = data$angular_size)
+#' lambda_obs = obs_lambda(ifu_datacube   = ifucube,
+#'                         reff_axisratio = reff_data,
+#'                         sbinsize       = data$sbinsize)
 #'
 #' plot_ifu(lambda_obs, data$appregion)
-#' }
 #'
 
 plot_ifu = function(lambda, appregion){

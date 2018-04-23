@@ -4,15 +4,17 @@
 \alias{obs_data_prep}
 \title{Prepare simulation data for observational kinematic analysis.}
 \usage{
-obs_data_prep(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
-  central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc,
-  m2l_bulge)
+obs_data_prep(filename, ptype = NA, r200 = 200, z = 0.05, fov = 15,
+  ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
+  pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70, m2l_disc = 1,
+  m2l_bulge = 1)
 }
 \arguments{
-\item{filename}{The Gadget output file containing the particle information of the galaxy to be analysed.}
+\item{filename}{The Gadget output file containing the particle information of the galaxy to be
+analysed.}
 
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the simulation, 1 - gas, 2 - dark matter, 3 - disc,
-4 - bulge, 5 - stars, 6 - boundary.}
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
 
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
@@ -26,9 +28,11 @@ obs_data_prep(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
 
 \item{lsf_fwhm}{The line spread function full-width half-max, given in angstroms.}
 
-\item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope output in arcseconds.}
+\item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope
+output in arcseconds.}
 
-\item{pixel_vscale}{The corresponding velocity pixel scale associated with a given telescope filter output in angstroms.}
+\item{pixel_vscale}{The corresponding velocity pixel scale associated with a given telescope
+filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
 
@@ -37,20 +41,26 @@ obs_data_prep(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
 \item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
 }
 \value{
-Returned is a list that contains a data frame of the observed particle information (\code{$galaxy_obs} (which contains the galaxy particle
-info from the GADGET file, with added coordinates \code{$z_obs}, \code{$r_obs}, and \code{$vy_obs} and particle fluxes, \code{$flux}, in units of
-1e-16 erg s-1 cm-2) and numerical factors including the number of spatial bins (\code{$sbin}), the size of those spatial bins in kpc and arcseconds
-(\code{$sbinsize} and \code{pixsize}), the number of velocity bins (\code{$vbin}), the size of those velocity bins in km/s (\code{$vbinsize}), the
-gaussian standard deviation of the line spread function in km/s (\code{lsf_size}) and the angular size of the galaxy in kpc/arcecond at the provided
-redshift (\code{$angular_size}).
+Returned is a list that contains:
+\item{\code{$galaxy_obs}}{A data frame of the observed particle information (which contains the
+  galaxy particle info from the GADGET file, with added coordinates \code{$galaxy_obs$z_obs},
+  \code{$galaxy_obs$r_obs}, and \code{$galaxy_obs$vy_obs} and particle fluxes,
+  \code{$galaxy_obs$flux}, in units of 1e-16 erg s-1 cm-2).}
+\item{\code{$sbin}}{The number of spatial bins.}
+\item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
+\item{\code{$pixsize}}{The size of the spatial bins in arcseconds.}
+\item{\code{$vbin}}{The number of velocity bins.}
+\item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
+\item{\code{$lsf_size}}{The gaussian standard deviation of the line spread function in km/s.}
+\item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
+ redshift.}
 }
 \description{
-The purpose of this function is to calculate the properties necessary for constructing an IFU observation data cube of a simulated galaxy at a user
-specified inclination and redshift.
+The purpose of this function is to calculate the properties necessary for constructing an IFU
+observation data cube of a simulated galaxy at a user specified inclination and redshift.
 }
 \examples{
-\dontrun{
-obs_data_prep(filename     = "path/to/some/snapshot_XXX",
+obs_data_prep(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
               r200         = 200,
               z            = 0.1,
               fov          = 15,
@@ -63,7 +73,7 @@ obs_data_prep(filename     = "path/to/some/snapshot_XXX",
               m2l_disc     = 2,
               m2l_bulge    = 1)
 
-obs_data_prep(filename     = "path/to/some/snapshot_XXX",
+obs_data_prep(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
               ptype        = c(3,4),
               r200         = 200,
               z            = 0.1,
@@ -76,6 +86,5 @@ obs_data_prep(filename     = "path/to/some/snapshot_XXX",
               inc_deg      = 0,
               m2l_disc     = 1,
               m2l_bulge    = 1)
-}
 
 }

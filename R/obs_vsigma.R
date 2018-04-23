@@ -1,39 +1,49 @@
 # Kate Harborne (last edit - 13/09/2017)
 #'Calculating the observable V/\eqn{\sigma}
 #'
-#'The purpose of this function is to calculate the V/\eqn{\sigma}. You can either supply the cube created
-#'by the \code{ifu_cube()} function directly, or the blurred cube created by \code{blur_cube()}.
+#'The purpose of this function is to calculate the V/\eqn{\sigma}. You can either supply the cube
+#' created by the \code{\link{ifu_cube}} function directly, or the blurred cube created by
+#' \code{\link{blur_cube}}.
 #'
-#'@param ifu_datacube The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region image (\code{$appregion}).
-#'@param reff_axisratio The semi-major and semi-minor axes output from the \code{find_reff()} function.
-#'@param sbinsize The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.
-#'@return Returns a list that contains the observed V/\eqn{\sigma} value (\code{$obs_vsigma}), and three matricies reflecting the images produced
-#' in IFU surveys - a luminosity counts image (\code{$counts_img}), a velocity image (\code{$velocity_img}) and a velocity dispersion image
-#' (\code{$dispersion_img}) - and the coordinates of the effective radius ellipse within which V/\eqn{\sigma}  is measured.
+#'@param ifu_datacube The list output from the function \code{\link{ifu_cube}} containing the mock
+#' IFU cube and the apperture region image (\code{$appregion}).
+#'@param reff_axisratio The semi-major and semi-minor axes output from the \code{\link{find_reff}}
+#' function.
+#'@param sbinsize The size of each spatial bin in kpc, output from the function
+#' \code{\link{obs_data_prep}}.
+#'@return Returns a list that contains:
+#' \item{\code{$obs_vsigma}}{The observed V/\eqn{\sigma} value.}
+#' \item{\code{$counts_img}}{The observed flux image.}
+#' \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
+#' \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
+#' \item{\code{$reff_ellipse}}{The coordinates of the effective radius ellipse within which
+#'  V/\eqn{\sigma} is measured}
 #'@examples
-#' \dontrun{
-#'  data      = obs_data_prep()
-#'  ifucube   = ifu_cube()
-#'  blurcube  = blur_cube()
-#'  reff_data = find_reff()
+#'  data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
+#'  ifucube   = ifu_cube(obs_data = data)
+#'  reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'                        ptype        = NA,
+#'                        r200         = 10,
+#'                        inc_deg      = 0,
+#'                        axis_ratio   = ifucube$axis_ratio,
+#'                        angular_size = data$angular_size)
 #'
 #'  obs_vsigma(ifu_datacube   = ifucube,
 #'             reff_axisratio = reff_data,
 #'             sbinsize       = data$sbinsize)
-#'
-#' }
 #'
 
 obs_vsigma = function(ifu_datacube, reff_axisratio, sbinsize){
 
   sbin            = length(ifu_datacube$xbin_labels) # number of spatial bins in data cube
   vbin            = length(ifu_datacube$vbin_labels)
-  calcregion_reff = array(data = rep(0,(sbin*sbin*vbin)), dim=c(sbin,sbin,vbin)) # for calculating lambdaR within the specified reff
+  calcregion_reff = array(data = rep(0,(sbin*sbin*vbin)), dim=c(sbin,sbin,vbin))
+                                                     # for calculating lambdaR within fac * reff
 
   xcentre = sbin/2 + 0.5
-  ycentre = sbin/2 + 0.5 # finding the centre pixel of the image
-  a = reff_axisratio$a / sbinsize
-  b = reff_axisratio$b / sbinsize
+  ycentre = sbin/2 + 0.5                             # finding the centre pixel of the image
+  a = reff_axisratio$a_kpc / sbinsize
+  b = reff_axisratio$b_kpc / sbinsize
 
   for (x in 1:sbin){
     for (y in 1:sbin){
@@ -44,8 +54,9 @@ obs_vsigma = function(ifu_datacube, reff_axisratio, sbinsize){
         calcregion_reff[x,y,] = 1
       }
     }
-  } # creating two arrays - one of a multiplier to consider lambdaR within Reff,
-  # and one of the radial values within Reff
+  }
+  # creating two arrays - one of a multiplier to consider lambdaR within Reff,
+  #  and one of the radial values within Reff
 
   cube_reff  = ifu_datacube$cube * calcregion_reff
   counts     = apply(cube_reff, c(1,2), sum)
@@ -61,11 +72,11 @@ obs_vsigma = function(ifu_datacube, reff_axisratio, sbinsize){
       velocity_img[c,d]   = .meanwt(ifu_datacube$vbin_labels, ifu_datacube$cube[c,d,])
       dispersion_img[c,d] = sqrt(.varwt(ifu_datacube$vbin_labels, ifu_datacube$cube[c,d,], velocity_img[c,d]))
     }
-  } # building the velocity and dispersion images
-  velocity[(is.na(velocity))]             = 0 # mean velocity
-  velocity_img[(is.na(velocity_img))]     = 0 # mean velocity image
-  standard_dev[(is.na(standard_dev))]     = 0 # velocity dispersion
-  dispersion_img[(is.na(dispersion_img))] = 0 # velocity dispersion image
+  }                                                        # build the velocity & dispersion maps
+  velocity[(is.na(velocity))]             = 0              # mean velocity
+  velocity_img[(is.na(velocity_img))]     = 0              # mean velocity image
+  standard_dev[(is.na(standard_dev))]     = 0              # velocity dispersion
+  dispersion_img[(is.na(dispersion_img))] = 0              # velocity dispersion image
 
   vsigma = sum(counts*velocity*velocity)/sum(counts*standard_dev*standard_dev)
 

@@ -7,26 +7,30 @@
 obs_galaxy(part_data, centre, inc_rad)
 }
 \arguments{
-\item{part_data}{The data frame output by \code{snapshot::snapread} for galaxy simulation data from Gadget.}
+\item{part_data}{The data frame output by \code{snapshot::snapread} for galaxy simulation data
+from Gadget.}
 
-\item{centre}{A logical that tells the function to centre the galaxy about its centre of mass or not (i.e. TRUE or FALSE).}
+\item{centre}{A logical that tells the function to centre the galaxy about its centre of mass or
+not (i.e. TRUE or FALSE).}
 
 \item{inc_rad}{The observed inclination angle in radians.}
 }
 \value{
-Returns a data frame containing the original particle information plus the observed z-position (\code{$z_obs}),
- observed radial position (\code{$r_obs}) and the observed line of sight velocity (\code{$vy_obs}) at the given inclination.
+Returns a data frame containing the original particle information plus the observed
+ z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
+ sight velocity (\code{$vy_obs}) at the given inclination.
 }
 \description{
-The purpose of this function is to produce the observable features of simulation data when taking mock IFU observations.
-It accepts the Gadget particle information output from the \code{snapshot::snapread} function and returns the observable
-galaxy properties projected at a user supplied inclination.
+The purpose of this function is to produce the observable features of simulation data when
+taking mock IFU observations. It accepts the Gadget particle information output from the
+\code{snapshot::snapread} function and returns the observable galaxy properties projected at a
+user supplied inclination.
 }
 \examples{
- \dontrun{
-  data = snapshot::snapread()
+  data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
+  data$part$part_type = rep(0,length(data$part))
+
   obs_galaxy(part_data = data$part,
              centre    = TRUE,
              inc_rad   = 0)
- }
 }

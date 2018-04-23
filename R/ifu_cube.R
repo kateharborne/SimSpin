@@ -1,30 +1,32 @@
-# Kate Harborne (last edit - 16/04/2018)
+# Kate Harborne (last edit - 23/04/2018)
 #'Creating a mock IFU kinematic data cube.
 #'
-#'The purpose of this function is to construct an IFU data cube. It accepts output parameters from \code{obs_data_prep()} and returns
-#' a 3D array containing the spatial and velocity corrdinates of each particle in the galaxy simulation in order to mimic the arrangement
-#' of an IFU data cube.
-#'
+#'The purpose of this function is to construct an IFU data cube. It accepts output parameters from
+#' \code{obs_data_prep()} and returns a 3D array containing the spatial and velocity corrdinates of
+#'  each particle in the galaxy simulation in order to mimic the arrangement of an IFU data cube.
 #'@param obs_data The list output from the \code{obs_data_prep()} function.
 #'@param threshold The magnitude limit of the observation.
-#'@return Returns a list containing a mock IFU data cube as required for calculating the observed spin parameter. Also contained is an image that
-#' describes the shape of the aperture (\code{$appregion}) such that any further convolutions that are applied to mimic beam smearing or seeing
-#' can be trimmed to the appropriate aperture shape. The bin labels for each dimension are supplied as \code{$xbin_labels}, \code{$ybin_labels},
-#' \code{$vbin_labels}. The axis ratio of the galaxy is calculated in this fuction and output in the list as the semi-major and semi-minor axes,
-#' \code{$axis_ratio$a} and \code{$axis_ratio$b}.
+#'@return Returns a list that contains:
+#' \item{\code{$cube}}{A mock IFU data cube as required for calculating the observed spin parameter}
+#' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+#' \item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
+#' \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
+#' \item{\code{$appregion}}{An image that describes the shape of the aperture such that any further
+#'  convolutions that are applied to mimic beam smearing or seeing can be trimmed to the
+#'  appropriate aperture shape.}
+#' \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
+#'  \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
 #'@examples
-#' \dontrun{
-#' data = obs_data_prep()
+#' data = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
 #'
-#' ifu_cube(obs_data = data,
-#'         threshold = 0)
+#' cube = ifu_cube(obs_data  = data,
+#'                 threshold = 0)
 #'
-#' ifu_cube(obs_data = data,
-#'         threshold = 20)
-#' }
+#' cube = ifu_cube(obs_data  = data,
+#'                 threshold = 20)
 #'
 
-ifu_cube = function(obs_data, threshold) {
+ifu_cube = function(obs_data, threshold=25) {
 
   galaxy_obs      = obs_data$galaxy_obs                                                         # data to populate the aperture
   sbin            = obs_data$sbin                                                               # number of spatial bins along the x and z axes

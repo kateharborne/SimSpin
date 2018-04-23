@@ -1,28 +1,31 @@
-// Kate Harborne (last edit - 16/04/2018)
+// Kate Harborne (last edit - 23/04/2018)
 #include <Rcpp.h>
 #include <cmath>
 using namespace Rcpp;
 
 //' Constructing galaxy simulation data from the Gadget output file data
 //'
-//' The purpose of this function is to produce the extra kinematic features for simulation data in spherical polar coordinates. It accepts
-//' the Gadget particle information output from the \code{snapshot::snapread} function and returns several additional galaxy
-//' properties that are useful for deriving the galaxy kinematics.
+//' The purpose of this function is to produce the extra kinematic features for simulation data in
+//' spherical polar coordinates. It accepts the Gadget particle information output from the
+//' \code{snapshot::snapread} function and returns several additional galaxy properties that are
+//' useful for deriving the galaxy kinematics.
 //'
-//' @param part_data The data frame output by \code{snapshot::snapread} for galaxy simulation data in Gadget format.
-//' @param centre A logical that tells the function to centre the galaxy about its centre of mass or not (i.e. TRUE or FALSE).
-//' @return Returns a data frame containing the particle \code{$ID}, \code{$x-}, \code{$y-} and \code{$z-}positions and corresponding
-//'  velocities (\code{$vx, $vy } and \code{$vz}), along with the spherical polar coordinates (\code{$r}, \code{$theta} and \code{$phi})
-//'  and associated velocities (\code{$vr}, \code{$vtheta} and \code{$vphi}), the cylindrical radial coordinate and its associated velocity
-//'  (\code{$cr} and \code{$vcr})  and the mass of each particle (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},
-//'  \code{$Jz}).
+//' @param part_data The data frame output by \code{snapshot::snapread} for galaxy simulation data
+//'  in Gadget format.
+//' @param centre A logical that tells the function to centre the galaxy about its centre of mass
+//'  or not (i.e. TRUE or FALSE).
+//' @return Returns a data frame containing the particle \code{$ID}, \code{$x-}, \code{$y-} and
+//'  \code{$z-}positions and corresponding velocities (\code{$vx, $vy } and \code{$vz}), along with
+//'  the spherical polar coordinates (\code{$r}, \code{$theta} and \code{$phi}) and associated
+//'  velocities (\code{$vr}, \code{$vtheta} and \code{$vphi}), the cylindrical radial coordinate
+//'  and its associated velocity (\code{$cr} and \code{$vcr}) and the mass of each particle
+//'  (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},\code{$Jz}).
 //' @examples
-//'  \dontrun{
-//'   data = snapshot::snapread()
+//'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
+//'   data$part$part_type = rep(0,length(data$part))
 //'
 //'   sim_galaxy(part_data = data$part,
 //'              centre    = TRUE)
-//'  }
 //' @export
 // [[Rcpp::export]]
 Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {

@@ -8,39 +8,44 @@ obs_lambda(ifu_datacube, reff_axisratio, sbinsize,
   dispersion_analysis = FALSE)
 }
 \arguments{
-\item{ifu_datacube}{The list output from the function \code{ifu_cube()} containing the mock IFU cube and the apperture region image (\code{$appregion}).}
+\item{ifu_datacube}{The list output from the function \code{\link{ifu_cube}} containing the mock
+IFU cube and the apperture region image (\code{$appregion}).}
 
-\item{reff_axisratio}{The semi-major and semi-minor axes output from the \code{find_reff()} function.}
+\item{reff_axisratio}{The semi-major and semi-minor axes output from the \code{\link{find_reff}}
+function.}
 
-\item{sbinsize}{The size of each spatial bin in kpc, output from the function \code{obs_data_prep()}.}
+\item{sbinsize}{The size of each spatial bin in kpc, output from the function
+\code{\link{obs_data_prep}}.}
 
-\item{dispersion_analysis}{(Optional) If specified as \code{TRUE}, the code will output the mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.}
+\item{dispersion_analysis}{(Optional) If specified as \code{TRUE}, the code will output the mean
+and median values of the LOS velocity dispersion. Default is \code{FALSE}.}
 }
 \value{
-Returns a list that contains the observed \eqn{\lambda}_R value (\code{$obs_lambdar}), and three matricies reflecting the images produced
-in IFU surveys - a luminosity counts image (\code{$counts_img}), a velocity image (\code{$velocity_img}) and a velocity dispersion image
-(\code{$dispersion_img}) - and the coordinates of the effective radius ellipse within which \eqn{\lambda}_R is measured.
+Returns a list that contains:
+\item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R}}
+\item{\code{$counts_img}}{The observed flux image.}
+\item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
+\item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
+\item{\code{$reff_ellipse}}{The coordinates of the effective radius ellipse within which
+ \eqn{\lambda}_R is measured}
 }
 \description{
-The purpose of this function is to calculate the spin parameter that would be observed given an IFU data cube. You can either supply the cube created
-by the \code{ifu_cube()} function directly, or the blurred cube created by \code{blur_cube()}.
+The purpose of this function is to calculate the spin parameter that would be observed given an
+IFU data cube. You can either supply the cube created by the \code{\link{ifu_cube}} function
+directly, or the blurred cube created by \code{\link{blur_cube}}.
 }
 \examples{
-\dontrun{
- data      = obs_data_prep()
- ifucube   = ifu_cube()
- blurcube  = blur_cube()
- reff_data = find_reff()
+ data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
+ ifucube   = ifu_cube(obs_data = data)
+ reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+                       ptype        = NA,
+                       r200         = 10,
+                       inc_deg      = 0,
+                       axis_ratio   = ifucube$axis_ratio,
+                       angular_size = data$angular_size)
 
  obs_lambda(ifu_datacube   = ifucube,
             reff_axisratio = reff_data,
             sbinsize       = data$sbinsize)
-
- obs_lambda(ifu_datacube   = blurcube,
-            reff_axisratio = reff_data,
-            sbinsize       = data$sbinsize,
-            dispersion_analysis  = TRUE)
-
-}
 
 }
