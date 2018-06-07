@@ -35,32 +35,18 @@
 #' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
 #'  redshift.}
 #'@examples
-#' obs_data_prep(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'               r200         = 200,
-#'               z            = 0.1,
-#'               fov          = 15,
-#'               ap_shape     = "circular",
-#'               central_wvl  = 4800,
-#'               lsf_fwhm     = 2.65,
-#'               pixel_sscale = 0.5,
-#'               pixel_vscale = 1.04,
-#'               inc_deg      = 0,
-#'               m2l_disc     = 2,
-#'               m2l_bulge    = 1)
-#'
-#' obs_data_prep(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'               ptype        = c(3,4),
-#'               r200         = 200,
-#'               z            = 0.1,
-#'               fov          = 15,
-#'               ap_shape     = "hexagonal",
-#'               central_wvl  = 4800,
-#'               lsf_fwhm     = 2.65,
-#'               pixel_sscale = 0.5,
-#'               pixel_vscale = 1.04,
-#'               inc_deg      = 0,
-#'               m2l_disc     = 1,
-#'               m2l_bulge    = 1)
+#' output = obs_data_prep(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'                        r200         = 200,
+#'                        z            = 0.1,
+#'                        fov          = 15,
+#'                        ap_shape     = "circular",
+#'                        central_wvl  = 4800,
+#'                        lsf_fwhm     = 2.65,
+#'                        pixel_sscale = 0.5,
+#'                        pixel_vscale = 1.04,
+#'                        inc_deg      = 0,
+#'                        m2l_disc     = 2,
+#'                        m2l_bulge    = 1)
 #'
 
 obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape="circular",

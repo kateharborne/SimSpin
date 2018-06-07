@@ -63,18 +63,20 @@ magicaxis::magplot(sim_data$r, sim_data$lambda, type="l", lwd=3, col="green", xl
 Alternatively, you can consider single components of the model. For example, if we wished to examine the properties of the galaxy disk, we specify `ptype = 3`. The same could be done to examine the bulge by specifying `ptype = 4`. If you wish to examine a combination of parameters, this is simply specified by `ptype = c(2,3)` to give, for example, the dark matter and disc components - though this vignette galaxy model contains no dark matter so this will result in an error as shown. 
 
 ```{r, error=TRUE, purl=FALSE}
-disk_data  = sim_analysis(filename = "~/SimSpin/inst/extdata/S0_vignette", 
-                          ptype    = 3,      # considering just the disk particles
-                          rmax     = 200, 
-                          rbin     = 200)
+disk_data  = sim_analysis(filename   = "~/SimSpin/inst/extdata/S0_vignette", 
+                          ptype      = 3,      # considering just the disk particles
+                          rmax       = 200, 
+                          rbin       = 200,
+                          DM_profile = list(profile="Hernquist", DM_mass=184.97, DM_a=34.51))
 
-bulge_data = sim_analysis(filename = "~/SimSpin/inst/extdata/S0_vignette", 
-                          ptype    = 4,      # considering just the bulge particles
-                          rmax     = 200, 
-                          rbin     = 200)
+bulge_data = sim_analysis(filename   = "~/SimSpin/inst/extdata/S0_vignette", 
+                          ptype      = 4,      # considering just the bulge particles
+                          rmax       = 200, 
+                          rbin       = 200,
+                          DM_profile = list(profile="Hernquist", DM_mass=184.97, DM_a=34.51))
 
 dm_data    = sim_analysis(filename = "~/SimSpin/inst/extdata/S0_vignette", 
-                          ptype    = c(2,3), # considering just the dark matter particles
+                          ptype    = 2, # considering just the dark matter particles
                           rmax     = 200, 
                           rbin     = 200)
 ```

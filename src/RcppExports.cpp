@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // obs_galaxy
 Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad);
-RcppExport SEXP SimSpin_obs_galaxy(SEXP part_dataSEXP, SEXP centreSEXP, SEXP inc_radSEXP) {
+RcppExport SEXP _SimSpin_obs_galaxy(SEXP part_dataSEXP, SEXP centreSEXP, SEXP inc_radSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,7 +20,7 @@ END_RCPP
 }
 // sim_galaxy
 Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre);
-RcppExport SEXP SimSpin_sim_galaxy(SEXP part_dataSEXP, SEXP centreSEXP) {
+RcppExport SEXP _SimSpin_sim_galaxy(SEXP part_dataSEXP, SEXP centreSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -29,4 +29,15 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(sim_galaxy(part_data, centre));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_SimSpin_obs_galaxy", (DL_FUNC) &_SimSpin_obs_galaxy, 3},
+    {"_SimSpin_sim_galaxy", (DL_FUNC) &_SimSpin_sim_galaxy, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_SimSpin(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

@@ -51,22 +51,6 @@
 #' values of the line-of-sight velocity dispersion (\code{$dispersion_analysis}). The observational
 #' images will also be plotted.
 #'@examples
-#' vsigma = find_vsigma(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                      r200         = 200,
-#'                      z            = 0.1,
-#'                      fov          = 15,
-#'                      ap_shape     = "circular",
-#'                      central_wvl  = 4800,
-#'                      lsf_fwhm     = 2.65,
-#'                      pixel_sscale = 0.5,
-#'                      pixel_vscale = 1.04,
-#'                      inc_deg      = 0,
-#'                      m2l_disc     = 2,
-#'                      m2l_bulge    = 1,
-#'                      threshold    = 25,
-#'                      measure_type = list(type = "fit", fac = 1))
-#'
-#'
 #' vsigma = find_vsigma(filename        = system.file("extdata", 'S0_vignette', package="SimSpin"),
 #'                      r200            = 200,
 #'                      z               = 0.1,

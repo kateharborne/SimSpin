@@ -44,8 +44,8 @@ directly, or the blurred cube created by \code{\link{blur_cube}}.
                        axis_ratio   = ifucube$axis_ratio,
                        angular_size = data$angular_size)
 
- obs_lambda(ifu_datacube   = ifucube,
-            reff_axisratio = reff_data,
-            sbinsize       = data$sbinsize)
+ output = obs_lambda(ifu_datacube   = ifucube,
+                     reff_axisratio = reff_data,
+                     sbinsize       = data$sbinsize)
 
 }

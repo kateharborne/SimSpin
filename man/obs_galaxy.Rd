@@ -30,7 +30,7 @@ user supplied inclination.
   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
   data$part$part_type = rep(0,length(data$part))
 
-  obs_galaxy(part_data = data$part,
-             centre    = TRUE,
-             inc_rad   = 0)
+  output = obs_galaxy(part_data = data$part,
+                      centre    = TRUE,
+                      inc_rad   = 0)
 }

@@ -1,0 +1,135 @@
+---
+title: "Constructing kinematic data cubes"
+author: "Katherine Harborne"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+``` {r, message=FALSE, warning=FALSE} 
+library(SimSpin)
+```
+
+``` {r, echo=FALSE, warning=FALSE}
+library("RColorBrewer")
+library("plot3D")
+rf = colorRampPalette(rev(brewer.pal(10,'Spectral')))
+pal = rf(7)
+```
+
+Here, we examine the flexibility of the `build_datacube()` function - 
+
+`build_datacube(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold, blur)`
+
+The purpose of this function is to construct a synthetic integral field unit (IFU) kinematic data cube from N-body particle simulations. Produced is a 3D array that contains the spatial and velocity information of a simulated galaxy in a similar format to that which would be constructed observationally in an IFU kinematic data cube. This function allows you to:
+
+1. apply telescope specifics (i.e. the field of view of the chosen instrument - `fov`, the shape of the aperture - `ap_shape`, the central wavelength of the observing arm - `central_wvl`, the threshold magnitude - `threshold` and the associated line-spread-function - `lsf_fwhm`),
+
+1. specify the dimensions of the output data cube (the spatial pixel size - `pixel_sscale` and the velocity pixel size - `pixel_vscale`) and,
+
+1. manipulate particulars of the simulated galaxy (the projected inclination of the galaxy - `inc_deg`, mass-to-light ratios of each component - `m2l_disc` and `m2l_bulge` and the level of spatial blurring due to seeing - `blur`)
+
+The function will then output:
+
+* `$datacube` - a 3d array containing the mock kinematic data cube.
+* `$xbin_labels` - specifying central bin values along the x-spatial direction in the cube in arcseconds.
+* `$ybin_labels` - specifying central bin values along the y-spatial direction in the cube in arcseconds.
+* `$vbin_labels` - specifying central bin values along the z-velocity direction in the cube in km s$^{-1}$.
+* `$axis_ratio` - the axis ratio of the observed galaxy in the form of a data-frame where:
+    * `$a` is the semi-major axis and,
+    * `$b` is the semi-minor axis (both given in kpc).
+
+The idea is that this function is general enough in its design to produce a wide range of possible data cubes, mimicking different surveys that currently exist for observational comparison. In this walk-through, we will consider the IFU survey, SAMI. 
+
+For this example, we will analyse `filename = "~/SimSpin/inst/extdata/S0_vignette"` to explore the various uses of this function. This is the Gadget snapshot for a $10^{10} M_{\odot}$ S0 galaxy containing 50,000 disk and 75,000 bulge particles of equal mass. The dark matter particles in this simulation have been replaced by a Hernquist analytic profile, with a $M_{DM}$ = 184.9 $\times 10^{10} M_{\odot}$ and halo scale radius, $a_{DM}$ = 34.5 kpc. 
+
+``` {r} 
+SAMI_datacube = 
+  build_datacube(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+                 z            = 0.06,        # redshift (i.e. projected distance)
+                 fov          = 15,          # field-of-view of IFU in ''
+                 ap_shape     = "circular",  # shape of the aperture 
+                 central_wvl  = 4800,        # central filter wavelength in angstroms
+                 lsf_fwhm     = 2.65,        # line-spread-function FWHM in angstroms
+                 pixel_sscale = 0.5,         # spatial pixel scale size in ''
+                 pixel_vscale = 1.04,        # velocity pixel scale size in angstroms
+                 inc_deg      = 90,          # projected galaxy inclination in degrees
+                 m2l_disc     = 2,           # disc mass-to-light in solar units
+                 m2l_bulge    = 1,           # bulge mass-to-light in solar units
+                 threshold    = 25)          # magnitude limit of the observation
+```
+
+If we examine the output of this function, we get a kinematic data cube (`SAMI_datacube$datacube`) which contains the spatial distribution of particles that fall into different velocity bins. We can tell in the plot below that our galaxy is rotating, as each velocity plane shows the distribution of particles travelling at that speed. Other outputs include the x- and y- spatial and velocity bin labels in units of '' and km s$^{-1}$ respectively (`SAMI_datacube$xbin_labels`, `SAMI_datacube$ybin_labels`, `SAMI_datacube$zbin_labels`). 
+
+```{r, echo=FALSE, fig.width=7, fig.height=7, fig.align="center"}
+test = array(data = 0, dim = c(30, 16, 30))
+SAMI = array(data = NA, dim = c(30, 16, 30))
+for (n in 1:30){
+ SAMI[,,n] = SAMI_datacube$datacube[,n,] 
+}
+SAMI[SAMI < 1.4] = NA
+plot3D::slice3D(x = -14.5:14.5, y = seq(-160, 160, length.out = 6), z = -14.5:14.5, 
+                colvar = SAMI[,6:11,], 
+                ys = seq(-160, 160, length.out = 6),  zs = NULL, xs = NULL,
+                phi = 50, theta = 35, colkey = FALSE,
+                NAcol=rgb(1,1,1,alpha=0.01),
+                xlab = "x", ylab = "velocity, km/s",
+                zlab = "y", ticktype = "detailed",
+                nticks = 1)
+
+plot3D::slicecont3D(x = -14.5:14.5, y = seq(-160, 160, length.out = 6), z = -14.5:14.5, 
+                    colvar = test[,6:11,], 
+                    ys = seq(-160, 160, length.out = 6),  zs = NULL, xs = NULL,
+                    colkey = FALSE,
+                    NAcol=rgb(1,1,1,alpha=0.01),
+                    add=TRUE, border="black")
+```
+
+We can also apply spatial convolution at this point, introducing some level of blurring due to seeing conditions. This is specified using the input `blur = list("psf" = , "fwhm" = )` where there are two choices of PSF (`"Moffat"` or `"Gaussian"`) and the full-width half-maximum is a number specifying the width of that PSF in arcseconds. For example, if we consider a Moffat PSF with width 2'', the output data cube will appear:
+
+``` {r} 
+SAMI_datacube_blur = 
+  build_datacube(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+                 z            = 0.06,       
+                 fov          = 15,         
+                 ap_shape     = "circular",  
+                 central_wvl  = 4800,      
+                 lsf_fwhm     = 2.65,     
+                 pixel_sscale = 0.5,         
+                 pixel_vscale = 1.04,        
+                 inc_deg      = 90,           
+                 m2l_disc     = 2,           
+                 m2l_bulge    = 1,           
+                 threshold    = 25,          
+                 blur         = list("psf" = "Moffat", "fwhm" = 2)) # specifying the PSF and fwhm
+```
+
+```{r, echo=FALSE, fig.width=7, fig.height=7, fig.align="center"}
+blur = array(data = NA, dim = c(30, 16, 30))
+for (n in 1:30){
+ blur[,,n] = SAMI_datacube_blur$datacube[,n,] 
+}
+blur[blur < 1.4] = NA
+plot3D::slice3D(x = -14.5:14.5, y = seq(-160, 160, length.out = 6), z = -14.5:14.5, 
+                colvar = blur[,6:11,], 
+                ys = seq(-160, 160, length.out = 6),  zs = NULL, xs = NULL,
+                phi = 50, theta = 35, colkey = FALSE,
+                NAcol=rgb(1,1,1,alpha=0.01),
+                xlab = "x", ylab = "velocity, km/s",
+                zlab = "y", ticktype = "detailed",
+                nticks = 1)
+
+plot3D::slicecont3D(x = -14.5:14.5, y = seq(-160, 160, length.out = 6), z = -14.5:14.5, 
+                    colvar = test[,6:11,], 
+                    ys = seq(-160, 160, length.out = 6),  zs = NULL, xs = NULL,
+                    colkey = FALSE,
+                    NAcol=rgb(1,1,1,alpha=0.01),
+                    add=TRUE, border="black")
+```
+
+Here we see the effect we would expect. The rotation of the galaxy is less apparent when the observation is blurred as the central dispersion from the bulge of the galaxy is spread out and becomes more dominant. 
+
+Overall, this function will produce something similar to an kinematic data cube. If you then wish to go on to produce flux, velocity and velocity dispersion maps or make calculations of the observed galaxy kinematics, you can use the function `find_lambda()` or `find_vsigma()` from the `SimSpin` package. 

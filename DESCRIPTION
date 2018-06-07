@@ -20,5 +20,6 @@ Depends:
     celestial
 RoxygenNote: 6.0.1
 Suggests: knitr,
-    rmarkdown
+    rmarkdown,
+    plot3D
 VignetteBuilder: knitr

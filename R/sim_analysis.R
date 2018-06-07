@@ -23,9 +23,9 @@
 #'@param DM_profile If dark matter particles are not included in the analysis, this option allows
 #' you to use the DM profile for the mass distribution such that the circular velocity can be
 #' correctly determined. Options include \code{NA} (default),
-#' \code{list(profile="NFW", DM_vm, DM_a, DM_rho0)} - where DM_vm is the virial mass, DM_a is the
-#' scale radius, and DM_rho0 is the density evaluated at the flattening radius - and
-#' \code{list(profile="Hernquist", DM_mass, DM_a)} - where DM_mass is the total mass of the dark
+#' \code{list("profile"="NFW", "DM_vm"=186.9, "DM_a"=34.5, "DM_rhof"=0.035)} - where DM_vm is the virial mass, DM_a is the
+#' scale radius, and DM_rhof is the density evaluated at the flattening radius - and
+#' \code{list("profile"="Hernquist", "DM_mass"=184.9, "DM_a"=34.5)} - where DM_mass is the total mass of the dark
 #' matter component and DM_a is the scale radius of the halo.
 #'@return A data frame containing kinematic features of radial bins including (at least):
 #'\item{\code{$r}/\code{$cr}/\code{$z}}{The outer radius of each bin.}
@@ -39,13 +39,15 @@
 #' (\code{$vc}), the velocity anisotropy (\code{$B}), rotational velocity (\code{$vrot}) and the
 #' spin parameter (\code{$lambda}) are included in the output data frame.
 #'@examples
-#'  sim_analysis(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"))
+#'  output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 #'
-#'  sim_analysis(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'               pype         = c(3,4),
-#'               bin_type     = "cr"
-#'               rmax         = 300,
-#'               rbin         = 100)
+#'  output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'                        ptype      = c(3,4),
+#'                        bin_type   = "cr",
+#'                        rmax       = 300,
+#'                        rbin       = 100,
+#'                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 #'
 
 sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM_profile=NA){
@@ -64,6 +66,13 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     }
   }
                                                            # labelling the data with particle types
+  if (is.list(DM_profile) == FALSE & is.na(ptype)){
+    if (galaxy_data$head$Npart[1] == 0){
+      cat("There are no dark matter particles in this model. Describe an analytic potential to calculate the total profile correctly. \n")
+      stop("DMpart Error")
+    }
+  }
+                                                           # error returned if DM is not present and DM_profile not specified
   if (is.na(ptype[1])){ptype = which(galaxy_data$head$Nall[p] != 0)}
                                                            # for all particles, leave ptype = NA
   if (0 %in% galaxy_data$head$Nall[ptype]){
@@ -71,6 +80,7 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     stop("Npart Error")
   }
                                                            # error returned if ptype is not present
+
   galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,]
                                                            # leaving only particles of ptype
   galaxy_data$head$Npart[p[!p %in% ptype]] = as.integer(0)
@@ -109,7 +119,7 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
         DM_mass_profile = DM_profile$DM_mass * rbin_labels[2:length(rbin_labels)]^2 / (DM_profile$DM_a + rbin_labels[2:length(rbin_labels)])^2
       }
       if (DM_profile$profile == "NFW"){
-        DM_mass_profile = 4 * pi * DM_profile$DM_rho0 * DM_profile$DM_a^3 * (log(1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a)) - ((rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a) / (1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a))))
+        DM_mass_profile = 4 * pi * DM_profile$DM_rhof * DM_profile$DM_a^3 * (log(1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a)) - ((rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a) / (1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a))))
       }
     }
                                                            # if a DM profile is assigned, assigning the radial mass profile

@@ -23,12 +23,12 @@
 #' data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
 #' ifucube   = ifu_cube(obs_data = data)
 #'
-#' find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'           ptype        = NA,
-#'           r200         = 10,
-#'           inc_deg      = 0,
-#'           axis_ratio   = ifucube$axis_ratio,
-#'           angular_size = data$angular_size)
+#' output = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'                    ptype        = NA,
+#'                    r200         = 10,
+#'                    inc_deg      = 0,
+#'                    axis_ratio   = ifucube$axis_ratio,
+#'                    angular_size = data$angular_size)
 #'
 
 find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_ratio, angular_size){

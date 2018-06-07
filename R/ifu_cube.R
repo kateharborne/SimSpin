@@ -20,7 +20,7 @@
 #' data = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
 #'
 #' cube = ifu_cube(obs_data  = data,
-#'                 threshold = 0)
+#'                 threshold = 10)
 #'
 #' cube = ifu_cube(obs_data  = data,
 #'                 threshold = 20)
@@ -79,7 +79,7 @@ ifu_cube = function(obs_data, threshold=25) {
         }
       }
       cell_counts = array(data = 0, dim = 1)                                                    # reset for the next iteration
-      flux_counts = array(data = 0, dim = 1)                                                    # reset for the next iteration
+      cell_flux   = array(data = 0, dim = 1)                                                      # reset for the next iteration
     }
   }
 

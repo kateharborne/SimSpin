@@ -28,9 +28,9 @@
 #'                        axis_ratio   = ifucube$axis_ratio,
 #'                        angular_size = data$angular_size)
 #'
-#'  obs_vsigma(ifu_datacube   = ifucube,
-#'             reff_axisratio = reff_data,
-#'             sbinsize       = data$sbinsize)
+#'  output = obs_vsigma(ifu_datacube   = ifucube,
+#'                      reff_axisratio = reff_data,
+#'                      sbinsize       = data$sbinsize)
 #'
 
 obs_vsigma = function(ifu_datacube, reff_axisratio, sbinsize){

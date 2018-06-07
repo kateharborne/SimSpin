@@ -24,9 +24,9 @@ the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - bo
 \item{DM_profile}{If dark matter particles are not included in the analysis, this option allows
 you to use the DM profile for the mass distribution such that the circular velocity can be
 correctly determined. Options include \code{NA} (default),
-\code{list(profile="NFW", DM_vm, DM_a, DM_rho0)} - where DM_vm is the virial mass, DM_a is the
-scale radius, and DM_rho0 is the density evaluated at the flattening radius - and
-\code{list(profile="Hernquist", DM_mass, DM_a)} - where DM_mass is the total mass of the dark
+\code{list("profile"="NFW", "DM_vm"=186.9, "DM_a"=34.5, "DM_rhof"=0.035)} - where DM_vm is the virial mass, DM_a is the
+scale radius, and DM_rhof is the density evaluated at the flattening radius - and
+\code{list("profile"="Hernquist", "DM_mass"=184.9, "DM_a"=34.5)} - where DM_mass is the total mass of the dark
 matter component and DM_a is the scale radius of the halo.}
 }
 \value{
@@ -55,12 +55,14 @@ not contain the anisotropy, rotational and circular velocities or spin parameter
 only physical when defined using 3D spherical shells.
 }
 \examples{
- sim_analysis(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"))
+ output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
+                       DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 
- sim_analysis(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-              pype         = c(3,4),
-              bin_type     = "cr"
-              rmax         = 300,
-              rbin         = 100)
+ output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
+                       ptype      = c(3,4),
+                       bin_type   = "cr",
+                       rmax       = 300,
+                       rbin       = 100,
+                       DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 
 }

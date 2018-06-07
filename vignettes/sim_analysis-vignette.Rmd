@@ -1,0 +1,221 @@
+---
+title: "Kinematic Analysis of Simulation Data"
+author: "Katherine Harborne"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+``` {r, message=FALSE, warning=FALSE} 
+library(SimSpin)
+```
+
+``` {r, echo=FALSE, warning=FALSE}
+library("RColorBrewer")
+library("plot3D")
+rf = colorRampPalette(rev(brewer.pal(10,'Spectral')))
+pal = rf(7)
+```
+
+Here, we examine the flexibility of the `sim_analysis()` function - 
+
+`sim_analysis(filename, ptype = NA, bin_type = "r", rmax = 200, rbin = 200, DM_profile = NA)`
+
+The purpose of this function is to calculate the kinematic properties of a simulated galaxy within certain user defined bins. Using this function, we can measure both individual components and the total galaxy:
+
+* the spherical radial coordinates,
+* the mass distributions,
+* the `log(`density`)` profiles,
+* the circular velocity profile,
+* the angular momentum components and magnitude,
+* the radial and tangential velocities and their dispersion,
+* the velocity anisotropy, $\beta$,
+* the rotational velocity,
+* the spin parameter, $\lambda$.
+
+For this example, we will analyse `filename = "~/SimSpin/inst/extdata/S0_vignette"` to explore the various uses of this function. This is the Gadget snapshot for a $10^{10} M_{\odot}$ S0 galaxy containing 50,000 disk and 75,000 bulge particles of equal mass. The dark matter particles in this simulation have been replaced by a Hernquist analytic profile, with a $M_{DM}$ = 184.9 $\times 10^{10} M_{\odot}$ and halo scale radius, $a_{DM}$ = 34.5 kpc. 
+
+``` {r} 
+S0 = snapshot::snapread("~/SimSpin/inst/extdata/S0_vignette")$part
+```
+
+If we run the `\sim_analysis()` function simply with the default inputs described above, 
+
+``` {r, error=TRUE, purl=FALSE} 
+S0_defaults = sim_analysis(filename = "~/SimSpin/inst/extdata/S0_vignette")
+```
+
+we receive an error. This is because the dark matter particles in the `S0_vignette` simulation provided have been replaced with an analytic description of the dark matter potential. As the function analyses all components in the simulation by default, the code issues an error. Without this mass in the form of particles, the output Gadget file contains no record of the effect that the dark matter analytic profile has on the other particles in the simulation. We need to specify this using a list, `DM_profile`, that contains details about that dark matter profile such that the total profile can be calculated properly. 
+
+There are two options currently for the type of analytic DM profile, `"NFW"` and `"Hernquist"`, which each require different inputs:
+
+1. `DM_profile = list("profile" = "NFW", "DM_vm" = 185.9, "DM_a" = 34.5, "DM_rho0" = 0.035)` 
+    * `"DM_vm"` is the virial mass in units $10^{10} M_{\odot}$.
+    * `"DM_a"` is the scale radius of the halo in $kpc$.
+    * `"DM_rhof"` is the density at the flattening radius in $10^{10} M_{\odot} kpc^{-3}$ .
+
+1. `DM_profile = list("profile" = "Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5)`
+    * `"DM_mass"` is the dark matter mass in units $10^{10} M_{\odot}$.
+    * `"DM_a"` is the scale radius of the halo in $kpc$.
+
+As the `S0_vignette` was run with a Hernquist analytic potential, we will use the second option:
+
+``` {r} 
+S0_total_3D = sim_analysis(filename   = "~/SimSpin/inst/extdata/S0_vignette",
+                           DM_profile = list("profile" = "Hernquist",
+                                             "DM_mass" = 184.9, 
+                                             "DM_a"    = 34.5))
+```
+
+If we want to consider the radial profiles of the disk or bulge particles in isolation, the dark matter profile can be left unspecified without an error:
+
+``` {r} 
+S0_disk_3D  = sim_analysis(filename = "~/SimSpin/inst/extdata/S0_vignette",
+                           ptype    = c(3))
+
+S0_bulge_3D = sim_analysis(filename = "~/SimSpin/inst/extdata/S0_vignette",
+                           ptype    = c(4))
+```
+
+In these cases, returned is a data frame containing the radial properties of the total galaxy in spherical shells of 1 kpc thickness (given the defaults `bin_type = "r"`, `rbin = 200` and `rmax = 200`). If you wish to consider a greater number of bins or a further radial distance from the centre, these parameters can be specified in the function. These spherical bins divide up the particles in the galaxy something like the image below: 
+
+```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
+S0_points = S0[abs(S0$x) < 175 & abs(S0$y) < 175 & abs(S0$z) < 175,]
+S0_points = S0_points[seq(1,nrow(S0_points), by=75),]
+S0_point2 = S0_points[S0_points$z > 0,]
+M = plot3D::mesh(seq(0, (3/2)*pi, length.out = 25),
+                 seq(0, pi, length.out = 25))
+u = M$x 
+v = M$y
+x = cos(u) * sin(v)
+y = sin(u) * sin(v)
+z = cos(v)
+
+plot3D::surf3D(200*x, 200*y, 200*z, xlim=c(-200,200), ylim=c(-200,200), zlim=c(-200,200), col=pal[7], alpha=0.1, phi=0, colkey = FALSE, bty="b")
+plot3D::surf3D(175*x, 175*y, 175*z, col=pal[6], alpha=0.2, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(150*x, 150*y, 150*z, col=pal[5], alpha=0.3, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(125*x, 125*y, 125*z, col=pal[4], alpha=0.4, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(100*x, 100*y, 100*z, col=pal[3], alpha=0.5, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(75*x, 75*y, 75*z, col=pal[2], alpha=0.6, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(50*x, 50*y, 50*z, col=pal[1], alpha=0.7, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::points3D(S0_points$x, S0_points$y, S0_points$z, col="black", pch=16, alpha=0.8, add=TRUE)
+
+```
+
+Given that we have examined the system in three dimensions, we can now consider a comprehensive list of radial properties of the total galaxy and its components (radial, tangential and circular velocities, spin parameter and anisotropies are only defined when we consider the distribution of particles in 3D - `bin_type = "r"`).  For example, we can examine the circular velocity and spin parameter profiles of each component in the galaxy:
+
+```{r, echo=FALSE, fig.width=5.5, fig.height=5, fig.align="center"}
+magicaxis::magplot(S0_total_3D$r, S0_total_3D$vc, type="l", col=pal[7], lwd=3, xlim = c(0,30), xlab="radius, kpc", ylab=expression("V"[C]*", km s"^-1))
+lines(S0_bulge_3D$r, S0_bulge_3D$vc, col=pal[5], lwd=3)
+lines(S0_disk_3D$r, S0_disk_3D$vc, col=pal[1], lwd=3)
+legend("topright", c("total", "disk", "bulge"), col=c(pal[7], pal[1], pal[5]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
+
+magicaxis::magplot(S0_total_3D$r, S0_total_3D$lambda, type="l", col=pal[7], lwd=3, xlim = c(0,30), ylim=c(0, 2), xlab="radius, kpc", ylab=expression(paste(lambda)[R]))
+lines(S0_bulge_3D$r, S0_bulge_3D$lambda, col=pal[5], lwd=3)
+lines(S0_disk_3D$r, S0_disk_3D$lambda, col=pal[1], lwd=3)
+
+```
+
+The function also allows you to bin data in other ways - for example, if you need to bin your data radially along the plane of the disk, you could specify `bin_type = cr` to give cylindrical radial bins in the layout below:
+
+``` {r} 
+S0_total_2D = sim_analysis(filename   = "~/SimSpin/inst/extdata/S0_vignette",
+                           bin_type   = "cr", 
+                           DM_profile = list("profile" = "Hernquist",
+                                             "DM_mass" = 184.9, 
+                                             "DM_a"    = 34.5))
+```
+
+```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
+M2 = plot3D::mesh(seq(0, (3/2)*pi, length.out = 25),
+                  seq(-200, 200, length.out = 25))
+u2 = M2$x
+v2 = M2$y
+x2 = cos(u2)
+y2 = sin(u2)
+z2 = v2
+
+plot3D::surf3D(200*x2, 200*y2, z2, xlim=c(-200,200), ylim=c(-200,200), zlim=c(-200,200), col=pal[7], alpha=0.1, phi=0, colkey = FALSE, bty="b")
+plot3D::surf3D(175*x2, 175*y2, z2, col=pal[6], alpha=0.2, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(150*x2, 150*y2, z2, col=pal[5], alpha=0.3, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(125*x2, 125*y2, z2, col=pal[4], alpha=0.4, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(100*x2, 100*y2, z2, col=pal[3], alpha=0.5, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(75*x2, 75*y2, z2, col=pal[2], alpha=0.6, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(50*x2, 50*y2, z2, col=pal[1], alpha=0.7, phi=0, colkey = FALSE, bty="b", add=TRUE)
+plot3D::points3D(S0_points$x, S0_points$y, S0_points$z, col="black", pch=16, alpha=0.8, add=TRUE)
+
+```
+
+There is also the option to specify `bin_type = z` in which you consider planes above the surface of the disk, such as:
+
+``` {r} 
+S0_total_1D = sim_analysis(filename   = "~/SimSpin/inst/extdata/S0_vignette",
+                           bin_type   = "z", 
+                           DM_profile = list("profile" = "Hernquist",
+                                             "DM_mass" = 184.9, 
+                                             "DM_a"    = 34.5))
+```
+
+```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
+M3 = plot3D::mesh(seq(0, (3/2)*pi, length.out = 25),
+                  seq(0, 25, length.out = 25))
+u3 = M3$x
+v3 = M3$y
+x3 = cos(u3)
+y3 = sin(u3)
+z3 = v3
+n = 200
+x4 = matrix(data = rep(seq(1,400, length.out = n), each=n), nrow = n, ncol = n)
+y4 = matrix(data = rep(seq(400,1, length.out = n), n), nrow = n, ncol = n)
+rr = sqrt((x4-200.5)^2 + (y4-200.5)^2)
+circle = matrix(data = NA, ncol = n, nrow = n)
+circle[rr<= 200] = 1
+
+plot3D::surf3D(200*x3, 200*y3, z3+150, xlim=c(-200,200), ylim=c(-200,200), zlim=c(0,200), col=pal[7], alpha=0.4, phi=0, colkey = FALSE, bty="b")
+plot3D::surf3D(x4-200.5, y4-200.5, z = (circle+174), col=pal[7], alpha=0.4, phi=0, colkey = FALSE, add=TRUE)
+plot3D::surf3D(200*x3, 200*y3, z3+125, col=pal[6], phi=0, alpha=0.6, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(200*x3, 200*y3, z3+100, col=pal[5], phi=0, alpha=0.6, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(200*x3, 200*y3, z3+75, col=pal[4], phi=0, alpha=0.6, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(200*x3, 200*y3, z3+50, col=pal[3], phi=0, alpha=0.6, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(200*x3, 200*y3, z3+25, col=pal[2], phi=0, alpha=0.6, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(200*x3, 200*y3, z3, col=pal[1], phi=0, alpha=0.6, colkey = FALSE, bty="b", add=TRUE)
+plot3D::surf3D(x4-200.5, y4-200.5, z = circle, col=pal[1], alpha=0.4, phi=0, colkey = FALSE, add=TRUE)
+plot3D::points3D(S0_point2$x, S0_point2$y, S0_point2$z, col="black", pch=16, alpha=0.8, add=TRUE)
+
+```
+
+These latter two `bin_type` choices will give a smaller number of profiles to plot, given that properties such as the rotational velocity, spin parameter and velocity anisotropy are not well defined from projected viewpoints. Outputs will consist of velocity profiles within the chosen coordinate system, mass, density and angular momentum profiles. For example, running `sim_analysis()` with `bin_type = "cr"` will return: 
+
+* the cylindrical radial coordinates,
+* the mass distributions,
+* the `log(`density`)` profiles,
+* the angular momentum components and magnitude,
+* the cylindrical radial velocity and dispersion.
+
+Similarly, for `bin_type = "z"` we get:
+
+* the z-coordinates above the plane of the disk,
+* the mass distributions,
+* the `log(`density`)` profiles,
+* the angular momentum components and magnitude,
+* the vertical velocity and dispersion off the plane of the disk.
+
+With this information, we can then consider mass and density profiles in different directions, for example:
+
+```{r, echo=FALSE, fig.width=5.5, fig.height=5, fig.align="center"}
+magicaxis::magplot(S0_total_3D$r, S0_total_3D$Mass, type="l", col=pal[6], lwd=3, xlim = c(0,30), xlab="radius, kpc", ylab=expression("Mass, 10"^10 *" M"['\u0298']))
+lines(S0_total_2D$cr, S0_total_2D$Mass, col=pal[3], lwd=3)
+lines(S0_total_1D$z, S0_total_1D$Mass, col=pal[2], lwd=3)
+legend("bottomright", c("1D", "2D", "3D"), col=c(pal[2], pal[3], pal[6]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
+
+magicaxis::magplot(S0_total_3D$r, S0_total_3D$logp, type="l", col=pal[6], lwd=3, xlim = c(0,30), xlab="radius, kpc", ylab=expression("log"[10]*"("*paste(rho)*"), 10"^10 *" M"['\u0298']*" kpc"^{-3}))
+lines(S0_total_2D$cr, S0_total_2D$logp, col=pal[3], lwd=3)
+lines(S0_total_1D$z, S0_total_1D$logp, col=pal[2], lwd=3)
+legend("bottomright", c("1D", "2D", "3D"), col=c(pal[2], pal[3], pal[6]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
+
+```
+
+Overall, this is a quick and simple function that allows your simulation to be initially evaluated. For comparison to mock observation techniques, consider also running the other functions in the `SimSpin` package such as `build_datacube()` or `find_lambda()`.

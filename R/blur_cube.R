@@ -26,6 +26,7 @@
 #'                        psf            = "Moffat",
 #'                        fwhm           = 0.5,
 #'                        angular_size   = data$angular_size)
+#'
 
 
 blur_cube = function(ifu_datacube, sbinsize, psf, fwhm, angular_size){

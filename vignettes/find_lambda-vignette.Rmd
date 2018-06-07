@@ -1,0 +1,167 @@
+---
+title: "Measuring observable galaxy kinematics"
+author: "Katherine Harborne"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+``` {r, message=FALSE, warning=FALSE} 
+library(SimSpin)
+```
+
+``` {r, echo=FALSE, warning=FALSE}
+library("RColorBrewer")
+rf = colorRampPalette(rev(brewer.pal(10,'Spectral')))
+pal = rf(7)
+```
+
+Here, we examine the flexibility of the `find_lambda()` function - 
+
+`find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold, measure_type = list("type"="fit", "fac"=1), blur, dispersion_analysis = FALSE)`
+
+The purpose of this function is to construct a synthetic integral field unit (IFU) kinematic data cube from N-body particle simulations and use this cube to construct flux, line-of-sight (LOS) velocity and LOS velocity dispersion maps for kinematic analysis. The observed spin parameter, $\lambda_R$ is found from these maps.
+
+This is designed to be generic enough to answer a range of questions and hence the inputs have a lot of freedom. For example:
+
+1. You are given a range of possible telescope observation set-ups, such as `ap_shape` (which may take the input `"circular"`, `"hexagonal"` or `"square"`), the field of view of the chosen instrument - `fov`, the central wavelength of the observing arm - `central_wvl`, the threshold magnitude - `threshold` and the associated line-spread-function - `lsf_fwhm`.
+
+1. The user can specify the dimensions of the output data cube (the spatial pixel size - `pixel_sscale` and the velocity pixel size - `pixel_vscale`).
+
+1. You are free to manipulate particulars of the simulated galaxy (the projected inclination of the galaxy - `inc_deg`, mass-to-light ratios of each component - `m2l_disc` and `m2l_bulge`, the radius within which $\lambda_R$ is measured (whether that be within an some multiple of the half light radius ellipse that has been fit using the observed axis ratio, or within an ellipse where the axis ratio is supplied by the user) - `measure_type`, and the level of spatial blurring due to seeing - `blur`).
+
+A series of outputs are then produced by this function, including:
+
+* `$datacube` - a 3D array that contains the spatial and velocity information of a simulated galaxy in a similar format to that which would be constructed observationally in an IFU kinematic data cube,
+* `$xbin_labels`, `$ybin_labels`, `$vbin_labels` - the central bin coordinates for each dimension of the cube (x-spatial and y-spatial given in arcseconds, and z-velocity given in km s$^{-1}$ respectively),
+* `$axis_ratio` - the axis ratio of the observed galaxy in the form of a data-frame where:
+    * `$a` is the semi-major axis and,
+    * `$b` is the semi-minor axis (both given in kpc).
+* `$lambda_R` - the observed spin parameter within the specified measurement radius,
+* `$counts_img`, `$velocity_img`, `$dispersion_img` - the observed flux, LOS velocity and LOS velocity dispersion images respectively (these images will also be plotted by the function),
+* `$reff_ellipse` - the ellipse that marks out the radius within which $\lambda_R$ is measured.
+* `$dispersion_analysis` - (optional if specified as `TRUE` in input) the mean and median values of the LOS velocity dispersion. 
+
+Especially when describing the particulars of the simulated galaxy, there are several different options that will allow us to evaluate a wide range of scenarios with this one function. In this vignette, we will consider 4 different scenarios to demonstrate this flexibility.
+
+## 1. SAMI observation, no seeing conditions, $\lambda_R$ within 1 R$_{eff}$
+
+``` {r, fig.width=3.25, fig.height=4} 
+SAMI_noseeing_1Reff = 
+  find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+              z            = 0.04,        # redshift (i.e. projected distance)
+              fov          = 15,          # field-of-view of IFU in ''
+              ap_shape     = "circular",  # shape of the aperture 
+              central_wvl  = 4800,        # central filter wavelength in angstroms
+              lsf_fwhm     = 2.65,        # line-spread-function FWHM in angstroms
+              pixel_sscale = 0.5,         # spatial pixel scale size in ''
+              pixel_vscale = 1.04,        # velocity pixel scale size in angstroms
+              inc_deg      = 75,          # projected galaxy inclination in degrees
+              m2l_disc     = 2,           # disc mass-to-light in solar units
+              m2l_bulge    = 1,           # bulge mass-to-light in solar units
+              threshold    = 26,          # magnitude limit of the observation
+              measure_type = list("type"="fit", "fac"=1)) # measurement radius
+              
+```
+
+As the inputs are fairly general, we can choose to set up our synthetic observation with any IFU specifications. Here we mimic the set up of the blue spectrographic arm on the SAMI instrument at the AAO. This IFU has a circular field-of-view with 15'' diameter. The central wavelength of the blue arm is 4800 angstroms and the line-spread-function for this instrument has been found to be well represented by a Gaussian with FWHM of 2.65 angstroms. 
+
+With no added seeing conditions, we leave `blur` unspecified. To measure $\lambda_R$ within 1 R$_{eff}$, we allow the function to determine the observed axis ratio of the galaxy and grow an ellipse with these dimensions until half the total counts are contained within the radius (i.e. `measure_type = list("type" = fit", "fac" = 1)`, where `"fit"` tells the function to use the axis ratio fit within the process from the unblurred flux image, and `fac` tells how many R$_{eff}$ to measure $\lambda_R$ within).
+
+The function automatically plots the images of each of the observed maps produced; the measurement radius within which $\lambda_R$ is calculated overlay-ed in red. 
+
+## 2. SAMI observation, with seeing FWHM = 2'', $\lambda_R$ within 1 R$_{eff}$
+
+``` {r, fig.width=3.25, fig.height=4} 
+SAMI_fwhm2_1Reff = 
+  find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+              z            = 0.04,      
+              fov          = 15,       
+              ap_shape     = "circular",  
+              central_wvl  = 4800,        
+              lsf_fwhm     = 2.65,      
+              pixel_sscale = 0.5,  
+              pixel_vscale = 1.04,      
+              inc_deg      = 75,        
+              m2l_disc     = 2,         
+              m2l_bulge    = 1,           
+              threshold    = 26,          
+              measure_type = list("type"="specified", 
+                                  "fac"=1,
+                                  "axis_ratio"=data.frame("a"=SAMI_noseeing_1Reff$axis_ratio$a_kpc,
+                                                          "b"=SAMI_noseeing_1Reff$axis_ratio$b_kpc)),  
+              blur         = list("psf" = "Moffat", "fwhm" = 2)) # specifying the PSF and fwhm
+              
+```
+
+This is very similar to the output in part 1, though this time we have mimicked the effects of seeing conditions within the synthetic observation. We have chosen a `"Moffat"` point spread function (the other option is to specify a `"Gaussian"` PSF) with full-width half-maximum of 2''. The effects of this seeing is shown in the observed maps produced. 
+
+We have chosen to specify the axis ratio in this case via `measure_type = list("type" = "specified")`. This takes the axis ratio that you supply (`{"axis_ratio" = data.frame("a" = , "b" =)`), where the semi-major and -minor axes are given in kpc, and grows an ellipse with these dimensions until `fac` * R$_{eff}$ is reached. This skips the step in which the axis ratio of the galaxy is fitted from the observed flux image, which may be useful when considering galaxies across different redshifts.
+
+## 3. MaNGA observation, with seeing FWHM = 2'', $\lambda_R$ within 1 R$_{eff}$
+
+``` {r, fig.width=3.25, fig.height=4} 
+MaNGA_fwhm2_1Reff = 
+  find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+              z            = 0.04,      
+              fov          = 32,       
+              ap_shape     = "hexagonal",  
+              central_wvl  = 5000,        
+              lsf_fwhm     = 3,      
+              pixel_sscale = 0.5,  
+              pixel_vscale = 1.2,      
+              inc_deg      = 75,        
+              m2l_disc     = 2,         
+              m2l_bulge    = 1,           
+              threshold    = 26,          
+              measure_type = list("type"="fit", "fac"=1), 
+              blur         = list("psf" = "Moffat", "fwhm" = 2))
+              
+```
+
+As we can choose to set up our synthetic observation with any IFU specifications, we now switch to mimic the set up of the blue camera of the MaNGA instrument at the Apache Point Observatory. This IFU has a hexagonal field-of-view with 12-32'' diameter (here, we choose to imitate the largest of their fiber arrangements). The central wavelength of the blue camera is 5000 angstroms. The line-spread-function for this instrument is reasonably uncertain and depends on the fibers used and observation specifics; hence, we choose an arbitrary FWHM of 3 angstroms. 
+
+Again, this is very similar to the output in part 1, though this time we have a larger, hexagonal field of view. We have mimicked the same effects of seeing conditions with a `"Moffat"` point spread function with FWHM = 2'' and allowed the axis ratio to be fit from the unblurred count image (`measure_type = list("type" = fit", "fac" = 1)`). 
+
+## 4. MaNGA observation, with seeing FWHM = 2'', $\lambda_R$ within 1 R$_{eff}^{SAMI}$
+
+However, if we want to compare between the same observations on each telescope, it would be more useful to constrain the measurement ellipse to a fixed size. This can be achieved by `measure_type = list("type" = "fixed", ...)`. This assumes that the axis ratio supplied in kpc is the one that describes a 1 R$_{eff}$ ellipse. We take the output axis ratio from the `SAMI_noseeing_1Reff` model to dictate `"axis_ratio" = data.frame("a"= , "b"= )` as shown in the example above such that the value of $\lambda_R$ is calculated in a consistent area. 
+
+``` {r, fig.width=3.25, fig.height=4} 
+MaNGA_fwhm2_1SAMIReff = 
+  find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+              z            = 0.04,      
+              fov          = 32,       
+              ap_shape     = "hexagonal",  
+              central_wvl  = 5000,        
+              lsf_fwhm     = 3,      
+              pixel_sscale = 0.5,  
+              pixel_vscale = 1.2,      
+              inc_deg      = 75,        
+              m2l_disc     = 2,         
+              m2l_bulge    = 1,           
+              threshold    = 26,          
+              measure_type = list("type"="fixed", 
+                                  "fac"=1, 
+                                  "axis_ratio"=data.frame("a"=SAMI_noseeing_1Reff$axis_ratio$a_kpc,
+                                                          "b"=SAMI_noseeing_1Reff$axis_ratio$b_kpc)), 
+              blur         = list("psf" = "Moffat", "fwhm" = 2)) 
+              
+```
+
+If we compare the values of $\lambda_R$ that are measured in each of these options, we see that each of these options produce slightly different values of $\lambda_R$ - as expected! The observational seeing reduces the value of the spin the most, as is seen in the difference between the first and latter 3 points. The difference between SAMI and MaNGA measurements is mostly due to the differences in the field of view of the instrument. If we fit the axis ratio of the galaxy in the SAMI FOV, we will get a different axis ratio than we would in fitting from the MaNGA image at the same redshift. We see (in the difference between 2 and 4) that fixing the axis ratio within which $\lambda_R$ is measured, this difference is reduced. 
+
+``` {r, fig.width=5, fig.height=4, echo=FALSE, fig.align="center"}
+magicaxis::magplot(NA, type="n", ylab=expression(paste(lambda)[R]), xlim = c(0,5), ylim=c(0.05,0.45), xaxt="n")
+points(1, SAMI_noseeing_1Reff$lambda, pch=21, bg=pal[1], cex=2)
+points(2, SAMI_fwhm2_1Reff$lambda, pch=21, bg=pal[3], cex=2)
+points(3, MaNGA_fwhm2_1Reff$lambda, pch=21, bg=pal[5], cex=2)
+points(4, MaNGA_fwhm2_1SAMIReff$lambda, pch=21, bg=pal[7], cex=2)
+legend("topright", inset=c(0.02,0.02), c(expression("1. SAMI, 1 R"["eff"]*", no seeing"), expression("2. SAMI, 1 R"["eff"]*", fwhm = 2''"), expression("3. MaNGA, 1 R"["eff"]*", fwhm = 2''"), expression("4. MaNGA, 1 R"["eff"]^"SAMI"*", fwhm = 2''")), pt.bg = c(pal[1], pal[3], pal[5], pal[7]), pch = c(21,21,21,21), text.col = "black", bty="n")
+
+```
+
+Overall, we have demonstrated 4 different ways of using the `find_lambda()` function in the `SimSpin` package. To compare these observed values to the value of spin inherent to the model, consider using the `sim_analysis()` function. Other walk-through from this package can be found at <https://rpubs.com/kateharborne>.

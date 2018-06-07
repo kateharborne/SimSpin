@@ -29,8 +29,8 @@ useful for deriving the galaxy kinematics.
 }
 \examples{
   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
-  data$part$part_type = rep(0,length(data$part))
+  data$part$part_type = rep(0,nrow(data$part))
 
-  sim_galaxy(part_data = data$part,
-             centre    = TRUE)
+  output = sim_galaxy(part_data = data$part,
+                      centre    = TRUE)
 }

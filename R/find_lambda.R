@@ -25,11 +25,15 @@
 #'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@param threshold The flux threshold of the observation.
 #'@param measure_type A list specifying the radius within which \eqn{\lambda_R} is measured. If
-#' \code{list(type = "fit", fac = 1)}, \eqn{\lambda_R} is measured in a specified multiple of
-#' \eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the unblurred galaxy  counts image.
-#' If \code{list(type = "specified", fac = 1, axis_ratio = data.frame("a" = 2, "b" = 1))},
+#' \code{list("type" = "fit", "fac" = 1)}, \eqn{\lambda_R} is measured in a specified multiple of
+#' \code{fac *} \eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the unblurred galaxy
+#' counts image.
+#' If \code{list("type" = "specified", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1))},
 #' \eqn{\lambda_R} is calculated within some factor of the effective radius, \code{fac *}
-#' \eqn{R_{eff}} with specified axis ratio externally as a data frame in units of kpc.
+#' \eqn{R_{eff}} with axis ratio specified externally as a data frame in units of kpc. Finally, if
+#' \code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1))},
+#' \eqn{\lambda_R} is measured within an ellipse described by the supplied "axis_ratio" in kpc (or
+#' a multiple of that axis ratio given by "fac").
 #'@param blur \emph{Optional} Specify if you wish to apply observational seeing effects to the
 #' cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies
 #' the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}.
@@ -66,42 +70,10 @@
 #'                       m2l_disc     = 2,
 #'                       m2l_bulge    = 1,
 #'                       threshold    = 25,
-#'                       measure_type = list(type = "fit", fac = 1))
-#'
-#' lambdar = find_lambda(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                       r200         = 200,
-#'                       z            = 0.1,
-#'                       fov          = 15,
-#'                       ap_shape     = "circular",
-#'                       central_wvl  = 4800,
-#'                       lsf_fwhm     = 2.65,
-#'                       pixel_sscale = 0.5,
-#'                       pixel_vscale = 1.04,
-#'                       inc_deg      = 0,
-#'                       m2l_disc     = 2,
-#'                       m2l_bulge    = 1,
-#'                       threshold    = 25,
 #'                       measure_type = list(type = "specified",
 #'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7),
 #'                                           fac = 1),
-#'                       dispersion_analysis = TRUE)
-#'
-#' lambdar = find_lambda(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                       r200         = 200,
-#'                       z            = 0.1,
-#'                       fov          = 15,
-#'                       ap_shape     = "circular",
-#'                       central_wvl  = 4800,
-#'                       lsf_fwhm     = 2.65,
-#'                       pixel_sscale = 0.5,
-#'                       pixel_vscale = 1.04,
-#'                       inc_deg      = 0,
-#'                       m2l_disc     = 2,
-#'                       m2l_bulge    = 1,
-#'                       threshold    = 25,
-#'                       measure_type = list(type = "fit", fac = 1),
-#'                       blur         = list("psf" = "Moffat", "fwhm" = 2)
-#'                       dispersion_analysis = FALSE)
+#'                       blur         = list("psf" = "Moffat", "fwhm" = 2))
 #'
 
 find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm,
@@ -132,6 +104,18 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & supplied axis ratio
+      lambda       = obs_lambda(ifu_datacube = ifu_imgs,
+                                reff_axisratio = measure_type$fac * reff_ar,
+                                sbinsize = observe_data$sbinsize, dispersion_analysis)
+                                                           # measure lambdaR within specified Reff
+    }
+
+    if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
+      reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
+                                "b_kpc"    = measure_type$axis_ratio$b,
+                                "a_arcsec" = measure_type$axis_ratio$a / observe_data$angular_size,
+                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size)
+                                                           # Reff at fixed specification
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = measure_type$fac * reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
@@ -189,6 +173,18 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data and measured axis ratio
+      lambda       = obs_lambda(ifu_datacube = blur_imgs,
+                                reff_axisratio = measure_type$fac * reff_ar,
+                                sbinsize = observe_data$sbinsize, dispersion_analysis)
+                                                           # measure lambdaR within number of Reff
+    }
+
+    if (measure_type$type == "fixed"){                 # fitting Reff from specified axis_ratio
+      reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
+                                "b_kpc"    = measure_type$axis_ratio$b,
+                                "a_arcsec" = measure_type$axis_ratio$a / observe_data$angular_size,
+                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size)
+                                                           # Reff at fixed specification
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = measure_type$fac * reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)

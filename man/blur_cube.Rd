@@ -40,4 +40,5 @@ The purpose of this function is to mimic the spatial blurring caused by seeing a
                        psf            = "Moffat",
                        fwhm           = 0.5,
                        angular_size   = data$angular_size)
+
 }

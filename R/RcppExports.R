@@ -20,12 +20,12 @@
 #'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
 #'   data$part$part_type = rep(0,length(data$part))
 #'
-#'   obs_galaxy(part_data = data$part,
-#'              centre    = TRUE,
-#'              inc_rad   = 0)
+#'   output = obs_galaxy(part_data = data$part,
+#'                       centre    = TRUE,
+#'                       inc_rad   = 0)
 #' @export
 obs_galaxy <- function(part_data, centre, inc_rad) {
-    .Call('SimSpin_obs_galaxy', PACKAGE = 'SimSpin', part_data, centre, inc_rad)
+    .Call('_SimSpin_obs_galaxy', PACKAGE = 'SimSpin', part_data, centre, inc_rad)
 }
 
 #' Constructing galaxy simulation data from the Gadget output file data
@@ -47,12 +47,12 @@ obs_galaxy <- function(part_data, centre, inc_rad) {
 #'  (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},\code{$Jz}).
 #' @examples
 #'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
-#'   data$part$part_type = rep(0,length(data$part))
+#'   data$part$part_type = rep(0,nrow(data$part))
 #'
-#'   sim_galaxy(part_data = data$part,
-#'              centre    = TRUE)
+#'   output = sim_galaxy(part_data = data$part,
+#'                       centre    = TRUE)
 #' @export
 sim_galaxy <- function(part_data, centre) {
-    .Call('SimSpin_sim_galaxy', PACKAGE = 'SimSpin', part_data, centre)
+    .Call('_SimSpin_sim_galaxy', PACKAGE = 'SimSpin', part_data, centre)
 }
 
