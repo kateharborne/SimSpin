@@ -68,8 +68,13 @@ ifu_cube = function(obs_data, threshold=25) {
     } else {
       coord = c((i%/%sbin + 1), i%%sbin)                                                        # determining coordinates to fill
       if (i%%sbin == 0){coord = c((i%/%sbin), sbin)}                                            # if at the end of a row, setting the coordinate correctly
+      if (i == 1){
+        cell_counts = vel_obs$vz[1:cum_counts$counts[i]]
+        cell_flux = vel_obs$flux[1:cum_counts$counts[i]]
+      } else {
       cell_counts = vel_obs$vz[(cum_counts$counts[i-1] + 1): cum_counts$counts[i]]              # all the velocities in that spatial bin
       cell_flux = vel_obs$flux[(cum_counts$counts[i-1] + 1): cum_counts$counts[i]]              # all the flux in that spatial bin
+      }
       if (sum(cell_flux) < threshold_flux){                                                     # if there are too few counts in that cell, set
         cube[coord[2], coord[1],] = 0                                                           #    the cell to zero and skip to the next cell
       } else {
