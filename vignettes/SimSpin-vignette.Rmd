@@ -54,10 +54,10 @@ When using `sim_analysis()`, we specify the snapshot `filename`, the type of par
 Below, a few of the possible distributions are plotted using the data produced by `sim_analysis()`.
 
 ``` {r, echo=FALSE, fig.width=3, fig.height=3}
-magicaxis::magplot(sim_data$r, sim_data$Mass, type="l", lwd=3, col="red", xlab="r, kpc", ylab=expression("Mass, 10"^{10}*" M"['\u0298']))
-magicaxis::magplot(sim_data$r, sim_data$logp, type="l", lwd=3, col="blue", xlab="r, kpc", ylab=expression("log("*paste(rho)*"),  10"^{10}*" M"['\u0298']*"kpc"^{-3}))
-magicaxis::magplot(sim_data$r, sim_data$B, type="p", pch=20, col="orange", xlab="r, kpc", ylab=expression(paste(beta)), ylim=c(-4, 1))
-magicaxis::magplot(sim_data$r, sim_data$lambda, type="l", lwd=3, col="green", xlab="r, kpc", ylab=expression(paste(lambda)))
+magicaxis::magplot(sim_data$profile$r, sim_data$profile$Mass, type="l", lwd=3, col="red", xlab="r, kpc", ylab=expression("Mass, 10"^{10}*" M"['\u0298']))
+magicaxis::magplot(sim_data$profile$r, sim_data$profile$logp, type="l", lwd=3, col="blue", xlab="r, kpc", ylab=expression("log("*paste(rho)*"),  10"^{10}*" M"['\u0298']*"kpc"^{-3}))
+magicaxis::magplot(sim_data$profile$r, sim_data$profile$B, type="p", pch=20, col="orange", xlab="r, kpc", ylab=expression(paste(beta)), ylim=c(-4, 1))
+magicaxis::magplot(sim_data$profile$r, sim_data$profile$lambda, type="l", lwd=3, col="green", xlab="r, kpc", ylab=expression(paste(lambda)))
 ```
 
 Alternatively, you can consider single components of the model. For example, if we wished to examine the properties of the galaxy disk, we specify `ptype = 3`. The same could be done to examine the bulge by specifying `ptype = 4`. If you wish to examine a combination of parameters, this is simply specified by `ptype = c(2,3)` to give, for example, the dark matter and disc components - though this vignette galaxy model contains no dark matter so this will result in an error as shown. 
@@ -81,10 +81,10 @@ dm_data    = sim_analysis(filename = "~/SimSpin/inst/extdata/S0_vignette",
                           rbin     = 200)
 ```
 ``` {r, echo=FALSE, fig.width=3, fig.height=3} 
-magicaxis::magplot(disk_data$r, disk_data$Mass, type="l", lwd=3, col="red", xlab="r, kpc", ylab=expression("Mass, 10"^{10}*" M"['\u0298']), ylim=c(0,0.65))
+magicaxis::magplot(disk_data$profile$r, disk_data$profile$Mass, type="l", lwd=3, col="red", xlab="r, kpc", ylab=expression("Mass, 10"^{10}*" M"['\u0298']), ylim=c(0,0.65))
 legend("bottomright", inset=c(0.05,0.05),c("Disk"), bty="n", cex=0.9)
 
-magicaxis::magplot(bulge_data$r, bulge_data$Mass, type="l", lwd=3, col="blue", xlab="r, kpc", ylab=expression("Mass, 10"^{10}*" M"['\u0298']), ylim=c(0,0.65))
+magicaxis::magplot(bulge_data$profile$r, bulge_data$profile$Mass, type="l", lwd=3, col="blue", xlab="r, kpc", ylab=expression("Mass, 10"^{10}*" M"['\u0298']), ylim=c(0,0.65))
 legend("bottomright", inset=c(0.05,0.05),c("Bulge"), bty="n", cex=0.9)
 ```
 
@@ -231,7 +231,7 @@ We can then compare the value of $\lambda_R$ that is output from this calculatio
 Once we have calculated all of these parameters, we can see how the measured $\lambda_R$ value compares to the true spin parameter we measure from the simulation. Obviously this is very dependent on the inclination angle at which we measure the galaxy and the accuracy to which we can measure the inclination observationally.
 
 ``` {r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
-magicaxis::magplot(sim_data$r, sim_data$lambda, type="l", lwd=3, col="green", xlab="r, kpc", ylab=expression(paste(lambda)), ylim = c(0, 0.7))
+magicaxis::magplot(sim_data$profile$r, sim_data$profile$lambda*3/sqrt(2), type="l", lwd=3, col="green", xlab="r, kpc", ylab=expression(paste(lambda)), ylim = c(0, 0.7))
 abline(h=SAMI_lambda$lambda_r[1], col = "blue", lwd=3)
 legend("topright", inset=c(0.05,0.05), c(expression("Simulated "*paste(lambda)[R]), expression("Observed "*paste(lambda)[R])), lty = c(1,1), col = c("green", "blue"), bty="n", lwd=c(3,3), cex=0.9)
 ```

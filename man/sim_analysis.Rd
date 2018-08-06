@@ -30,7 +30,8 @@ scale radius, and DM_rhof is the density evaluated at the flattening radius - an
 matter component and DM_a is the scale radius of the halo.}
 }
 \value{
-A data frame containing kinematic features of radial bins including (at least):
+A list that contains the particle data of the simulation (\code{$part} and \code{$head} for a particle data.frame and header
+file respectively), a data frame containing kinematic features of radial bins (\code{$profile}) including (at least):
 \item{\code{$r}/\code{$cr}/\code{$z}}{The outer radius of each bin.}
 \item{\code{$Mass}}{The contained mass.}
 \item{\code{$logp}}{The logarithm of the density in each bin.}
@@ -40,7 +41,9 @@ each bin.}
 \item{\code{$J}}{The angular momentum magnitude in each shell.}
 In the case of \code{bin_type = "r"} additionally the circular velocity
 (\code{$vc}), the velocity anisotropy (\code{$B}), rotational velocity (\code{$vrot}) and the
-spin parameter (\code{$lambda}) are included in the output data frame.
+spin parameter (\code{$lambda}) are included in the output data frame. Finally, the dispersion
+of particles off the plane of the disc is also given as \code{$sigma_z}, which describes the
+standard deviation of particle positions about the z-axis.
 }
 \description{
 The purpose of this function is to calculate the kinematic properties of a simulated galaxy,

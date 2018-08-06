@@ -27,7 +27,8 @@
 #' scale radius, and DM_rhof is the density evaluated at the flattening radius - and
 #' \code{list("profile"="Hernquist", "DM_mass"=184.9, "DM_a"=34.5)} - where DM_mass is the total mass of the dark
 #' matter component and DM_a is the scale radius of the halo.
-#'@return A data frame containing kinematic features of radial bins including (at least):
+#'@return A list that contains the particle data of the simulation (\code{$part_data} and \code{$head_data} for a particle data.frame and header
+#'file respectively), a data frame containing kinematic features of radial bins (\code{$profile}) including (at least):
 #'\item{\code{$r}/\code{$cr}/\code{$z}}{The outer radius of each bin.}
 #'\item{\code{$Mass}}{The contained mass.}
 #'\item{\code{$logp}}{The logarithm of the density in each bin.}
@@ -37,7 +38,9 @@
 #'\item{\code{$J}}{The angular momentum magnitude in each shell.}
 #'In the case of \code{bin_type = "r"} additionally the circular velocity
 #' (\code{$vc}), the velocity anisotropy (\code{$B}), rotational velocity (\code{$vrot}) and the
-#' spin parameter (\code{$lambda}) are included in the output data frame.
+#' spin parameter (\code{$lambda}) are included in the output data frame. Finally, the dispersion
+#' of particles off the plane of the disc is also given as \code{$sigma_z}, which describes the
+#' standard deviation of particle positions about the z-axis.
 #'@examples
 #'  output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
 #'                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
@@ -66,20 +69,22 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     }
   }
                                                            # labelling the data with particle types
-  if (is.list(DM_profile) == FALSE & is.na(ptype)){
-    if (galaxy_data$head$Npart[1] == 0){
-      cat("There are no dark matter particles in this model. Describe an analytic potential to calculate the total profile correctly. \n")
+
+  if (is.list(DM_profile) == FALSE && is.na(ptype[1]) | is.list(DM_profile) == FALSE && (ptype %in% 2)){
+    if (galaxy_data$head$Npart[2] == 0){
+      cat("There are no dark matter particles in this model. Describe an analytic potential to calculate the total kinematic profile correctly. \n")
       stop("DMpart Error")
     }
   }
-                                                           # error returned if DM is not present and DM_profile not specified
+  # error returned if DM is not present and DM_profile not specified
+
   if (is.na(ptype[1])){ptype = which(galaxy_data$head$Nall[p] != 0)}
-                                                           # for all particles, leave ptype = NA
+                                                           # for ptype = NA, specify all present particles
   if (0 %in% galaxy_data$head$Nall[ptype]){
     cat("Particles of ptype = c(", ptype[which(galaxy_data$head$Nall[ptype] == 0)], ") are missing in this model. \n")
     stop("Npart Error")
   }
-                                                           # error returned if ptype is not present
+  # error returned if ptype is not present
 
   galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,]
                                                            # leaving only particles of ptype
@@ -98,6 +103,7 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
   ## For 3D spherical shells ## -------------------------------------------------------------------
   if (bin_type == "r"){
     galaxy_cdf       = galaxy_df[galaxy_df$r < rmax,]      # remove particles further than rmax (spherical)
+    sigma_z          = sqrt(mean(galaxy_cdf$z * galaxy_cdf$z)-(mean(galaxy_cdf$z))^2)
     galaxy_cdf$group = as.integer(cut(galaxy_cdf$r,
                                       breaks=seq(0,rmax,by=rmax/rbin),
                                       labels=seq(1,rbin))) # assigns each particle into an rbin
@@ -115,10 +121,9 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     rbin_labels      = seq(0,rmax,rmax/rbin)
     DM_mass_profile = rep(0, rbin)
     if (is.list(DM_profile)){
-      if (DM_profile$profile == "hernquist"){
+      if (DM_profile$profile == "Hernquist"){
         DM_mass_profile = DM_profile$DM_mass * rbin_labels[2:length(rbin_labels)]^2 / (DM_profile$DM_a + rbin_labels[2:length(rbin_labels)])^2
-      }
-      if (DM_profile$profile == "NFW"){
+      } else if (DM_profile$profile == "NFW"){
         DM_mass_profile = 4 * pi * DM_profile$DM_rhof * DM_profile$DM_a^3 * (log(1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a)) - ((rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a) / (1 + (rbin_labels[2:length(rbin_labels)]/DM_profile$DM_a))))
       }
     }
@@ -136,7 +141,7 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
                          "sigma_vt" = numeric(rbin),
                          "B"        = numeric(rbin),
                          "vrot"     = numeric(rbin),
-                         "lambda"   = numeric(rbin))       # empty placeholders for output profile variables
+                         "lambda"   = numeric(rbin))             # empty placeholders for output profile variables
     for (j in 1:rbin){
       if (j == 1){
         grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
@@ -196,6 +201,7 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     galaxy_cdf       = galaxy_df[(galaxy_df$cr < rmax) &
                                    (abs(galaxy_df$z) < rmax),]
                                                            # remove particles further than rmax (cyclindrical)
+    sigma_z          = sqrt(mean(galaxy_cdf$z * galaxy_cdf$z)-(mean(galaxy_cdf$z))^2)
     galaxy_cdf$group = as.integer(cut(galaxy_cdf$cr,
                                       breaks=seq(0,rmax,rmax/rbin),
                                       labels=seq(1,rbin))) # assigns each particle into an rbin
@@ -219,7 +225,7 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
                          "Jy"       = numeric(rbin),
                          "Jz"       = numeric(rbin),
                          "vcr"      = numeric(rbin),
-                         "sigma_vcr"= numeric(rbin))       # empty placeholders for output profile variables
+                         "sigma_vcr"= numeric(rbin))             # empty placeholders for output profile variables
     for (j in 1:rbin){
       if (j == 1){
         grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
@@ -265,6 +271,7 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     galaxy_cdf       = galaxy_df[(galaxy_df$cr < rmax) &
                                    ((galaxy_df$z) < rmax) &
                                    ((galaxy_df$z) > 0),]    # remove particles further than rmax (off surface of disk) and below 0
+    sigma_z          = sqrt(mean(galaxy_cdf$z * galaxy_cdf$z)-(mean(galaxy_cdf$z))^2)
     galaxy_cdf$group = as.integer(cut(galaxy_cdf$z,
                                       breaks=seq(0,rmax,rmax/rbin),
                                       labels=seq(1,rbin)))  # assigns each particle into an rbin
@@ -278,15 +285,15 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     grp_num$cumsum   = cumsum(grp_num$Freq)                 # total number of particles contained within rbin to the centre
     galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),] # ordering particles by group
     rbin_labels      = seq(0,rmax,rmax/rbin)
-    profile = data.frame("z"        = numeric(rbin),
-                         "Mass"     = numeric(rbin),
-                         "logp"     = numeric(rbin),
-                         "J"        = numeric(rbin),
-                         "Jx"       = numeric(rbin),
-                         "Jy"       = numeric(rbin),
-                         "Jz"       = numeric(rbin),
+    profile = data.frame("z"       = numeric(rbin),
+                         "Mass"    = numeric(rbin),
+                         "logp"    = numeric(rbin),
+                         "J"       = numeric(rbin),
+                         "Jx"      = numeric(rbin),
+                         "Jy"      = numeric(rbin),
+                         "Jz"      = numeric(rbin),
                          "vz"      = numeric(rbin),
-                         "sigma_vz"= numeric(rbin))        # empty placeholders for output profile variables
+                         "sigma_vz"= numeric(rbin))              # empty placeholders for output profile variables
     for (j in 1:rbin){
       if (j == 1){
         grp = galaxy_odf[as.integer(1:grp_num$cumsum[j]),]
@@ -328,5 +335,5 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     }
   }
 
-  return(profile)
+  return(list("part_data" = galaxy_data$part, "head_data" = galaxy_data$head, "profile" = profile, "sigma_z" = sigma_z))
 }

@@ -108,14 +108,14 @@ plot3D::points3D(S0_points$x, S0_points$y, S0_points$z, col="black", pch=16, alp
 Given that we have examined the system in three dimensions, we can now consider a comprehensive list of radial properties of the total galaxy and its components (radial, tangential and circular velocities, spin parameter and anisotropies are only defined when we consider the distribution of particles in 3D - `bin_type = "r"`).  For example, we can examine the circular velocity and spin parameter profiles of each component in the galaxy:
 
 ```{r, echo=FALSE, fig.width=5.5, fig.height=5, fig.align="center"}
-magicaxis::magplot(S0_total_3D$r, S0_total_3D$vc, type="l", col=pal[7], lwd=3, xlim = c(0,30), xlab="radius, kpc", ylab=expression("V"[C]*", km s"^-1))
-lines(S0_bulge_3D$r, S0_bulge_3D$vc, col=pal[5], lwd=3)
-lines(S0_disk_3D$r, S0_disk_3D$vc, col=pal[1], lwd=3)
-legend("topright", c("total", "disk", "bulge"), col=c(pal[7], pal[1], pal[5]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
+magicaxis::magplot(S0_total_3D$profile$r, S0_total_3D$profile$vc, type="l", col=pal[7], lwd=3, xlim = c(0,30), ylim = c(0,250), xlab="radius, kpc", ylab=expression("V"[C]*", km s"^-1))
+lines(S0_bulge_3D$profile$r, S0_bulge_3D$profile$vc, col=pal[5], lwd=3)
+lines(S0_disk_3D$profile$r, S0_disk_3D$profile$vc, col=pal[1], lwd=3)
+legend("topleft", c("total", "disk", "bulge"), col=c(pal[7], pal[1], pal[5]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
 
-magicaxis::magplot(S0_total_3D$r, S0_total_3D$lambda, type="l", col=pal[7], lwd=3, xlim = c(0,30), ylim=c(0, 2), xlab="radius, kpc", ylab=expression(paste(lambda)[R]))
-lines(S0_bulge_3D$r, S0_bulge_3D$lambda, col=pal[5], lwd=3)
-lines(S0_disk_3D$r, S0_disk_3D$lambda, col=pal[1], lwd=3)
+magicaxis::magplot(S0_total_3D$profile$r, S0_total_3D$profile$lambda, type="l", col=pal[7], lwd=3, xlim = c(0,30), ylim=c(0, 2), xlab="radius, kpc", ylab=expression(paste(lambda)[R]))
+lines(S0_bulge_3D$profile$r, S0_bulge_3D$profile$lambda, col=pal[5], lwd=3)
+lines(S0_disk_3D$profile$r, S0_disk_3D$profile$lambda, col=pal[1], lwd=3)
 
 ```
 
@@ -206,14 +206,14 @@ Similarly, for `bin_type = "z"` we get:
 With this information, we can then consider mass and density profiles in different directions, for example:
 
 ```{r, echo=FALSE, fig.width=5.5, fig.height=5, fig.align="center"}
-magicaxis::magplot(S0_total_3D$r, S0_total_3D$Mass, type="l", col=pal[6], lwd=3, xlim = c(0,30), xlab="radius, kpc", ylab=expression("Mass, 10"^10 *" M"['\u0298']))
-lines(S0_total_2D$cr, S0_total_2D$Mass, col=pal[3], lwd=3)
-lines(S0_total_1D$z, S0_total_1D$Mass, col=pal[2], lwd=3)
+magicaxis::magplot(S0_total_3D$profile$r, S0_total_3D$profile$Mass, type="l", col=pal[6], lwd=3, xlim = c(0,30), xlab="radius, kpc", ylab=expression("Mass, 10"^10 *" M"['\u0298']))
+lines(S0_total_2D$profile$cr, S0_total_2D$profile$Mass, col=pal[3], lwd=3)
+lines(S0_total_1D$profile$z, S0_total_1D$profile$Mass, col=pal[2], lwd=3)
 legend("bottomright", c("1D", "2D", "3D"), col=c(pal[2], pal[3], pal[6]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
 
-magicaxis::magplot(S0_total_3D$r, S0_total_3D$logp, type="l", col=pal[6], lwd=3, xlim = c(0,30), xlab="radius, kpc", ylab=expression("log"[10]*"("*paste(rho)*"), 10"^10 *" M"['\u0298']*" kpc"^{-3}))
-lines(S0_total_2D$cr, S0_total_2D$logp, col=pal[3], lwd=3)
-lines(S0_total_1D$z, S0_total_1D$logp, col=pal[2], lwd=3)
+magicaxis::magplot(S0_total_3D$profile$r, S0_total_3D$profile$logp, type="l", col=pal[6], lwd=3, xlim = c(0,30), xlab="radius, kpc", ylab=expression("log"[10]*"("*paste(rho)*"), 10"^10 *" M"['\u0298']*" kpc"^{-3}))
+lines(S0_total_2D$profile$cr, S0_total_2D$profile$logp, col=pal[3], lwd=3)
+lines(S0_total_1D$profile$z, S0_total_1D$profile$logp, col=pal[2], lwd=3)
 legend("bottomright", c("1D", "2D", "3D"), col=c(pal[2], pal[3], pal[6]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
 
 ```
