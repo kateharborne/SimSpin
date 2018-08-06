@@ -6,7 +6,7 @@
 \usage{
 find_vsigma(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
   lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
-  measure_type = list(type = "fit", fac = 1), blur)
+  measure_type = list(type = "fit", fac = 1), blur, IFU_plot = TRUE)
 }
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
@@ -51,6 +51,10 @@ If \code{list(type = "specified", fac = 1, axis_ratio = data.frame("a" = 2, "b" 
 cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the
 shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}. \code{"fwhm"} is
 a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.}
+
+\item{IFU_plot}{\emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
+LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
+automatically.}
 }
 \value{
 A list containing:
@@ -94,6 +98,7 @@ vsigma = find_vsigma(filename        = system.file("extdata", 'S0_vignette', pac
                      measure_type    = list(type = "specified",
                                             axis_ratio = data.frame("a"=3.5, "b"=1.7),
                                             fac = 1),
-                     blur            = list("psf" = "Moffat", "fwhm" = 2))
+                     blur            = list("psf" = "Moffat", "fwhm" = 2),
+                     IFU_plot        = FALSE)
 
 }

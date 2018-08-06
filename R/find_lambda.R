@@ -43,6 +43,9 @@
 #' arcseconds.
 #'@param dispersion_analysis \emph{Optional} If specified as \code{TRUE}, the code will output the
 #' mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.
+#'@param IFU_plot \emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
+#'LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
+#'automatically.
 #'@return A list containing:
 #' \item{\code{$datacube}}{The 3D array corresponding to the kinematic data cube.}
 #' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
@@ -75,13 +78,14 @@
 #'                       measure_type = list(type = "specified",
 #'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7),
 #'                                           fac = 1),
-#'                       blur         = list("psf" = "Moffat", "fwhm" = 2))
+#'                       blur         = list("psf" = "Moffat", "fwhm" = 2),
+#'                       IFU_plot     = FALSE)
 #'
 
 find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm,
                         pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
                         measure_type = list(type="fit", fac=1), blur,
-                        dispersion_analysis = FALSE){
+                        dispersion_analysis = FALSE, IFU_plot = TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
@@ -193,7 +197,9 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                                            # measure lambdaR within number of Reff
     }
 
-    plot_ifu(lambda, appregion = observe_data$appregion)   # plot IFU images
+    if (IFU_plot == TRUE){
+      plot_ifu(lambda, appregion = observe_data$appregion)   # plot IFU images
+    }
 
     if (dispersion_analysis == TRUE) {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,

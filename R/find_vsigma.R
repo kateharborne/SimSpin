@@ -35,6 +35,10 @@
 #' cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the
 #' shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}. \code{"fwhm"} is
 #' a numeric specifying the full-width half-maximum of the PSF given in units of arcseconds.
+#'@param IFU_plot \emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
+#'LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
+#'automatically.
+
 #'@return A list containing:
 #' \item{\code{$datacube}}{A 3D array corresponding to the kinematic data cube.}
 #' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
@@ -67,13 +71,14 @@
 #'                      measure_type    = list(type = "specified",
 #'                                             axis_ratio = data.frame("a"=3.5, "b"=1.7),
 #'                                             fac = 1),
-#'                      blur            = list("psf" = "Moffat", "fwhm" = 2))
+#'                      blur            = list("psf" = "Moffat", "fwhm" = 2),
+#'                      IFU_plot        = FALSE)
 #'
 
 
 find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm,
                        pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
-                       measure_type = list(type="fit", fac=1), blur){
+                       measure_type = list(type="fit", fac=1), blur, IFU_plot=TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
@@ -149,7 +154,9 @@ find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
                                                            # measure vsigma within number of Reff
     }
 
-    plot_ifu(vsigma, appregion = observe_data$appregion)   # plot IFU images
+    if (IFU_plot == TRUE){
+      plot_ifu(vsigma, appregion = observe_data$appregion)   # plot IFU images
+    }
 
     output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                   "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,

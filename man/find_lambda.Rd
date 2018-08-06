@@ -7,7 +7,7 @@
 find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
   lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
   measure_type = list(type = "fit", fac = 1), blur,
-  dispersion_analysis = FALSE)
+  dispersion_analysis = FALSE, IFU_plot = TRUE)
 }
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
@@ -46,11 +46,13 @@ filter output in angstroms.}
 \code{fac *} \eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the unblurred galaxy
 counts image.
 If \code{list("type" = "specified", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1))},
-\eqn{\lambda_R} is calculated within some factor of the effective radius, \code{fac *}
-\eqn{R_{eff}} with axis ratio specified externally as a data frame in units of kpc. Finally, if
+the effective radius of the galaxy is measured from the unblurred counts image as in "fit", but
+the axis ratio of the grown ellipse is kept at the supplied axis ratio and  \eqn{\lambda_R} is
+calculated within some factor of the effective radius, \code{fac *}\eqn{R_{eff}}. Finally, if
 \code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1))},
 \eqn{\lambda_R} is measured within an ellipse described by the supplied "axis_ratio" in kpc (or
-a multiple of that axis ratio given by "fac").}
+a multiple of that ellipse size given by "fac") -  no measurement of the effective radius is
+made, assuming that the supplied values are correct.}
 
 \item{blur}{\emph{Optional} Specify if you wish to apply observational seeing effects to the
 cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies
@@ -60,6 +62,10 @@ arcseconds.}
 
 \item{dispersion_analysis}{\emph{Optional} If specified as \code{TRUE}, the code will output the
 mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.}
+
+\item{IFU_plot}{\emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
+LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
+automatically.}
 }
 \value{
 A list containing:
@@ -102,6 +108,7 @@ lambdar = find_lambda(filename     = system.file("extdata", 'S0_vignette', packa
                       measure_type = list(type = "specified",
                                           axis_ratio = data.frame("a"=3.5, "b"=1.7),
                                           fac = 1),
-                      blur         = list("psf" = "Moffat", "fwhm" = 2))
+                      blur         = list("psf" = "Moffat", "fwhm" = 2),
+                      IFU_plot     = FALSE)
 
 }
