@@ -30,7 +30,7 @@ scale radius, and DM_rhof is the density evaluated at the flattening radius - an
 matter component and DM_a is the scale radius of the halo.}
 }
 \value{
-A list that contains the particle data of the simulation (\code{$part} and \code{$head} for a particle data.frame and header
+A list that contains the particle data of the simulation (\code{$part_data} and \code{$head_data} for a particle data.frame and header
 file respectively), a data frame containing kinematic features of radial bins (\code{$profile}) including (at least):
 \item{\code{$r}/\code{$cr}/\code{$z}}{The outer radius of each bin.}
 \item{\code{$Mass}}{The contained mass.}

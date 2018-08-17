@@ -20,9 +20,6 @@
 #' data = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
 #'
 #' cube = ifu_cube(obs_data  = data,
-#'                 threshold = 10)
-#'
-#' cube = ifu_cube(obs_data  = data,
 #'                 threshold = 20)
 #'
 
