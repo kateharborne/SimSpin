@@ -31,7 +31,6 @@ The purpose of this function is to construct an IFU data cube. It accepts output
 \examples{
 data = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
 
-cube = ifu_cube(obs_data  = data,
-                threshold = 20)
+cube = ifu_cube(obs_data  = data, threshold = 20)
 
 }
