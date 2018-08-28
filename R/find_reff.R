@@ -101,7 +101,8 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
     ellipse_axis_ratio = data.frame("a_kpc"     = axis_ratio$a * fac,
                                     "b_kpc"     = axis_ratio$b * fac,
                                     "a_arcsec"  = (axis_ratio$a * fac) / angular_size,
-                                    "b_arcsec"  = (axis_ratio$b * fac) / angular_size)
+                                    "b_arcsec"  = (axis_ratio$b * fac) / angular_size,
+                                    "angle"     = 90)
 
     return(ellipse_axis_ratio)
   }
@@ -136,7 +137,8 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
     ellipse_axis_ratio = data.frame("a_kpc"     = axis_ratio$a * fac,
                                     "b_kpc"     = axis_ratio$b * fac,
                                     "a_arcsec"  = (axis_ratio$a * fac) / angular_size,
-                                    "b_arcsec"  = (axis_ratio$b * fac) / angular_size)
+                                    "b_arcsec"  = (axis_ratio$b * fac) / angular_size,
+                                    "angle"     = 90)
     return(ellipse_axis_ratio)
   }
 }

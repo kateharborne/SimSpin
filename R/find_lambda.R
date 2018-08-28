@@ -32,10 +32,11 @@
 #' the effective radius of the galaxy is measured from the unblurred counts image as in "fit", but
 #' the axis ratio of the grown ellipse is kept at the supplied axis ratio and  \eqn{\lambda_R} is
 #' calculated within some factor of the effective radius, \code{fac *}\eqn{R_{eff}}. Finally, if
-#' \code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1))},
+#' \code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1, "ang" = 90))},
 #' \eqn{\lambda_R} is measured within an ellipse described by the supplied "axis_ratio" in kpc (or
-#' a multiple of that ellipse size given by "fac") -  no measurement of the effective radius is
-#' made, assuming that the supplied values are correct.
+#' a multiple of that ellipse size given by "fac") at the position angle "ang" -  no measurement of
+#' the effective radius is made, assuming that the supplied values are determined using another
+#' package.
 #'@param blur \emph{Optional} Specify if you wish to apply observational seeing effects to the
 #' cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies
 #' the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}.
@@ -120,7 +121,8 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
       reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
                                 "b_kpc"    = measure_type$axis_ratio$b,
                                 "a_arcsec" = measure_type$axis_ratio$a / observe_data$angular_size,
-                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size)
+                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size,
+                                "angle"    = measure_type$axis_ratio$ang)
                                                            # Reff at fixed specification
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = measure_type$fac * reff_ar,
@@ -128,7 +130,9 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                                            # measure lambdaR within specified Reff
     }
 
-    plot_ifu(lambda, appregion = observe_data$appregion)   # plot IFU images
+    if (IFU_plot == TRUE){
+      plot_ifu(lambda, appregion = observe_data$appregion)   # plot IFU images
+    }
 
     if (dispersion_analysis == TRUE) {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
@@ -138,6 +142,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                           "dispersion_img"=lambda$dispersion_img,
                           "reff_ellipse"=lambda$reff_ellipse,
                           "angular_size"=observe_data$angular_size,
+                          "sbinsize"=observe_data$sbinsize,
                           "appregion"=observe_data$appregion,
                           "dispersion_analysis"=lambda$dispersion_analysis)
     } else {
@@ -148,6 +153,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                           "dispersion_img"=lambda$dispersion_img,
                           "reff_ellipse"=lambda$reff_ellipse,
                           "angular_size"=observe_data$angular_size,
+                          "sbinsize"=observe_data$sbinsize,
                           "appregion"=observe_data$appregion)
     }
 
@@ -189,7 +195,8 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
       reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
                                 "b_kpc"    = measure_type$axis_ratio$b,
                                 "a_arcsec" = measure_type$axis_ratio$a / observe_data$angular_size,
-                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size)
+                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size,
+                                "angle"    = measure_type$axis_ratio$ang)
                                                            # Reff at fixed specification
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = measure_type$fac * reff_ar,
@@ -209,6 +216,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                     "dispersion_img" = lambda$dispersion_img,
                     "reff_ellipse" = lambda$reff_ellipse,
                     "angular_size" = observe_data$angular_size,
+                    "sbinsize"= observe_data$sbinsize,
                     "appregion" = observe_data$appregion,
                     "dispersion_analysis" = lambda$dispersion_analysis)
     } else {
@@ -219,6 +227,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                     "dispersion_img" = lambda$dispersion_img,
                     "reff_ellipse" = lambda$reff_ellipse,
                     "angular_size" = observe_data$angular_size,
+                    "sbinsize"= observe_data$sbinsize,
                     "appregion" = observe_data$appregion)
     }
 

@@ -49,10 +49,11 @@ If \code{list("type" = "specified", "fac" = 1, "axis_ratio" = data.frame("a" = 2
 the effective radius of the galaxy is measured from the unblurred counts image as in "fit", but
 the axis ratio of the grown ellipse is kept at the supplied axis ratio and  \eqn{\lambda_R} is
 calculated within some factor of the effective radius, \code{fac *}\eqn{R_{eff}}. Finally, if
-\code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1))},
+\code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1, "ang" = 90))},
 \eqn{\lambda_R} is measured within an ellipse described by the supplied "axis_ratio" in kpc (or
-a multiple of that ellipse size given by "fac") -  no measurement of the effective radius is
-made, assuming that the supplied values are correct.}
+a multiple of that ellipse size given by "fac") at the position angle "ang" -  no measurement of
+the effective radius is made, assuming that the supplied values are determined using another
+package.}
 
 \item{blur}{\emph{Optional} Specify if you wish to apply observational seeing effects to the
 cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies
