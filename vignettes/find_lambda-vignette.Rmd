@@ -147,7 +147,8 @@ MaNGA_fwhm2_1SAMIReff =
               measure_type = list("type"="fixed", 
                                   "fac"=1, 
                                   "axis_ratio"=data.frame("a"=SAMI_noseeing_1Reff$axis_ratio$a_kpc,
-                                                          "b"=SAMI_noseeing_1Reff$axis_ratio$b_kpc)), 
+                                                          "b"=SAMI_noseeing_1Reff$axis_ratio$b_kpc,
+                                                          "angle"=90)), 
               blur         = list("psf" = "Moffat", "fwhm" = 2)) 
               
 ```
