@@ -100,8 +100,13 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                axis_ratio = ifu_imgs$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & measured axis ratio
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
                                                            # measure lambdaR within specified Reff
       }
@@ -111,8 +116,14 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & supplied axis ratio
+
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
                                                            # measure lambdaR within specified Reff
     }
@@ -124,8 +135,13 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                 "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size,
                                 "angle"    = measure_type$axis_ratio$ang)
                                                            # Reff at fixed specification
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
                                                            # measure lambdaR within specified Reff
     }
@@ -174,8 +190,13 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                axis_ratio = ifu_imgs$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & measured axis ratio
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
                                                            # measure lambdaR within number of Reff
     }
@@ -185,8 +206,13 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data and measured axis ratio
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
                                                            # measure lambdaR within number of Reff
     }
@@ -198,8 +224,13 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                 "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size,
                                 "angle"    = measure_type$axis_ratio$ang)
                                                            # Reff at fixed specification
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
                                                            # measure lambdaR within number of Reff
     }
