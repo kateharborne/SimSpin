@@ -146,17 +146,12 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                                            # measure lambdaR within specified Reff
     }
 
-    if (IFU_plot == TRUE){
-      plot_ifu(lambda, appregion = observe_data$appregion)   # plot IFU images
-    }
-
     if (dispersion_analysis == TRUE) {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
                           "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
                           "axis_ratio"=measure_type$fac * reff_ar, "lambda_r"=lambda$obs_lambdar,
                           "counts_img"=lambda$counts_img, "velocity_img"=lambda$velocity_img,
                           "dispersion_img"=lambda$dispersion_img,
-                          "reff_ellipse"=lambda$reff_ellipse,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "appregion"=observe_data$appregion,
@@ -167,10 +162,13 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                           "axis_ratio"=measure_type$fac * reff_ar, "lambda_r"=lambda$obs_lambdar,
                           "counts_img"=lambda$counts_img, "velocity_img"=lambda$velocity_img,
                           "dispersion_img"=lambda$dispersion_img,
-                          "reff_ellipse"=lambda$reff_ellipse,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "appregion"=observe_data$appregion)
+    }
+
+    if (IFU_plot == TRUE){
+      plot_ifu(output)   # plot IFU images
     }
 
     return(output)
@@ -235,17 +233,12 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                                            # measure lambdaR within number of Reff
     }
 
-    if (IFU_plot == TRUE){
-      plot_ifu(lambda, appregion = observe_data$appregion)   # plot IFU images
-    }
-
     if (dispersion_analysis == TRUE) {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
                     "axis_ratio" = measure_type$fac * reff_ar, "lambda_r" = lambda$obs_lambdar,
                     "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img,
                     "dispersion_img" = lambda$dispersion_img,
-                    "reff_ellipse" = lambda$reff_ellipse,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "appregion" = observe_data$appregion,
@@ -256,10 +249,13 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                     "axis_ratio" = measure_type$fac * reff_ar, "lambda_r" = lambda$obs_lambdar,
                     "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img,
                     "dispersion_img" = lambda$dispersion_img,
-                    "reff_ellipse" = lambda$reff_ellipse,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "appregion" = observe_data$appregion)
+    }
+
+    if (IFU_plot == TRUE){
+      plot_ifu(output)   # plot IFU images
     }
 
     return(output)
