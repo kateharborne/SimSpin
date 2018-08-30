@@ -15,7 +15,8 @@ Imports:
     magicaxis,
     ProFit,
     fields,
-    RColorBrewer
+    RColorBrewer,
+    plotrix
 Depends:
     celestial
 RoxygenNote: 6.0.1
