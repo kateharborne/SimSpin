@@ -25,7 +25,7 @@
 #'  ifucube   = ifu_cube(obs_data = data)
 #'  reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
 #'                        ptype        = NA,
-#'                        r200         = 10,
+#'                        r200         = 200,
 #'                        inc_deg      = 0,
 #'                        axis_ratio   = ifucube$axis_ratio,
 #'                        angular_size = data$angular_size)
@@ -57,23 +57,12 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
         rr = (((xx * cos(ang)) + (yy * sin(ang)))^2 / a^2) + (((xx * sin(ang)) - (yy * cos(ang)))^2 / b^2)
         if (rr <= 1){
           calcregion_reff[x,y,] = 1
-          radius[x,y] = xx + yy
+          radius[x,y] = sqrt(xx^2 + yy^2) * sbinsize
         }
       }
     }
     # creating two arrays - one of a multiplier to consider lambdaR within Reff,
     #  and one of the radial values within Reff
-
-    rhold_freq = as.data.frame(table(radius)) # creating a table containing frequencies that each equal distance pixel occurs
-    rhold_freq$cumr = sqrt((cumsum(rhold_freq$Freq) * (sbinsize^2)) / pi) # calculating the radius using the area
-
-    for (i in 1:(dim(rhold_freq)[1])) {
-      radius[which(radius == as.numeric(as.vector(rhold_freq$radius))[i])] = rhold_freq$cumr[i]
-    } # putting these calculated values into the radius image
-
-    radius[which(is.na(radius))] = 0 #setting all surrounding pixels to 0 (rather than NA)
-    radius[which(radius == sqrt((sbinsize^2)/pi))] = 0
-    # setting radius of central pixel to zero such that it does not contribute to the lambdaR summation
 
     cube_reff  = ifu_datacube$cube * calcregion_reff
     counts     = apply(cube_reff, c(1,2), sum)

@@ -39,7 +39,7 @@ directly, or the blurred cube created by \code{\link{blur_cube}}.
  ifucube   = ifu_cube(obs_data = data)
  reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
                        ptype        = NA,
-                       r200         = 10,
+                       r200         = 200,
                        inc_deg      = 0,
                        axis_ratio   = ifucube$axis_ratio,
                        angular_size = data$angular_size)
