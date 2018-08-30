@@ -9,19 +9,21 @@
 #' velocity and dispersion images.
 #'@return Returns three plots - a flux image, a velcoity image and a dispersion image.
 #'@examples
-#' data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
-#' ifucube   = ifu_cube(obs_data = data)
-#' reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                       ptype        = NA,
-#'                       r200         = 200,
+#' lambdar = find_lambda(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'                       z            = 0.1,
+#'                       fov          = 15,
+#'                       ap_shape     = "circular",
+#'                       central_wvl  = 4800,
+#'                       lsf_fwhm     = 2.65,
+#'                       pixel_sscale = 0.5,
+#'                       pixel_vscale = 1.04,
 #'                       inc_deg      = 0,
-#'                       axis_ratio   = ifucube$axis_ratio,
-#'                       angular_size = data$angular_size)
-#' lambda_obs = obs_lambda(ifu_datacube = ifucube,
-#'                         reff_data    = reff_data,
-#'                         sbinsize     = data$sbinsize)
+#'                       m2l_disc     = 2,
+#'                       m2l_bulge    = 1,
+#'                       threshold    = 25,
+#'                       IFU_plot     = FALSE)
 #'
-#' plot_ifu(lambda = lambda_obs, appregion = data$appregion)
+#' plot_ifu(lambdar)
 #'
 
 plot_ifu = function(lambda){

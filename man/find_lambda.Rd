@@ -109,7 +109,6 @@ lambdar = find_lambda(filename     = system.file("extdata", 'S0_vignette', packa
                       measure_type = list(type = "specified",
                                           axis_ratio = data.frame("a"=3.5, "b"=1.7),
                                           fac = 1),
-                      blur         = list("psf" = "Moffat", "fwhm" = 2),
                       IFU_plot     = FALSE)
 
 }
