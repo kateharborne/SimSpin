@@ -41,14 +41,14 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
     vbin            = length(ifu_datacube$vbin_labels)
     calcregion_reff = array(data = rep(0,(sbin*sbin*vbin)), dim=c(sbin,sbin,vbin))
                                                            # calculating lambdaR within reff
-    radius          = matrix(data = NA, nrow=sbin, ncol=sbin)
+    radius          = matrix(data = 0, nrow=sbin, ncol=sbin)
                                                            # radial positions within calcregion
 
     xcentre = sbin/2 + 0.5
     ycentre = sbin/2 + 0.5                                 # finding the centre pixel of the image
     a = reff_axisratio$a_kpc / sbinsize
     b = reff_axisratio$b_kpc / sbinsize
-    ang = reff_axisratio$angle * (pi / 180)
+    ang = (reff_axisratio$angle-90) * (pi / 180)
 
     for (x in 1:sbin){
       for (y in 1:sbin){
@@ -87,13 +87,7 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
 
     lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
 
-    elli_x = seq(-a, a, length.out = 500)
-    elli_y = (b / a) * sqrt(a^2 - elli_x^2)
-    reff_elli = matrix(data=NA, nrow = 1000, ncol = 2)
-    reff_elli[1:1000,1] = c(elli_x, rev(elli_x)) + rep(sbin/2, 1000)
-    reff_elli[1:1000,2] = c(elli_y, rev(elli_y)*-1) + rep(sbin/2, 1000)
-
-    if (max(reff_elli)>sbin){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
+    if ((a*sin(ang))>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
     if (dispersion_analysis == TRUE) {
       mean_dispersion = mean(standard_dev)
@@ -104,14 +98,12 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
                     "counts_img"           = counts_img,
                     "velocity_img"         = velocity_img,
                     "dispersion_img"       = dispersion_img,
-                    "reff_ellipse"         = reff_elli,
                     "dispersion_analysis"  = dispersion_analysis)
       } else {
         output = list("obs_lambdar"    = lambda,
                       "counts_img"     = counts_img,
                       "velocity_img"   = velocity_img,
-                      "dispersion_img" = dispersion_img,
-                      "reff_ellipse"   = reff_elli)
+                      "dispersion_img" = dispersion_img)
       }
 
   return(output)
