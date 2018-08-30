@@ -21,9 +21,12 @@ output will be the flux, velocity and dispersion maps.
 \examples{
 data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
 ifucube   = ifu_cube(obs_data = data)
-reff_data = find_props(ifu_datacube = ifucube,
-                       sbinsize = data$sbinsize,
-                       angular_size = data$angular_size)
+reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+                      ptype        = NA,
+                      r200         = 200,
+                      inc_deg      = 0,
+                      axis_ratio   = ifucube$axis_ratio,
+                      angular_size = data$angular_size)
 lambda_obs = obs_lambda(ifu_datacube = ifucube,
                         reff_data    = reff_data,
                         sbinsize     = data$sbinsize)
