@@ -109,16 +109,16 @@ find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
                                                            # measure lambdaR within specified Reff
     }
 
-    plot_ifu(vsigma, appregion = observe_data$appregion)   # plot IFU images
-
-
     output       = list("datacube" = ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
                         "ybin_labels" = ifu_imgs$ybin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                         "axis_ratio" = reff_ar, "vsigma" = vsigma$obs_vsigma,
                         "counts_img" = vsigma$counts_img, "velocity_img" = vsigma$velocity_img,
-                        "dispersion_img" = vsigma$dispersion_img,
-                        "reff_ellipse" = vsigma$reff_ellipse, "appregion" = observe_data$appregion,
+                        "dispersion_img" = vsigma$dispersion_img, "appregion" = observe_data$appregion,
                         "dispersion_analysis" = vsigma$dispersion_analysis)
+
+    if (IFU_plot == TRUE){
+      plot_ifu(output)   # plot IFU images
+    }
 
     return(output)
 
@@ -154,16 +154,15 @@ find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
                                                            # measure vsigma within number of Reff
     }
 
-    if (IFU_plot == TRUE){
-      plot_ifu(vsigma, appregion = observe_data$appregion)   # plot IFU images
-    }
-
     output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                   "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
                   "axis_ratio" = reff_ar, "vsigma" = vsigma$obs_vsigma,
                   "counts_img" = vsigma$counts_img, "velocity_img" = vsigma$velocity_img,
-                  "dispersion_img" = vsigma$dispersion_img,
-                  "reff_ellipse" = vsigma$reff_ellipse, "appregion" = observe_data$appregion)
+                  "dispersion_img" = vsigma$dispersion_img, "appregion" = observe_data$appregion)
+
+    if (IFU_plot == TRUE){
+      plot_ifu(output)   # plot IFU images
+    }
 
     return(output)
 
