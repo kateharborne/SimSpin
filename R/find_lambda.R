@@ -113,14 +113,9 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
       reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
-                               angular_size = observe_data$angular_size)
+                               angular_size = observe_data$angular_size,
+                               fract = measure_type$fac)
                                                            # Reff from data & supplied axis ratio
-
-      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
-      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
-      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
-      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
-
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
@@ -148,7 +143,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
     if (dispersion_analysis == TRUE) {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
                           "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
-                          "axis_ratio"=measure_type$fac * reff_ar, "lambda_r"=lambda$obs_lambdar,
+                          "axis_ratio"=reff_ar, "lambda_r"=lambda$obs_lambdar,
                           "counts_img"=lambda$counts_img, "velocity_img"=lambda$velocity_img,
                           "dispersion_img"=lambda$dispersion_img,
                           "angular_size"=observe_data$angular_size,
@@ -158,7 +153,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
     } else {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
                           "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
-                          "axis_ratio"=measure_type$fac * reff_ar, "lambda_r"=lambda$obs_lambdar,
+                          "axis_ratio"=reff_ar, "lambda_r"=lambda$obs_lambdar,
                           "counts_img"=lambda$counts_img, "velocity_img"=lambda$velocity_img,
                           "dispersion_img"=lambda$dispersion_img,
                           "angular_size"=observe_data$angular_size,
@@ -201,12 +196,9 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
       reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
-                               angular_size = observe_data$angular_size)
+                               angular_size = observe_data$angular_size,
+                               fract = measure_type$fac)
                                                            # Reff from data and measured axis ratio
-      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
-      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
-      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
-      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
@@ -235,7 +227,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
     if (dispersion_analysis == TRUE) {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
-                    "axis_ratio" = measure_type$fac * reff_ar, "lambda_r" = lambda$obs_lambdar,
+                    "axis_ratio" = reff_ar, "lambda_r" = lambda$obs_lambdar,
                     "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img,
                     "dispersion_img" = lambda$dispersion_img,
                     "angular_size" = observe_data$angular_size,
@@ -245,7 +237,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
     } else {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
-                    "axis_ratio" = measure_type$fac * reff_ar, "lambda_r" = lambda$obs_lambdar,
+                    "axis_ratio" = reff_ar, "lambda_r" = lambda$obs_lambdar,
                     "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img,
                     "dispersion_img" = lambda$dispersion_img,
                     "angular_size" = observe_data$angular_size,

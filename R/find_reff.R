@@ -77,7 +77,7 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
       axes = axis_ratio * fac
       elli = galaxy_cdf$ID[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
       etotal = length(elli)
-    }
+      }
     # if there are fewer than ntotal/2 particles inside, the ellipse grows by small amount until
     #  it contains more than ntotal/2
 
@@ -93,10 +93,10 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
         axes = axis_ratio * fac
         elli = galaxy_cdf$ID[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
         etotal = length(elli)
-      }
+        }
       # if the difference is greater than 0.5% of ntotal/2, the ellipse shrinks again by one
       #  factor and increases in smaller increments until etotal > ntotal/2 again
-    }
+      }
 
     ellipse_axis_ratio = data.frame("a_kpc"     = axis_ratio$a * fac,
                                     "b_kpc"     = axis_ratio$b * fac,
@@ -105,9 +105,10 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
                                     "angle"     = 90)
 
     return(ellipse_axis_ratio)
-  }
+   }
 
-  if (etotal > ntotal*fract){
+  else {
+
     while (etotal > ntotal*fract){
       fac  = fac - 0.01
       axes = axis_ratio * fac
