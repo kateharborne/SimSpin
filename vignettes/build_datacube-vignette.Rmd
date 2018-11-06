@@ -48,7 +48,7 @@ For this example, we will analyse `filename = "~/SimSpin/inst/extdata/S0_vignett
 
 ``` {r} 
 SAMI_datacube = 
-  build_datacube(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+  build_datacube(filename     = "../inst/extdata/S0_vignette",
                  z            = 0.06,        # redshift (i.e. projected distance)
                  fov          = 15,          # field-of-view of IFU in ''
                  ap_shape     = "circular",  # shape of the aperture 
@@ -92,7 +92,7 @@ We can also apply spatial convolution at this point, introducing some level of b
 
 ``` {r} 
 SAMI_datacube_blur = 
-  build_datacube(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+  build_datacube(filename     = "../inst/extdata/S0_vignette",
                  z            = 0.06,       
                  fov          = 15,         
                  ap_shape     = "circular",  

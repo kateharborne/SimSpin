@@ -51,7 +51,7 @@ Especially when describing the particulars of the simulated galaxy, there are se
 
 ``` {r, fig.width=3.25, fig.height=4} 
 SAMI_noseeing_1Reff = 
-  find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+  find_lambda(filename     = "../inst/extdata/S0_vignette",
               z            = 0.04,        # redshift (i.e. projected distance)
               fov          = 15,          # field-of-view of IFU in ''
               ap_shape     = "circular",  # shape of the aperture 
@@ -77,7 +77,7 @@ The function automatically plots the images of each of the observed maps produce
 
 ``` {r, fig.width=3.25, fig.height=4} 
 SAMI_fwhm2_1Reff = 
-  find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+  find_lambda(filename     = "../inst/extdata/S0_vignette",
               z            = 0.04,      
               fov          = 15,       
               ap_shape     = "circular",  
@@ -90,7 +90,7 @@ SAMI_fwhm2_1Reff =
               m2l_bulge    = 1,           
               threshold    = 26,          
               measure_type = list("type"="specified", 
-                                  "fac"=1,
+                                  "fac"=0.5,
                                   "axis_ratio"=data.frame("a"=SAMI_noseeing_1Reff$axis_ratio$a_kpc,
                                                           "b"=SAMI_noseeing_1Reff$axis_ratio$b_kpc)),  
               blur         = list("psf" = "Moffat", "fwhm" = 2)) # specifying the PSF and fwhm
@@ -99,13 +99,13 @@ SAMI_fwhm2_1Reff =
 
 This is very similar to the output in part 1, though this time we have mimicked the effects of seeing conditions within the synthetic observation. We have chosen a `"Moffat"` point spread function (the other option is to specify a `"Gaussian"` PSF) with full-width half-maximum of 2''. The effects of this seeing is shown in the observed maps produced. 
 
-We have chosen to specify the axis ratio in this case via `measure_type = list("type" = "specified")`. This takes the axis ratio that you supply (`{"axis_ratio" = data.frame("a" = , "b" =)`), where the semi-major and -minor axes are given in kpc, and grows an ellipse with these dimensions until `fac` * R$_{eff}$ is reached. This skips the step in which the axis ratio of the galaxy is fitted from the observed flux image, which may be useful when considering galaxies across different redshifts.
+We have chosen to specify the axis ratio in this case via `measure_type = list("type" = "specified")`. This takes the axis ratio that you supply (`{"axis_ratio" = data.frame("a" = , "b" =)`), where the semi-major and -minor axes are given in kpc, and grows an ellipse with these dimensions until the `fac` fraction of total particles is contained. This skips the step in which the axis ratio of the galaxy is fitted from the observed flux image, which may be useful when considering galaxies across different redshifts.
 
 ## 3. MaNGA observation, with seeing FWHM = 2'', $\lambda_R$ within 1 R$_{eff}$
 
 ``` {r, fig.width=3.25, fig.height=4} 
 MaNGA_fwhm2_1Reff = 
-  find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+  find_lambda(filename     = "../inst/extdata/S0_vignette",
               z            = 0.04,      
               fov          = 32,       
               ap_shape     = "hexagonal",  
@@ -132,7 +132,7 @@ However, if we want to compare between the same observations on each telescope, 
 
 ``` {r, fig.width=3.25, fig.height=4} 
 MaNGA_fwhm2_1SAMIReff = 
-  find_lambda(filename     = "~/SimSpin/inst/extdata/S0_vignette",
+  find_lambda(filename     = "../inst/extdata/S0_vignette",
               z            = 0.04,      
               fov          = 32,       
               ap_shape     = "hexagonal",  
