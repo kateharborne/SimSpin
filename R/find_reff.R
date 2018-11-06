@@ -8,7 +8,7 @@
 #'
 #'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
-#' simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.
+#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param inc_deg The observed inclination of the simulated galaxy in degrees.
 #'@param fract The fraction of particles to be contained within the radius calculated. Default is
@@ -33,40 +33,34 @@
 
 find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_ratio, angular_size){
 
-  galaxy_data = snapshot::snapread(filename)               # reading the data into large list
-  galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))
-  p = seq(1,6)                                             # all possible particle values
-  ppart = cumsum(galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)])
-                                                           # present particles
+  galaxy_file = h5::h5file(filename, mode = "r")           # reading in the snapshot data
+  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
+                           "y"         = h5::readDataSet(galaxy_file["y"]),
+                           "z"         = h5::readDataSet(galaxy_file["z"]),
+                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
+                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
+                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
+                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
+                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
+  h5::h5close(galaxy_file)                                 # close the snapshot data file
 
-  for (i in 1:length(ppart)){
-    if (i == 1){
-      galaxy_data$part[1:as.integer(ppart[i]),]$part_type =  which(galaxy_data$head$Nall[p] != 0)[i]
-    } else {
-      galaxy_data$part[as.integer(ppart[i-1]+1):as.integer(ppart[i]),]$part_type = which(galaxy_data$head$Nall[p] != 0)[i]
-    }
-  }
-                                                           # label the data with particle types
+  ppart = unique(galaxy_data$part_type)                    # all possible particle values
 
-  if (is.na(ptype[1])){ptype = which(galaxy_data$head$Nall[p] != 0)}
-                                                           # for all particles, leave ptype = NA
-  if (0 %in% galaxy_data$head$Nall[ptype]){
-    cat("Particles of ptype =", which(galaxy_data$head$Nall[ptype] %in% 0), " are missing in this model. \n")
+  if (is.na(ptype[1])) {ptype = ppart}                     # if ptype is NA, set as all possible particle values
+  if (all(ptype %in% ppart)){
+    galaxy_data =  galaxy_data[galaxy_data$part_type %in% ptype,]
+  } else {
+    cat("Particles of ptype =", paste(ptype[!ptype %in% ppart], collapse = ","), "are missing in this model. \n")
     stop("Npart Error")
   }
-                                                           # error returned if ptype is not present
-
-  galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,]
-                                                           # leaving only requested ptype
-  galaxy_data$head$Npart[p[!p %in% ptype]] = as.integer(0)
-  galaxy_data$head$Nall[p[!p %in% ptype]] = as.integer(0)  # removing record in the header
 
   inc_rad    = inc_deg * (pi / 180)                        # the galaxy inclination in radians
-  galaxy_df  = obs_galaxy(galaxy_data$part, centre=TRUE, inc_rad)
+  galaxy_df  = obs_galaxy(galaxy_data, centre=TRUE, inc_rad)
                                                            # extracting position & LOS velocities
-  ntotal     = as.numeric(nrow(galaxy_df))                 # total number of particles in the galaxy
+
   galaxy_cdf = galaxy_df[galaxy_df$r_obs<r200,]            # removing particles beyond r200
-  elli = galaxy_cdf$ID[((galaxy_cdf$x^2  / axis_ratio$a^2) + (galaxy_cdf$z_obs^2 / axis_ratio$b^2)) <= 1]
+  ntotal     = as.numeric(nrow(galaxy_cdf))                # total number of particles in the galaxy within r200
+  elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axis_ratio$a^2) + (galaxy_cdf$z_obs^2 / axis_ratio$b^2)) <= 1]
                                                            # particles within the ellipse
   etotal = as.integer(length(elli))                        # number of particles within the ellipse
   fac = 1
@@ -75,7 +69,7 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
     while (etotal < ntotal*fract){
       fac  = fac + 0.01
       axes = axis_ratio * fac
-      elli = galaxy_cdf$ID[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
       etotal = length(elli)
       }
     # if there are fewer than ntotal/2 particles inside, the ellipse grows by small amount until
@@ -86,12 +80,12 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
     if (diff > (0.005 * ntotal*fract)){
       fac = fac - 0.01
       axes = axis_ratio * fac
-      elli = galaxy_cdf$ID[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
       etotal = length(elli)
       while (etotal < ntotal*fract){
         fac = fac + 0.0005
         axes = axis_ratio * fac
-        elli = galaxy_cdf$ID[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+        elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
         etotal = length(elli)
         }
       # if the difference is greater than 0.5% of ntotal/2, the ellipse shrinks again by one
@@ -112,7 +106,7 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
     while (etotal > ntotal*fract){
       fac  = fac - 0.01
       axes = axis_ratio * fac
-      elli = galaxy_cdf[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1,]
+      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
       etotal = length(elli)
     }
     # if there are more than ntotal/2 particles inside, the ellipse shrinks by small amount until
@@ -123,12 +117,12 @@ find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_rati
     if (diff > (0.005 * ntotal*fract)){
       fac = fac + 0.01
       axes = axis_ratio * fac
-      elli = galaxy_cdf$ID[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
       etotal = length(elli)
       while (etotal > ntotal*fract){
         fac = fac - 0.0005
         axes = axis_ratio * fac
-        elli = galaxy_cdf$ID[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+        elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
         etotal = length(elli)
       }
       # if the difference is greater than 0.5% of ntotal/2, the ellipse grows again by one factor
