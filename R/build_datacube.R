@@ -9,7 +9,7 @@
 #'
 #'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
-#' simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.
+#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param z The galaxy redshift.
 #'@param fov The field of view of the IFU, diameter in arcseconds.

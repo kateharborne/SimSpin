@@ -17,10 +17,18 @@
 #'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 #'  sight velocity (\code{$vy_obs}) at the given inclination.
 #' @examples
-#'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
-#'   data$part$part_type = rep(0,length(data$part))
+#'   galaxy_file = h5::h5file(system.file("extdata", 'S0_vignette', package="SimSpin"), mode = "r")
+#'   galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
+#'                            "y"         = h5::readDataSet(galaxy_file["y"]),
+#'                            "z"         = h5::readDataSet(galaxy_file["z"]),
+#'                            "vx"        = h5::readDataSet(galaxy_file["vx"]),
+#'                            "vy"        = h5::readDataSet(galaxy_file["vy"]),
+#'                            "vz"        = h5::readDataSet(galaxy_file["vz"]),
+#'                            "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
+#'                            "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
+#'   h5::h5close(galaxy_file)
 #'
-#'   output = obs_galaxy(part_data = data$part,
+#'   output = obs_galaxy(part_data = galaxy_data,
 #'                       centre    = TRUE,
 #'                       inc_rad   = 0)
 #' @export
@@ -46,10 +54,18 @@ obs_galaxy <- function(part_data, centre, inc_rad) {
 #'  and its associated velocity (\code{$cr} and \code{$vcr}) and the mass of each particle
 #'  (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},\code{$Jz}).
 #' @examples
-#'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
-#'   data$part$part_type = rep(0,nrow(data$part))
+#'   galaxy_file = h5::h5file(system.file("extdata", 'S0_vignette', package="SimSpin"), mode = "r")
+#'   galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
+#'                            "y"         = h5::readDataSet(galaxy_file["y"]),
+#'                            "z"         = h5::readDataSet(galaxy_file["z"]),
+#'                            "vx"        = h5::readDataSet(galaxy_file["vx"]),
+#'                            "vy"        = h5::readDataSet(galaxy_file["vy"]),
+#'                            "vz"        = h5::readDataSet(galaxy_file["vz"]),
+#'                            "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
+#'                            "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
+#'   h5::h5close(galaxy_file)
 #'
-#'   output = sim_galaxy(part_data = data$part,
+#'   output = sim_galaxy(part_data = galaxy_data,
 #'                       centre    = TRUE)
 #' @export
 sim_galaxy <- function(part_data, centre) {

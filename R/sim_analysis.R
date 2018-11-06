@@ -18,8 +18,8 @@
 #' in 1D off the plane of the galaxy.
 #'@param rmax The maximum radial coordinate considered within the simulated galaxy in kpc.
 #'@param rbin The number of radial bins considered.
-#'@param ptype The particle type/types to be extracted - \code{NA} (default) gives all particles in
-#' the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.
+#'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
+#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
 #'@param DM_profile If dark matter particles are not included in the analysis, this option allows
 #' you to use the DM profile for the mass distribution such that the circular velocity can be
 #' correctly determined. Options include \code{NA} (default),
@@ -46,7 +46,7 @@
 #'                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 #'
 #'  output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                        ptype      = c(3,4),
+#'                        ptype      = c(2,3),
 #'                        bin_type   = "cr",
 #'                        rmax       = 300,
 #'                        rbin       = 100,
@@ -55,42 +55,28 @@
 
 sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM_profile=NA){
 
-  galaxy_data = snapshot::snapread(filename)               # reading in the data into large list
-  galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))
-                                                           # add a "particle type" column
-  p = seq(1,6)                                             # all possible particle values
-  ppart = cumsum(galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)])
-                                                           # number of present particles
-  for (i in 1:length(ppart)){
-    if (i == 1){
-      galaxy_data$part[1:as.integer(ppart[i]),]$part_type =  which(galaxy_data$head$Nall[p] != 0)[i]
-    } else {
-      galaxy_data$part[as.integer(ppart[i-1]+1):as.integer(ppart[i]),]$part_type = which(galaxy_data$head$Nall[p] != 0)[i]
-    }
-  }
-                                                           # labelling the data with particle types
+  galaxy_file = h5::h5file(filename, mode = "r")           # reading in the snapshot data
+  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
+                           "y"         = h5::readDataSet(galaxy_file["y"]),
+                           "z"         = h5::readDataSet(galaxy_file["z"]),
+                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
+                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
+                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
+                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
+                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
+  h5::h5close(galaxy_file)                                 # close the snapshot data file
 
-  if (is.list(DM_profile) == FALSE && is.na(ptype[1]) | is.list(DM_profile) == FALSE && (ptype %in% 2)){
-    if (galaxy_data$head$Npart[2] == 0){
-      cat("There are no dark matter particles in this model. Describe an analytic potential to calculate the total kinematic profile correctly. \n")
-      stop("DMpart Error")
-    }
-  }
-  # error returned if DM is not present and DM_profile not specified
+  ppart = unique(galaxy_data$part_type)                    # all possible particle values
 
-  if (is.na(ptype[1])){ptype = which(galaxy_data$head$Nall[p] != 0)}
-                                                           # for ptype = NA, specify all present particles
-  if (0 %in% galaxy_data$head$Nall[ptype]){
-    cat("Particles of ptype = c(", ptype[which(galaxy_data$head$Nall[ptype] == 0)], ") are missing in this model. \n")
+  if (is.na(ptype[1])) {ptype = ppart}                     # if ptype is NA, set as all possible particle values
+  if (all(ptype %in% ppart)){
+    galaxy_data =  galaxy_data[galaxy_data$part_type %in% ptype,]
+  } else {
+    cat("Particles of ptype =", paste(ptype[!ptype %in% ppart], collapse = ","), "are missing in this model. \n")
     stop("Npart Error")
   }
-  # error returned if ptype is not present
 
-  galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,]
-                                                           # leaving only particles of ptype
-  galaxy_data$head$Npart[p[!p %in% ptype]] = as.integer(0)
-  galaxy_data$head$Nall[p[!p %in% ptype]] = as.integer(0)  # removing record of the removed particles in the header
-  galaxy_df  = sim_galaxy(galaxy_data$part, centre=TRUE)   # adding spherical coordinates and J
+  galaxy_df  = sim_galaxy(galaxy_data, centre=TRUE)        # adding spherical coordinates and J
   grp        = matrix()                                    # empty placeholders for loops
   grp_mass   = 0
   grp_Jx     = 0
@@ -139,6 +125,8 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
                          "vr"       = numeric(rbin),
                          "sigma_vr" = numeric(rbin),
                          "sigma_vt" = numeric(rbin),
+                         "sigma2_vx" = numeric(rbin),
+                         "sigma2_vz" = numeric(rbin),
                          "B"        = numeric(rbin),
                          "vrot"     = numeric(rbin),
                          "lambda"   = numeric(rbin))             # empty placeholders for output profile variables
@@ -188,6 +176,8 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
       profile$sigma_vt[j] = sqrt((mean(grp$vtheta * grp$vtheta) - (grp_vtheta * grp_vtheta)) +
                                    (mean(grp$vphi * grp$vphi) - (grp_vphi * grp_vphi)))
                                                            # tangential velocity dispersion, km/s
+      profile$sigma2_vx[j] = sum((grp$vx - mean(grp$vx))^2) / length(grp$vx)
+      profile$sigma2_vz[j] = sum((grp$vz - mean(grp$vz))^2) / length(grp$vz)
       profile$B[j] = 1 - ((profile$sigma_vt[j] * profile$sigma_vt[j]) / (2 * profile$sigma_vr[j] * profile$sigma_vr[j]))
                                                            # velocity anisotropy, unitless
       profile$vrot[j] = grp_J / (grp_mass * profile$r[j] * 3.086e16)
@@ -335,5 +325,5 @@ sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM
     }
   }
 
-  return(list("part_data" = galaxy_data$part, "head_data" = galaxy_data$head, "profile" = profile, "sigma_z" = sigma_z))
+  return(list("part_data" = galaxy_data, "profile" = profile, "sigma_z" = sigma_z))
 }

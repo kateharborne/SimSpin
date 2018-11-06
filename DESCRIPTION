@@ -11,7 +11,7 @@ LazyData: true
 LinkingTo: Rcpp
 Imports:
     Rcpp,
-    snapshot,
+    h5,
     magicaxis,
     ProFit,
     fields,
@@ -19,7 +19,7 @@ Imports:
     plotrix
 Depends:
     celestial
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests: knitr,
     rmarkdown,
     plot3D

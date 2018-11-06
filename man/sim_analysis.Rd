@@ -18,8 +18,8 @@ in 1D off the plane of the galaxy.}
 
 \item{rbin}{The number of radial bins considered.}
 
-\item{ptype}{The particle type/types to be extracted - \code{NA} (default) gives all particles in
-the simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
 
 \item{DM_profile}{If dark matter particles are not included in the analysis, this option allows
 you to use the DM profile for the mass distribution such that the circular velocity can be
@@ -62,7 +62,7 @@ only physical when defined using 3D spherical shells.
                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 
  output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
-                       ptype      = c(3,4),
+                       ptype      = c(2,3),
                        bin_type   = "cr",
                        rmax       = 300,
                        rbin       = 100,

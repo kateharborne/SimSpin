@@ -19,17 +19,24 @@ using namespace Rcpp;
 //'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 //'  sight velocity (\code{$vy_obs}) at the given inclination.
 //' @examples
-//'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
-//'   data$part$part_type = rep(0,length(data$part))
+//'   galaxy_file = h5::h5file(system.file("extdata", 'S0_vignette', package="SimSpin"), mode = "r")
+//'   galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
+//'                            "y"         = h5::readDataSet(galaxy_file["y"]),
+//'                            "z"         = h5::readDataSet(galaxy_file["z"]),
+//'                            "vx"        = h5::readDataSet(galaxy_file["vx"]),
+//'                            "vy"        = h5::readDataSet(galaxy_file["vy"]),
+//'                            "vz"        = h5::readDataSet(galaxy_file["vz"]),
+//'                            "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
+//'                            "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
+//'   h5::h5close(galaxy_file)
 //'
-//'   output = obs_galaxy(part_data = data$part,
+//'   output = obs_galaxy(part_data = galaxy_data,
 //'                       centre    = TRUE,
 //'                       inc_rad   = 0)
 //' @export
 // [[Rcpp::export]]
 Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
 
-  Rcpp::NumericVector ID        = part_data["ID"];
   Rcpp::NumericVector x         = part_data["x"];
   Rcpp::NumericVector y         = part_data["y"];
   Rcpp::NumericVector z         = part_data["z"];
@@ -57,8 +64,7 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
   }
 
   Rcpp::DataFrame df =
-    Rcpp::DataFrame::create(Rcpp::Named("ID")        = ID,
-                            Rcpp::Named("x")         = x,
+    Rcpp::DataFrame::create(Rcpp::Named("x")         = x,
                             Rcpp::Named("y")         = y,
                             Rcpp::Named("z")         = z,
                             Rcpp::Named("vx")        = vx,

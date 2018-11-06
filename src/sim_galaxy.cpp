@@ -21,16 +21,23 @@ using namespace Rcpp;
 //'  and its associated velocity (\code{$cr} and \code{$vcr}) and the mass of each particle
 //'  (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},\code{$Jz}).
 //' @examples
-//'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
-//'   data$part$part_type = rep(0,nrow(data$part))
+//'   galaxy_file = h5::h5file(system.file("extdata", 'S0_vignette', package="SimSpin"), mode = "r")
+//'   galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
+//'                            "y"         = h5::readDataSet(galaxy_file["y"]),
+//'                            "z"         = h5::readDataSet(galaxy_file["z"]),
+//'                            "vx"        = h5::readDataSet(galaxy_file["vx"]),
+//'                            "vy"        = h5::readDataSet(galaxy_file["vy"]),
+//'                            "vz"        = h5::readDataSet(galaxy_file["vz"]),
+//'                            "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
+//'                            "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
+//'   h5::h5close(galaxy_file)
 //'
-//'   output = sim_galaxy(part_data = data$part,
+//'   output = sim_galaxy(part_data = galaxy_data,
 //'                       centre    = TRUE)
 //' @export
 // [[Rcpp::export]]
 Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
 
-  Rcpp::NumericVector ID        = part_data["ID"];
   Rcpp::NumericVector x         = part_data["x"];
   Rcpp::NumericVector y         = part_data["y"];
   Rcpp::NumericVector z         = part_data["z"];

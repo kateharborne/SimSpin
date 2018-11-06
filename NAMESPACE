@@ -3,7 +3,7 @@ importFrom(Rcpp, evalCpp)
 useDynLib(SimSpin)
 
 import("magicaxis")
-importFrom("snapshot", "snapread")
+importFrom("h5", "h5file", "readDataSet", "h5close")
 importFrom("celestial", "cosdistAngScale")
 importFrom("fields", "image.plot")
 importFrom("ProFit", "profitMakeGaussianPSF", "profitBruteConv", "profitCubaMoffat")

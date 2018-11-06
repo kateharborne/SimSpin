@@ -87,7 +87,7 @@ obs_lambda = function(ifu_datacube, reff_axisratio, sbinsize, dispersion_analysi
 
     lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
 
-    if ((a*sin(ang))>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
+    if (a>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
     if (dispersion_analysis == TRUE) {
       mean_dispersion = mean(standard_dev)

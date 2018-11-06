@@ -7,7 +7,7 @@
 #'@param filename The Gadget output file containing the particle information of the galaxy to be
 #' analysed.
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
-#' simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.
+#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param z The galaxy redshift.
 #'@param fov The field of view of the IFU, diameter in arcseconds.
@@ -55,31 +55,26 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape=
 
   set.seed(42);
   sol_lum = 3.827e33;                                      # solar luminosity in erg s-1
-  galaxy_data  = snapshot::snapread(filename)              # reading in the snapshot data
-  galaxy_data$part$part_type = rep(0, nrow(galaxy_data$part))
-                                                           # add a "particle type" column
-  p = seq(1,6)                                             # all possible particle values
-  ppart = cumsum(galaxy_data$head$Npart[which(galaxy_data$head$Nall[p] != 0)])
-                                                           # present particles
-  for (i in 1:length(ppart)){
-    if (i == 1){
-      galaxy_data$part[1:as.integer(ppart[i]),]$part_type =  which(galaxy_data$head$Nall[p] != 0)[i]
-    } else {
-      galaxy_data$part[as.integer(ppart[i-1]+1):as.integer(ppart[i]),]$part_type = which(galaxy_data$head$Nall[p] != 0)[i]
-    }
-  }
-                                                           # labelling the data with particle types
-  if (is.na(ptype[1])){ptype = which(galaxy_data$head$Nall[p] != 0)}
-                                                           # for all particles, leave ptype = NA
-  if (0 %in% galaxy_data$head$Nall[ptype]){
-    cat("Particles of ptype =", which(galaxy_data$head$Nall[ptype] %in% 0), " are missing in this model. \n")
+  galaxy_file = h5::h5file(filename, mode = "r")           # reading in the snapshot data
+  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
+                           "y"         = h5::readDataSet(galaxy_file["y"]),
+                           "z"         = h5::readDataSet(galaxy_file["z"]),
+                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
+                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
+                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
+                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
+                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
+  h5::h5close(galaxy_file)                                 # close the snapshot data file
+
+  ppart = unique(galaxy_data$part_type)                    # all possible particle values
+
+  if (is.na(ptype[1])) {ptype = ppart}                     # if ptype is NA, set as all possible particle values
+  if (all(ptype %in% ppart)){
+    galaxy_data =  galaxy_data[galaxy_data$part_type %in% ptype,]
+  } else {
+    cat("Particles of ptype =", paste(ptype[!ptype %in% ppart], collapse = ","), "are missing in this model. \n")
     stop("Npart Error")
   }
-                                                           # error returned if ptype is not present
-  galaxy_data$part = galaxy_data$part[galaxy_data$part$part_type %in% ptype,]
-                                                           # leaving only requested ptype
-  galaxy_data$head$Npart[p[!p %in% ptype]] = as.integer(0)
-  galaxy_data$head$Nall[p[!p %in% ptype]] = as.integer(0)  # removing record of particles in header
 
   inc_rad      = inc_deg * (pi / 180)                      # galaxy inclination in radians
   ang_size     = celestial::cosdistAngScale(z, ref="Planck15")
@@ -124,7 +119,7 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape=
   }
                                                            # hexagonal apperture mask
 
-  galaxy_df   = obs_galaxy(galaxy_data$part, centre=TRUE, inc_rad)
+  galaxy_df   = obs_galaxy(galaxy_data, centre=TRUE, inc_rad)
                                                            # extracting the position and LOS data
   galaxy_df   = galaxy_df[(galaxy_df$r < r200),]           # removing particles beyond r200
 
@@ -148,11 +143,11 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape=
   vbin = ceiling((max(galaxy_cdf$vy_obs) - min(galaxy_cdf$vy_obs)) / vbinsize)
                                                            # the number of velocity bins
   galaxy_cdf$flux = rep(0, nrow(galaxy_cdf))
-  galaxy_cdf[(galaxy_cdf$part_type== 3),]$flux =
-    ((galaxy_cdf[(galaxy_cdf$part_type== 3),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_disc)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
+  galaxy_cdf[(galaxy_cdf$part_type== 2),]$flux =
+    ((galaxy_cdf[(galaxy_cdf$part_type== 2),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_disc)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
                                                            # calculating flux from disc particles
-  galaxy_cdf[(galaxy_cdf$part_type== 4),]$flux =
-    ((galaxy_cdf[(galaxy_cdf$part_type== 4),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_bulge)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
+  galaxy_cdf[(galaxy_cdf$part_type== 3),]$flux =
+    ((galaxy_cdf[(galaxy_cdf$part_type== 3),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_bulge)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
                                                            # calculating flux from bulge particles
                                                            #  fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
 

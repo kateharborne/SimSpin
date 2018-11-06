@@ -28,9 +28,17 @@ spherical polar coordinates. It accepts the Gadget particle information output f
 useful for deriving the galaxy kinematics.
 }
 \examples{
-  data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
-  data$part$part_type = rep(0,nrow(data$part))
+  galaxy_file = h5::h5file(system.file("extdata", 'S0_vignette', package="SimSpin"), mode = "r")
+  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
+                           "y"         = h5::readDataSet(galaxy_file["y"]),
+                           "z"         = h5::readDataSet(galaxy_file["z"]),
+                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
+                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
+                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
+                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
+                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
+  h5::h5close(galaxy_file)
 
-  output = sim_galaxy(part_data = data$part,
+  output = sim_galaxy(part_data = galaxy_data,
                       centre    = TRUE)
 }
