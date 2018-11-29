@@ -4,9 +4,9 @@
 \alias{find_lambda}
 \title{Measuring observable galaxy kinematics.}
 \usage{
-find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
-  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
-  measure_type = list(type = "fit", fac = 1), blur,
+find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
+  central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc,
+  m2l_bulge, threshold, measure_type = list(type = "fit", fac = 1), blur,
   dispersion_analysis = FALSE, IFU_plot = TRUE)
 }
 \arguments{

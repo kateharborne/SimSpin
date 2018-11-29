@@ -4,9 +4,10 @@
 \alias{find_vsigma}
 \title{Measuring observable galaxy kinematics.}
 \usage{
-find_vsigma(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
-  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
-  measure_type = list(type = "fit", fac = 1), blur, IFU_plot = TRUE)
+find_vsigma(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
+  central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc,
+  m2l_bulge, threshold, measure_type = list(type = "fit", fac = 1), blur,
+  IFU_plot = TRUE)
 }
 \arguments{
 \item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}

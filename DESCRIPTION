@@ -11,15 +11,16 @@ LazyData: true
 LinkingTo: Rcpp
 Imports:
     Rcpp,
-    h5,
+    hdf5r,
     magicaxis,
     ProFit,
     fields,
     RColorBrewer,
-    plotrix
+    plotrix,
+    ProSpect
 Depends:
     celestial
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,
     plot3D

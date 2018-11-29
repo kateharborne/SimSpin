@@ -1,4 +1,4 @@
-// Kate Harborne (last edit - 13/09/2017)
+// Kate Harborne (last edit - 29/11/2018)
 #include <Rcpp.h>
 #include <cmath>
 using namespace Rcpp;
@@ -19,24 +19,17 @@ using namespace Rcpp;
 //'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 //'  sight velocity (\code{$vy_obs}) at the given inclination.
 //' @examples
-//'   galaxy_file = h5::h5file(system.file("extdata", 'S0_vignette', package="SimSpin"), mode = "r")
-//'   galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-//'                            "y"         = h5::readDataSet(galaxy_file["y"]),
-//'                            "z"         = h5::readDataSet(galaxy_file["z"]),
-//'                            "vx"        = h5::readDataSet(galaxy_file["vx"]),
-//'                            "vy"        = h5::readDataSet(galaxy_file["vy"]),
-//'                            "vz"        = h5::readDataSet(galaxy_file["vz"]),
-//'                            "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-//'                            "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-//'   h5::h5close(galaxy_file)
+//'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
+//'   data$part$part_type = rep(0,length(data$part))
 //'
-//'   output = obs_galaxy(part_data = galaxy_data,
+//'   output = obs_galaxy(part_data = data$part,
 //'                       centre    = TRUE,
 //'                       inc_rad   = 0)
 //' @export
 // [[Rcpp::export]]
 Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
 
+  Rcpp::NumericVector ID        = part_data["ID"];
   Rcpp::NumericVector x         = part_data["x"];
   Rcpp::NumericVector y         = part_data["y"];
   Rcpp::NumericVector z         = part_data["z"];
@@ -44,7 +37,6 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
   Rcpp::NumericVector vy        = part_data["vy"];
   Rcpp::NumericVector vz        = part_data["vz"];
   Rcpp::NumericVector Mass      = part_data["Mass"];
-  Rcpp::NumericVector part_type = part_data["part_type"];
 
   int n = x.size();
   if(centre == TRUE){
@@ -64,7 +56,8 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
   }
 
   Rcpp::DataFrame df =
-    Rcpp::DataFrame::create(Rcpp::Named("x")         = x,
+    Rcpp::DataFrame::create(Rcpp::Named("ID")        = ID,
+                            Rcpp::Named("x")         = x,
                             Rcpp::Named("y")         = y,
                             Rcpp::Named("z")         = z,
                             Rcpp::Named("vx")        = vx,
@@ -74,8 +67,7 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
                             Rcpp::Named("r")         = r,
                             Rcpp::Named("z_obs")     = z_obs,
                             Rcpp::Named("r_obs")     = r_obs,
-                            Rcpp::Named("vy_obs")    = vy_obs,
-                            Rcpp::Named("part_type") = part_type);
+                            Rcpp::Named("vy_obs")    = vy_obs);
 
   return(df);
 

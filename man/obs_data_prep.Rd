@@ -4,18 +4,11 @@
 \alias{obs_data_prep}
 \title{Prepare simulation data for observational kinematic analysis.}
 \usage{
-obs_data_prep(filename, ptype = NA, r200 = 200, z = 0.05, fov = 15,
+obs_data_prep(simdata, r200 = 200, z = 0.05, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
-  pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70, m2l_disc = 1,
-  m2l_bulge = 1)
+  pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70)
 }
 \arguments{
-\item{filename}{The Gadget output file containing the particle information of the galaxy to be
-analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
-
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{z}{The galaxy redshift.}
@@ -35,6 +28,12 @@ output in arcseconds.}
 filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
+
+\item{filename}{The Gadget output file containing the particle information of the galaxy to be
+analysed.}
+
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
 
 \item{m2l_disc}{The mass-to-light ratio of the disc component in solar units.}
 
