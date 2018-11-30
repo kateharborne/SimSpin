@@ -53,27 +53,26 @@
 #'                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 #'
 
-sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM_profile=NA){
+sim_analysis = function(simdata, bin_type="r", rmax=200, rbin=200, DM_profile=NA){
 
-  galaxy_file = h5::h5file(filename, mode = "r")           # reading in the snapshot data
-  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-                           "y"         = h5::readDataSet(galaxy_file["y"]),
-                           "z"         = h5::readDataSet(galaxy_file["z"]),
-                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
-                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
-                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
-                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-  h5::h5close(galaxy_file)                                 # close the snapshot data file
+  result = grepl(paste(c("PartType0", "PartType1", "PartType2", "PartType3", "PartType4"), collapse = "|"), names(simdata))
+  # finding the luminous matter within the simulation for imaging
 
-  ppart = unique(galaxy_data$part_type)                    # all possible particle values
-
-  if (is.na(ptype[1])) {ptype = ppart}                     # if ptype is NA, set as all possible particle values
-  if (all(ptype %in% ppart)){
-    galaxy_data =  galaxy_data[galaxy_data$part_type %in% ptype,]
-  } else {
-    cat("Particles of ptype =", paste(ptype[!ptype %in% ppart], collapse = ","), "are missing in this model. \n")
-    stop("Npart Error")
+  if (any(result)) {                                       # concatenating the seperate particle
+    present = which(result)                                #  data.frames into a single data.frame
+    if (length(present) == 1){
+      galaxy_data = simdata[[present[1]]]$Part
+    } else if (length(present) == 2){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part)
+    } else if (length(present) == 3){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part, simdata[[present[3]]]$Part)
+    } else if (length(present) == 4){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part, simdata[[present[3]]]$Part,
+                          simdata[[present[4]]]$Part)
+    } else if (length(present) == 5){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part, simdata[[present[3]]]$Part,
+                          simdata[[present[4]]]$Part, simdata[[present[5]]]$Part)
+    }
   }
 
   galaxy_df  = sim_galaxy(galaxy_data, centre=TRUE)        # adding spherical coordinates and J

@@ -82,20 +82,20 @@
 #'                       IFU_plot     = FALSE)
 #'
 
-find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                        pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
+find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
+                        pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25,
                         measure_type = list(type="fit", fac=1), blur,
                         dispersion_analysis = FALSE, IFU_plot = TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
-    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge)
+    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                                 pixel_sscale, pixel_vscale, inc_deg)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = ifu_imgs$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & measured axis ratio
@@ -111,7 +111,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
       }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size,
                                fract = measure_type$fac)
@@ -169,8 +169,8 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
 
   } else {                                                 # IF spatial blurring IS requested
 
-    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge)
+    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                                 pixel_sscale, pixel_vscale, inc_deg)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
     blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf,
@@ -178,7 +178,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                                            # blur IFU cube
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = ifu_imgs$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & measured axis ratio
@@ -194,7 +194,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size,
                                fract = measure_type$fac)

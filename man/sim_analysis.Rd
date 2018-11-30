@@ -4,12 +4,10 @@
 \alias{sim_analysis}
 \title{Kinematic analysis of simulation data.}
 \usage{
-sim_analysis(filename, bin_type = "r", rmax = 200, rbin = 200,
-  ptype = NA, DM_profile = NA)
+sim_analysis(simdata, bin_type = "r", rmax = 200, rbin = 200,
+  DM_profile = NA)
 }
 \arguments{
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
-
 \item{bin_type}{The direction in which to bin the simulation model - \code{"r"} (default) bins
 radially in 3D spherical shells, \code{"cr"} bins radially in 2D circular rings, \code{"z"} bins
 in 1D off the plane of the galaxy.}
@@ -18,9 +16,6 @@ in 1D off the plane of the galaxy.}
 
 \item{rbin}{The number of radial bins considered.}
 
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
-
 \item{DM_profile}{If dark matter particles are not included in the analysis, this option allows
 you to use the DM profile for the mass distribution such that the circular velocity can be
 correctly determined. Options include \code{NA} (default),
@@ -28,6 +23,11 @@ correctly determined. Options include \code{NA} (default),
 scale radius, and DM_rhof is the density evaluated at the flattening radius - and
 \code{list("profile"="Hernquist", "DM_mass"=184.9, "DM_a"=34.5)} - where DM_mass is the total mass of the dark
 matter component and DM_a is the scale radius of the halo.}
+
+\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
+
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
 }
 \value{
 A list that contains the particle data of the simulation (\code{$part_data} and \code{$head_data} for a particle data.frame and header

@@ -4,17 +4,13 @@
 \alias{find_lambda}
 \title{Measuring observable galaxy kinematics.}
 \usage{
-find_lambda(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
-  central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc,
-  m2l_bulge, threshold, measure_type = list(type = "fit", fac = 1), blur,
+find_lambda(simdata, r200 = 200, z = 0.05, fov = 15,
+  ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
+  pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
+  threshold = 25, measure_type = list(type = "fit", fac = 1), blur,
   dispersion_analysis = FALSE, IFU_plot = TRUE)
 }
 \arguments{
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
-
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{z}{The galaxy redshift.}
@@ -34,10 +30,6 @@ output in arcseconds.}
 filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
-
-\item{m2l_disc}{The mass-to-light ratio of the disc component in solar units.}
-
-\item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
 
 \item{threshold}{The flux threshold of the observation.}
 
@@ -67,6 +59,15 @@ mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.}
 \item{IFU_plot}{\emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
 LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
 automatically.}
+
+\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
+
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
+
+\item{m2l_disc}{The mass-to-light ratio of the disc component in solar units.}
+
+\item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
 }
 \value{
 A list containing:

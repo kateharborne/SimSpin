@@ -16,10 +16,10 @@ Imports:
     ProFit,
     fields,
     RColorBrewer,
-    plotrix,
-    ProSpect
+    plotrix
 Depends:
-    celestial
+    celestial,
+    ProSpect
 RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,

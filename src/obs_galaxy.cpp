@@ -43,9 +43,15 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
     double xcen = median(x);
     double ycen = median(y);
     double zcen = median(z);
+    double vxcen = median(vx);
+    double vycen = median(vy);
+    double vzcen = median(vz);
     x = x-xcen;
     y = y-ycen;
     z = z-zcen;
+    vx = vx - vxcen;
+    vy = vy - vycen;
+    vz = vz - vzcen;
   }
   Rcpp::NumericVector r(n), z_obs(n), vy_obs(n), r_obs(n);
   for(int i=0; i<n; i++){

@@ -44,17 +44,22 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
   Rcpp::NumericVector vx        = part_data["vx"];
   Rcpp::NumericVector vy        = part_data["vy"];
   Rcpp::NumericVector vz        = part_data["vz"];
-  Rcpp::NumericVector Mass      = part_data["Mass"];
-  Rcpp::NumericVector part_type = part_data["part_type"];                                            // reading in particle properties
+  Rcpp::NumericVector Mass      = part_data["Mass"];                                                 // reading in particle properties
 
   int n = x.size();                                                                                  // number of particles in simulation
   if(centre == TRUE){
     double xcen = median(x);
     double ycen = median(y);
     double zcen = median(z);
+    double vxcen = median(vx);
+    double vycen = median(vy);
+    double vzcen = median(vz);
     x = x-xcen;
     y = y-ycen;
     z = z-zcen;
+    vx = vx - vxcen;
+    vy = vy - vycen;
+    vz = vz - vzcen;
   }
                                                                                                      // centering particle positions based on median
   Rcpp::NumericVector r(n), cr(n), theta(n), phi(n), vr(n), vt(n), vcr(n), vtheta(n), vphi(n), Jx(n), Jy(n), Jz(n);
@@ -97,8 +102,7 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
                             Rcpp::Named("Mass")      = Mass,
                             Rcpp::Named("Jx")        = Jx,
                             Rcpp::Named("Jy")        = Jy,
-                            Rcpp::Named("Jz")        = Jz,
-                            Rcpp::Named("part_type") = part_type);
+                            Rcpp::Named("Jz")        = Jz);
 
   return(df);
 

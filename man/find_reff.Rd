@@ -4,15 +4,10 @@
 \alias{find_reff}
 \title{Find the effective radius of a simulated galaxy.}
 \usage{
-find_reff(filename, ptype = NA, r200 = 200, inc_deg, fract = 0.5,
-  axis_ratio, angular_size)
+find_reff(simdata, r200 = 200, inc_deg, fract = 0.5, axis_ratio,
+  angular_size)
 }
 \arguments{
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
-
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{inc_deg}{The observed inclination of the simulated galaxy in degrees.}
@@ -25,6 +20,11 @@ observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.}
 
 \item{angular_size}{The kpc/'' scaling factor output by \code{\link{obs_data_prep}} used to give
 the axis ratios in both kpc and ''.}
+
+\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
+
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
 }
 \value{
 Returned is a scaled axis ratio that describes the semi-major and semi-minor axes of an

@@ -31,27 +31,23 @@
 #'                    angular_size = data$angular_size)
 #'
 
-find_reff = function(filename, ptype=NA, r200=200, inc_deg, fract=0.5, axis_ratio, angular_size){
+find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_size){
 
-  galaxy_file = h5::h5file(filename, mode = "r")           # reading in the snapshot data
-  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-                           "y"         = h5::readDataSet(galaxy_file["y"]),
-                           "z"         = h5::readDataSet(galaxy_file["z"]),
-                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
-                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
-                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
-                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-  h5::h5close(galaxy_file)                                 # close the snapshot data file
+  result = grepl(paste(c("PartType2", "PartType3", "PartType4"), collapse = "|"), names(simdata))
+  # finding the luminous matter within the simulation for imaging
 
-  ppart = unique(galaxy_data$part_type)                    # all possible particle values
-
-  if (is.na(ptype[1])) {ptype = ppart}                     # if ptype is NA, set as all possible particle values
-  if (all(ptype %in% ppart)){
-    galaxy_data =  galaxy_data[galaxy_data$part_type %in% ptype,]
+  if (any(result)) {                                       # concatenating the seperate particle
+    present = which(result)                                #  data.frames into a single data.frame
+    if (length(present) == 1){
+      galaxy_data = simdata[[present[1]]]$Part
+    } else if (length(present) == 2){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part)
+    } else if (length(present) == 3){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part, simdata[[present[3]]]$Part)
+    }
   } else {
-    cat("Particles of ptype =", paste(ptype[!ptype %in% ppart], collapse = ","), "are missing in this model. \n")
-    stop("Npart Error")
+    cat("There are no particles representing luminous matter in this simulation (i.e. no stars, bulge or disc particles). \n")
+    stop("LumPart Error") # if no stars, bulge or disc component, stop trying to build IFU cube
   }
 
   inc_rad    = inc_deg * (pi / 180)                        # the galaxy inclination in radians
