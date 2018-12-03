@@ -8,6 +8,8 @@ find_reff(simdata, r200 = 200, inc_deg, fract = 0.5, axis_ratio,
   angular_size)
 }
 \arguments{
+\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
+
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{inc_deg}{The observed inclination of the simulated galaxy in degrees.}
@@ -20,11 +22,6 @@ observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.}
 
 \item{angular_size}{The kpc/'' scaling factor output by \code{\link{obs_data_prep}} used to give
 the axis ratios in both kpc and ''.}
-
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
 }
 \value{
 Returned is a scaled axis ratio that describes the semi-major and semi-minor axes of an
@@ -37,11 +34,11 @@ radius and returning the radial coordinate at which half the total number of par
 galaxy is contained.
 }
 \examples{
-data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
-ifucube   = ifu_cube(obs_data = data)
+galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+data        = obs_data_prep(simdata = galaxy_data)
+ifucube     = ifu_cube(obs_data = data)
 
-output = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-                   ptype        = NA,
+output = find_reff(simdata      = galaxy_data,
                    r200         = 10,
                    inc_deg      = 0,
                    axis_ratio   = ifucube$axis_ratio,
