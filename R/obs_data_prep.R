@@ -4,10 +4,7 @@
 #'The purpose of this function is to calculate the properties necessary for constructing an IFU
 #' observation data cube of a simulated galaxy at a user specified inclination and redshift.
 #'
-#'@param filename The Gadget output file containing the particle information of the galaxy to be
-#' analysed.
-#'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
-#' simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.
+#'@param simdata The simulation information data.frame output by \code{\link{sim_data}}.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param z The galaxy redshift.
 #'@param fov The field of view of the IFU, diameter in arcseconds.
@@ -19,8 +16,6 @@
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
-#'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
-#'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@return Returned is a list that contains:
 #' \item{\code{$galaxy_obs}}{A data frame of the observed particle information (which contains the
 #'   galaxy particle info from the GADGET file, with added coordinates \code{$galaxy_obs$z_obs},
@@ -28,15 +23,16 @@
 #'   \code{$galaxy_obs$flux}, in units of 1e-16 erg s-1 cm-2).}
 #' \item{\code{$sbin}}{The number of spatial bins.}
 #' \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
-#' \item{\code{$pixsize}}{The size of the spatial bins in arcseconds.}
+#' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
+#'  redshift.}
 #' \item{\code{$vbin}}{The number of velocity bins.}
 #' \item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
 #' \item{\code{$lsf_size}}{The gaussian standard deviation of the line spread function in km/s.}
-#' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
-#'  redshift.}
+#' \item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
+#'  aperture.}
 #'@examples
-#' output = obs_data_prep(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                        r200         = 200,
+#' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#' output = obs_data_prep(simdata      = galaxy_data,
 #'                        z            = 0.1,
 #'                        fov          = 15,
 #'                        ap_shape     = "circular",
@@ -44,9 +40,7 @@
 #'                        lsf_fwhm     = 2.65,
 #'                        pixel_sscale = 0.5,
 #'                        pixel_vscale = 1.04,
-#'                        inc_deg      = 0,
-#'                        m2l_disc     = 2,
-#'                        m2l_bulge    = 1)
+#'                        inc_deg      = 0)
 #'
 
 obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800,
@@ -142,14 +136,14 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   if ("PartType2" %in% names(simdata)){                    # if there are disc particles in the data file,
     inc_discID = which(simdata$PartType2$Part$ID %in% galaxy_cdf$ID)
     disc_ids = simdata$PartType2$Part$ID[inc_discID]
-    galaxy_cdf[(galaxy_cdf$ID == disc_ids),]$flux = (simdata$PartType2$Lum[inc_discID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
+    galaxy_cdf[(galaxy_cdf$ID %in% disc_ids),]$flux = (simdata$PartType2$Lum[inc_discID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
     # calculating flux from bulge particles fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
   }
 
   if ("PartType3" %in% names(simdata)){                    # if there are bulge particles in the data file,
     inc_bulgeID = which(simdata$PartType3$Part$ID %in% galaxy_cdf$ID)
     bulge_ids = simdata$PartType3$Part$ID[inc_bulgeID]
-    galaxy_cdf[(galaxy_cdf$ID == bulge_ids),]$flux = (simdata$PartType3$Lum[inc_bulgeID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
+    galaxy_cdf[(galaxy_cdf$ID %in% bulge_ids),]$flux = (simdata$PartType3$Lum[inc_bulgeID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
     # calculating flux from bulge particles fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
   }
 
@@ -168,10 +162,10 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
                                outtype = "Jansky", filters = tempfilt, ref="Planck15")$out
         j = j+1
       }
-      galaxy_cdf[(galaxy_cdf$ID == star_ids),]$flux = (star_flux * 3e-9 * (pixel_sscale^2)) / (central_wvl * 1e-4 * 1e-16)
+      galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux = (star_flux * 3e-9 * (pixel_sscale^2)) / (central_wvl * 1e-4 * 1e-16)
       # flux in units of 10-16 erg s-1 cm-2 arcsec-2
     } else {
-      galaxy_cdf[(galaxy_cdf$ID == star_ids),]$flux = (simdata$PartType4$Lum[inc_starID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
+      galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux = (simdata$PartType4$Lum[inc_starID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
     }
   }
 
@@ -182,7 +176,6 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
                 "vbin"        = vbin,
                 "vbinsize"    = vbinsize,
                 "lsf_size"    = lsf_size,
-                "pixel_sscale"= pixel_sscale,
                 "appregion"   = appregion)
 
   return(output)

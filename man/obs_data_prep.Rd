@@ -9,6 +9,8 @@ obs_data_prep(simdata, r200 = 200, z = 0.05, fov = 15,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70)
 }
 \arguments{
+\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
+
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{z}{The galaxy redshift.}
@@ -28,16 +30,6 @@ output in arcseconds.}
 filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
-
-\item{filename}{The Gadget output file containing the particle information of the galaxy to be
-analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 1 - gas, 2 - dark matter, 3 - disc, 4 - bulge, 5 - stars, 6 - boundary.}
-
-\item{m2l_disc}{The mass-to-light ratio of the disc component in solar units.}
-
-\item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
 }
 \value{
 Returned is a list that contains:
@@ -47,20 +39,21 @@ Returned is a list that contains:
   \code{$galaxy_obs$flux}, in units of 1e-16 erg s-1 cm-2).}
 \item{\code{$sbin}}{The number of spatial bins.}
 \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
-\item{\code{$pixsize}}{The size of the spatial bins in arcseconds.}
+\item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
+ redshift.}
 \item{\code{$vbin}}{The number of velocity bins.}
 \item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
 \item{\code{$lsf_size}}{The gaussian standard deviation of the line spread function in km/s.}
-\item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
- redshift.}
+\item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
+ aperture.}
 }
 \description{
 The purpose of this function is to calculate the properties necessary for constructing an IFU
 observation data cube of a simulated galaxy at a user specified inclination and redshift.
 }
 \examples{
-output = obs_data_prep(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-                       r200         = 200,
+galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+output = obs_data_prep(simdata      = galaxy_data,
                        z            = 0.1,
                        fov          = 15,
                        ap_shape     = "circular",
@@ -68,8 +61,6 @@ output = obs_data_prep(filename     = system.file("extdata", 'S0_vignette', pack
                        lsf_fwhm     = 2.65,
                        pixel_sscale = 0.5,
                        pixel_vscale = 1.04,
-                       inc_deg      = 0,
-                       m2l_disc     = 2,
-                       m2l_bulge    = 1)
+                       inc_deg      = 0)
 
 }
