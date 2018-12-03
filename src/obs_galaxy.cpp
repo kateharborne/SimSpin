@@ -6,23 +6,22 @@ using namespace Rcpp;
 //' Constructing galaxy observation data from the Gadget output file data.
 //'
 //' The purpose of this function is to produce the observable features of simulation data when
-//' taking mock IFU observations. It accepts the Gadget particle information output from the
-//' \code{snapshot::snapread} function and returns the observable galaxy properties projected at a
+//' taking mock IFU observations. It accepts particle information output from the
+//' \code{\link{sim_data}} function and returns the observable galaxy properties projected at a
 //' user supplied inclination.
 //'
-//' @param part_data The data frame output by \code{snapshot::snapread} for galaxy simulation data
-//'  from Gadget.
-//' @param centre A logical that tells the function to centre the galaxy about its centre of mass or
-//'  not (i.e. TRUE or FALSE).
+//' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
+//' @param centre A logical that tells the function to centre the galaxy about its centre of mass
+//'  and velocity or not (i.e. TRUE or FALSE).
 //' @param inc_rad The observed inclination angle in radians.
 //' @return Returns a data frame containing the original particle information plus the observed
 //'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 //'  sight velocity (\code{$vy_obs}) at the given inclination.
 //' @examples
-//'   data = snapshot::snapread(system.file("extdata", 'S0_vignette', package="SimSpin"))
-//'   data$part$part_type = rep(0,length(data$part))
+//'   data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+//'   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
 //'
-//'   output = obs_galaxy(part_data = data$part,
+//'   output = obs_galaxy(part_data = galaxy_data,
 //'                       centre    = TRUE,
 //'                       inc_rad   = 0)
 //' @export
