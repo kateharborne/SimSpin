@@ -20,7 +20,6 @@ using namespace Rcpp;
 //'  and its associated velocity (\code{$cr} and \code{$vcr}) and the mass of each particle
 //'  (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},\code{$Jz}).
 //' @examples
-//' @examples
 //'   data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 //'   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
 //'
