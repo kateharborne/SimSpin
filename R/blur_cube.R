@@ -18,7 +18,8 @@
 #'\item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
 #'\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 #'@examples
-#'  data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
+#'  galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#'  data      = obs_data_prep(galaxy_data)
 #'  ifucube   = ifu_cube(obs_data = data)
 #'
 #'  blurcube  = blur_cube(ifu_datacube   = ifucube,
