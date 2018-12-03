@@ -1,8 +1,33 @@
-# Kate Harborne (last edit - 23/04/2018)
+# Kate Harborne (last edit - 03/12/2018)
 #'Prepare simulation data for SimSpin
 #'
+#'The purpose of this function is to take a SimSpin simulation file (an HDF5 file with particle
+#' information subset in particle types, "PartTypeX") and output a data.frame that is easy for
+#' processing throughout the rest of the package. This reduces the number of times that you need to
+#' load the simulation into the package, which is the most time-consuming process. This also allows
+#' you to combine the particle information with spectral information output from other codes.
+#'
+#'@param filename The SimSpin HDF5 file containing the particle information of the galaxy.
+#'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
+#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
+#'@param SSP The spectral information HDF5 file containing the luminosities for each particle at
+#' each wavelength.
+#'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
+#'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
+#'@param m2l_star If no SSP file is specified and stellar particles exist in the file, the
+#' mass-to-light ratio of the stellar component in solar units.
+#'
+#'@return A list of data.frames containing the particle information (\code{$Part}) for each
+#' particle type requested from the simulation. Each data frame contains the position (x, y, z)
+#' and velocity (vx, vy, vz) information, along with the ID and mass of each particle. Also
+#' associated with each PartType element in the list is an array of luminosities, \code{$Lum}. If
+#' SSP information has been supplied, this will be a 2D array with a second wavelength array
+#' (\code{$Wav}) specifying the wavelength at which each luminosity is defined. Else, a single
+#' luminosity will be associated with each particle.
+#'@examples
+#' output = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 
-sim_data = function(filename, ptype=NA, SSP=NA, m2l_disc=1, m2l_bulge=1, m2l_star = 1){
+sim_data = function(filename, ptype=NA, SSP=NA, m2l_disc=1, m2l_bulge=1, m2l_star=1){
 
   galaxy_file = hdf5r::h5file(filename, mode = "r")           # reading in the snapshot data
   ppart = substring(hdf5r::list.groups(galaxy_file), 1)
@@ -77,7 +102,7 @@ sim_data = function(filename, ptype=NA, SSP=NA, m2l_disc=1, m2l_bulge=1, m2l_sta
 
   }
 
-  if ("PartType4" %in% ptype){ # if gas particles are requested
+  if ("PartType4" %in% ptype){ # if stellar particles are requested
     star_n = length(hdf5r::readDataSet(galaxy_file[["PartType4/x"]]))
     star_ID = formatC(1:star_n, width = floor(log10(star_n)) + 1, format = "d", flag = "0")
     star_part = data.frame("ID"        = as.integer(paste0("4", star_ID)),
@@ -89,7 +114,7 @@ sim_data = function(filename, ptype=NA, SSP=NA, m2l_disc=1, m2l_bulge=1, m2l_sta
                            "vz"        = hdf5r::readDataSet(galaxy_file[["PartType4/vz"]]),
                            "Mass"      = hdf5r::readDataSet(galaxy_file[["PartType4/Mass"]]))
 
-    if (!is.na(SSP)){
+    if (!is.na(SSP)){ # if spectral information is supplied
       f = hdf5r::h5file(SSP, mode = "r")
       star_lum = hdf5r::readDataSet(f[["PartType4/Luminosity"]])
       star_wave = hdf5r::readDataSet(f[["PartType4/Wavelength"]])

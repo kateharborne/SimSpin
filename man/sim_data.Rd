@@ -7,6 +7,38 @@
 sim_data(filename, ptype = NA, SSP = NA, m2l_disc = 1,
   m2l_bulge = 1, m2l_star = 1)
 }
+\arguments{
+\item{filename}{The SimSpin HDF5 file containing the particle information of the galaxy.}
+
+\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
+simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
+
+\item{SSP}{The spectral information HDF5 file containing the luminosities for each particle at
+each wavelength.}
+
+\item{m2l_disc}{The mass-to-light ratio of the disc component in solar units.}
+
+\item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
+
+\item{m2l_star}{If no SSP file is specified and stellar particles exist in the file, the
+mass-to-light ratio of the stellar component in solar units.}
+}
+\value{
+A list of data.frames containing the particle information (\code{$Part}) for each
+particle type requested from the simulation. Each data frame contains the position (x, y, z)
+and velocity (vx, vy, vz) information, along with the ID and mass of each particle. Also
+associated with each PartType element in the list is an array of luminosities, \code{$Lum}. If
+SSP information has been supplied, this will be a 2D array with a second wavelength array
+(\code{$Wav}) specifying the wavelength at which each luminosity is defined. Else, a single
+luminosity will be associated with each particle.
+}
 \description{
-Prepare simulation data for SimSpin
+The purpose of this function is to take a SimSpin simulation file (an HDF5 file with particle
+information subset in particle types, "PartTypeX") and output a data.frame that is easy for
+processing throughout the rest of the package. This reduces the number of times that you need to
+load the simulation into the package, which is the most time-consuming process. This also allows
+you to combine the particle information with spectral information output from other codes.
+}
+\examples{
+output = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 }
