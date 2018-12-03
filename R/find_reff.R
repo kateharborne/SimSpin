@@ -15,8 +15,9 @@
 #' observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.
 #'@param angular_size The kpc/'' scaling factor output by \code{\link{obs_data_prep}} used to give
 #' the axis ratios in both kpc and ''.
-#'@return Returned is a scaled axis ratio that describes the semi-major and semi-minor axes of an
-#' ellipse that contains half the total number of particles.
+#'@return Returned is a data.frame containing the scaled axis ratio that describes the semi-major
+#' and semi-minor axes of an ellipse that contains the specified fraction of the total number of
+#' particles.
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)

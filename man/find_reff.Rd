@@ -24,8 +24,9 @@ observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.}
 the axis ratios in both kpc and ''.}
 }
 \value{
-Returned is a scaled axis ratio that describes the semi-major and semi-minor axes of an
-ellipse that contains half the total number of particles.
+Returned is a data.frame containing the scaled axis ratio that describes the semi-major
+and semi-minor axes of an ellipse that contains the specified fraction of the total number of
+particles.
 }
 \description{
 The purpose of this function is to find the observed effective radius of a simulated galaxy
