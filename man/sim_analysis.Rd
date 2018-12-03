@@ -8,6 +8,8 @@ sim_analysis(simdata, bin_type = "r", rmax = 200, rbin = 200,
   DM_profile = NA)
 }
 \arguments{
+\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
+
 \item{bin_type}{The direction in which to bin the simulation model - \code{"r"} (default) bins
 radially in 3D spherical shells, \code{"cr"} bins radially in 2D circular rings, \code{"z"} bins
 in 1D off the plane of the galaxy.}
@@ -23,11 +25,6 @@ correctly determined. Options include \code{NA} (default),
 scale radius, and DM_rhof is the density evaluated at the flattening radius - and
 \code{list("profile"="Hernquist", "DM_mass"=184.9, "DM_a"=34.5)} - where DM_mass is the total mass of the dark
 matter component and DM_a is the scale radius of the halo.}
-
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
 }
 \value{
 A list that contains the particle data of the simulation (\code{$part_data} and \code{$head_data} for a particle data.frame and header
@@ -58,11 +55,11 @@ not contain the anisotropy, rotational and circular velocities or spin parameter
 only physical when defined using 3D spherical shells.
 }
 \examples{
- output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
+ galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+ output = sim_analysis(simdata = galaxy_data,
                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 
- output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
-                       ptype      = c(2,3),
+ output = sim_analysis(simdata    = galaxy_data,
                        bin_type   = "cr",
                        rmax       = 300,
                        rbin       = 100,
