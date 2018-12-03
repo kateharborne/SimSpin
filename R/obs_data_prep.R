@@ -176,7 +176,8 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
                 "vbin"        = vbin,
                 "vbinsize"    = vbinsize,
                 "lsf_size"    = lsf_size,
-                "appregion"   = appregion)
+                "appregion"   = appregion,
+                "pixel_sscale"= pixel_sscale)
 
   return(output)
 }
