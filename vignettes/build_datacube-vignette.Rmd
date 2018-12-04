@@ -22,7 +22,7 @@ pal = rf(7)
 
 Here, we examine the flexibility of the `build_datacube()` function - 
 
-`build_datacube(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold, blur)`
+`build_datacube(simdata, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, threshold, blur)`
 
 The purpose of this function is to construct a synthetic integral field unit (IFU) kinematic data cube from N-body particle simulations. Produced is a 3D array that contains the spatial and velocity information of a simulated galaxy in a similar format to that which would be constructed observationally in an IFU kinematic data cube. This function allows you to:
 
@@ -44,11 +44,13 @@ The function will then output:
 
 The idea is that this function is general enough in its design to produce a wide range of possible data cubes, mimicking different surveys that currently exist for observational comparison. In this walk-through, we will consider the IFU survey, SAMI. 
 
-For this example, we will analyse `filename = "~/SimSpin/inst/extdata/S0_vignette"` to explore the various uses of this function. This is the Gadget snapshot for a $10^{10} M_{\odot}$ S0 galaxy containing 50,000 disk and 75,000 bulge particles of equal mass. The dark matter particles in this simulation have been replaced by a Hernquist analytic profile, with a $M_{DM}$ = 184.9 $\times 10^{10} M_{\odot}$ and halo scale radius, $a_{DM}$ = 34.5 kpc. 
+For this example, we will analyse `SimSpin_example.hdf5` file included within the `SimSpin` package to explore the various uses of this function. This is the Gadget snapshot for a $10^{10} M_{\odot}$ S0 galaxy containing 50,000 disk and 75,000 bulge particles of equal mass. The dark matter particles in this simulation have been replaced by a Hernquist analytic profile, with a $M_{DM}$ = 184.9 $\times 10^{10} M_{\odot}$ and halo scale radius, $a_{DM}$ = 34.5 kpc. We first read in the data file using the `sim_data()` function. The list produced can then be passed to `build_datacube()`:
 
 ``` {r} 
+galaxy_file = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+
 SAMI_datacube = 
-  build_datacube(filename     = "../inst/extdata/S0_vignette",
+  build_datacube(simdata      = galaxy_file,
                  z            = 0.06,        # redshift (i.e. projected distance)
                  fov          = 15,          # field-of-view of IFU in ''
                  ap_shape     = "circular",  # shape of the aperture 
@@ -57,8 +59,6 @@ SAMI_datacube =
                  pixel_sscale = 0.5,         # spatial pixel scale size in ''
                  pixel_vscale = 1.04,        # velocity pixel scale size in angstroms
                  inc_deg      = 90,          # projected galaxy inclination in degrees
-                 m2l_disc     = 2,           # disc mass-to-light in solar units
-                 m2l_bulge    = 1,           # bulge mass-to-light in solar units
                  threshold    = 25)          # magnitude limit of the observation
 ```
 
@@ -92,7 +92,7 @@ We can also apply spatial convolution at this point, introducing some level of b
 
 ``` {r} 
 SAMI_datacube_blur = 
-  build_datacube(filename     = "../inst/extdata/S0_vignette",
+  build_datacube(simdata      = galaxy_file,
                  z            = 0.06,       
                  fov          = 15,         
                  ap_shape     = "circular",  
@@ -100,9 +100,7 @@ SAMI_datacube_blur =
                  lsf_fwhm     = 2.65,     
                  pixel_sscale = 0.5,         
                  pixel_vscale = 1.04,        
-                 inc_deg      = 90,           
-                 m2l_disc     = 2,           
-                 m2l_bulge    = 1,           
+                 inc_deg      = 90,      
                  threshold    = 25,          
                  blur         = list("psf" = "Moffat", "fwhm" = 2)) # specifying the PSF and fwhm
 ```

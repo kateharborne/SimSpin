@@ -72,7 +72,7 @@ build_datacube = function(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
   } else {                                                 # IF spatial blurring IS requested
 
     observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale)
+                                 pixel_sscale, pixel_vscale, inc_deg)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
     blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf,

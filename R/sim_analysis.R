@@ -54,7 +54,14 @@
 sim_analysis = function(simdata, bin_type="r", rmax=200, rbin=200, DM_profile=NA){
 
   result = grepl(paste(c("PartType0", "PartType1", "PartType2", "PartType3", "PartType4"), collapse = "|"), names(simdata))
-  # finding the luminous matter within the simulation for imaging
+  # finding the particles within the simulation for imaging
+
+  if (!("PartType0" %in% names(simdata))){ # if the simulation doesn't have any DM particles
+    if (is.na(DM_profile[1])){             # AND if no analytic DM_profile has been described
+      cat("No dark matter component is included in this analysis. Be aware that some profiles will not be realistic. \n")
+      warning("DM Error")                  # issue warning.
+    }
+  }
 
   if (any(result)) {                                       # concatenating the seperate particle
     present = which(result)                                #  data.frames into a single data.frame

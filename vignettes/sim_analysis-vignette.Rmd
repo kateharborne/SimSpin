@@ -22,7 +22,7 @@ pal = rf(7)
 
 Here, we examine the flexibility of the `sim_analysis()` function - 
 
-`sim_analysis(filename, ptype = NA, bin_type = "r", rmax = 200, rbin = 200, DM_profile = NA)`
+`sim_analysis(simdata, bin_type = "r", rmax = 200, rbin = 200, DM_profile = NA)`
 
 The purpose of this function is to calculate the kinematic properties of a simulated galaxy within certain user defined bins. Using this function, we can measure both individual components and the total galaxy:
 
@@ -36,28 +36,23 @@ The purpose of this function is to calculate the kinematic properties of a simul
 * the rotational velocity,
 * the spin parameter, $\lambda$.
 
-For this example, we will analyse `filename = "../inst/extdata/S0_vignette"` to explore the various uses of this function. This is the Gadget snapshot for a $10^{10} M_{\odot}$ S0 galaxy containing 50,000 disk and 75,000 bulge particles of equal mass. The dark matter particles in this simulation have been replaced by a Hernquist analytic profile, with a $M_{DM}$ = 184.9 $\times 10^{10} M_{\odot}$ and halo scale radius, $a_{DM}$ = 34.5 kpc. 
+For this example, we will analyse `SimSpin_example.hdf5` to explore the various uses of this function. This is the Gadget snapshot for a $10^{10} M_{\odot}$ S0 galaxy containing 50,000 disc and 75,000 bulge particles of equal mass. The dark matter particles in this simulation have been replaced by a Hernquist analytic profile, with a $M_{DM}$ = 184.9 $\times 10^{10} M_{\odot}$ and halo scale radius, $a_{DM}$ = 34.5 kpc. 
+
+We begin by loading the particle data in three ways. First, we load all the particles using the generic `sim_data()` function. We can load in specific components by specifying the `ptype`, where we use Gadget convention such that 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars. You can request any combnation of these types, for example the bulge and disc components would be requested with `ptype = c(2,3)`. Here, we also load each of the disc and bulge components seperately.
 
 ``` {r} 
-galaxy_file = h5::h5file("../inst/extdata/S0_vignette", mode = "r")           # reading in the snapshot data
-S0          = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-                         "y"         = h5::readDataSet(galaxy_file["y"]),
-                         "z"         = h5::readDataSet(galaxy_file["z"]),
-                         "vx"        = h5::readDataSet(galaxy_file["vx"]),
-                         "vy"        = h5::readDataSet(galaxy_file["vy"]),
-                         "vz"        = h5::readDataSet(galaxy_file["vz"]),
-                         "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-                         "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-h5::h5close(galaxy_file)                                 # close the snapshot data file
+galaxy_file = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+disc_file   = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"), ptype = 2)
+bulge_file  = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"), ptype = 3)
 ```
 
-If we run the `\sim_analysis()` function simply with the default inputs described above, 
+If we run the `sim_analysis()` function on the full galaxy file simply with the default inputs described above, 
 
 ``` {r, error=TRUE, purl=FALSE} 
-S0_defaults = sim_analysis(filename = "../inst/extdata/S0_vignette")
+S0_defaults = sim_analysis(galaxy_file)
 ```
 
-we receive an error. This is because the dark matter particles in the `S0_vignette` simulation provided have been replaced with an analytic description of the dark matter potential. As the function analyses all components in the simulation by default, the code issues an error. Without this mass in the form of particles, the output Gadget file contains no record of the effect that the dark matter analytic profile has on the other particles in the simulation. We need to specify this using a list, `DM_profile`, that contains details about that dark matter profile such that the total profile can be calculated properly. 
+we receive a warning. This is because the dark matter particles in the `SimSpin_example` simulation provided have been replaced with an analytic description of the dark matter potential. As the function analyses all components in the simulation by default, the code issues an error. Without this mass in the form of particles, the output Gadget file contains no record of the effect that the dark matter analytic profile has on the other particles in the simulation. We need to specify this using a list, `DM_profile`, that contains details about that dark matter profile such that the total profile can be calculated properly. 
 
 There are two options currently for the type of analytic DM profile, `"NFW"` and `"Hernquist"`, which each require different inputs:
 
@@ -70,28 +65,28 @@ There are two options currently for the type of analytic DM profile, `"NFW"` and
     * `"DM_mass"` is the dark matter mass in units $10^{10} M_{\odot}$.
     * `"DM_a"` is the scale radius of the halo in $kpc$.
 
-As the `S0_vignette` was run with a Hernquist analytic potential, we will use the second option:
+As the `SimSpin_example` was run with a Hernquist analytic potential, we will use the second option:
 
 ``` {r} 
-S0_total_3D = sim_analysis(filename   = "../inst/extdata/S0_vignette",
-                           DM_profile = list("profile" = "Hernquist",
-                                             "DM_mass" = 184.9, 
-                                             "DM_a"    = 34.5))
+S0_DM = list("profile" = "Hernquist",
+             "DM_mass" = 184.9, 
+             "DM_a"    = 34.5)
+
+S0_total_3D = sim_analysis(simdata    = galaxy_file,
+                           DM_profile = S0_DM)
 ```
 
-If we want to consider the radial profiles of the disk or bulge particles in isolation, the dark matter profile can be left unspecified without an error:
+If we want to consider the radial profiles of the disc or bulge particles in isolation, we specify the isolated data files generated using `sim_data()` above:
 
 ``` {r} 
-S0_disk_3D  = sim_analysis(filename = "../inst/extdata/S0_vignette",
-                           ptype    = c(2))
-
-S0_bulge_3D = sim_analysis(filename = "../inst/extdata/S0_vignette",
-                           ptype    = c(3))
+S0_disc_3D  = sim_analysis(simdata = disc_file, DM_profile = S0_DM)
+S0_bulge_3D = sim_analysis(simdata = bulge_file, DM_profile = S0_DM)
 ```
 
 In these cases, returned is a data frame containing the radial properties of the total galaxy in spherical shells of 1 kpc thickness (given the defaults `bin_type = "r"`, `rbin = 200` and `rmax = 200`). If you wish to consider a greater number of bins or a further radial distance from the centre, these parameters can be specified in the function. These spherical bins divide up the particles in the galaxy something like the image below: 
 
 ```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
+S0 = S0_total_3D$part_data
 S0_points = S0[abs(S0$x) < 175 & abs(S0$y) < 175 & abs(S0$z) < 175,]
 S0_points = S0_points[seq(1,nrow(S0_points), by=75),]
 S0_point2 = S0_points[S0_points$z > 0,]
@@ -119,23 +114,21 @@ Given that we have examined the system in three dimensions, we can now consider 
 ```{r, echo=FALSE, fig.width=5.5, fig.height=5, fig.align="center"}
 magicaxis::magplot(S0_total_3D$profile$r, S0_total_3D$profile$vc, type="l", col=pal[7], lwd=3, xlim = c(0,30), ylim = c(0,250), xlab="radius, kpc", ylab=expression("V"[C]*", km s"^-1))
 lines(S0_bulge_3D$profile$r, S0_bulge_3D$profile$vc, col=pal[5], lwd=3)
-lines(S0_disk_3D$profile$r, S0_disk_3D$profile$vc, col=pal[1], lwd=3)
-legend("topleft", c("total", "disk", "bulge"), col=c(pal[7], pal[1], pal[5]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
+lines(S0_disc_3D$profile$r, S0_disc_3D$profile$vc, col=pal[1], lwd=3)
+legend("topleft", c("total", "disc", "bulge"), col=c(pal[7], pal[1], pal[5]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
 
 magicaxis::magplot(S0_total_3D$profile$r, S0_total_3D$profile$lambda, type="l", col=pal[7], lwd=3, xlim = c(0,30), ylim=c(0, 2), xlab="radius, kpc", ylab=expression(paste(lambda)))
 lines(S0_bulge_3D$profile$r, S0_bulge_3D$profile$lambda, col=pal[5], lwd=3)
-lines(S0_disk_3D$profile$r, S0_disk_3D$profile$lambda, col=pal[1], lwd=3)
+lines(S0_disc_3D$profile$r, S0_disc_3D$profile$lambda, col=pal[1], lwd=3)
 
 ```
 
-The function also allows you to bin data in other ways - for example, if you need to bin your data radially along the plane of the disk, you could specify `bin_type = cr` to give cylindrical radial bins in the layout below:
+The function also allows you to bin data in other ways - for example, if you need to bin your data radially along the plane of the disc, you could specify `bin_type = cr` to give cylindrical radial bins in the layout below:
 
 ``` {r} 
-S0_total_2D = sim_analysis(filename   = "../inst/extdata/S0_vignette",
+S0_total_2D = sim_analysis(simdata    = galaxy_file,
                            bin_type   = "cr", 
-                           DM_profile = list("profile" = "Hernquist",
-                                             "DM_mass" = 184.9, 
-                                             "DM_a"    = 34.5))
+                           DM_profile = S0_DM)
 ```
 
 ```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
@@ -158,14 +151,12 @@ plot3D::points3D(S0_points$x, S0_points$y, S0_points$z, col="black", pch=16, alp
 
 ```
 
-There is also the option to specify `bin_type = z` in which you consider planes above the surface of the disk, such as:
+There is also the option to specify `bin_type = z` in which you consider planes above the surface of the disc, such as:
 
 ``` {r} 
-S0_total_1D = sim_analysis(filename   = "../inst/extdata/S0_vignette",
+S0_total_1D = sim_analysis(simdata    = galaxy_file,
                            bin_type   = "z", 
-                           DM_profile = list("profile" = "Hernquist",
-                                             "DM_mass" = 184.9, 
-                                             "DM_a"    = 34.5))
+                           DM_profile = S0_DM)
 ```
 
 ```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
@@ -206,11 +197,11 @@ These latter two `bin_type` choices will give a smaller number of profiles to pl
 
 Similarly, for `bin_type = "z"` we get:
 
-* the z-coordinates above the plane of the disk,
+* the z-coordinates above the plane of the disc,
 * the mass distributions,
 * the `log(`density`)` profiles,
 * the angular momentum components and magnitude,
-* the vertical velocity and dispersion off the plane of the disk.
+* the vertical velocity and dispersion off the plane of the disc.
 
 With this information, we can then consider mass and density profiles in different directions, for example:
 
