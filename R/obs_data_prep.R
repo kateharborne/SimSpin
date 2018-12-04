@@ -153,7 +153,7 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
     star_ids = simdata$PartType4$Part$ID[inc_starID]
 
     if (length(names(simdata$PartType4)) == 3){            #  and if there are spectra associated,
-      tempfilt=list(filt_g_SDSS)                           #  use ProSpect to get particle flux.
+      tempfilt=list(globalVariables(filt_g_SDSS))          #  use ProSpect to get particle flux.
       star_flux = numeric(length = length(galaxy_cdf$ID))
       j = 1
       for (i in inc_starID){
