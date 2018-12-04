@@ -29,8 +29,8 @@ The purpose of this function is to construct an IFU data cube. It accepts output
  each particle in the galaxy simulation in order to mimic the arrangement of an IFU data cube.
 }
 \examples{
-data = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
-
-cube = ifu_cube(obs_data  = data, threshold = 20)
+galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+data        = obs_data_prep(simdata = galaxy_data)
+cube        = ifu_cube(obs_data  = data, threshold = 20)
 
 }

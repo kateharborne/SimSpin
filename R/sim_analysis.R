@@ -12,14 +12,12 @@
 #' not contain the anisotropy, rotational and circular velocities or spin parameter as these are
 #' only physical when defined using 3D spherical shells.
 #'
-#'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
+#'@param simdata The simulation information data.frame output by \code{\link{sim_data}}.
 #'@param bin_type The direction in which to bin the simulation model - \code{"r"} (default) bins
 #' radially in 3D spherical shells, \code{"cr"} bins radially in 2D circular rings, \code{"z"} bins
 #' in 1D off the plane of the galaxy.
 #'@param rmax The maximum radial coordinate considered within the simulated galaxy in kpc.
 #'@param rbin The number of radial bins considered.
-#'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
-#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
 #'@param DM_profile If dark matter particles are not included in the analysis, this option allows
 #' you to use the DM profile for the mass distribution such that the circular velocity can be
 #' correctly determined. Options include \code{NA} (default),
@@ -42,38 +40,44 @@
 #' of particles off the plane of the disc is also given as \code{$sigma_z}, which describes the
 #' standard deviation of particle positions about the z-axis.
 #'@examples
-#'  output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#'  galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#'  output = sim_analysis(simdata = galaxy_data,
 #'                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 #'
-#'  output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                        ptype      = c(2,3),
+#'  output = sim_analysis(simdata    = galaxy_data,
 #'                        bin_type   = "cr",
 #'                        rmax       = 300,
 #'                        rbin       = 100,
 #'                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 #'
 
-sim_analysis = function(filename, bin_type="r", rmax=200, rbin=200, ptype=NA, DM_profile=NA){
+sim_analysis = function(simdata, bin_type="r", rmax=200, rbin=200, DM_profile=NA){
 
-  galaxy_file = h5::h5file(filename, mode = "r")           # reading in the snapshot data
-  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-                           "y"         = h5::readDataSet(galaxy_file["y"]),
-                           "z"         = h5::readDataSet(galaxy_file["z"]),
-                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
-                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
-                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
-                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-  h5::h5close(galaxy_file)                                 # close the snapshot data file
+  result = grepl(paste(c("PartType0", "PartType1", "PartType2", "PartType3", "PartType4"), collapse = "|"), names(simdata))
+  # finding the particles within the simulation for imaging
 
-  ppart = unique(galaxy_data$part_type)                    # all possible particle values
+  if (!("PartType0" %in% names(simdata))){ # if the simulation doesn't have any DM particles
+    if (is.na(DM_profile[1])){             # AND if no analytic DM_profile has been described
+      cat("No dark matter component is included in this analysis. Be aware that some profiles will not be realistic. \n")
+      warning("DM Error")                  # issue warning.
+    }
+  }
 
-  if (is.na(ptype[1])) {ptype = ppart}                     # if ptype is NA, set as all possible particle values
-  if (all(ptype %in% ppart)){
-    galaxy_data =  galaxy_data[galaxy_data$part_type %in% ptype,]
-  } else {
-    cat("Particles of ptype =", paste(ptype[!ptype %in% ppart], collapse = ","), "are missing in this model. \n")
-    stop("Npart Error")
+  if (any(result)) {                                       # concatenating the seperate particle
+    present = which(result)                                #  data.frames into a single data.frame
+    if (length(present) == 1){
+      galaxy_data = simdata[[present[1]]]$Part
+    } else if (length(present) == 2){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part)
+    } else if (length(present) == 3){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part, simdata[[present[3]]]$Part)
+    } else if (length(present) == 4){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part, simdata[[present[3]]]$Part,
+                          simdata[[present[4]]]$Part)
+    } else if (length(present) == 5){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part, simdata[[present[3]]]$Part,
+                          simdata[[present[4]]]$Part, simdata[[present[5]]]$Part)
+    }
   }
 
   galaxy_df  = sim_galaxy(galaxy_data, centre=TRUE)        # adding spherical coordinates and J

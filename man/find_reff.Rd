@@ -4,14 +4,11 @@
 \alias{find_reff}
 \title{Find the effective radius of a simulated galaxy.}
 \usage{
-find_reff(filename, ptype = NA, r200 = 200, inc_deg, fract = 0.5,
-  axis_ratio, angular_size)
+find_reff(simdata, r200 = 200, inc_deg, fract = 0.5, axis_ratio,
+  angular_size)
 }
 \arguments{
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
+\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
 
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
@@ -27,8 +24,9 @@ observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.}
 the axis ratios in both kpc and ''.}
 }
 \value{
-Returned is a scaled axis ratio that describes the semi-major and semi-minor axes of an
-ellipse that contains half the total number of particles.
+Returned is a data.frame containing the scaled axis ratio that describes the semi-major
+and semi-minor axes of an ellipse that contains the specified fraction of the total number of
+particles.
 }
 \description{
 The purpose of this function is to find the observed effective radius of a simulated galaxy
@@ -37,11 +35,11 @@ radius and returning the radial coordinate at which half the total number of par
 galaxy is contained.
 }
 \examples{
-data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
-ifucube   = ifu_cube(obs_data = data)
+galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+data        = obs_data_prep(simdata = galaxy_data)
+ifucube     = ifu_cube(obs_data = data)
 
-output = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-                   ptype        = NA,
+output = find_reff(simdata      = galaxy_data,
                    r200         = 10,
                    inc_deg      = 0,
                    axis_ratio   = ifucube$axis_ratio,

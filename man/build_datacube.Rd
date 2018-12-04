@@ -4,15 +4,11 @@
 \alias{build_datacube}
 \title{Constructing kinematic data cubes.}
 \usage{
-build_datacube(filename, ptype = NA, r200 = 200, z, fov, ap_shape,
-  central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc,
-  m2l_bulge, threshold, blur)
+build_datacube(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
+  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, threshold, blur)
 }
 \arguments{
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
+\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
 
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
@@ -34,10 +30,6 @@ filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
 
-\item{m2l_disc}{The mass-to-light ratio of the disc component in solar units.}
-
-\item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
-
 \item{threshold}{The magnitude limit of the observation.}
 
 \item{blur}{\emph{Optional} Specified to apply observational seeing effects to the cube. A list
@@ -52,7 +44,11 @@ A list containing:
 \item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
 \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
-\code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
+ \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
+\item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
+\item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
+\item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
+  redshift.}
 }
 \description{
 The purpose of this basic function is to use the \code{SimSpin} package sub-functions to
@@ -62,8 +58,8 @@ array corresponding to the kinematic data cube for that mock observation, the co
 labels and the observed axis ratio of the observed galaxy.
 }
 \examples{
-cube = build_datacube(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-                      r200         = 200,
+galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+cube = build_datacube(simdata      = galaxy_data,
                       z            = 0.1,
                       fov          = 15,
                       ap_shape     = "circular",
@@ -72,8 +68,6 @@ cube = build_datacube(filename     = system.file("extdata", 'S0_vignette', packa
                       pixel_sscale = 0.5,
                       pixel_vscale = 1.04,
                       inc_deg      = 0,
-                      m2l_disc     = 2,
-                      m2l_bulge    = 1,
                       threshold    = 25)
 
 }

@@ -9,18 +9,21 @@
 #' velocity and dispersion images.
 #'@return Returns three plots - a flux image, a velcoity image and a dispersion image.
 #'@examples
-#' lambdar = find_lambda(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                       z            = 0.1,
+#' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#' lambdar = find_lambda(simdata      = galaxy_data,
+#'                       r200         = 200,
+#'                       z            = 0.05,
 #'                       fov          = 15,
 #'                       ap_shape     = "circular",
 #'                       central_wvl  = 4800,
 #'                       lsf_fwhm     = 2.65,
 #'                       pixel_sscale = 0.5,
 #'                       pixel_vscale = 1.04,
-#'                       inc_deg      = 0,
-#'                       m2l_disc     = 2,
-#'                       m2l_bulge    = 1,
+#'                       inc_deg      = 70,
 #'                       threshold    = 25,
+#'                       measure_type = list(type = "fixed",
+#'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
+#'                                           fac = 1),
 #'                       IFU_plot     = FALSE)
 #'
 #' plot_ifu(lambdar)

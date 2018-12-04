@@ -5,21 +5,23 @@ Version: 0.1.0
 Author: Katherine Harborne
 Maintainer: <katherine.harborne@icrar.org>
 Description: The purpose of this package is to provide a set of tools to "observe" simulations of galaxies as if you were an observer using an integral field unit (IFU). The galaxy model can be observed at a chosen inclination and an IFU observation can be produced in a selection of different spatial shapes (square, circular, and hexagonal) to account for the variety of CCD arrangements used by current telescopes. This data cube can be used to calculate the value an observer would measure for the spin parameter compared to the value that is measured directly from the simulation.
-License: LGPL-3
+License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
 Imports:
     Rcpp,
-    h5,
+    hdf5r,
     magicaxis,
     ProFit,
     fields,
     RColorBrewer,
-    plotrix
+    plotrix,
+    FITSio
 Depends:
-    celestial
-RoxygenNote: 6.1.0
+    celestial,
+    ProSpect
+RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,
     plot3D

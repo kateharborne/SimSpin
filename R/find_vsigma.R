@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 23/04/2018)
+# Kate Harborne (last edit - 03/12/18)
 #'Measuring observable galaxy kinematics.
 #'
 #'The purpose of this basic function is to use the \code{SimSpin} package sub-functions to measure
@@ -8,9 +8,7 @@
 #' \code{\link{plot_ifu}}) and return the V/\eqn{\sigma} ratio within a user specified measurement
 #' radius.
 #'
-#'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
-#'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
-#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
+#'@param simdata The simulation information data.frame output by \code{\link{sim_data}}.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param z The galaxy redshift.
 #'@param fov The field of view of the IFU, diameter in arcseconds.
@@ -22,15 +20,24 @@
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
-#'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
-#'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@param threshold The flux threshold of the observation.
-#'@param measure_type A list specifying the radius within which \eqn{\lambda_R} is measured. If
-#' \code{list(type = "fit", fac = 1)}, \eqn{\lambda_R} is measured in a specified multiple of
-#' \eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the unblurred galaxy  counts image.
-#' If \code{list(type = "specified", fac = 1, axis_ratio = data.frame("a" = 2, "b" = 1))},
-#' \eqn{\lambda_R} is calculated within some factor of the effective radius, \code{fac *}
-#' \eqn{R_{eff}} with specified axis ratio externally as a data frame in units of kpc.
+#'@param measure_type A list specifying the radius within which \eqn{\lambda_R} is measured. There
+#' are three options for this:
+#' \enumerate{
+#' \item If \code{list("type" = "fit", "fac" = 1)}, \eqn{\lambda_R} is measured in a specified
+#'  multiple of \code{$fac *} \eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the
+#'  unblurred galaxy counts image.
+#' \item If \code{list("type" = "specified", "fract" = 0.5, "axis_ratio" = data.frame("a" = 2,
+#'  "b" = 1))}, the effective radius of the galaxy is measured from the unblurred counts image as
+#'  in "fit", but the axis ratio of the grown ellipse is kept at the supplied axis ratio and grown
+#'  until it contains some fraction (\code{$fract}) of the total particles. \eqn{\lambda_R} is
+#'  calculated within this ellipse.
+#' \item Finally, if \code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2,
+#' "b" = 1, "ang" = 90))}, \eqn{\lambda_R} is measured within an ellipse described by the supplied
+#' "axis_ratio" in kpc (or a multiple of that ellipse size given by "fac") at the position angle
+#' "ang" -  no measurement of the effective radius is made, assuming that the supplied values are
+#' determined using another package.
+#' }
 #'@param blur \emph{Optional} Specify if you wish to apply observational seeing effects to the
 #' cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the
 #' shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}. \code{"fwhm"} is
@@ -46,16 +53,20 @@
 #' \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 #' \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame
 #'  where \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
+#' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
+#'  redshift.}
+#' \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
+#' \item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
 #' \item{\code{$vsigma}}{The observed V/\eqn{\sigma}.}
 #' \item{\code{$counts_img}}{The observed flux image.}
 #' \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 #' \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
-#' \item{\code{$reff_ellipse}}{The observed measurement radius.}
-#' And optionally, specified by the \code{dispersion_analysis} parameter, the mean and median
-#' values of the line-of-sight velocity dispersion (\code{$dispersion_analysis}). The observational
-#' images will also be plotted.
+#' \item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
+#'  aperture.}
+#'
 #'@examples
-#' vsigma = find_vsigma(filename        = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#' vsigma = find_vsigma(simdata         = galaxy_data,
 #'                      r200            = 200,
 #'                      z               = 0.1,
 #'                      fov             = 15,
@@ -65,32 +76,36 @@
 #'                      pixel_sscale    = 0.5,
 #'                      pixel_vscale    = 1.04,
 #'                      inc_deg         = 0,
-#'                      m2l_disc        = 2,
-#'                      m2l_bulge       = 1,
 #'                      threshold       = 25,
-#'                      measure_type    = list(type = "specified",
-#'                                             axis_ratio = data.frame("a"=3.5, "b"=1.7),
+#'                      measure_type    = list(type = "fixed",
+#'                                             axis_ratio = data.frame("a"=3.5, "b"=1.7,
+#'                                                                     "angle"=90),
 #'                                             fac = 1),
 #'                      IFU_plot        = FALSE)
 #'
 
 
-find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                       pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
+find_vsigma = function(simdata, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                       pixel_sscale, pixel_vscale, inc_deg, threshold,
                        measure_type = list(type="fit", fac=1), blur, IFU_plot=TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
-    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge)
+    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                                 pixel_sscale, pixel_vscale, inc_deg)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = ifu_imgs$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & measured axis ratio
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
       vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
                                 reff_axisratio = measure_type$fac * reff_ar,
                                 sbinsize = observe_data$sbinsize)
@@ -98,22 +113,44 @@ find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
-                               angular_size = observe_data$angular_size)
+                               angular_size = observe_data$angular_size,
+                               fract = measure_type$fract)
                                                            # Reff from data & supplied axis ratio
+
       vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
                                 reff_axisratio = measure_type$fac * reff_ar,
                                 sbinsize = observe_data$sbinsize)
                                                            # measure lambdaR within specified Reff
     }
 
+    if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
+      reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
+                                "b_kpc"    = measure_type$axis_ratio$b,
+                                "a_arcsec" = measure_type$axis_ratio$a / observe_data$angular_size,
+                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size,
+                                "angle"    = measure_type$axis_ratio$ang)
+      # Reff at fixed specification
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
+      vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
+                                reff_axisratio = measure_type$fac * reff_ar,
+                                sbinsize = observe_data$sbinsize)
+      # measure lambdaR within specified Reff
+    }
+
+
     output       = list("datacube" = ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
                         "ybin_labels" = ifu_imgs$ybin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
-                        "axis_ratio" = reff_ar, "vsigma" = vsigma$obs_vsigma,
+                        "axis_ratio" = reff_ar, "angular_size"=observe_data$angular_size,
+                        "sbinsize"=observe_data$sbinsize,
+                        "vbinsize"=observe_data$vbinsize, "vsigma" = vsigma$obs_vsigma,
                         "counts_img" = vsigma$counts_img, "velocity_img" = vsigma$velocity_img,
-                        "dispersion_img" = vsigma$dispersion_img, "appregion" = observe_data$appregion,
-                        "dispersion_analysis" = vsigma$dispersion_analysis)
+                        "dispersion_img" = vsigma$dispersion_img, "appregion" = observe_data$appregion)
 
     if (IFU_plot == TRUE){
       plot_ifu(output)   # plot IFU images
@@ -123,8 +160,8 @@ find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
 
   } else {                                                 # IF spatial blurring IS requested
 
-    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge)
+    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                                 pixel_sscale, pixel_vscale, inc_deg)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
     blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf,
@@ -132,10 +169,15 @@ find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
                                                            # blur IFU cube
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = ifu_imgs$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & measured axis ratio
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
       vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
                                 reff_axisratio = measure_type$fac * reff_ar,
                                 sbinsize = observe_data$sbinsize)
@@ -143,9 +185,10 @@ find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
-                               angular_size = observe_data$angular_size)
+                               angular_size = observe_data$angular_size,
+                               fract = measure_type$fract)
                                                            # Reff from data and measured axis ratio
       vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
                                 reff_axisratio = measure_type$fac * reff_ar,
@@ -153,9 +196,30 @@ find_vsigma = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, centr
                                                            # measure vsigma within number of Reff
     }
 
+    if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
+      reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
+                                "b_kpc"    = measure_type$axis_ratio$b,
+                                "a_arcsec" = measure_type$axis_ratio$a / observe_data$angular_size,
+                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size,
+                                "angle"    = measure_type$axis_ratio$ang)
+      # Reff at fixed specification
+      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
+      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
+      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
+      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+
+      vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
+                                reff_axisratio = measure_type$fac * reff_ar,
+                                sbinsize = observe_data$sbinsize)
+      # measure lambdaR within specified Reff
+    }
+
+
     output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                   "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
-                  "axis_ratio" = reff_ar, "vsigma" = vsigma$obs_vsigma,
+                  "axis_ratio" = reff_ar, "angular_size"=observe_data$angular_size,
+                  "sbinsize"=observe_data$sbinsize,
+                  "vbinsize"=observe_data$vbinsize, "vsigma" = vsigma$obs_vsigma,
                   "counts_img" = vsigma$counts_img, "velocity_img" = vsigma$velocity_img,
                   "dispersion_img" = vsigma$dispersion_img, "appregion" = observe_data$appregion)
 

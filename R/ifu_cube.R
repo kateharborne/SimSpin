@@ -17,9 +17,9 @@
 #' \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
 #'  \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
 #'@examples
-#' data = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
-#'
-#' cube = ifu_cube(obs_data  = data, threshold = 20)
+#' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#' data        = obs_data_prep(simdata = galaxy_data)
+#' cube        = ifu_cube(obs_data  = data, threshold = 20)
 #'
 
 ifu_cube = function(obs_data, threshold=25) {

@@ -6,12 +6,11 @@ using namespace Rcpp;
 //' Constructing galaxy simulation data from the Gadget output file data
 //'
 //' The purpose of this function is to produce the extra kinematic features for simulation data in
-//' spherical polar coordinates. It accepts the Gadget particle information output from the
-//' \code{snapshot::snapread} function and returns several additional galaxy properties that are
+//' spherical polar coordinates. It accepts particle information output from the
+//' \code{\link{sim_data}} function and returns several additional galaxy properties that are
 //' useful for deriving the galaxy kinematics.
 //'
-//' @param part_data The data frame output by \code{snapshot::snapread} for galaxy simulation data
-//'  in Gadget format.
+//' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
 //' @param centre A logical that tells the function to centre the galaxy about its centre of mass
 //'  or not (i.e. TRUE or FALSE).
 //' @return Returns a data frame containing the particle \code{$ID}, \code{$x-}, \code{$y-} and
@@ -21,16 +20,8 @@ using namespace Rcpp;
 //'  and its associated velocity (\code{$cr} and \code{$vcr}) and the mass of each particle
 //'  (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},\code{$Jz}).
 //' @examples
-//'   galaxy_file = h5::h5file(system.file("extdata", 'S0_vignette', package="SimSpin"), mode = "r")
-//'   galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-//'                            "y"         = h5::readDataSet(galaxy_file["y"]),
-//'                            "z"         = h5::readDataSet(galaxy_file["z"]),
-//'                            "vx"        = h5::readDataSet(galaxy_file["vx"]),
-//'                            "vy"        = h5::readDataSet(galaxy_file["vy"]),
-//'                            "vz"        = h5::readDataSet(galaxy_file["vz"]),
-//'                            "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-//'                            "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-//'   h5::h5close(galaxy_file)
+//'   data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+//'   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
 //'
 //'   output = sim_galaxy(part_data = galaxy_data,
 //'                       centre    = TRUE)
@@ -44,17 +35,22 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
   Rcpp::NumericVector vx        = part_data["vx"];
   Rcpp::NumericVector vy        = part_data["vy"];
   Rcpp::NumericVector vz        = part_data["vz"];
-  Rcpp::NumericVector Mass      = part_data["Mass"];
-  Rcpp::NumericVector part_type = part_data["part_type"];                                            // reading in particle properties
+  Rcpp::NumericVector Mass      = part_data["Mass"];                                                 // reading in particle properties
 
   int n = x.size();                                                                                  // number of particles in simulation
   if(centre == TRUE){
     double xcen = median(x);
     double ycen = median(y);
     double zcen = median(z);
+    double vxcen = median(vx);
+    double vycen = median(vy);
+    double vzcen = median(vz);
     x = x-xcen;
     y = y-ycen;
     z = z-zcen;
+    vx = vx - vxcen;
+    vy = vy - vycen;
+    vz = vz - vzcen;
   }
                                                                                                      // centering particle positions based on median
   Rcpp::NumericVector r(n), cr(n), theta(n), phi(n), vr(n), vt(n), vcr(n), vtheta(n), vphi(n), Jx(n), Jy(n), Jz(n);
@@ -97,8 +93,7 @@ Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre) {
                             Rcpp::Named("Mass")      = Mass,
                             Rcpp::Named("Jx")        = Jx,
                             Rcpp::Named("Jy")        = Jy,
-                            Rcpp::Named("Jz")        = Jz,
-                            Rcpp::Named("part_type") = part_type);
+                            Rcpp::Named("Jz")        = Jz);
 
   return(df);
 

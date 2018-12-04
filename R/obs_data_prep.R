@@ -1,13 +1,10 @@
-# Kate Harborne (last edit - 23/04/2018)
+# Kate Harborne (last edit - 29/11/2018)
 #'Prepare simulation data for observational kinematic analysis.
 #'
 #'The purpose of this function is to calculate the properties necessary for constructing an IFU
 #' observation data cube of a simulated galaxy at a user specified inclination and redshift.
 #'
-#'@param filename The Gadget output file containing the particle information of the galaxy to be
-#' analysed.
-#'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
-#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
+#'@param simdata The simulation information data.frame output by \code{\link{sim_data}}.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param z The galaxy redshift.
 #'@param fov The field of view of the IFU, diameter in arcseconds.
@@ -19,8 +16,6 @@
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
-#'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
-#'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@return Returned is a list that contains:
 #' \item{\code{$galaxy_obs}}{A data frame of the observed particle information (which contains the
 #'   galaxy particle info from the GADGET file, with added coordinates \code{$galaxy_obs$z_obs},
@@ -28,15 +23,16 @@
 #'   \code{$galaxy_obs$flux}, in units of 1e-16 erg s-1 cm-2).}
 #' \item{\code{$sbin}}{The number of spatial bins.}
 #' \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
-#' \item{\code{$pixsize}}{The size of the spatial bins in arcseconds.}
+#' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
+#'  redshift.}
 #' \item{\code{$vbin}}{The number of velocity bins.}
 #' \item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
 #' \item{\code{$lsf_size}}{The gaussian standard deviation of the line spread function in km/s.}
-#' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
-#'  redshift.}
+#' \item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
+#'  aperture.}
 #'@examples
-#' output = obs_data_prep(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                        r200         = 200,
+#' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#' output = obs_data_prep(simdata      = galaxy_data,
 #'                        z            = 0.1,
 #'                        fov          = 15,
 #'                        ap_shape     = "circular",
@@ -44,50 +40,27 @@
 #'                        lsf_fwhm     = 2.65,
 #'                        pixel_sscale = 0.5,
 #'                        pixel_vscale = 1.04,
-#'                        inc_deg      = 0,
-#'                        m2l_disc     = 2,
-#'                        m2l_bulge    = 1)
+#'                        inc_deg      = 0)
 #'
 
-obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape="circular",
-                         central_wvl=4800, lsf_fwhm=2.65, pixel_sscale=0.5, pixel_vscale=1.04,
-                         inc_deg=70, m2l_disc=1, m2l_bulge=1){
+obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800,
+                         lsf_fwhm=2.65, pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70){
 
   set.seed(42);
   sol_lum = 3.827e33;                                      # solar luminosity in erg s-1
-  galaxy_file = h5::h5file(filename, mode = "r")           # reading in the snapshot data
-  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-                           "y"         = h5::readDataSet(galaxy_file["y"]),
-                           "z"         = h5::readDataSet(galaxy_file["z"]),
-                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
-                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
-                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
-                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-  h5::h5close(galaxy_file)                                 # close the snapshot data file
-
-  ppart = unique(galaxy_data$part_type)                    # all possible particle values
-
-  if (is.na(ptype[1])) {ptype = ppart}                     # if ptype is NA, set as all possible particle values
-  if (all(ptype %in% ppart)){
-    galaxy_data =  galaxy_data[galaxy_data$part_type %in% ptype,]
-  } else {
-    cat("Particles of ptype =", paste(ptype[!ptype %in% ppart], collapse = ","), "are missing in this model. \n")
-    stop("Npart Error")
-  }
 
   inc_rad      = inc_deg * (pi / 180)                      # galaxy inclination in radians
   ang_size     = celestial::cosdistAngScale(z, ref="Planck15")
-                                                           # angular size given z, kpc/"
+  # angular size given z, kpc/"
   lum_dist     = celestial::cosdistLumDist(z, ref="Planck15")
-                                                           # the luminosity distance, Mpc
+  # the luminosity distance, Mpc
   ap_size      = ang_size * fov                            # diameter size of the telescope, kpc
   sbin         = floor(fov / pixel_sscale)                 # bin sizes in the x- & y/z_obs- axes
   sbinsize     = ap_size / sbin                            # kpc per bin
   vbinsize     = (pixel_vscale / central_wvl) * (3e8 / 1e3)
-                                                           # km/s per velocity bin
+  # km/s per velocity bin
   lsf_size     = ((lsf_fwhm / central_wvl) * (3e8 / 1e3)) / (2 * sqrt(2*log(2)))
-                                                           # velocity uncertainty (sd)
+  # velocity uncertainty (sd)
 
   appregion    = matrix(data = 0, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
   xcentre = sbin/2 + 0.5
@@ -100,11 +73,11 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape=
     rr = sqrt(xx^2 + yy^2)
     appregion[rr<= sbin/2] = 1
   }
-                                                           # circular apperture mask
+  # circular apperture mask
   if (ap_shape == "square"){
     appregion = matrix(data = 1, ncol = sbin, nrow = sbin)
   }
-                                                           # square apperture mask
+  # square apperture mask
   if (ap_shape == "hexagonal"){
     for (x in 1:sbin){
       for (y in 1:sbin){
@@ -117,16 +90,33 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape=
       }
     }
   }
-                                                           # hexagonal apperture mask
+  # hexagonal apperture mask
+
+  result = grepl(paste(c("PartType2", "PartType3", "PartType4"), collapse = "|"), names(simdata))
+  # finding the luminous matter within the simulation for imaging
+
+  if (any(result)) {                                       # concatenating the seperate particle
+    present = which(result)                                #  data.frames into a single data.frame
+    if (length(present) == 1){
+      galaxy_data = simdata[[present[1]]]$Part
+    } else if (length(present) == 2){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part)
+    } else if (length(present) == 3){
+      galaxy_data = rbind(simdata[[present[1]]]$Part, simdata[[present[2]]]$Part, simdata[[present[3]]]$Part)
+    }
+  } else {
+    cat("There are no particles representing luminous matter in this simulation (i.e. no stars, bulge or disc particles). \n")
+    stop("LumPart Error") # if no stars, bulge or disc component, stop trying to build IFU cube
+  }
 
   galaxy_df   = obs_galaxy(galaxy_data, centre=TRUE, inc_rad)
-                                                           # extracting the position and LOS data
+  # extracting the position and LOS data
   galaxy_df   = galaxy_df[(galaxy_df$r < r200),]           # removing particles beyond r200
 
   if (ap_shape == "circular"){
     galaxy_cdf  = galaxy_df[galaxy_df$r_obs < (ap_size / 2),]
   }
-                                                           # removing particles outside aperture
+  # removing particles outside aperture
   if (ap_shape == "square"){
     galaxy_cdf  = galaxy_df[abs(galaxy_df$x) < (sbin / 2) * sbinsize,]
     galaxy_cdf  = galaxy_cdf[abs(galaxy_cdf$z_obs) < (sbin / 2) * sbinsize,]
@@ -139,17 +129,45 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape=
     galaxy_cdf  = galaxy_cdf[dotprod >= 0,]
   }
 
-
   vbin = ceiling((max(galaxy_cdf$vy_obs) - min(galaxy_cdf$vy_obs)) / vbinsize)
-                                                           # the number of velocity bins
+  # the number of velocity bins
   galaxy_cdf$flux = rep(0, nrow(galaxy_cdf))
-  galaxy_cdf[(galaxy_cdf$part_type== 2),]$flux =
-    ((galaxy_cdf[(galaxy_cdf$part_type== 2),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_disc)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
-                                                           # calculating flux from disc particles
-  galaxy_cdf[(galaxy_cdf$part_type== 3),]$flux =
-    ((galaxy_cdf[(galaxy_cdf$part_type== 3),]$Mass * 1e10 * sol_lum * (pixel_sscale^2)) / (m2l_bulge)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
-                                                           # calculating flux from bulge particles
-                                                           #  fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
+
+  if ("PartType2" %in% names(simdata)){                    # if there are disc particles in the data file,
+    inc_discID = which(simdata$PartType2$Part$ID %in% galaxy_cdf$ID)
+    disc_ids = simdata$PartType2$Part$ID[inc_discID]
+    galaxy_cdf[(galaxy_cdf$ID %in% disc_ids),]$flux = (simdata$PartType2$Lum[inc_discID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
+    # calculating flux from bulge particles fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
+  }
+
+  if ("PartType3" %in% names(simdata)){                    # if there are bulge particles in the data file,
+    inc_bulgeID = which(simdata$PartType3$Part$ID %in% galaxy_cdf$ID)
+    bulge_ids = simdata$PartType3$Part$ID[inc_bulgeID]
+    galaxy_cdf[(galaxy_cdf$ID %in% bulge_ids),]$flux = (simdata$PartType3$Lum[inc_bulgeID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
+    # calculating flux from bulge particles fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
+  }
+
+  if ("PartType4" %in% names(simdata)){                    # if there are stars in the data file,
+
+    inc_starID = which(simdata$PartType4$Part$ID %in% galaxy_cdf$ID)
+    star_ids = simdata$PartType4$Part$ID[inc_starID]
+
+    if (length(names(simdata$PartType4)) == 3){            #  and if there are spectra associated,
+      tempfilt=list(globalVariables(filt_g_SDSS))          #  use ProSpect to get particle flux.
+      star_flux = numeric(length = length(galaxy_cdf$ID))
+      j = 1
+      for (i in inc_starID){
+        star_flux[j] =
+          ProSpect::photom_lum(wave = simdata$PartType4$Wav, lum = simdata$PartType4$Lum[i,], z = z,
+                               outtype = "Jansky", filters = tempfilt, ref="Planck15")$out
+        j = j+1
+      }
+      galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux = (star_flux * 3e-9 * (pixel_sscale^2)) / (central_wvl * 1e-4 * 1e-16)
+      # flux in units of 10-16 erg s-1 cm-2 arcsec-2
+    } else {
+      galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux = (simdata$PartType4$Lum[inc_starID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
+    }
+  }
 
   output = list("galaxy_obs"  = galaxy_cdf,
                 "sbin"        = sbin,
@@ -158,8 +176,8 @@ obs_data_prep = function(filename, ptype=NA, r200=200, z=0.05, fov=15, ap_shape=
                 "vbin"        = vbin,
                 "vbinsize"    = vbinsize,
                 "lsf_size"    = lsf_size,
-                "pixel_sscale"= pixel_sscale,
-                "appregion"   = appregion)
+                "appregion"   = appregion,
+                "pixel_sscale"= pixel_sscale)
 
   return(output)
 }

@@ -7,9 +7,7 @@
 #' \code{\link{blur_cube}}, \code{\link{find_reff}}, \code{\link{obs_lambda}} and
 #' \code{\link{plot_ifu}}) and return the \eqn{\lambda_R} within a specified measurement radius.
 #'
-#'@param filename The Gadget file containing the particle information of the galaxy to be analysed.
-#'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
-#' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
+#'@param simdata The simulation information data.frame output by \code{\link{sim_data}}.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param z The galaxy redshift.
 #'@param fov The field of view of the IFU, diameter in arcseconds.
@@ -21,22 +19,24 @@
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
-#'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
-#'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@param threshold The flux threshold of the observation.
-#'@param measure_type A list specifying the radius within which \eqn{\lambda_R} is measured. If
-#' \code{list("type" = "fit", "fac" = 1)}, \eqn{\lambda_R} is measured in a specified multiple of
-#' \code{fac *} \eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the unblurred galaxy
-#' counts image.
-#' If \code{list("type" = "specified", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1))},
-#' the effective radius of the galaxy is measured from the unblurred counts image as in "fit", but
-#' the axis ratio of the grown ellipse is kept at the supplied axis ratio and  \eqn{\lambda_R} is
-#' calculated within some factor of the effective radius, \code{fac *}\eqn{R_{eff}}. Finally, if
-#' \code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2, "b" = 1, "ang" = 90))},
-#' \eqn{\lambda_R} is measured within an ellipse described by the supplied "axis_ratio" in kpc (or
-#' a multiple of that ellipse size given by "fac") at the position angle "ang" -  no measurement of
-#' the effective radius is made, assuming that the supplied values are determined using another
-#' package.
+#'@param measure_type A list specifying the radius within which \eqn{\lambda_R} is measured. There
+#' are three options for this:
+#' \enumerate{
+#' \item If \code{list("type" = "fit", "fac" = 1)}, \eqn{\lambda_R} is measured in a specified
+#'  multiple of \code{$fac *} \eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the
+#'  unblurred galaxy counts image.
+#' \item If \code{list("type" = "specified", "fract" = 0.5, "axis_ratio" = data.frame("a" = 2,
+#'  "b" = 1))}, the effective radius of the galaxy is measured from the unblurred counts image as
+#'  in "fit", but the axis ratio of the grown ellipse is kept at the supplied axis ratio and grown
+#'  until it contains some fraction (\code{$fract}) of the total particles. \eqn{\lambda_R} is
+#'  calculated within this ellipse.
+#' \item Finally, if \code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2,
+#' "b" = 1, "ang" = 90))}, \eqn{\lambda_R} is measured within an ellipse described by the supplied
+#' "axis_ratio" in kpc (or a multiple of that ellipse size given by "fac") at the position angle
+#' "ang" -  no measurement of the effective radius is made, assuming that the supplied values are
+#' determined using another package.
+#' }
 #'@param blur \emph{Optional} Specify if you wish to apply observational seeing effects to the
 #' cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies
 #' the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}.
@@ -54,16 +54,20 @@
 #' \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 #' \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
 #'  \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
-#' \item{\code{$lambda_R}}{The observed spin parameter \eqn{\lambda_R}}
+#' \item{\code{$lambda_r}}{The observed spin parameter \eqn{\lambda_R}}
 #' \item{\code{$counts_img}}{The observed flux image.}
 #' \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 #' \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
-#' \item{\code{$reff_ellipse}}{The observed measurement radius.}
-#' And optionally, specified by the \code{dispersion_analysis} parameter, the mean and median
-#' values of the line-of-sight velocity dispersion (\code{$dispersion_analysis}). The observational
-#' images will also be plotted.
+#' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
+#'  redshift.}
+#' \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
+#' \item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
+#' \item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
+#'  aperture.}
+#'
 #'@examples
-#' lambdar = find_lambda(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
+#' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#' lambdar = find_lambda(simdata      = galaxy_data,
 #'                       r200         = 200,
 #'                       z            = 0.1,
 #'                       fov          = 15,
@@ -73,29 +77,27 @@
 #'                       pixel_sscale = 0.5,
 #'                       pixel_vscale = 1.04,
 #'                       inc_deg      = 0,
-#'                       m2l_disc     = 2,
-#'                       m2l_bulge    = 1,
 #'                       threshold    = 25,
-#'                       measure_type = list(type = "specified",
-#'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7),
+#'                       measure_type = list(type = "fixed",
+#'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
 #'                                           fac = 1),
 #'                       IFU_plot     = FALSE)
 #'
 
-find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                        pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
+find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
+                        pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25,
                         measure_type = list(type="fit", fac=1), blur,
                         dispersion_analysis = FALSE, IFU_plot = TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
-    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge)
+    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                                 pixel_sscale, pixel_vscale, inc_deg)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = ifu_imgs$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & measured axis ratio
@@ -111,10 +113,10 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
       }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size,
-                               fract = measure_type$fac)
+                               fract = measure_type$fract)
                                                            # Reff from data & supplied axis ratio
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = reff_ar,
@@ -148,6 +150,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                           "dispersion_img"=lambda$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
+                          "vbinsize"=observe_data$vbinsize,
                           "appregion"=observe_data$appregion,
                           "dispersion_analysis"=lambda$dispersion_analysis)
     } else {
@@ -158,6 +161,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                           "dispersion_img"=lambda$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
+                          "vbinsize"=observe_data$vbinsize,
                           "appregion"=observe_data$appregion)
     }
 
@@ -169,8 +173,8 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
 
   } else {                                                 # IF spatial blurring IS requested
 
-    observe_data = obs_data_prep(filename, ptype, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge)
+    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+                                 pixel_sscale, pixel_vscale, inc_deg)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
     blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf,
@@ -178,7 +182,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                                                            # blur IFU cube
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = ifu_imgs$axis_ratio,
                                angular_size = observe_data$angular_size)
                                                            # Reff from data & measured axis ratio
@@ -194,10 +198,10 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
-      reff_ar      = find_reff(filename, ptype = NA, r200, inc_deg,
+      reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size,
-                               fract = measure_type$fac)
+                               fract = measure_type$fract)
                                                            # Reff from data and measured axis ratio
 
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
@@ -232,6 +236,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                     "dispersion_img" = lambda$dispersion_img,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
+                    "vbinsize" = observe_data$vbinsize,
                     "appregion" = observe_data$appregion,
                     "dispersion_analysis" = lambda$dispersion_analysis)
     } else {
@@ -242,6 +247,7 @@ find_lambda  = function(filename, ptype = NA, r200 = 200, z, fov, ap_shape, cent
                     "dispersion_img" = lambda$dispersion_img,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
+                    "vbinsize" = observe_data$vbinsize,
                     "appregion" = observe_data$appregion)
     }
 

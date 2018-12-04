@@ -4,11 +4,11 @@
 \alias{sim_analysis}
 \title{Kinematic analysis of simulation data.}
 \usage{
-sim_analysis(filename, bin_type = "r", rmax = 200, rbin = 200,
-  ptype = NA, DM_profile = NA)
+sim_analysis(simdata, bin_type = "r", rmax = 200, rbin = 200,
+  DM_profile = NA)
 }
 \arguments{
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
+\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
 
 \item{bin_type}{The direction in which to bin the simulation model - \code{"r"} (default) bins
 radially in 3D spherical shells, \code{"cr"} bins radially in 2D circular rings, \code{"z"} bins
@@ -17,9 +17,6 @@ in 1D off the plane of the galaxy.}
 \item{rmax}{The maximum radial coordinate considered within the simulated galaxy in kpc.}
 
 \item{rbin}{The number of radial bins considered.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
 
 \item{DM_profile}{If dark matter particles are not included in the analysis, this option allows
 you to use the DM profile for the mass distribution such that the circular velocity can be
@@ -58,11 +55,11 @@ not contain the anisotropy, rotational and circular velocities or spin parameter
 only physical when defined using 3D spherical shells.
 }
 \examples{
- output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
+ galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+ output = sim_analysis(simdata = galaxy_data,
                        DM_profile = list("profile"="Hernquist", "DM_mass" = 184.9, "DM_a" = 34.5))
 
- output = sim_analysis(filename   = system.file("extdata", 'S0_vignette', package="SimSpin"),
-                       ptype      = c(2,3),
+ output = sim_analysis(simdata    = galaxy_data,
                        bin_type   = "cr",
                        rmax       = 300,
                        rbin       = 100,

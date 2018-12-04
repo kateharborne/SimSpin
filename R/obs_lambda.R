@@ -18,13 +18,11 @@
 #' \item{\code{$counts_img}}{The observed flux image.}
 #' \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 #' \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
-#' \item{\code{$reff_ellipse}}{The coordinates of the effective radius ellipse within which
-#'  \eqn{\lambda}_R is measured}
 #'@examples
-#'  data      = obs_data_prep(filename = system.file("extdata", 'S0_vignette', package="SimSpin"))
-#'  ifucube   = ifu_cube(obs_data = data)
-#'  reff_data = find_reff(filename     = system.file("extdata", 'S0_vignette', package="SimSpin"),
-#'                        ptype        = NA,
+#'  galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+#'  data        = obs_data_prep(simdata = galaxy_data)
+#'  ifucube     = ifu_cube(obs_data = data, threshold = 20)
+#'  reff_data = find_reff(simdata      = galaxy_data,
 #'                        r200         = 200,
 #'                        inc_deg      = 0,
 #'                        axis_ratio   = ifucube$axis_ratio,

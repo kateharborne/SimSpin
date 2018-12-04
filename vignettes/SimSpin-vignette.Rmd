@@ -15,24 +15,18 @@ library(SimSpin)
 
 The purpose of this package is to measure the observable spin parameter $\lambda_R$ for simulated galaxy models with an effort to provide a method of communication between observers and computational astrophysicists. The aim is to address a simple question: is the true spin parameter, $\lambda$, and the one that we measure observationally, $\lambda_R$, comparable? 
 
-This notebook will walk through a few of the basic steps that we can use to analyse a galaxy model. Here, we will use `filename = "../inst/extdata/S0_vignette"` to explore the three basic functions available in this package. This is the Gadget snapshot for a $10^{10} M_{\odot}$, S0 galaxy containing 50,000 disk and 75,000 bulge particles of equal mass. This is shown below. 
+This notebook will walk through a few of the basic steps that we can use to analyse a galaxy model. Here, we will use the `SimSpin_example.hdf5` file included within the `SimSpin` package to explore the three basic functions available in this package. This is the Gadget snapshot for a $10^{10} M_{\odot}$, S0 galaxy containing 50,000 disk and 75,000 bulge particles of equal mass. We read in this simulation file using the `sim_data()` function shown below. This function takes a SimSpin HDF5 file and writes it out as an R list of data frames that are easy to manipulate within the rest of the package. At this stage, you can specify the type of particle we want to analyse `ptype = NA (all), 0 (gas), 1 (dark matter), 2 (disc), 3 (bulge), 4 (stars), 5 (boundaries)` or any present combination, `c(2,3)`, and the mass-to-light ratio of each of those particle types. 
 
 ``` {r} 
-galaxy_file = h5::h5file("../inst/extdata/S0_vignette", mode = "r")           # reading in the snapshot data
-galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-                         "y"         = h5::readDataSet(galaxy_file["y"]),
-                         "z"         = h5::readDataSet(galaxy_file["z"]),
-                         "vx"        = h5::readDataSet(galaxy_file["vx"]),
-                         "vy"        = h5::readDataSet(galaxy_file["vy"]),
-                         "vz"        = h5::readDataSet(galaxy_file["vz"]),
-                         "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-                         "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-h5::h5close(galaxy_file)                                 # close the snapshot data file
+galaxy_file = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"),
+                       ptype = NA,
+                       m2l_disc = 2,
+                       m2l_bulge = 1)  # reading in the snapshot data
 ```
 
 ``` {r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
-disk = galaxy_data[galaxy_data$part_type == 2,]
-bulge = galaxy_data[galaxy_data$part_type == 3,]
+disk = galaxy_file$PartType2$Part
+bulge = galaxy_file$PartType3$Part
 
 magicaxis::magplot(disk$x, disk$y, pch = '.', xlim = c(-20, 20), ylim = c(-20, 20), xlab = "x-position, kpc", ylab = "y-position, kpc", col = rgb(0, 0, 0, 0.05))
 points(bulge$x, bulge$y, col = rgb(1, 0, 0, 0.05), pch = '.')
@@ -53,15 +47,14 @@ To begin, we can use the `sim_analysis()` function to calculate a few useful qua
 * the Bullock spin parameter ($\lambda$) distribution
 
 ```{r}
-sim_data = sim_analysis(filename   = "../inst/extdata/S0_vignette", 
+sim_data = sim_analysis(simdata    = galaxy_file, 
                         bin_type   = "r",
-                        ptype      = NA,  # considering all particles
                         rmax       = 200, # maximum radius considered, kpc
                         rbin       = 200, # number of radial bins considered
                         DM_profile = list(profile="Hernquist", DM_mass=184.97, DM_a=34.51))
 ```
 
-When using `sim_analysis()`, we specify the snapshot `filename`, the type of particle we want to analyse `ptype = NA (all), 0 (gas), 1 (dark matter), 2 (disc), 3 (bulge), 4 (stars), 5 (boundaries)` or any present combination, `c(2,3)`, the maximum radius `rmax` in kpc we want to consider and the number of radial bins that we wish to divide the galaxy into, `rbin`. In the above example, all particles are grouped into bins of width `rmax / rbin = 1` kpc. Because we have specified `binddir = "r"` our bins are spherical shells. If we wished to study the distributions of certain components in cylindrical coordinates, we would specify either `bindir = "cr"` (cylindrical radial coordinated) or `="z"` (for 1D coordinates off the surface of the disc).
+When using `sim_analysis()`, we specify the snapshot `filename`, the maximum radius `rmax` in kpc we want to consider and the number of radial bins that we wish to divide the galaxy into, `rbin`. In the above example, all particles are grouped into bins of width `rmax / rbin = 1` kpc. Because we have specified `binddir = "r"` our bins are spherical shells. If we wished to study the distributions of certain components in cylindrical coordinates, we would specify either `bindir = "cr"` (cylindrical radial coordinated) or `="z"` (for 1D coordinates off the surface of the disc).
 
 Below, a few of the possible distributions are plotted using the data produced by `sim_analysis()`.
 
@@ -75,22 +68,26 @@ magicaxis::magplot(sim_data$profile$r, sim_data$profile$lambda, type="l", lwd=3,
 Alternatively, you can consider single components of the model. For example, if we wished to examine the properties of the galaxy disk, we specify `ptype = 2`. The same could be done to examine the bulge by specifying `ptype = 3`. If you wish to examine a combination of parameters, this is simply specified by `ptype = c(2,3)` to give, for example, the dark matter and disc components - though this vignette galaxy model contains no dark matter so this will result in an error as shown. 
 
 ```{r, error=TRUE, purl=FALSE}
-disk_data  = sim_analysis(filename   = "../inst/extdata/S0_vignette", 
-                          ptype      = 2,      # considering just the disk particles
+
+disk_file  = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"),
+                      ptype = 2)  # considering just the disk particles
+
+disk_data  = sim_analysis(simdata    = disk_file, 
                           rmax       = 200, 
                           rbin       = 200,
                           DM_profile = list(profile="Hernquist", DM_mass=184.97, DM_a=34.51))
 
-bulge_data = sim_analysis(filename   = "../inst/extdata/S0_vignette", 
-                          ptype      = 3,      # considering just the bulge particles
+bulge_file = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"),
+                      ptype = 3)  # considering just the disk particles
+
+bulge_data = sim_analysis(simdata    = bulge_file,
                           rmax       = 200, 
                           rbin       = 200,
                           DM_profile = list(profile="Hernquist", DM_mass=184.97, DM_a=34.51))
 
-dm_data    = sim_analysis(filename = "../inst/extdata/S0_vignette", 
-                          ptype    = 1, # considering just the dark matter particles
-                          rmax     = 200, 
-                          rbin     = 200)
+dm_file    = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"),
+                      ptype = 1)  # considering just the disk particles
+
 ```
 ``` {r, echo=FALSE, fig.width=3, fig.height=3} 
 magicaxis::magplot(disk_data$profile$r, disk_data$profile$Mass, type="l", lwd=3, col="red", xlab="r, kpc", ylab=expression("Mass, 10"^{10}*" M"['\u0298']), ylim=c(0,0.65))
@@ -105,8 +102,7 @@ legend("bottomright", inset=c(0.05,0.05),c("Bulge"), bty="n", cex=0.9)
 An important part of this package is to take mock integral field unit (IFU) observations of galaxy models. The output of such an observation is a kinematic data cube, in which the galaxy is binned in 3-dimensions; binned spatially in the projected x-y plane and binned via velocity in the z-direction. The function `build_datacube()` can be used to construct such a data product for simulated galaxy models. 
 
 ```{r} 
-SAMI_cube_phys = build_datacube(filename     = "../inst/extdata/S0_vignette", 
-                                ptype        = NA, 
+SAMI_cube_phys = build_datacube(simdata      = galaxy_file, 
                                 r200         = 200, 
                                 z            = 0.06, 
                                 fov          = 15, 
@@ -115,9 +111,7 @@ SAMI_cube_phys = build_datacube(filename     = "../inst/extdata/S0_vignette",
                                 lsf_fwhm     = 2.56, 
                                 pixel_sscale = 0.5, 
                                 pixel_vscale = 1.04, 
-                                inc_deg      = 70, 
-                                m2l_disc     = 1, 
-                                m2l_bulge    = 1, 
+                                inc_deg      = 70,
                                 threshold    = 25)       
 ```
 
@@ -147,8 +141,7 @@ As the LSF of IFU instruments can be well approximated by a Gaussian, we model e
 In order to mimic the effects of beam smearing and observational seeing in our mock kinematic data cube, we can optionally specify the `blur` argument. In this, each projected sptial plane in the kinematic data cube will be convolved with a PSF kernel of either "Moffat" or "Gaussian" shape with a FWHM specified in arcseconds. 
 
 ```{r} 
-SAMI_cube_blur = build_datacube(filename     = "../inst/extdata/S0_vignette", 
-                                ptype        = NA, 
+SAMI_cube_blur = build_datacube(simdata      = galaxy_file,
                                 r200         = 200, 
                                 z            = 0.06, 
                                 fov          = 15, 
@@ -157,9 +150,7 @@ SAMI_cube_blur = build_datacube(filename     = "../inst/extdata/S0_vignette",
                                 lsf_fwhm     = 2.56, 
                                 pixel_sscale = 0.5, 
                                 pixel_vscale = 1.04, 
-                                inc_deg      = 70, 
-                                m2l_disc     = 1, 
-                                m2l_bulge    = 1, 
+                                inc_deg      = 70,
                                 threshold    = 25, 
                                 blur         = list("psf" = "Moffat", "fwhm" = 2))       
 ```
@@ -190,8 +181,7 @@ where $F_i$ is the observed flux taken from the flux image, $R_i$ is the radial 
 
 
 ```{r} 
-SAMI_lambda = find_lambda(filename     = "../inst/extdata/S0_vignette", 
-                          ptype        = NA, 
+SAMI_lambda = find_lambda(simdata      = galaxy_file,  
                           r200         = 200, 
                           z            = 0.06, 
                           fov          = 15, 
@@ -200,9 +190,7 @@ SAMI_lambda = find_lambda(filename     = "../inst/extdata/S0_vignette",
                           lsf_fwhm     = 2.56, 
                           pixel_sscale = 0.5, 
                           pixel_vscale = 1.04, 
-                          inc_deg      = 70, 
-                          m2l_disc     = 1, 
-                          m2l_bulge    = 1, 
+                          inc_deg      = 70,
                           measure_type = list(type = "fit", fac = 1), 
                           threshold    = 25, 
                           blur         = list("psf" = "Moffat", "fwhm" = 2))
@@ -216,8 +204,7 @@ This function will return the observed spin parameter (`$obs_lambdar`), three IF
 If the measurement radius specified is larger than the aperture, the function will return a warning.
 
 ```{r}
-SAMI_lambda_warning = find_lambda(filename = "../inst/extdata/S0_vignette", 
-                                  ptype = NA, 
+SAMI_lambda_warning = find_lambda(simdata = galaxy_file,
                                   r200 = 200, 
                                   z = 0.06, 
                                   fov = 15, 
@@ -226,9 +213,7 @@ SAMI_lambda_warning = find_lambda(filename = "../inst/extdata/S0_vignette",
                                   lsf_fwhm = 2.56, 
                                   pixel_sscale = 0.5, 
                                   pixel_vscale = 1.04, 
-                                  inc_deg = 70, 
-                                  m2l_disc = 1, 
-                                  m2l_bulge = 1, 
+                                  inc_deg = 70,
                                   measure_type = list(type = "fit", fac = 5),  
                                   threshold = 25, 
                                   blur = list("psf" = "Moffat", "fwhm" = 2))
@@ -236,14 +221,14 @@ SAMI_lambda_warning = find_lambda(filename = "../inst/extdata/S0_vignette",
 
 The level of blurring applied and the measurement radius within which $\lambda_R$ is measured can be optionally altered to study the effects that these choices have on the measurement. If the `measurement_radius` or `blur` arguments are missing, no atmospheric seeing conditions will be applied and $\lambda_R$ will, by default, be measured within 1 effective radius. 
 
-We can then compare the value of $\lambda_R$ that is output from this calculation to the one measured using `sim\_analysis()` from the simulated model.
+We can then compare the value of $\lambda_R$ that is output from this calculation to the one measured using `sim_analysis()` from the simulated model.
 
 ### Considering $\lambda_R$
 
 Once we have calculated all of these parameters, we can see how the measured $\lambda_R$ value compares to the true spin parameter we measure from the simulation. Obviously this is very dependent on the inclination angle at which we measure the galaxy and the accuracy to which we can measure the inclination observationally.
 
 ``` {r, echo=FALSE, fig.width=5, fig.height=5, fig.align="center"}
-magicaxis::magplot(sim_data$profile$r, sim_data$profile$lambda*3/sqrt(2), type="l", lwd=3, col="green", xlab="r, kpc", ylab=expression(paste(lambda)), ylim = c(0, 0.7))
+magicaxis::magplot(sim_data$profile$r, sim_data$profile$lambda*3/sqrt(2), type="l", lwd=3, col="green", xlab="r, kpc", ylab=expression(paste(lambda)), ylim = c(0, 0.3))
 abline(h=SAMI_lambda$lambda_r[1], col = "blue", lwd=3)
 legend("topright", inset=c(0.05,0.05), c(expression("Simulated "*paste(lambda)[R]), expression("Observed "*paste(lambda)[R])), lty = c(1,1), col = c("green", "blue"), bty="n", lwd=c(3,3), cex=0.9)
 ```

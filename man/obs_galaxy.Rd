@@ -7,11 +7,10 @@
 obs_galaxy(part_data, centre, inc_rad)
 }
 \arguments{
-\item{part_data}{The data frame output by \code{snapshot::snapread} for galaxy simulation data
-from Gadget.}
+\item{part_data}{The concatenated data frames output by \code{\link{sim_data}}.}
 
-\item{centre}{A logical that tells the function to centre the galaxy about its centre of mass or
-not (i.e. TRUE or FALSE).}
+\item{centre}{A logical that tells the function to centre the galaxy about its centre of mass
+and velocity or not (i.e. TRUE or FALSE).}
 
 \item{inc_rad}{The observed inclination angle in radians.}
 }
@@ -22,21 +21,13 @@ Returns a data frame containing the original particle information plus the obser
 }
 \description{
 The purpose of this function is to produce the observable features of simulation data when
-taking mock IFU observations. It accepts the Gadget particle information output from the
-\code{snapshot::snapread} function and returns the observable galaxy properties projected at a
+taking mock IFU observations. It accepts particle information output from the
+\code{\link{sim_data}} function and returns the observable galaxy properties projected at a
 user supplied inclination.
 }
 \examples{
-  galaxy_file = h5::h5file(system.file("extdata", 'S0_vignette', package="SimSpin"), mode = "r")
-  galaxy_data = data.frame("x"         = h5::readDataSet(galaxy_file["x"]),
-                           "y"         = h5::readDataSet(galaxy_file["y"]),
-                           "z"         = h5::readDataSet(galaxy_file["z"]),
-                           "vx"        = h5::readDataSet(galaxy_file["vx"]),
-                           "vy"        = h5::readDataSet(galaxy_file["vy"]),
-                           "vz"        = h5::readDataSet(galaxy_file["vz"]),
-                           "Mass"      = h5::readDataSet(galaxy_file["Mass"]),
-                           "part_type" = h5::readDataSet(galaxy_file["Part_Type"]))
-  h5::h5close(galaxy_file)
+  data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+  galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
 
   output = obs_galaxy(part_data = galaxy_data,
                       centre    = TRUE,

@@ -4,15 +4,12 @@
 \alias{find_vsigma}
 \title{Measuring observable galaxy kinematics.}
 \usage{
-find_vsigma(filename, ptype = NA, r200 = 200, z, fov, ap_shape, central_wvl,
-  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, m2l_disc, m2l_bulge, threshold,
+find_vsigma(simdata, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm,
+  pixel_sscale, pixel_vscale, inc_deg, threshold,
   measure_type = list(type = "fit", fac = 1), blur, IFU_plot = TRUE)
 }
 \arguments{
-\item{filename}{The Gadget file containing the particle information of the galaxy to be analysed.}
-
-\item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
-simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
+\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
 
 \item{r200}{The virial radius specified in the simulation, kpc.}
 
@@ -34,18 +31,25 @@ filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
 
-\item{m2l_disc}{The mass-to-light ratio of the disc component in solar units.}
-
-\item{m2l_bulge}{The mass-to-light ratio of the bulge component in solar units.}
-
 \item{threshold}{The flux threshold of the observation.}
 
-\item{measure_type}{A list specifying the radius within which \eqn{\lambda_R} is measured. If
-\code{list(type = "fit", fac = 1)}, \eqn{\lambda_R} is measured in a specified multiple of
-\eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the unblurred galaxy  counts image.
-If \code{list(type = "specified", fac = 1, axis_ratio = data.frame("a" = 2, "b" = 1))},
-\eqn{\lambda_R} is calculated within some factor of the effective radius, \code{fac *}
-\eqn{R_{eff}} with specified axis ratio externally as a data frame in units of kpc.}
+\item{measure_type}{A list specifying the radius within which \eqn{\lambda_R} is measured. There
+are three options for this:
+\enumerate{
+\item If \code{list("type" = "fit", "fac" = 1)}, \eqn{\lambda_R} is measured in a specified
+ multiple of \code{$fac *} \eqn{R_{eff}}, where \eqn{R_{eff}} has been calculated from the
+ unblurred galaxy counts image.
+\item If \code{list("type" = "specified", "fract" = 0.5, "axis_ratio" = data.frame("a" = 2,
+ "b" = 1))}, the effective radius of the galaxy is measured from the unblurred counts image as
+ in "fit", but the axis ratio of the grown ellipse is kept at the supplied axis ratio and grown
+ until it contains some fraction (\code{$fract}) of the total particles. \eqn{\lambda_R} is
+ calculated within this ellipse.
+\item Finally, if \code{list("type" = "fixed", "fac" = 1, "axis_ratio" = data.frame("a" = 2,
+"b" = 1, "ang" = 90))}, \eqn{\lambda_R} is measured within an ellipse described by the supplied
+"axis_ratio" in kpc (or a multiple of that ellipse size given by "fac") at the position angle
+"ang" -  no measurement of the effective radius is made, assuming that the supplied values are
+determined using another package.
+}}
 
 \item{blur}{\emph{Optional} Specify if you wish to apply observational seeing effects to the
 cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the
@@ -64,14 +68,16 @@ A list containing:
 \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame
  where \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
+\item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
+ redshift.}
+\item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
+\item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
 \item{\code{$vsigma}}{The observed V/\eqn{\sigma}.}
 \item{\code{$counts_img}}{The observed flux image.}
 \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
-\item{\code{$reff_ellipse}}{The observed measurement radius.}
-And optionally, specified by the \code{dispersion_analysis} parameter, the mean and median
-values of the line-of-sight velocity dispersion (\code{$dispersion_analysis}). The observational
-images will also be plotted.
+\item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
+ aperture.}
 }
 \description{
 The purpose of this basic function is to use the \code{SimSpin} package sub-functions to measure
@@ -82,7 +88,8 @@ each required sub-function (\code{\link{obs_data_prep}}, \code{\link{ifu_cube}},
 radius.
 }
 \examples{
-vsigma = find_vsigma(filename        = system.file("extdata", 'S0_vignette', package="SimSpin"),
+galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
+vsigma = find_vsigma(simdata         = galaxy_data,
                      r200            = 200,
                      z               = 0.1,
                      fov             = 15,
@@ -92,11 +99,10 @@ vsigma = find_vsigma(filename        = system.file("extdata", 'S0_vignette', pac
                      pixel_sscale    = 0.5,
                      pixel_vscale    = 1.04,
                      inc_deg         = 0,
-                     m2l_disc        = 2,
-                     m2l_bulge       = 1,
                      threshold       = 25,
-                     measure_type    = list(type = "specified",
-                                            axis_ratio = data.frame("a"=3.5, "b"=1.7),
+                     measure_type    = list(type = "fixed",
+                                            axis_ratio = data.frame("a"=3.5, "b"=1.7,
+                                                                    "angle"=90),
                                             fac = 1),
                      IFU_plot        = FALSE)
 
