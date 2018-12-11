@@ -9,7 +9,7 @@ To install directly into R:
 > library(devtools)
 > install_github("kateharborne/SimSpin")
 ```
-Simulation data needs to be laid out in HDF5 format for processing with SimSpin. If using a Gadget binary or HDF5 simulation output, see [https://github.com/kateharborne/create_SimSpinFile](create_SimSpinFile) for automatic generation of SimSpin compatible files.  If you would rather generate the SimSpin file independently, the expected format is outlined below. This SimSpin file can then be read into SimSpin using the function:
+Simulation data needs to be laid out in HDF5 format for processing with SimSpin. If using a Gadget binary or HDF5 simulation output, see [create_SimSpinFile](https://github.com/kateharborne/create_SimSpinFile) for automatic generation of SimSpin compatible files.  If you would rather generate the SimSpin file independently, the expected format is outlined below. This SimSpin file can then be read into SimSpin using the function:
 
 ```
 galaxy_data = SimSpin::sim_data(filename = SimSpin_example.hdf5)
@@ -25,11 +25,11 @@ This function produces a list that can be accessed by each of the basic SimSpin 
 
 By varying the effects of observational seeing, the measurement radius, projected inclination and distance, and the telescope parameters within the find_lambda() function, we can begin to understand how inherent limitations of observing galaxies can effect the measurement of &#955;_r by comparing to the true spin parameter than is measured in the sim_analysis() function.
 
-For more detailed examples of using each of the analysis functions above, please see the SimSpin vignettes published on [http://rpubs.com/kateharborne](Rpubs).
+For more detailed examples of using each of the analysis functions above, please see the SimSpin vignettes published on [Rpubs](http://rpubs.com/kateharborne).
 
 ## SimSpin format
 
-Here we outline the expected file format accepted by SimSpin.  If you would like to generate this file automatically, a short Python function has been written that uses the [https://github.com/pynbody/pynbody](pynbody) package to read in various simulation data types and generate a SimSpin compatible HDF5 file. See [https://github.com/kateharborne/create_SimSpinFile](create_SimSpinFile).
+Here we outline the expected file format accepted by SimSpin.  If you would like to generate this file automatically, a short Python function has been written that uses the [pynbody](https://github.com/pynbody/pynbody) package to read in various simulation data types and generate a SimSpin compatible HDF5 file. See [create_SimSpinFile](https://github.com/kateharborne/create_SimSpinFile).
 
 If you would rather generate the SimSpin file independently, the expected file format is outlined below.
 
