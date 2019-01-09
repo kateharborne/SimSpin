@@ -29,7 +29,7 @@
 #' plot_ifu(lambdar)
 #'
 
-plot_ifu = function(lambda){
+plot_ifu = function(lambda, reff=TRUE){
 
   appregion      = lambda$appregion
   appregion[appregion == 0] = NA
@@ -46,15 +46,21 @@ plot_ifu = function(lambda){
   par(mfcol=c(1,1), family="serif", font=1, cex=1.1)
   magicaxis::magimage(asinh(counts_img), xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), magmap=FALSE, zlim = range(c(asinh(lambda$counts_img))), family="serif", font=1)
   fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$counts_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("flux, 10"^{-16} * "erg s"^{-1} * "cm"^{-2} * "arcsec"^{-2}))
-  plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  if (reff==TRUE){
+    plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  }
 
   par(family="serif", font=1, cex=1.1)
   magicaxis::magimage(velocity_img,  xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), magmap=FALSE, scale="linear")
   fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$velocity_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
-  plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  if (reff==TRUE){
+    plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  }
 
   par(family="serif", font=1, cex=1.1)
-  magicaxis::magimage(dispersion_img,  xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), magmap=FALSE, scale="linear")
-  fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$dispersion_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("dispersion"[LOS] * ", km s"^{-1}))
-  plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  magicaxis::magimage(dispersion_img,  xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(200)), magmap=FALSE, scale="linear")
+  fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$dispersion_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(200)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("dispersion"[LOS] * ", km s"^{-1}))
+  if (reff==TRUE){
+    plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  }
 }

@@ -4,7 +4,7 @@
 \alias{plot_ifu}
 \title{Plotting the flux, velocity and dipsersion image output from the IFU kinematic cube.}
 \usage{
-plot_ifu(lambda)
+plot_ifu(lambda, reff = TRUE)
 }
 \arguments{
 \item{lambda}{The list output from the function \code{\link{find_lambda}} containing the flux,

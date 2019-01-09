@@ -50,9 +50,9 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   sol_lum = 3.827e33;                                      # solar luminosity in erg s-1
 
   inc_rad      = inc_deg * (pi / 180)                      # galaxy inclination in radians
-  ang_size     = celestial::cosdistAngScale(z, ref="Planck15")
+  ang_size     = celestial::cosdistAngScale(z, ref="Planck")
   # angular size given z, kpc/"
-  lum_dist     = celestial::cosdistLumDist(z, ref="Planck15")
+  lum_dist     = celestial::cosdistLumDist(z, ref="Planck")
   # the luminosity distance, Mpc
   ap_size      = ang_size * fov                            # diameter size of the telescope, kpc
   sbin         = floor(fov / pixel_sscale)                 # bin sizes in the x- & y/z_obs- axes
@@ -153,13 +153,13 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
     star_ids = simdata$PartType4$Part$ID[inc_starID]
 
     if (length(names(simdata$PartType4)) == 3){            #  and if there are spectra associated,
-      tempfilt=list(globalVariables(filt_g_SDSS))          #  use ProSpect to get particle flux.
+      tempfilt=list(filt_g_SDSS)                           #  use ProSpect to get particle flux.
       star_flux = numeric(length = length(galaxy_cdf$ID))
       j = 1
       for (i in inc_starID){
         star_flux[j] =
           ProSpect::photom_lum(wave = simdata$PartType4$Wav, lum = simdata$PartType4$Lum[i,], z = z,
-                               outtype = "Jansky", filters = tempfilt, ref="Planck15")$out
+                               outtype = "Jansky", filters = tempfilt, ref="Planck")$out
         j = j+1
       }
       galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux = (star_flux * 3e-9 * (pixel_sscale^2)) / (central_wvl * 1e-4 * 1e-16)

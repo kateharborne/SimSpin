@@ -117,7 +117,7 @@ lines(S0_bulge_3D$profile$r, S0_bulge_3D$profile$vc, col=pal[5], lwd=3)
 lines(S0_disc_3D$profile$r, S0_disc_3D$profile$vc, col=pal[1], lwd=3)
 legend("topleft", c("total", "disc", "bulge"), col=c(pal[7], pal[1], pal[5]), lty=c(1,1,1), bty="n", lwd=c(3,3,3))
 
-magicaxis::magplot(S0_total_3D$profile$r, S0_total_3D$profile$lambda, type="l", col=pal[7], lwd=3, xlim = c(0,30), ylim=c(0, 2), xlab="radius, kpc", ylab=expression(paste(lambda)))
+magicaxis::magplot(S0_total_3D$profile$r, S0_total_3D$profile$lambda, type="l", col=pal[7], lwd=3, xlim = c(0,30), ylim=c(0, 0.5), xlab="radius, kpc", ylab=expression(paste(lambda)))
 lines(S0_bulge_3D$profile$r, S0_bulge_3D$profile$lambda, col=pal[5], lwd=3)
 lines(S0_disc_3D$profile$r, S0_disc_3D$profile$lambda, col=pal[1], lwd=3)
 
