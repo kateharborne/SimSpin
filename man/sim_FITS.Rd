@@ -4,11 +4,34 @@
 \alias{sim_FITS}
 \title{Generate a FITS file for the data cube produced in SimSpin}
 \usage{
-sim_FITS(out_data, out_file, obs_name = "SimSpin datacube")
+sim_FITS(out_data, z, pixel_sscale, pixel_vscale, psf_fwhm = 0, r200,
+  r50, Hdisk, Ahalo, Abulge, out_file, obs_name = "SimSpin datacube")
 }
 \arguments{
 \item{out_data}{The list output from \code{\link{build_datacube}}, \code{\link{find_lambda}} or
 \code{\link{find_vsigma}}.}
+
+\item{z}{The redshift projected distance at which \code{\link{find_lambda}}/\code{\link{find_vsigma}}
+was run.}
+
+\item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope
+output in arcseconds.}
+
+\item{pixel_vscale}{The corresponding velocity pixel scale associated with a given telescope
+filter output in angstroms.}
+
+\item{psf_fwhm}{The FWHM of the PSF used for spatial blurring used when
+\code{\link{find_lambda}}/\code{\link{find_vsigma}} was run.}
+
+\item{r200}{The virial radius specified in the simulation, kpc.}
+
+\item{r50}{The half mass radius specified by the simulation, kpc.}
+
+\item{Hdisk}{The scale length of the disk component in the simulation, kpc.}
+
+\item{Ahalo}{The scale height of the dark matter halo component in the simulation, kpc.}
+
+\item{Abulge}{The scale height of the bulge component in the simulation, kpc.}
 
 \item{out_file}{A string describing the path and file name of the FITS file to be written.}
 
@@ -38,6 +61,6 @@ lambdar = find_lambda(simdata      = galaxy_data,
                                           axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
                                           fac = 1),
                       IFU_plot     = FALSE)
-sim_FITS(out_data = lambdar, out_file = "simdata_example.fits")
+sim_FITS(out_data = lambdar, pixel_sscale = 0.5, pixel_vscale = 1.04, out_file = "simdata_example.fits")
 unlink("simdata_example.fits")
 }
