@@ -236,7 +236,7 @@ sim_analysis = function(simdata, bin_type="r", rmax=200, rbin=200, DM_profile=NA
       }
                                                             # enclosed mass within outer radius
       profile$logp[j] =
-        log10(grp_mass / ((4 / 3) * pi * ((profile$cr[j] * profile$cr[j] * profile$cr[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j]))))
+        log10(grp_mass / (pi * rmax * ((profile$cr[j] * profile$cr[j]) - (rbin_labels[j] * rbin_labels[j]))))
                                                             # log10 of shell density
       grp_Jx = sum(grp$Jx)                                  # angular momentum components of shell
       grp_Jy = sum(grp$Jy)
@@ -278,7 +278,8 @@ sim_analysis = function(simdata, bin_type="r", rmax=200, rbin=200, DM_profile=NA
                                                             # putting occupied bins into the full rbin
     grp_num$cumsum   = cumsum(grp_num$Freq)                 # total number of particles contained within rbin to the centre
     galaxy_odf       = galaxy_cdf[order(galaxy_cdf$group),] # ordering particles by group
-    rbin_labels      = seq(0,rmax,rmax/rbin)
+    zbinsize         = rmax/rbin
+    rbin_labels      = seq(0,rmax,zbinsize)
     profile = data.frame("z"       = numeric(rbin),
                          "Mass"    = numeric(rbin),
                          "logp"    = numeric(rbin),
@@ -304,7 +305,7 @@ sim_analysis = function(simdata, bin_type="r", rmax=200, rbin=200, DM_profile=NA
       }
                                                            # enclosed mass within outer radius
       profile$logp[j] =
-        log10(grp_mass / ((4 / 3) * pi * ((profile$z[j] * profile$z[j] * profile$z[j]) - (rbin_labels[j] * rbin_labels[j] * rbin_labels[j]))))
+        log10(grp_mass / (pi * rmax * rmax * (profile$z[j]  -  rbin_labels[j])))
                                                            # log10 of shell density
       grp_Jx = sum(grp$Jx)                                 # angular momentum components of shell
       grp_Jy = sum(grp$Jy)
