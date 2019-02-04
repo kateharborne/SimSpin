@@ -7,6 +7,8 @@
 #'
 #'@param lambda The list output from the function \code{\link{find_lambda}} containing the flux,
 #' velocity and dispersion images.
+#'@param reff Boolean specifying whether or not you would like the effective radius ellipse to be
+#'plotted over the image. Default is TRUE.
 #'@return Returns three plots - a flux image, a velcoity image and a dispersion image.
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))

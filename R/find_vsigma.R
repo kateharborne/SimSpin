@@ -87,8 +87,7 @@
 
 find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
                        pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25,
-                       measure_type = list(type="fit", fac=1), blur,
-                       dispersion_analysis = FALSE, IFU_plot = TRUE){
+                       measure_type = list(type="fit", fac=1), blur, IFU_plot = TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
@@ -149,7 +148,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
                         "ybin_labels" = ifu_imgs$ybin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                         "axis_ratio" = reff_ar, "angular_size"=observe_data$angular_size,
                         "sbinsize"=observe_data$sbinsize,
-                        "vbinsize"=observe_data$vbinsize, "vsigma" = vsigma$obs_vsigma,
+                        "vbinsize"=observe_data$vbinsize, "d_L"=observe_data$d_L, "vsigma" = vsigma$obs_vsigma,
                         "counts_img" = vsigma$counts_img, "velocity_img" = vsigma$velocity_img,
                         "dispersion_img" = vsigma$dispersion_img, "appregion" = observe_data$appregion)
 
@@ -220,7 +219,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
                   "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
                   "axis_ratio" = reff_ar, "angular_size"=observe_data$angular_size,
                   "sbinsize"=observe_data$sbinsize,
-                  "vbinsize"=observe_data$vbinsize, "vsigma" = vsigma$obs_vsigma,
+                  "vbinsize"=observe_data$vbinsize, "d_L"=observe_data$d_L, "vsigma" = vsigma$obs_vsigma,
                   "counts_img" = vsigma$counts_img, "velocity_img" = vsigma$velocity_img,
                   "dispersion_img" = vsigma$dispersion_img, "appregion" = observe_data$appregion)
 

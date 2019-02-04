@@ -151,6 +151,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
+                          "d_L"=observe_data$d_L,
                           "appregion"=observe_data$appregion,
                           "dispersion_analysis"=lambda$dispersion_analysis)
     } else {
@@ -162,6 +163,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
+                          "d_L"=observe_data$d_L,
                           "appregion"=observe_data$appregion)
     }
 
@@ -237,6 +239,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
+                    "d_L"=observe_data$d_L,
                     "appregion" = observe_data$appregion,
                     "dispersion_analysis" = lambda$dispersion_analysis)
     } else {
@@ -248,6 +251,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
+                    "d_L"=observe_data$d_L,
                     "appregion" = observe_data$appregion)
     }
 

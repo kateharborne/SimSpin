@@ -15,8 +15,8 @@ sim_FITSimage(out_image, out_data, z, pixel_sscale, psf_fwhm = 0,
 \item{out_data}{The list output from \code{\link{build_datacube}}, \code{\link{find_lambda}} or
 \code{\link{find_vsigma}}.}
 
-\item{z}{The redshift projected distance at which \code{\link{find_lambda}}/\code{\link{find_vsigma}}
-was run.}
+\item{z}{The redshift projected distance at which
+\code{\link{find_lambda}}/\code{\link{find_vsigma}} was run.}
 
 \item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope
 output in arcseconds.}
@@ -36,7 +36,8 @@ output in arcseconds.}
 
 \item{out_file}{A string describing the path and file name of the FITS file to be written.}
 
-\item{obs_name}{A string that describes the name of the observation. Default is "SimSpin datacube".}
+\item{obs_name}{A string that describes the name of the observation. Default is "SimSpin
+datacube".}
 }
 \value{
 Outputs a standard format FITS file.
@@ -59,9 +60,12 @@ lambdar = find_lambda(simdata      = galaxy_data,
                       inc_deg      = 0,
                       threshold    = 25,
                       measure_type = list(type = "fixed",
-                                          axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
+                                          axis_ratio = data.frame("a"=3.5,
+                                                                  "b"=1.7,
+                                                                  "angle"=90),
                                           fac = 1),
                       IFU_plot     = FALSE)
-sim_FITSimage(out_data = lambdar$counts_img, pixel_sscale = 0.5, out_file = "simdata_example.fits")
+sim_FITSimage(out_image = lambdar$counts_img, out_data = lambdar, z = 0.1, pixel_sscale = 0.5,
+out_file = "simdata_example.fits")
 unlink("simdata_example.fits")
 }

@@ -10,8 +10,8 @@
 #' output in arcseconds.
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
-#'@param z The redshift projected distance at which \code{\link{find_lambda}}/\code{\link{find_vsigma}}
-#' was run.
+#'@param z The redshift projected distance at which
+#'\code{\link{find_lambda}}/\code{\link{find_vsigma}} was run.
 #'@param psf_fwhm The FWHM of the PSF used for spatial blurring used when
 #' \code{\link{find_lambda}}/\code{\link{find_vsigma}} was run.
 #'@param r200 The virial radius specified in the simulation, kpc.
@@ -20,7 +20,8 @@
 #'@param Ahalo The scale height of the dark matter halo component in the simulation, kpc.
 #'@param Abulge The scale height of the bulge component in the simulation, kpc.
 #'@param out_file A string describing the path and file name of the FITS file to be written.
-#'@param obs_name A string that describes the name of the observation. Default is "SimSpin datacube".
+#'@param obs_name A string that describes the name of the observation. Default is "SimSpin
+#'datacube".
 #'
 #'@return Outputs a standard format FITS file.
 #'@examples
@@ -40,30 +41,32 @@
 #'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
 #'                                           fac = 1),
 #'                       IFU_plot     = FALSE)
-#' sim_FITS(out_data = lambdar, pixel_sscale = 0.5, pixel_vscale = 1.04, out_file = "simdata_example.fits")
+#' sim_FITS(out_data = lambdar, pixel_sscale = 0.5, pixel_vscale = 1.04, z=0.1, r200=200, r50=10,
+#' Hdisk=5, Ahalo=34.5, Abulge=3.45, out_file = "simdata_example.fits")
 #' unlink("simdata_example.fits")
 
 
-sim_FITS = function(out_data, z, pixel_sscale, pixel_vscale, psf_fwhm=0, r200, r50, Hdisk, Ahalo, Abulge, out_file, obs_name="SimSpin datacube"){
+sim_FITS = function(out_data, z, pixel_sscale, pixel_vscale, psf_fwhm=0, r200=200, r50=10, Hdisk=5.64,
+                    Ahalo=34.5, Abulge=3.45, out_file, obs_name="SimSpin datacube"){
 
   crpix_sim = c(length(out_data$xbin_labels)/2,length(out_data$ybin_labels)/2,length(out_data$vbin_labels)/2)
   cdelt_sim = c(pixel_sscale, pixel_sscale, pixel_vscale)
   crval_sim = c(round(out_data$xbin_labels[crpix_sim[1]] + cdelt_sim[1]/2),
                 round(out_data$xbin_labels[crpix_sim[2]] + cdelt_sim[2]/2),
                 out_data$vbin_labels[crpix_sim[3]] + cdelt_sim[3]/2)
-  len_sim   = c(length(out_data$xbin_labels), length(out_data$ybin_labels), length(out_data$vbin_labels))
+  len_sim   = c(dim(out_data$datacube)[1], dim(out_data$datacube)[2], dim(out_data$datacube)[3])
   ctype_sim = c("X-Spaxel Size", "Y-Spaxel Size", "Voxel Size")
   cunit_sim = c("arcsec", "arcsec", "angstrom")
-  header = newKwv("KEYWORD", "VALUE", "NOTE")
-  header = addKwv("REDSHIFT", z, "redshift, z", header=header)
-  header = addKwv("SPIXSIZE", out_data$sbinsize, "spatial size, kpc/pixel", header=header)
-  header = addKwv("VPIXSIZE", out_data$vbinsize, "velcoity size, kms-1/pixel", header=header)
-  header = addKwv("PSFFWHM", psf_fwhm, "FWHM, arcsec", header=header)
-  header = addKwv("SIMR200", r200, "virial radius from sim, kpc", header=header)
-  header = addKwv("SIMHDISK", Hdisk, "disk scale length from sim, kpc", header=header)
-  header = addKwv("SIMAHALO", Ahalo, "halo scale height from sim, kpc", header=header)
-  header = addKwv("SIMABULG", Abulge, "bulge scale height from sim, kpc", header=header)
-  header = addKwv("HALFMASS", r50, "half mass radius of sim, kpc", header=header)
+  head_sim = FITSio::newKwv("KEYWORD", "VALUE", "NOTE")
+  head_sim = FITSio::addKwv("REDSHIFT", z, "redshift, z", header=head_sim)
+  head_sim = FITSio::addKwv("SPIXSIZE", out_data$sbinsize, "spatial size, kpc/pixel", header=head_sim)
+  head_sim = FITSio::addKwv("VPIXSIZE", out_data$vbinsize, "velcoity size, kms-1/pixel", header=head_sim)
+  head_sim = FITSio::addKwv("PSFFWHM", psf_fwhm, "FWHM, arcsec", header=head_sim)
+  head_sim = FITSio::addKwv("SIMR200", r200, "virial radius from sim, kpc", header=head_sim)
+  head_sim = FITSio::addKwv("SIMHDISK", Hdisk, "disk scale length from sim, kpc", header=head_sim)
+  head_sim = FITSio::addKwv("SIMAHALO", Ahalo, "halo scale height from sim, kpc", header=head_sim)
+  head_sim = FITSio::addKwv("SIMABULG", Abulge, "bulge scale height from sim, kpc", header=head_sim)
+  head_sim = FITSio::addKwv("HALFMASS", r50, "half mass radius of sim, kpc", header=head_sim)
 
   FITSio::writeFITSim(out_data$datacube, file = out_file, c1 = obs_name,
                       crpixn = crpix_sim,
@@ -71,7 +74,7 @@ sim_FITS = function(out_data, z, pixel_sscale, pixel_vscale, psf_fwhm=0, r200, r
                       cdeltn = cdelt_sim,
                       ctypen = ctype_sim,
                       cunitn = cunit_sim,
-                      header = header)
+                      header = head_sim)
 
 
   return(sprintf("New FITS file written."))

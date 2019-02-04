@@ -65,8 +65,8 @@ SAMI_datacube =
 If we examine the output of this function, we get a kinematic data cube (`SAMI_datacube$datacube`) which contains the spatial distribution of particles that fall into different velocity bins. We can tell in the plot below that our galaxy is rotating, as each velocity plane shows the distribution of particles travelling at that speed. Other outputs include the x- and y- spatial and velocity bin labels in units of '' and km s$^{-1}$ respectively (`SAMI_datacube$xbin_labels`, `SAMI_datacube$ybin_labels`, `SAMI_datacube$zbin_labels`). 
 
 ```{r, echo=FALSE, fig.width=7, fig.height=7, fig.align="center"}
-test = array(data = 0, dim = c(30, 16, 30))
-SAMI = array(data = NA, dim = c(30, 16, 30))
+test = array(data = 0, dim = c(30, 15, 30))
+SAMI = array(data = NA, dim = c(30, 15, 30))
 for (n in 1:30){
  SAMI[,,n] = SAMI_datacube$datacube[,n,] 
 }
@@ -106,7 +106,7 @@ SAMI_datacube_blur =
 ```
 
 ```{r, echo=FALSE, fig.width=7, fig.height=7, fig.align="center"}
-blur = array(data = NA, dim = c(30, 16, 30))
+blur = array(data = NA, dim = c(30, 15, 30))
 for (n in 1:30){
  blur[,,n] = SAMI_datacube_blur$datacube[,n,] 
 }

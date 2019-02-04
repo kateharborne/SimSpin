@@ -9,6 +9,9 @@ plot_ifu(lambda, reff = TRUE)
 \arguments{
 \item{lambda}{The list output from the function \code{\link{find_lambda}} containing the flux,
 velocity and dispersion images.}
+
+\item{reff}{Boolean specifying whether or not you would like the effective radius ellipse to be
+plotted over the image. Default is TRUE.}
 }
 \value{
 Returns three plots - a flux image, a velcoity image and a dispersion image.

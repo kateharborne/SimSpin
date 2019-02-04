@@ -4,15 +4,16 @@
 \alias{sim_FITS}
 \title{Generate a FITS file for the data cube produced in SimSpin}
 \usage{
-sim_FITS(out_data, z, pixel_sscale, pixel_vscale, psf_fwhm = 0, r200,
-  r50, Hdisk, Ahalo, Abulge, out_file, obs_name = "SimSpin datacube")
+sim_FITS(out_data, z, pixel_sscale, pixel_vscale, psf_fwhm = 0,
+  r200 = 200, r50 = 10, Hdisk = 5.64, Ahalo = 34.5,
+  Abulge = 3.45, out_file, obs_name = "SimSpin datacube")
 }
 \arguments{
 \item{out_data}{The list output from \code{\link{build_datacube}}, \code{\link{find_lambda}} or
 \code{\link{find_vsigma}}.}
 
-\item{z}{The redshift projected distance at which \code{\link{find_lambda}}/\code{\link{find_vsigma}}
-was run.}
+\item{z}{The redshift projected distance at which
+\code{\link{find_lambda}}/\code{\link{find_vsigma}} was run.}
 
 \item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope
 output in arcseconds.}
@@ -35,7 +36,8 @@ filter output in angstroms.}
 
 \item{out_file}{A string describing the path and file name of the FITS file to be written.}
 
-\item{obs_name}{A string that describes the name of the observation. Default is "SimSpin datacube".}
+\item{obs_name}{A string that describes the name of the observation. Default is "SimSpin
+datacube".}
 }
 \value{
 Outputs a standard format FITS file.
@@ -61,6 +63,7 @@ lambdar = find_lambda(simdata      = galaxy_data,
                                           axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
                                           fac = 1),
                       IFU_plot     = FALSE)
-sim_FITS(out_data = lambdar, pixel_sscale = 0.5, pixel_vscale = 1.04, out_file = "simdata_example.fits")
+sim_FITS(out_data = lambdar, pixel_sscale = 0.5, pixel_vscale = 1.04, z=0.1, r200=200, r50=10,
+Hdisk=5, Ahalo=34.5, Abulge=3.45, out_file = "simdata_example.fits")
 unlink("simdata_example.fits")
 }
