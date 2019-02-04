@@ -49,10 +49,10 @@
 sim_FITS = function(out_data, z, pixel_sscale, pixel_vscale, psf_fwhm=0, r200=200, r50=10, Hdisk=5.64,
                     Ahalo=34.5, Abulge=3.45, out_file, obs_name="SimSpin datacube"){
 
-  crpix_sim = c(length(out_data$xbin_labels)/2,length(out_data$ybin_labels)/2,length(out_data$vbin_labels)/2)
+  crpix_sim = c(dim(out_data$datacube)[1]/2, dim(out_data$datacube)[2]/2, dim(out_data$datacube)[3]/2)
   cdelt_sim = c(pixel_sscale, pixel_sscale, pixel_vscale)
-  crval_sim = c(round(out_data$xbin_labels[crpix_sim[1]] + cdelt_sim[1]/2),
-                round(out_data$xbin_labels[crpix_sim[2]] + cdelt_sim[2]/2),
+  crval_sim = c(round(out_data$xbin_labels[length(SAMI_lambda$xbin_labels)/2] + cdelt_sim[1]/2),
+                round(out_data$xbin_labels[length(SAMI_lambda$xbin_labels)/2] + cdelt_sim[2]/2),
                 out_data$vbin_labels[crpix_sim[3]] + cdelt_sim[3]/2)
   len_sim   = c(dim(out_data$datacube)[1], dim(out_data$datacube)[2], dim(out_data$datacube)[3])
   ctype_sim = c("X-Spaxel Size", "Y-Spaxel Size", "Voxel Size")
