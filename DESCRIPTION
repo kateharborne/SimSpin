@@ -19,10 +19,10 @@ Imports:
     plotrix,
     FITSio
 Depends:
-    celestial,
-    ProSpect
+    celestial
 RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,
-    plot3D
+    plot3D,
+    ProSpect
 VignetteBuilder: knitr
