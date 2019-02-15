@@ -25,7 +25,7 @@ This function produces a list that can be accessed by each of the basic SimSpin 
 
 By varying the effects of observational seeing, the measurement radius, projected inclination and distance, and the telescope parameters within the find_lambda() function, we can begin to understand how inherent limitations of observing galaxies can effect the measurement of &#955;_r by comparing to the true spin parameter than is measured in the sim_analysis() function.
 
-For more detailed examples of using each of the analysis functions above, please see the SimSpin vignettes published on [Rpubs](http://rpubs.com/kateharborne).
+For more detailed examples of using each of the analysis functions above, please see the SimSpin vignettes published on [Rpubs](http://rpubs.com/kateharborne). This [web app](http://simspin.icrar.org) can also be used to explore the N-body analysis capabilities of SimSpin. 
 
 ## SimSpin format
 
