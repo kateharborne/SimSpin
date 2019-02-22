@@ -36,11 +36,13 @@ blur_cube = function(ifu_datacube, sbinsize, psf, fwhm, angular_size){
   sbin            = length(ifu_datacube$xbin_labels) # number of spatial bins in data cube
   vbin            = length(ifu_datacube$vbin_labels) # number of velocity bins in data cube
 
+  if (sbin < 25 && sbin %% 2 != 0){psf_dim = sbin} else if (sbin < 25 && sbin %% 2 == 0){psf_dim = sbin-1} else {psf_dim = 25}
+
   if (psf == "Gaussian"){
-    psf_k = ProFit::profitMakeGaussianPSF(fwhm = fwhm_scaled, dim = c(25,25))
+    psf_k = ProFit::profitMakeGaussianPSF(fwhm = fwhm_scaled, dim = c(psf_dim,psf_dim))
   }
   if (psf == "Moffat"){
-    psf_k = ProFit::profitCubaMoffat(fwhm = fwhm_scaled, mag = 1, con = 5, dim = c(25,25))
+    psf_k = ProFit::profitCubaMoffat(fwhm = fwhm_scaled, mag = 1, con = 5, dim = c(psf_dim,psf_dim))
   }
                                                      # creating each PSF kernel
   blurcube        = array(data = 0, dim = c(sbin, sbin, vbin))
