@@ -9,29 +9,16 @@
 #' velocity and dispersion images.
 #'@param reff Boolean specifying whether or not you would like the effective radius ellipse to be
 #'plotted over the image. Default is TRUE.
+#'@param which_plots String describing which plots you wish to show - any combination of "Flux",
+#'"Velocity" or "Dispersion". Default is NA, which will plot all three.
 #'@return Returns three plots - a flux image, a velcoity image and a dispersion image.
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-#' lambdar = find_lambda(simdata      = galaxy_data,
-#'                       r200         = 200,
-#'                       z            = 0.05,
-#'                       fov          = 15,
-#'                       ap_shape     = "circular",
-#'                       central_wvl  = 4800,
-#'                       lsf_fwhm     = 2.65,
-#'                       pixel_sscale = 0.5,
-#'                       pixel_vscale = 1.04,
-#'                       inc_deg      = 70,
-#'                       threshold    = 25,
-#'                       measure_type = list(type = "fixed",
-#'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
-#'                                           fac = 1),
-#'                       IFU_plot     = FALSE)
-#'
+#' lambdar = find_lambda(simdata = galaxy_data)
 #' plot_ifu(lambdar)
 #'
 
-plot_ifu = function(lambda, reff=TRUE){
+plot_ifu = function(lambda, reff=TRUE, which_plots=NA){
 
   appregion      = lambda$appregion
   appregion[appregion == 0] = NA
@@ -44,25 +31,34 @@ plot_ifu = function(lambda, reff=TRUE){
   xcen = (sbin/2)
   ycen = (sbin/2)
 
-
-  par(mfcol=c(1,1), family="serif", font=1, cex=1.1)
-  magicaxis::magimage(asinh(counts_img), xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), magmap=FALSE, zlim = range(c(asinh(lambda$counts_img))), family="serif", font=1)
-  fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$counts_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("flux, 10"^{-16} * "erg s"^{-1} * "cm"^{-2} * "arcsec"^{-2}))
-  if (reff==TRUE){
-    plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  if(is.na(which_plots[1])){
+    which_plots = c("Flux", "Velocity", "Dispersion")
   }
 
-  par(family="serif", font=1, cex=1.1)
-  magicaxis::magimage(velocity_img,  xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), magmap=FALSE, scale="linear")
-  fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$velocity_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
-  if (reff==TRUE){
-    plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  if(any(which_plots == "Flux")){
+    par(mfcol=c(1,1), family="serif", font=1, cex=1.1)
+    magicaxis::magimage(asinh(counts_img), xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), magmap=FALSE, zlim = range(c(asinh(lambda$counts_img))), family="serif", font=1)
+    fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$counts_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("flux, 10"^{-16} * "erg s"^{-1} * "cm"^{-2} * "arcsec"^{-2}))
+    if (reff==TRUE){
+      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+    }
   }
 
-  par(family="serif", font=1, cex=1.1)
-  magicaxis::magimage(dispersion_img,  xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(200)), magmap=FALSE, scale="linear")
-  fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$dispersion_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(200)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("dispersion"[LOS] * ", km s"^{-1}))
-  if (reff==TRUE){
-    plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+  if(any(which_plots == "Velocity")){
+    par(family="serif", font=1, cex=1.1)
+    magicaxis::magimage(velocity_img,  xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), magmap=FALSE, scale="linear")
+    fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$velocity_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
+    if (reff==TRUE){
+      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+    }
+  }
+
+  if(any(which_plots == "Dispersion")){
+    par(family="serif", font=1, cex=1.1)
+    magicaxis::magimage(dispersion_img,  xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(200)), magmap=FALSE, scale="linear")
+    fields::image.plot(legend.only = TRUE, zlim = range(c(lambda$dispersion_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(200)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("dispersion"[LOS] * ", km s"^{-1}))
+    if (reff==TRUE){
+      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a_kpc / sbinsize, b = axis_data$b_kpc / sbinsize, angle = axis_data$angle - 90, border="red", lwd = 5, deg=TRUE)
+    }
   }
 }
