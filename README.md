@@ -1,7 +1,7 @@
 # SimSpin
 SimSpin - A package for the kinematic analysis of galaxy simulations
 
-The purpose of the Simspin R-package is to take a galaxy simulation and measure an the kinematics of that model as if it had been observed using an IFU. A kinematic data cube can be produced using the functions in this package; from this cube, "observables" can be measured. Specifically, the observable spin parameter, &#955;_r. This package, once installed, is fully documented and tested.
+The purpose of the Simspin R-package is to take a galaxy simulation and measure an the kinematics of that model as if it had been observed using an IFU. A kinematic data cube can be produced using the functions in this package; from this cube, "observables" can be measured. Specifically, the observable spin parameter, &#955;<sub>r</sub>. This package, once installed, is fully documented and tested.
 
 To install directly into R:
 ```
@@ -19,11 +19,11 @@ This function produces a list that can be accessed by each of the basic SimSpin 
 
 1. sim_analysis() - This function is designed to output the kinematic properties of the galaxy model to be observed. This provides the comparison to the kinematic observables produced in the following functions. 
 
-2. build_datacube() - This function produces the kinematic data cube prior to kinematic analysis. This allows the user to take the cubes to use in some other form of analysis without having to calculate &#955;_r.
+2. build_datacube() - This function produces the kinematic data cube prior to kinematic analysis. This allows the user to take the cubes to use in some other form of analysis without having to calculate &#955;<sub>r</sub>.
 
 3. find_lambda() - This function produces a kinematic data cube and calculates the observed spin parameter, ellipticity, inclination and the corresponding flux, line-of-sight velocity and line-of-sight velocity dispersion images. 
 
-By varying the effects of observational seeing, the measurement radius, projected inclination and distance, and the telescope parameters within the find_lambda() function, we can begin to understand how inherent limitations of observing galaxies can effect the measurement of &#955;_r by comparing to the true spin parameter than is measured in the sim_analysis() function.
+By varying the effects of observational seeing, the measurement radius, projected inclination and distance, and the telescope parameters within the find_lambda() function, we can begin to understand how inherent limitations of observing galaxies can effect the measurement of &#955;<sub>r</sub> by comparing to the true spin parameter than is measured in the sim_analysis() function.
 
 For more detailed examples of using each of the analysis functions above, please see the SimSpin vignettes published on [Rpubs](http://rpubs.com/kateharborne). This [web app](http://simspin.icrar.org) can also be used to explore the N-body analysis capabilities of SimSpin. 
 
