@@ -107,7 +107,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
       vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
                                                            # measure lambdaR within specified Reff
     }
@@ -120,7 +120,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
                                                            # Reff from data & supplied axis ratio
 
       vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
                                                            # measure lambdaR within specified Reff
     }
@@ -138,7 +138,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
       vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
       # measure lambdaR within specified Reff
     }
@@ -179,7 +179,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
       vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
                                                            # measure vsigma within number of Reff
     }
@@ -191,7 +191,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
                                fract = measure_type$fract)
                                                            # Reff from data and measured axis ratio
       vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
                                                            # measure vsigma within number of Reff
     }
@@ -209,7 +209,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
       vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
-                                reff_axisratio = measure_type$fac * reff_ar,
+                                reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
       # measure lambdaR within specified Reff
     }

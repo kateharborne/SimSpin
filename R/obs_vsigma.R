@@ -79,7 +79,7 @@ obs_vsigma = function(ifu_datacube, reff_axisratio, sbinsize){
 
   vsigma = sum(counts*velocity*velocity)/sum(counts*standard_dev*standard_dev)
 
-  if (a>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
+  if (a>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_vsigma produced will not be the true value evaluated at reff.", "\n")}
 
   output = list("obs_vsigma"     = sqrt(vsigma),
                 "counts_img"     = counts_img,
