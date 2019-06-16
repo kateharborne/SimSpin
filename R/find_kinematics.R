@@ -2,9 +2,9 @@
 #'Measuring observable galaxy kinematics.
 #'
 #'The purpose of this basic function is to use the \code{SimSpin} package sub-functions to measure
-#' both the observable spin parameter, \eqn{\lambda_R}, and ratio V/\eqn{\sigma} of a simulated 
+#' both the observable spin parameter, \eqn{\lambda_R}, and ratio V/\eqn{\sigma} of a simulated
 #' galaxy model. This function will call each required sub-function (\code{\link{obs_data_prep}},
-#' \code{\link{ifu_cube}}, \code{\link{blur_cube}}, \code{\link{find_reff}}, 
+#' \code{\link{ifu_cube}}, \code{\link{blur_cube}}, \code{\link{find_reff}},
 #' \code{\link{obs_lambda}}, \code{\link{obs_vsigma}} and \code{\link{plot_ifu}}) and return the
 #' \eqn{\lambda_R} and the V/\eqn{\sigma} ratio within a specified measurement radius.
 #'
@@ -86,18 +86,18 @@
 #'                           IFU_plot     = FALSE)
 #'
 
-find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
-                        pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25,
-                        measure_type = list(type="fit", fac=1), blur,
-                        dispersion_analysis = FALSE, IFU_plot = TRUE){
-  
+find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
+                         pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25,
+                         measure_type = list(type="fit", fac=1), blur,
+                         dispersion_analysis = FALSE, IFU_plot = TRUE){
+
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
-    
+
     observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
                                  pixel_sscale, pixel_vscale, inc_deg)
     # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
-    
+
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
       reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = ifu_imgs$axis_ratio,
@@ -107,7 +107,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
       reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
       reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
-      
+
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
@@ -117,7 +117,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                                 sbinsize = observe_data$sbinsize)
       # measure vsigma within specified Reff
     }
-    
+
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
       reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
@@ -133,7 +133,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                                 sbinsize = observe_data$sbinsize)
       # measure vsigma within specified Reff
     }
-    
+
     if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
       reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
                                 "b_kpc"    = measure_type$axis_ratio$b,
@@ -145,18 +145,18 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
       reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
       reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
-      
+
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
       # measure lambdaR within specified Reff
-      
+
       vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
       # measure vsigma within specified Reff
     }
-    
+
     if (dispersion_analysis == TRUE) {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
                           "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
@@ -181,15 +181,15 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                           "d_L"=observe_data$d_L,
                           "appregion"=observe_data$appregion)
     }
-    
+
     if (IFU_plot == TRUE){
       plot_ifu(output)   # plot IFU images
     }
-    
+
     return(output)
-    
+
   } else {                                                 # IF spatial blurring IS requested
-    
+
     observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
                                  pixel_sscale, pixel_vscale, inc_deg)
     # prep simulation data in observer units
@@ -197,7 +197,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
     blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf,
                              fwhm = blur$fwhm, angular_size = observe_data$angular_size)
     # blur IFU cube
-    
+
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
       reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = ifu_imgs$axis_ratio,
@@ -207,36 +207,36 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
       reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
       reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
-      
+
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
       # measure lambdaR within number of Reff
-      
+
       vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
       # measure vsigma within number of Reff
     }
-    
+
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
       reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
                                angular_size = observe_data$angular_size,
                                fract = measure_type$fract)
       # Reff from data and measured axis ratio
-      
+
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
       # measure lambdaR within number of Reff
-      
+
       vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
       # measure vsigma within number of Reff
     }
-    
+
     if (measure_type$type == "fixed"){                 # fitting Reff from specified axis_ratio
       reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
                                 "b_kpc"    = measure_type$axis_ratio$b,
@@ -248,18 +248,18 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
       reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
       reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
-      
+
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize, dispersion_analysis)
       # measure lambdaR within number of Reff
-      
+
       vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
                                 sbinsize = observe_data$sbinsize)
       # measure lambdaR within specified Reff
     }
-    
+
     if (dispersion_analysis == TRUE) {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
@@ -284,13 +284,13 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                     "d_L"=observe_data$d_L,
                     "appregion" = observe_data$appregion)
     }
-    
+
     if (IFU_plot == TRUE){
       plot_ifu(output)   # plot IFU images
     }
-    
+
     return(output)
-    
+
   }
-  
+
 }
