@@ -53,8 +53,8 @@ sim_FITSimage = function(out_image, out_data, z, pixel_sscale, psf_fwhm=0, r200=
 
   crpix_sim = c(dim(out_data$datacube)[1]/2, dim(out_data$datacube)[2]/2)
   cdelt_sim = c(pixel_sscale, pixel_sscale)
-  crval_sim = c(round(out_data$xbin_labels[length(SAMI_lambda$xbin_labels)/2] + cdelt_sim[1]/2),
-                round(out_data$xbin_labels[length(SAMI_lambda$xbin_labels)/2] + cdelt_sim[2]/2))
+  crval_sim = c(round(out_data$xbin_labels[length(out_data$xbin_labels)/2] + cdelt_sim[1]/2),
+                round(out_data$xbin_labels[length(out_data$xbin_labels)/2] + cdelt_sim[2]/2))
   len_sim   = c(dim(out_data$datacube)[1], dim(out_data$datacube)[2])
   ctype_sim = c("X-Spaxel Size", "Y-Spaxel Size")
   cunit_sim = c("arcsec", "arcsec")
