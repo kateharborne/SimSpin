@@ -137,7 +137,7 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
     inc_discID = which(simdata$PartType2$Part$ID %in% galaxy_cdf$ID)
     disc_ids = simdata$PartType2$Part$ID[inc_discID]
     galaxy_cdf[(galaxy_cdf$ID %in% disc_ids),]$flux = (simdata$PartType2$Lum[inc_discID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
-    # calculating flux from bulge particles fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
+    # calculating flux from disc particles fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
   }
 
   if ("PartType3" %in% names(simdata)){                    # if there are bulge particles in the data file,
