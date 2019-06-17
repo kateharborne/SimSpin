@@ -69,21 +69,21 @@
 #'
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-#' lambdar = find_kinematics(simdata      = galaxy_data,
-#'                           r200         = 200,
-#'                           z            = 0.1,
-#'                           fov          = 15,
-#'                           ap_shape     = "circular",
-#'                           central_wvl  = 4800,
-#'                           lsf_fwhm     = 2.65,
-#'                           pixel_sscale = 0.5,
-#'                           pixel_vscale = 1.04,
-#'                           inc_deg      = 0,
-#'                           threshold    = 25,
-#'                           measure_type = list(type = "fixed",
-#'                                               axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
-#'                                               fac = 1),
-#'                           IFU_plot     = FALSE)
+#' kinematics = find_kinematics(simdata      = galaxy_data,
+#'                              r200         = 200,
+#'                              z            = 0.1,
+#'                              fov          = 15,
+#'                              ap_shape     = "circular",
+#'                              central_wvl  = 4800,
+#'                              lsf_fwhm     = 2.65,
+#'                              pixel_sscale = 0.5,
+#'                              pixel_vscale = 1.04,
+#'                              inc_deg      = 0,
+#'                              threshold    = 25,
+#'                              measure_type = list(type = "fixed",
+#'                                                  axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
+#'                                                  fac = 1),
+#'                              IFU_plot     = FALSE)
 #'
 
 find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
@@ -108,14 +108,10 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
-      lambda       = obs_lambda(ifu_datacube = ifu_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
-      # measure lambdaR within specified Reff
-      vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize)
-      # measure vsigma within specified Reff
+      kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
+                                  reff_axisratio = reff_ar,
+                                  sbinsize = observe_data$sbinsize, dispersion_analysis)
+      # measure kinematics within specified Reff
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
@@ -124,14 +120,10 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                angular_size = observe_data$angular_size,
                                fract = measure_type$fract)
       # Reff from data & supplied axis ratio
-      lambda       = obs_lambda(ifu_datacube = ifu_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
-      # measure lambdaR within specified Reff
-      vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize)
-      # measure vsigma within specified Reff
+      kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
+                                  reff_axisratio = reff_ar,
+                                  sbinsize = observe_data$sbinsize, dispersion_analysis)
+      # measure kinematics within specified Reff
     }
 
     if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
@@ -146,35 +138,31 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
-      lambda       = obs_lambda(ifu_datacube = ifu_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
-      # measure lambdaR within specified Reff
+      kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
+                                  reff_axisratio = reff_ar,
+                                  sbinsize = observe_data$sbinsize, dispersion_analysis)
+      # measure kinematics within specified Reff
 
-      vsigma       = obs_vsigma(ifu_datacube = ifu_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize)
-      # measure vsigma within specified Reff
     }
 
     if (dispersion_analysis == TRUE) {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
                           "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
-                          "axis_ratio"=reff_ar, "lambda_r"=lambda$obs_lambdar, "vsigma" = vsigma$obs_vsigma,
-                          "counts_img"=lambda$counts_img, "velocity_img"=lambda$velocity_img,
-                          "dispersion_img"=lambda$dispersion_img,
+                          "axis_ratio"=reff_ar, "lambda_r"=kinematics$obs_lambdar, "vsigma" = kinematics$obs_vsigma,
+                          "counts_img"=kinematics$counts_img, "velocity_img"=kinematics$velocity_img,
+                          "dispersion_img"=kinematics$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
                           "d_L"=observe_data$d_L,
                           "appregion"=observe_data$appregion,
-                          "dispersion_analysis"=lambda$dispersion_analysis)
+                          "dispersion_analysis"=kinematics$dispersion_analysis)
     } else {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
                           "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
-                          "axis_ratio"=reff_ar, "lambda_r"=lambda$obs_lambdar, "vsigma" = vsigma$obs_vsigma,
-                          "counts_img"=lambda$counts_img, "velocity_img"=lambda$velocity_img,
-                          "dispersion_img"=lambda$dispersion_img,
+                          "axis_ratio"=reff_ar, "lambda_r"=kinematics$obs_lambdar, "vsigma" = kinematics$obs_vsigma,
+                          "counts_img"=kinematics$counts_img, "velocity_img"=kinematics$velocity_img,
+                          "dispersion_img"=kinematics$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
@@ -208,15 +196,11 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
-      lambda       = obs_lambda(ifu_datacube = blur_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
-      # measure lambdaR within number of Reff
+      kinematics = obs_kinematics(ifu_datacube = blur_imgs,
+                                  reff_axisratio = reff_ar,
+                                  sbinsize = observe_data$sbinsize, dispersion_analysis)
+      # measure kinematics within specified Reff
 
-      vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize)
-      # measure vsigma within number of Reff
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
@@ -226,15 +210,10 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                fract = measure_type$fract)
       # Reff from data and measured axis ratio
 
-      lambda       = obs_lambda(ifu_datacube = blur_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
-      # measure lambdaR within number of Reff
-
-      vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize)
-      # measure vsigma within number of Reff
+      kinematics = obs_kinematics(ifu_datacube = blur_imgs,
+                                  reff_axisratio = reff_ar,
+                                  sbinsize = observe_data$sbinsize, dispersion_analysis)
+      # measure kinematics within specified Reff
     }
 
     if (measure_type$type == "fixed"){                 # fitting Reff from specified axis_ratio
@@ -249,35 +228,30 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
       reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
 
-      lambda       = obs_lambda(ifu_datacube = blur_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
-      # measure lambdaR within number of Reff
-
-      vsigma       = obs_vsigma(ifu_datacube = blur_imgs,
-                                reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize)
-      # measure lambdaR within specified Reff
+      kinematics = obs_kinematics(ifu_datacube = blur_imgs,
+                                  reff_axisratio = reff_ar,
+                                  sbinsize = observe_data$sbinsize, dispersion_analysis)
+      # measure kinematics within specified Reff
     }
 
     if (dispersion_analysis == TRUE) {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
-                    "axis_ratio" = reff_ar, "lambda_r" = lambda$obs_lambdar, "vsigma" = vsigma$obs_vsigma,
-                    "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img,
-                    "dispersion_img" = lambda$dispersion_img,
+                    "axis_ratio" = reff_ar, "lambda_r" = kinematics$obs_lambdar, "vsigma" = kinematics$obs_vsigma,
+                    "counts_img" = kinematics$counts_img, "velocity_img" = kinematics$velocity_img,
+                    "dispersion_img" = kinematics$dispersion_img,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
                     "d_L"=observe_data$d_L,
                     "appregion" = observe_data$appregion,
-                    "dispersion_analysis" = lambda$dispersion_analysis)
+                    "dispersion_analysis" = kinematics$dispersion_analysis)
     } else {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
-                    "axis_ratio" = reff_ar, "lambda_r" = lambda$obs_lambdar, "vsigma" = vsigma$obs_vsigma,
-                    "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img,
-                    "dispersion_img" = lambda$dispersion_img,
+                    "axis_ratio" = reff_ar, "lambda_r" = kinematics$obs_lambdar, "vsigma" = kinematics$obs_vsigma,
+                    "counts_img" = kinematics$counts_img, "velocity_img" = kinematics$velocity_img,
+                    "dispersion_img" = kinematics$dispersion_img,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
