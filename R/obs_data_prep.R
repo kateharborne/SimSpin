@@ -44,7 +44,7 @@
 #'
 
 obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800,
-                         lsf_fwhm=2.65, pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70){
+                         lsf_fwhm=2.65, pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, filter="g"){
 
   set.seed(42);
   sol_lum = 3.827e33;                                      # solar luminosity in erg s-1
@@ -152,8 +152,9 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
     inc_starID = which(simdata$PartType4$Part$ID %in% galaxy_cdf$ID)
     star_ids = simdata$PartType4$Part$ID[inc_starID]
 
-    if (length(names(simdata$PartType4)) == 3){            #  and if there are spectra associated,
-      tempfilt=list(ProSpect::filt_g_SDSS)                           #  use ProSpect to get particle flux.
+    if (length(names(simdata$PartType4)) == 3){              #  and if there are spectra associated,
+      if (filter == "g"){tempfilt=list(ProSpect::filt_g_SDSS)} #  use ProSpect to get particle flux.
+      if (filter == "r"){tempfilt=list(ProSpect::filt_r_SDSS)}                         
       star_flux = numeric(length = length(galaxy_cdf$ID))
       j = 1
       for (i in inc_starID){
