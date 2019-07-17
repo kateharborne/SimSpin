@@ -81,7 +81,9 @@
 #'                              inc_deg      = 0,
 #'                              threshold    = 25,
 #'                              measure_type = list(type = "fixed",
-#'                                                  axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
+#'                                                  axis_ratio = data.frame("a"=3.5,
+#'                                                                          "b"=1.7,
+#'                                                                          "angle"=90),
 #'                                                  fac = 1),
 #'                              IFU_plot     = FALSE)
 #'

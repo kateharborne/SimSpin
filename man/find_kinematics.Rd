@@ -96,20 +96,22 @@ galaxy model. This function will call each required sub-function (\code{\link{ob
 }
 \examples{
 galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-lambdar = find_kinematics(simdata      = galaxy_data,
-                          r200         = 200,
-                          z            = 0.1,
-                          fov          = 15,
-                          ap_shape     = "circular",
-                          central_wvl  = 4800,
-                          lsf_fwhm     = 2.65,
-                          pixel_sscale = 0.5,
-                          pixel_vscale = 1.04,
-                          inc_deg      = 0,
-                          threshold    = 25,
-                          measure_type = list(type = "fixed",
-                                              axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
-                                              fac = 1),
-                          IFU_plot     = FALSE)
+kinematics = find_kinematics(simdata      = galaxy_data,
+                             r200         = 200,
+                             z            = 0.1,
+                             fov          = 15,
+                             ap_shape     = "circular",
+                             central_wvl  = 4800,
+                             lsf_fwhm     = 2.65,
+                             pixel_sscale = 0.5,
+                             pixel_vscale = 1.04,
+                             inc_deg      = 0,
+                             threshold    = 25,
+                             measure_type = list(type = "fixed",
+                                                 axis_ratio = data.frame("a"=3.5,
+                                                                         "b"=1.7,
+                                                                         "angle"=90),
+                                                 fac = 1),
+                             IFU_plot     = FALSE)
 
 }
