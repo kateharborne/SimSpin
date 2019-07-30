@@ -33,7 +33,7 @@ ifu_cube = function(obs_data, threshold=25) {
   vbinsize        = obs_data$vbinsize                                                           # size of velocity bins
   vseq            = seq(-(vbin * vbinsize) / 2, (vbin * vbinsize) / 2, by=vbinsize)             # velocity bin break positions
   lsf_size        = obs_data$lsf_size                                                           # size of line spread function fwhm
-  threshold_flux  = 1.3608e22 * 10^((threshold + 26.832) / -2.5) * (pixel_sscale^2)             # calculating threshold flux in units for ifu cube
+  threshold_flux  = ProSpect::magAB2Jansky(threshold)                                           # calculating threshold flux in units for ifu cube
   galaxy_obs$binx = cut(galaxy_obs$x, breaks=sbin_breaks, labels=F)
   galaxy_obs$binz = cut(galaxy_obs$z_obs, breaks=sbin_breaks, labels=F)
   galaxy_obs$binn = galaxy_obs$binx + (sbin * galaxy_obs$binz) - sbin                           # assigning particles to positions in aperture
