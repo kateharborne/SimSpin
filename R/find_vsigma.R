@@ -86,13 +86,13 @@
 
 
 find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
-                       pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25,
+                       pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25, filter="g",
                        measure_type = list(type="fit", fac=1), blur, IFU_plot = TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
     observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg)
+                                 pixel_sscale, pixel_vscale, inc_deg, filter)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
 
@@ -161,7 +161,7 @@ find_vsigma = function(simdata, r200=200, z=0.1, fov=15, ap_shape="circular", ce
   } else {                                                 # IF spatial blurring IS requested
 
     observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg)
+                                 pixel_sscale, pixel_vscale, inc_deg, filter)
                                                            # prep simulation data in observer units
     ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
     blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf,
