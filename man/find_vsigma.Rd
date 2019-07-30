@@ -7,8 +7,8 @@
 find_vsigma(simdata, r200 = 200, z = 0.1, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
-  threshold = 25, measure_type = list(type = "fit", fac = 1), blur,
-  IFU_plot = TRUE)
+  threshold = 25, filter = "g", measure_type = list(type = "fit", fac
+  = 1), blur, IFU_plot = TRUE)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}

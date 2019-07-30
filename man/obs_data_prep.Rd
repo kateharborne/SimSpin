@@ -6,7 +6,8 @@
 \usage{
 obs_data_prep(simdata, r200 = 200, z = 0.05, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
-  pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70)
+  pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
+  filter = "g")
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
