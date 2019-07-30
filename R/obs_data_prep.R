@@ -154,17 +154,15 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
 
     if (length(names(simdata$PartType4)) == 3){              #  and if there are spectra associated,
       if (filter == "g"){tempfilt=list(ProSpect::filt_g_SDSS)} #  use ProSpect to get particle flux.
-      if (filter == "r"){tempfilt=list(ProSpect::filt_r_SDSS)}                         
+      if (filter == "r"){tempfilt=list(ProSpect::filt_r_SDSS)}
       star_flux = numeric(length = length(galaxy_cdf$ID))
       j = 1
       for (i in inc_starID){
-        star_flux[j] =
+        galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux[j] =
           ProSpect::photom_lum(wave = simdata$PartType4$Wav, lum = simdata$PartType4$Lum[i,], z = z,
-                               outtype = "Jansky", filters = tempfilt, ref="Planck")$out
+                               outtype = "Jansky", filters = tempfilt, ref="Planck") # flux density in Janksy
         j = j+1
       }
-      galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux = (star_flux * 3e-9 * (pixel_sscale^2)) / (central_wvl * 1e-4 * 1e-16)
-      # flux in units of 10-16 erg s-1 cm-2 arcsec-2
     } else {
       galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux = (simdata$PartType4$Lum[inc_starID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
     }
