@@ -10,8 +10,9 @@
 #'@param filename The SimSpin HDF5 file containing the particle information of the galaxy.
 #'@param ptype The particle type/types to be extracted - NA (default) gives all particles in the
 #' simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.
-#'@param SSP The spectral information HDF5 file containing the luminosities for each particle at
-#' each wavelength.
+#'@param SSP Boolean specifying whether you wish the flux of the particle be calculated based
+#' on the supplied Age/Metallicity information or scaled by the mass. Default is FALSE. If set
+#' to TRUE and no Age/Metallicity information is present in the file, function will error.
 #'@param m2l_disc The mass-to-light ratio of the disc component in solar units.
 #'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@param m2l_star If no SSP file is specified and stellar particles exist in the file, the
@@ -27,7 +28,7 @@
 #'@examples
 #' output = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 
-sim_data = function(filename, ptype=NA, SSP=NA, m2l_disc=1, m2l_bulge=1, m2l_star=1){
+sim_data = function(filename, ptype=NA, SSP=FALSE, m2l_disc=1, m2l_bulge=1, m2l_star=1){
 
   galaxy_file = hdf5r::h5file(filename, mode = "r")           # reading in the snapshot data
   ppart = substring(hdf5r::list.groups(galaxy_file), 1)
@@ -73,56 +74,152 @@ sim_data = function(filename, ptype=NA, SSP=NA, m2l_disc=1, m2l_bulge=1, m2l_sta
   if ("PartType2" %in% ptype){ # if disc particles are requested
     disc_n = length(hdf5r::readDataSet(galaxy_file[["PartType2/x"]]))
     disc_ID = formatC(1:disc_n, width = floor(log10(disc_n)) + 1, format = "d", flag = "0")
-    disc_part = data.frame("ID"        = as.integer(paste0("2", disc_ID)),
-                           "x"         = hdf5r::readDataSet(galaxy_file[["PartType2/x"]]),
-                           "y"         = hdf5r::readDataSet(galaxy_file[["PartType2/y"]]),
-                           "z"         = hdf5r::readDataSet(galaxy_file[["PartType2/z"]]),
-                           "vx"        = hdf5r::readDataSet(galaxy_file[["PartType2/vx"]]),
-                           "vy"        = hdf5r::readDataSet(galaxy_file[["PartType2/vy"]]),
-                           "vz"        = hdf5r::readDataSet(galaxy_file[["PartType2/vz"]]),
-                           "Mass"      = hdf5r::readDataSet(galaxy_file[["PartType2/Mass"]]))
-    disc_lum = (disc_part$Mass * 1e10) / m2l_disc
-    PartType2 = list("Part" = disc_part, "Lum" = disc_lum)
 
+    if (length(hdf5r::list.datasets(galaxy_file[["PartType2"]])) == 7 && SSP){
+      cat("SSP requested, but no Age/Metallicity information contained within supplied file,", paste(filename), ". \n",
+          "Please set SSP=FALSE, or provide additional particle information. \n")
+      stop("SSP Error")        # if SSP is requested without the required info, error
+    } else {
+      disc_part = data.frame("ID"        = as.integer(paste0("2", disc_ID)),
+                             "x"         = hdf5r::readDataSet(galaxy_file[["PartType2/x"]]),
+                             "y"         = hdf5r::readDataSet(galaxy_file[["PartType2/y"]]),
+                             "z"         = hdf5r::readDataSet(galaxy_file[["PartType2/z"]]),
+                             "vx"        = hdf5r::readDataSet(galaxy_file[["PartType2/vx"]]),
+                             "vy"        = hdf5r::readDataSet(galaxy_file[["PartType2/vy"]]),
+                             "vz"        = hdf5r::readDataSet(galaxy_file[["PartType2/vz"]]),
+                             "Mass"      = hdf5r::readDataSet(galaxy_file[["PartType2/Mass"]]))
+    }
+
+     if (length(hdf5r::list.datasets(galaxy_file[["PartType2"]])) == 7 && isFALSE(SSP)){
+      disc_lum = (disc_part$Mass * 1e10) / m2l_disc
+      PartType2 = list("Part" = disc_part, "Lum" = disc_lum)
+
+    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType2"]])) == 9 && isFALSE(SSP)){
+      disc_lum = (disc_part$Mass * 1e10) / m2l_disc
+      PartType2 = list("Part" = disc_part, "Lum" = disc_lum)
+
+    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType2"]])) == 9 && SSP){
+
+      if ("Age" %in% substring(hdf5r::list.datasets(galaxy_file[["PartType2"]]), 1)){
+        disc_SSP = data.frame("Metallicity" = hdf5r::readDataSet(galaxy_file[["PartType2/Metallicity"]]),
+                              "Age"         = hdf5r::readDataSet(galaxy_file[["PartType2/Age"]]))
+
+        # if 9 datasets are provided and SSP is true, check if "Age" is already supplied
+      } else { # if not, calculate the "Age" using celestial (performed in parallel)
+        numCores = parallel::detectCores()
+        sft = hdf5r::readDataSet(galaxy_file[["PartType2/StellarFormationTime"]])
+        age = as.numeric(parallel::mclapply(sft, .SFTtoAge, mc.cores = numCores))
+
+        disc_SSP = data.frame("Metallicity" = hdf5r::readDataSet(galaxy_file[["PartType2/Metallicity"]]),
+                              "Age" = age)
+      }
+
+      PartType2 = list("Part" = disc_part, "SSP" = disc_SSP)
+
+    }
   }
 
   if ("PartType3" %in% ptype){ # if bulge particles are requested
     bulge_n = length(hdf5r::readDataSet(galaxy_file[["PartType3/x"]]))
     bulge_ID = formatC(1:bulge_n, width = floor(log10(bulge_n)) + 1, format = "d", flag = "0")
-    bulge_part = data.frame("ID"        = as.integer(paste0("3", bulge_ID)),
-                            "x"         = hdf5r::readDataSet(galaxy_file[["PartType3/x"]]),
-                            "y"         = hdf5r::readDataSet(galaxy_file[["PartType3/y"]]),
-                            "z"         = hdf5r::readDataSet(galaxy_file[["PartType3/z"]]),
-                            "vx"        = hdf5r::readDataSet(galaxy_file[["PartType3/vx"]]),
-                            "vy"        = hdf5r::readDataSet(galaxy_file[["PartType3/vy"]]),
-                            "vz"        = hdf5r::readDataSet(galaxy_file[["PartType3/vz"]]),
-                            "Mass"      = hdf5r::readDataSet(galaxy_file[["PartType3/Mass"]]))
-    bulge_lum = (bulge_part$Mass * 1e10) / m2l_bulge
-    PartType3 = list("Part" = bulge_part, "Lum" = bulge_lum)
+    if (length(hdf5r::list.datasets(galaxy_file[["PartType3"]])) == 7 && SSP){
+      cat("SSP requested, but no Age/Metallicity information contained within supplied file,", paste(filename), ". \n",
+          "Please set SSP=FALSE, or provide additional particle information. \n")
+      stop("SSP Error")        # if SSP is requested without the required info, error
+    } else {
+      bulge_part = data.frame("ID"        = as.integer(paste0("3", bulge_ID)),
+                              "x"         = hdf5r::readDataSet(galaxy_file[["PartType3/x"]]),
+                              "y"         = hdf5r::readDataSet(galaxy_file[["PartType3/y"]]),
+                              "z"         = hdf5r::readDataSet(galaxy_file[["PartType3/z"]]),
+                              "vx"        = hdf5r::readDataSet(galaxy_file[["PartType3/vx"]]),
+                              "vy"        = hdf5r::readDataSet(galaxy_file[["PartType3/vy"]]),
+                              "vz"        = hdf5r::readDataSet(galaxy_file[["PartType3/vz"]]),
+                              "Mass"      = hdf5r::readDataSet(galaxy_file[["PartType3/Mass"]]))
+    }
 
+    if (length(hdf5r::list.datasets(galaxy_file[["PartType3"]])) == 7 && isFALSE(SSP)){
+      bulge_lum = (bulge_part$Mass * 1e10) / m2l_bulge
+      PartType3 = list("Part" = bulge_part, "Lum" = bulge_lum)
+
+    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType3"]])) == 9 && isFALSE(SSP)){
+      bulge_lum = (bulge_part$Mass * 1e10) / m2l_bulge
+      PartType3 = list("Part" = bulge_part, "Lum" = bulge_lum)
+
+    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType3"]])) == 9 && SSP){
+
+      if ("Age" %in% substring(hdf5r::list.datasets(galaxy_file[["PartType3"]]), 1)){
+        bulge_SSP = data.frame("Metallicity" = hdf5r::readDataSet(galaxy_file[["PartType3/Metallicity"]]),
+                               "Age"         = hdf5r::readDataSet(galaxy_file[["PartType3/Age"]]))
+
+        # if 9 datasets are provided and SSP is true, check if "Age" is already supplied
+      } else { # if not, calculate the "Age" using celestial (performed in parallel)
+        numCores = parallel::detectCores()
+        sft = hdf5r::readDataSet(galaxy_file[["PartType3/StellarFormationTime"]])
+        age = as.numeric(parallel::mclapply(sft, .SFTtoAge, mc.cores = numCores))
+
+        bulge_SSP = data.frame("Metallicity" = hdf5r::readDataSet(galaxy_file[["PartType3/Metallicity"]]),
+                               "Age" = age)
+      }
+
+      PartType3 = list("Part" = bulge_part, "SSP" = bulge_SSP)
+
+    }
   }
 
   if ("PartType4" %in% ptype){ # if stellar particles are requested
+
     star_n = length(hdf5r::readDataSet(galaxy_file[["PartType4/x"]]))
     star_ID = formatC(1:star_n, width = floor(log10(star_n)) + 1, format = "d", flag = "0")
-    star_part = data.frame("ID"        = as.integer(paste0("4", star_ID)),
-                           "x"         = hdf5r::readDataSet(galaxy_file[["PartType4/x"]]),
-                           "y"         = hdf5r::readDataSet(galaxy_file[["PartType4/y"]]),
-                           "z"         = hdf5r::readDataSet(galaxy_file[["PartType4/z"]]),
-                           "vx"        = hdf5r::readDataSet(galaxy_file[["PartType4/vx"]]),
-                           "vy"        = hdf5r::readDataSet(galaxy_file[["PartType4/vy"]]),
-                           "vz"        = hdf5r::readDataSet(galaxy_file[["PartType4/vz"]]),
-                           "Mass"      = hdf5r::readDataSet(galaxy_file[["PartType4/Mass"]]))
 
-    if (!is.na(SSP)){ # if spectral information is supplied
-      f = hdf5r::h5file(SSP, mode = "r")
-      star_lum = hdf5r::readDataSet(f[["PartType4/Luminosity"]])
-      star_wave = hdf5r::readDataSet(f[["PartType4/Wavelength"]])
-      hdf5r::h5close(f)
-      PartType4 = list("Part" = star_part, "Lum" = star_lum, "Wav" = star_wave)
+    if (length(hdf5r::list.datasets(galaxy_file[["PartType4"]])) == 7 && SSP){
+      cat("SSP requested, but no Age/Metallicity information contained within supplied file,", paste(filename), ". \n",
+      "Please set SSP=FALSE, or provide additional particle information. \n")
+      stop("SSP Error")        # if SSP is requested without the required info, error
     } else {
+      star_part = data.frame("ID"        = as.integer(paste0("4", star_ID)),
+                             "x"         = hdf5r::readDataSet(galaxy_file[["PartType4/x"]]),
+                             "y"         = hdf5r::readDataSet(galaxy_file[["PartType4/y"]]),
+                             "z"         = hdf5r::readDataSet(galaxy_file[["PartType4/z"]]),
+                             "vx"        = hdf5r::readDataSet(galaxy_file[["PartType4/vx"]]),
+                             "vy"        = hdf5r::readDataSet(galaxy_file[["PartType4/vy"]]),
+                             "vz"        = hdf5r::readDataSet(galaxy_file[["PartType4/vz"]]),
+                             "Mass"      = hdf5r::readDataSet(galaxy_file[["PartType4/Mass"]]))
+
+    }
+
+    if (length(hdf5r::list.datasets(galaxy_file[["PartType4"]])) == 7 && isFALSE(SSP)){
+
       star_lum = ((star_part$Mass * 1e10) / m2l_star)
+      # if no Age/Metallicity is provided, use M2L ratio to calculate luminosity
       PartType4 = list("Part" = star_part, "Lum" = star_lum)
+
+    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType4"]])) == 9 && isFALSE(SSP)){
+
+      star_lum = ((star_part$Mass * 1e10) / m2l_star)
+      # if Age/Metallicity is provided, but SSP is false, use M2L ratio to calculate luminosity
+      PartType4 = list("Part" = star_part, "Lum" = star_lum)
+
+    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType4"]])) == 9 && SSP){
+
+      if ("Age" %in% substring(hdf5r::list.datasets(galaxy_file[["PartType4"]]), 1)){
+
+        star_SSP = data.frame("Metallicity" = hdf5r::readDataSet(galaxy_file[["PartType4/Metallicity"]]),
+                              "Age"         = hdf5r::readDataSet(galaxy_file[["PartType4/Age"]]))
+
+        # if 9 datasets are provided and SSP is true, check if "Age" is already supplied
+      } else { # if not, calculate the "Age" using celestial (performed in parallel)
+
+        numCores = parallel::detectCores()
+        sft = hdf5r::readDataSet(galaxy_file[["PartType4/StellarFormationTime"]])
+        age = as.numeric(parallel::mclapply(sft, .SFTtoAge, mc.cores = numCores))
+
+        star_SSP = data.frame("Metallicity" = hdf5r::readDataSet(galaxy_file[["PartType4/Metallicity"]]),
+                              "Age" = age)
+
+      }
+
+      PartType4 = list("Part" = star_part, "SSP" = star_SSP)
+
     }
   }
 

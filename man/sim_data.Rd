@@ -4,7 +4,7 @@
 \alias{sim_data}
 \title{Prepare simulation data for SimSpin}
 \usage{
-sim_data(filename, ptype = NA, SSP = NA, m2l_disc = 1,
+sim_data(filename, ptype = NA, SSP = FALSE, m2l_disc = 1,
   m2l_bulge = 1, m2l_star = 1)
 }
 \arguments{
@@ -13,8 +13,9 @@ sim_data(filename, ptype = NA, SSP = NA, m2l_disc = 1,
 \item{ptype}{The particle type/types to be extracted - NA (default) gives all particles in the
 simulation, 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars, 5 - boundary.}
 
-\item{SSP}{The spectral information HDF5 file containing the luminosities for each particle at
-each wavelength.}
+\item{SSP}{Boolean specifying whether you wish the flux of the particle be calculated based
+on the supplied Age/Metallicity information or scaled by the mass. Default is FALSE. If set
+to TRUE and no Age/Metallicity information is present in the file, function will error.}
 
 \item{m2l_disc}{The mass-to-light ratio of the disc component in solar units.}
 
