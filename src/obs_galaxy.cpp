@@ -63,16 +63,11 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
   Rcpp::DataFrame df =
     Rcpp::DataFrame::create(Rcpp::Named("ID")        = ID,
                             Rcpp::Named("x")         = x,
-                            Rcpp::Named("y")         = y,
-                            Rcpp::Named("z")         = z,
-                            Rcpp::Named("vx")        = vx,
-                            Rcpp::Named("vy")        = vy,
-                            Rcpp::Named("vz")        = vz,
-                            Rcpp::Named("Mass")      = Mass,
                             Rcpp::Named("r")         = r,
                             Rcpp::Named("z_obs")     = z_obs,
                             Rcpp::Named("r_obs")     = r_obs,
-                            Rcpp::Named("vy_obs")    = vy_obs);
+                            Rcpp::Named("vy_obs")    = vy_obs,
+                            Rcpp::Named("Mass")      = Mass);
 
   return(df);
 
