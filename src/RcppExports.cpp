@@ -5,16 +5,26 @@
 
 using namespace Rcpp;
 
-// obs_galaxy
-Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad);
-RcppExport SEXP _SimSpin_obs_galaxy(SEXP part_dataSEXP, SEXP centreSEXP, SEXP inc_radSEXP) {
+// cen_galaxy
+Rcpp::List cen_galaxy(Rcpp::DataFrame part_data);
+RcppExport SEXP _SimSpin_cen_galaxy(SEXP part_dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::DataFrame >::type part_data(part_dataSEXP);
-    Rcpp::traits::input_parameter< bool >::type centre(centreSEXP);
+    rcpp_result_gen = Rcpp::wrap(cen_galaxy(part_data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// obs_galaxy
+Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad);
+RcppExport SEXP _SimSpin_obs_galaxy(SEXP part_dataSEXP, SEXP inc_radSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type part_data(part_dataSEXP);
     Rcpp::traits::input_parameter< double >::type inc_rad(inc_radSEXP);
-    rcpp_result_gen = Rcpp::wrap(obs_galaxy(part_data, centre, inc_rad));
+    rcpp_result_gen = Rcpp::wrap(obs_galaxy(part_data, inc_rad));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -32,7 +42,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_SimSpin_obs_galaxy", (DL_FUNC) &_SimSpin_obs_galaxy, 3},
+    {"_SimSpin_cen_galaxy", (DL_FUNC) &_SimSpin_cen_galaxy, 1},
+    {"_SimSpin_obs_galaxy", (DL_FUNC) &_SimSpin_obs_galaxy, 2},
     {"_SimSpin_sim_galaxy", (DL_FUNC) &_SimSpin_sim_galaxy, 2},
     {NULL, NULL, 0}
 };
