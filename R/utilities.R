@@ -108,3 +108,32 @@
 
 }
 
+.reorient_galaxy = function(galaxy_data){
+
+  # step 1: define the moment of inertia tensor
+  inertiaTensor = matrix(nrow=3, ncol=3)
+  inertiaTensor[1,1] = sum(galaxy_data$Mass * (galaxy_data$y^2 + galaxy_data$z^2))
+  inertiaTensor[2,2] = sum(galaxy_data$Mass * (galaxy_data$x^2 + galaxy_data$z^2))
+  inertiaTensor[3,3] = sum(galaxy_data$Mass * (galaxy_data$x^2 + galaxy_data$y^2))
+  inertiaTensor[1,2] = -sum(galaxy_data$Mass*galaxy_data$x*galaxy_data$y)
+  inertiaTensor[1,3] = -sum(galaxy_data$Mass*galaxy_data$x*galaxy_data$z)
+  inertiaTensor[2,3] = -sum(galaxy_data$Mass*galaxy_data$y*galaxy_data$z)
+  inertiaTensor[2,1] = inertiaTensor[1,2]
+  inertiaTensor[3,1] = inertiaTensor[1,3]
+  inertiaTensor[3,2] = inertiaTensor[2,3]
+
+
+  # step 2: find eigen vectors and reorder such that x is the major axis
+  eigen_vec = eigen(inertiaTensor)$vectors
+  eigen_vec = cbind(eigen_vec[,3], eigen_vec[,2], eigen_vec[,1])
+  rot_mat = t(eigen_vec) # tranpose to get rotation matrix
+
+  # step 5: rotate coordinates using rotation matrix
+  new_coor =  rot_mat %*% rbind(galaxy_data$x, galaxy_data$y, galaxy_data$z)
+  new_vel =  rot_mat %*% rbind(galaxy_data$vx, galaxy_data$vy, galaxy_data$vz)
+
+  galaxy_data$x = new_coor[1,]; galaxy_data$y = new_coor[2,]; galaxy_data$z = new_coor[3,];
+  galaxy_data$vx = new_vel[1,]; galaxy_data$vy = new_vel[2,]; galaxy_data$vz = new_vel[3,];
+
+  return(galaxy_data)
+}
