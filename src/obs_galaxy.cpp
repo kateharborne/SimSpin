@@ -11,8 +11,6 @@ using namespace Rcpp;
 //' user supplied inclination.
 //'
 //' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
-//' @param centre A logical that tells the function to centre the galaxy about its centre of mass
-//'  and velocity or not (i.e. TRUE or FALSE).
 //' @param inc_rad The observed inclination angle in radians.
 //' @return Returns a data frame containing the original particle information plus the observed
 //'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
@@ -22,11 +20,10 @@ using namespace Rcpp;
 //'   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
 //'
 //'   output = obs_galaxy(part_data = galaxy_data,
-//'                       centre    = TRUE,
 //'                       inc_rad   = 0)
 //' @export
 // [[Rcpp::export]]
-Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
+Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad) {
 
   Rcpp::NumericVector ID        = part_data["ID"];
   Rcpp::NumericVector x         = part_data["x"];
@@ -38,20 +35,7 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, bool centre, double inc_rad) {
   Rcpp::NumericVector Mass      = part_data["Mass"];
 
   int n = x.size();
-  if(centre == TRUE){
-    double xcen = median(x);
-    double ycen = median(y);
-    double zcen = median(z);
-    double vxcen = median(vx);
-    double vycen = median(vy);
-    double vzcen = median(vz);
-    x = x-xcen;
-    y = y-ycen;
-    z = z-zcen;
-    vx = vx - vxcen;
-    vy = vy - vycen;
-    vz = vz - vzcen;
-  }
+
   Rcpp::NumericVector r(n), z_obs(n), vy_obs(n), r_obs(n);
   for(int i=0; i<n; i++){
     r[i]      = ::sqrt((x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]));
