@@ -4,7 +4,7 @@
 \alias{ifu_cube}
 \title{Creating a mock IFU kinematic data cube.}
 \usage{
-ifu_cube(obs_data, threshold = 25)
+ifu_cube(obs_data)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
