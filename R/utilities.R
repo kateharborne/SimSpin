@@ -137,3 +137,47 @@
 
   return(galaxy_data)
 }
+
+.assign_flux = function(X, obs__data, image__grid, lengths__grid, temp_filt, redshift){
+      if (lengths__grid[[X]] > 1){ # if there are particles in the X
+        temp = data.frame("Age" = obs__data$galaxy_obs$Age[image__grid[[X]]] * 1e9,
+                          "Mass" = obs__data$galaxy_obs$Mass[image__grid[[X]]] * 1e10,
+                          "cumMass" = rep(NA, length(obs__data$galaxy_obs$Mass[image__grid[[X]]])),
+                          "Metallicity" = obs__data$galaxy_obs$Metallicity[image__grid[[X]]])
+        temp = temp[order(temp$Age),] # fill a data frame and order by age
+
+      if (length(unique(temp$Age)) != length(temp$Age)){
+        # if there are any particles with the same age
+        nu = as.integer(which(table(temp$Age) > 1))
+        for (n in 1:length(nu)){
+          vals = which(temp$Age == temp$Age[nu[n]])
+          temp$Mass[vals[1]] = sum(temp$Mass[vals])
+          temp$Metallicity[vals[1]] = sum(temp$Metallicity[vals])
+          vals = vals[-1]
+          temp = temp[-vals,]
+          } # sum together all masses and metallicities such that we have a single particle at that age
+        }
+
+      temp$cumMass = cumsum(temp$Mass) # cumulative sum of ages
+      tmp_SFHfunc = approxfun(x = c(temp$Age), y = c(0,diff(temp$cumMass)/diff(temp$Age)), yleft=0, yright=0)
+      # describe star formation rate in M_sol/yr as a function of age
+      tmp_Zfunc = approxfun(x = c(temp$Age), y = c(temp$Metallicity), yleft=0, yright=0)
+      # describe metallicity as a function of age
+      tmp_SFH = ProSpect::SFHfunc(massfunc = tmp_SFHfunc, Z = tmp_Zfunc, z=redshift, speclib = ProSpect::BC03lr,
+                                  outtype="Jansky",
+                                  filters = temp_filt, ref="Planck")
+      # generate a spectrum
+      flux = tmp_SFH$out$out
+      # convert to flux
+      } else {flux=0}
+  return(flux)
+}
+
+.masslum2flux = function(X, obs__data, image__grid, lengths__grid, redshift){
+  if (lengths__grid[[X]] > 1){ # if there are particles in that grid cell
+    lum = sum(obs__data$galaxy_obs$Lum[image__grid[[X]]]) # sum luminosities in each cell
+    flux = ProSpect::CGS2Jansky(lum * ProSpect::Lum2FluxFactor(z = redshift, ref="Planck")) # convert to flux in Janskys
+  } else {flux=0}
+  return(flux)
+}
+
