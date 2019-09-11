@@ -50,9 +50,10 @@ blur_cube = function(ifu_datacube, sbinsize, psf, fwhm, angular_size){
     blurcube[,,c] = ProFit::profitBruteConv(ifu_datacube$cube[,,c], psf_k)
   }
                                                      # apply PSF to spatial plane via convolution
-  blurcube    = blurcube * ifu_datacube$appregion    # trimming cube to data within the aperture
+  blurcube    = blurcube * ifu_datacube$ap_region    # trimming cube to data within the aperture
 
   output = list("cube"        = blurcube,
+                "ap_region"   = ifu_datacube$ap_region,
                 "xbin_labels" = ifu_datacube$xbin_labels,
                 "ybin_labels" = ifu_datacube$ybin_labels,
                 "vbin_labels" = ifu_datacube$vbin_labels)

@@ -20,11 +20,11 @@
 
 plot_ifu = function(lambda, reff=TRUE, which_plots=NA){
 
-  appregion      = lambda$appregion
-  appregion[appregion == 0] = NA
-  counts_img     = lambda$counts_img * appregion
-  velocity_img   = lambda$velocity_img * appregion
-  dispersion_img = lambda$dispersion_img * appregion
+  ap_region      = lambda$ap_region
+  ap_region[ap_region == 0] = NA
+  counts_img     = lambda$counts_img * ap_region
+  velocity_img   = lambda$velocity_img * ap_region
+  dispersion_img = lambda$dispersion_img * ap_region
   axis_data      = lambda$axis_ratio
   sbin = dim(counts_img)[1]
   sbinsize = lambda$sbinsize
