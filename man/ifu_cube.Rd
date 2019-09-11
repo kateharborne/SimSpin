@@ -4,12 +4,12 @@
 \alias{ifu_cube}
 \title{Creating a mock IFU kinematic data cube.}
 \usage{
-ifu_cube(obs_data)
+ifu_cube(obs_data, img_data)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
 
-\item{threshold}{The magnitude limit of the observation.}
+\item{img_grid}{The list output from the \code{img_grid()} function.}
 }
 \value{
 Returns a list that contains:
@@ -25,7 +25,7 @@ Returns a list that contains:
 }
 \description{
 The purpose of this function is to construct an IFU data cube. It accepts output parameters from
-\code{obs_data_prep()} and returns a 3D array containing the spatial and velocity corrdinates of
+\code{obs_data_prep()} and \code{img_grid()} and returns a 3D array containing the spatial and velocity corrdinates of
  each particle in the galaxy simulation in order to mimic the arrangement of an IFU data cube.
 }
 \examples{
