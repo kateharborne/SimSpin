@@ -5,7 +5,7 @@
 \title{Calculating the observed kinematics, \eqn{\lambda_R} and V/\eqn{\sigma}}
 \usage{
 obs_kinematics(ifu_datacube, reff_axisratio, sbinsize,
-  dispersion_analysis = FALSE)
+  radius_type = "Both")
 }
 \arguments{
 \item{ifu_datacube}{The list output from the function \code{\link{ifu_cube}} containing the mock
@@ -16,21 +16,22 @@ function.}
 
 \item{sbinsize}{The size of each spatial bin in kpc, output from the function
 \code{\link{obs_data_prep}}.}
-
-\item{dispersion_analysis}{(Optional) If specified as \code{TRUE}, the code will output the mean
-and median values of the LOS velocity dispersion. Default is \code{FALSE}.}
 }
 \value{
 Returns a list that contains:
-\item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R}}
+\item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R} measured with circular
+radii. \emph{(When \code{radius_type = "Both"} or \code{"Circular"}.)}}
+\item{\code{$obs_elambdar}}{The observed spin parameter \eqn{\lambda_R} measured with elliptical
+radii. \emph{(When \code{radius_type = "Both"} or \code{"Elliptical"}.)}}
+\item{\code{$obs_vsigma}}{The observed V/\eqn{\sigma} value.}
 \item{\code{$counts_img}}{The observed flux image.}
 \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
 }
 \description{
-The purpose of this function is to calculate the spin parameter, \eqn{\lambda_R}, 
-and ratio V/\eqn{\sigma} that would be observed given an IFU data cube. You can either 
-supply the cube created by the \code{\link{ifu_cube}} function directly, or the blurred 
+The purpose of this function is to calculate the spin parameter, \eqn{\lambda_R},
+and ratio V/\eqn{\sigma} that would be observed given an IFU data cube. You can either
+supply the cube created by the \code{\link{ifu_cube}} function directly, or the blurred
 cube created by \code{\link{blur_cube}}.
 }
 \examples{

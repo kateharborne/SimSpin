@@ -37,13 +37,16 @@
 #' "ang" -  no measurement of the effective radius is made, assuming that the supplied values are
 #' determined using another package.
 #' }
+#'@param radius_type The method of computing radii - "Circular" i.e. \eqn{r^{2} = x^{2} + y{2}} or
+#'"Elliptical" where r is the semi-major axis of the ellipse having an axis ratio \eqn{b/a} on
+#'which the pixel lies, i.e.
+#'\eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}. Default is "Both" such
+#'that both \eqn{\lambda_R} values are returned.
 #'@param blur \emph{Optional} Specify if you wish to apply observational seeing effects to the
 #' cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies
 #' the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}.
 #' \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of
 #' arcseconds.
-#'@param dispersion_analysis \emph{Optional} If specified as \code{TRUE}, the code will output the
-#' mean and median values of the LOS velocity dispersion. Default is \code{FALSE}.
 #'@param IFU_plot \emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
 #'LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
 #'automatically.
@@ -54,7 +57,10 @@
 #' \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 #' \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
 #'  \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
-#' \item{\code{$lambda_r}}{The observed spin parameter \eqn{\lambda_R}}
+#' \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R} measured with circular
+#' radii. \emph{(When \code{radius_type = "Both"} or \code{"Circular"}.)}}
+#' \item{\code{$obs_elambdar}}{The observed spin parameter \eqn{\lambda_R} measured with elliptical
+#' radii. \emph{(When \code{radius_type = "Both"} or \code{"Elliptical"}.)}}
 #' \item{\code{$counts_img}}{The observed flux image.}
 #' \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 #' \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
@@ -87,7 +93,7 @@
 find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
                         pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25, filter="g",
                         measure_type = list(type="fit", fac=1), blur,
-                        dispersion_analysis = FALSE, IFU_plot = TRUE){
+                        radius_type="Both", IFU_plot = TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
@@ -108,7 +114,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
 
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
+                                sbinsize = observe_data$sbinsize, radius_type = radius_type)
                                                            # measure lambdaR within specified Reff
       }
 
@@ -120,7 +126,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                                                            # Reff from data & supplied axis ratio
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
+                                sbinsize = observe_data$sbinsize, radius_type = radius_type)
                                                            # measure lambdaR within specified Reff
     }
 
@@ -138,11 +144,22 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
 
       lambda       = obs_lambda(ifu_datacube = ifu_imgs,
                                 reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
+                                sbinsize = observe_data$sbinsize, radius_type = radius_type)
                                                            # measure lambdaR within specified Reff
     }
 
-    if (dispersion_analysis == TRUE) {
+    if (radius_type == "Both" | radius_type == "both") {
+      output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
+                          "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
+                          "axis_ratio"=reff_ar, "lambda_r"=lambda$obs_lambdar, "elambda_r"=lambda$obs_elambdar,
+                          "counts_img"=lambda$counts_img, "velocity_img"=lambda$velocity_img,
+                          "dispersion_img"=lambda$dispersion_img,
+                          "angular_size"=observe_data$angular_size,
+                          "sbinsize"=observe_data$sbinsize,
+                          "vbinsize"=observe_data$vbinsize,
+                          "d_L"=observe_data$d_L,
+                          "appregion"=observe_data$appregion)
+    } else if (radius_type == "Circular" | radius_type == "circular") {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
                           "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
                           "axis_ratio"=reff_ar, "lambda_r"=lambda$obs_lambdar,
@@ -152,12 +169,11 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
                           "d_L"=observe_data$d_L,
-                          "appregion"=observe_data$appregion,
-                          "dispersion_analysis"=lambda$dispersion_analysis)
-    } else {
+                          "appregion"=observe_data$appregion)
+    } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
                           "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
-                          "axis_ratio"=reff_ar, "lambda_r"=lambda$obs_lambdar,
+                          "axis_ratio"=reff_ar, "elambda_r"=lambda$obs_elambdar,
                           "counts_img"=lambda$counts_img, "velocity_img"=lambda$velocity_img,
                           "dispersion_img"=lambda$dispersion_img,
                           "angular_size"=observe_data$angular_size,
@@ -195,7 +211,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
 
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
+                                sbinsize = observe_data$sbinsize, radius_type=radius_type)
                                                            # measure lambdaR within number of Reff
     }
 
@@ -208,7 +224,7 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
 
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
+                                sbinsize = observe_data$sbinsize, radius_type=radius_type)
                                                            # measure lambdaR within number of Reff
     }
 
@@ -226,11 +242,23 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
 
       lambda       = obs_lambda(ifu_datacube = blur_imgs,
                                 reff_axisratio = reff_ar,
-                                sbinsize = observe_data$sbinsize, dispersion_analysis)
+                                sbinsize = observe_data$sbinsize, radius_type=radius_type)
                                                            # measure lambdaR within number of Reff
     }
 
-    if (dispersion_analysis == TRUE) {
+    if (radius_type == "Both" | radius_type == "both") {
+      output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
+                    "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
+                    "axis_ratio" = reff_ar, "lambda_r" = lambda$obs_lambdar,
+                    "elambda_r" = lambda$obs_elambdar,
+                    "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img,
+                    "dispersion_img" = lambda$dispersion_img,
+                    "angular_size" = observe_data$angular_size,
+                    "sbinsize"= observe_data$sbinsize,
+                    "vbinsize" = observe_data$vbinsize,
+                    "d_L"=observe_data$d_L,
+                    "appregion" = observe_data$appregion)
+    } else if (radius_type == "Circular" | radius_type == "circular") {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
                     "axis_ratio" = reff_ar, "lambda_r" = lambda$obs_lambdar,
@@ -240,12 +268,12 @@ find_lambda  = function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular"
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
                     "d_L"=observe_data$d_L,
-                    "appregion" = observe_data$appregion,
-                    "dispersion_analysis" = lambda$dispersion_analysis)
-    } else {
+                    "appregion" = observe_data$appregion)
+    } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
-                    "axis_ratio" = reff_ar, "lambda_r" = lambda$obs_lambdar,
+                    "axis_ratio" = reff_ar,
+                    "elambda_r" = lambda$obs_elambdar,
                     "counts_img" = lambda$counts_img, "velocity_img" = lambda$velocity_img,
                     "dispersion_img" = lambda$dispersion_img,
                     "angular_size" = observe_data$angular_size,
