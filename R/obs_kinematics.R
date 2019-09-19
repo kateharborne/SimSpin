@@ -101,21 +101,21 @@ obs_kinematics = function(ifu_datacube, reff_axisratio, sbinsize, radius_type = 
     elambda = sum(counts*eradius*abs(velocity))/sum(counts*eradius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
     output = list("obs_lambdar"    = lambda,
                   "obs_elambdar"   = elambda,
-                  "obs_vsigma"     = vsigma,
+                  "obs_vsigma"     = sqrt(vsigma),
                   "counts_img"     = counts_img,
                   "velocity_img"   = velocity_img,
                   "dispersion_img" = dispersion_img)
   } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
     elambda = sum(counts*eradius*abs(velocity))/sum(counts*eradius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
     output = list("obs_elambdar"   = elambda,
-                  "obs_vsigma"     = vsigma,
+                  "obs_vsigma"     = sqrt(vsigma),
                   "counts_img"     = counts_img,
                   "velocity_img"   = velocity_img,
                   "dispersion_img" = dispersion_img)
   } else if (radius_type == "Circular" | radius_type == "circular"){
     lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
     output = list("obs_lambdar"    = lambda,
-                  "obs_vsigma"     = vsigma,
+                  "obs_vsigma"     = sqrt(vsigma),
                   "counts_img"     = counts_img,
                   "velocity_img"   = velocity_img,
                   "dispersion_img" = dispersion_img)
