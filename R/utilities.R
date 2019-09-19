@@ -181,3 +181,7 @@
   return(flux)
 }
 
+.rtnorm <- function(n, mean, sd, a = -Inf, b = Inf){
+  qnorm(runif(n, pnorm(a, mean, sd), pnorm(b, mean, sd)), mean, sd)
+}
+
