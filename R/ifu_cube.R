@@ -71,7 +71,7 @@ ifu_cube = function(obs_data, img_data) {
   zbin_labels     = expand.grid(t(matrix(data = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", zbins)),
                                                                as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", zbins)))), nrow = sbin, ncol = sbin)))
                                                                                                 # spatial coordinates in each spaxel in a column for
-                                                                                                #    elliptcity calculation
+                                                                                                #    ellipticity calculation
   xcen       = .meanwt(xbin_labels, as.vector(img_data$flux_img))                               # calculating the centre of the galaxy
   zcen       = .meanwt(zbin_labels, as.vector(img_data$flux_img))
   sx         = sqrt(.varwt(xbin_labels, as.vector(img_data$flux_img), xcen))                    # calculating standard deviation along each direction
