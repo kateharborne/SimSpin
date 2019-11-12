@@ -21,40 +21,38 @@
 #'
 
 
-img_grid = function(obs_data, z=0.05, filter="g", threshold=25){
+img_grid = function(obs_data, z=0.05, filter="g"){
 
+  numCores = parallel::detectCores()
   galIDs = as.data.frame(obs_data$galaxy_obs$binn) # spaxel that each particle sits in
   sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
-  image_grid = lapply(seq(1,sbin*sbin), function(x) which(galIDs == x)) # list of particles that exist in each spaxel
+  vbin = obs_data$vbin # depth of cube
+  image_grid = parallel::mclapply(seq(1,sbin*sbin*vbin), function(x) which(galIDs == x),
+                                  mc.cores=numCores) # list of particles that exist in each spaxel
   lengths_grid = lapply(image_grid, length) # number of particles in each spaxel
-  numCores = parallel::detectCores()
 
   if ("Metallicity" %in% names(obs_data$galaxy_obs) & "Age" %in% names(obs_data$galaxy_obs)){ # if SSP is required
     if (filter=="g"){tempfilt=list(ProSpect::filt_g_SDSS)} # loading the filter
     if (filter=="r"){tempfilt=list(ProSpect::filt_r_SDSS)}
-    flux = parallel::mclapply(seq(1, sbin*sbin), .assign_flux, obs__data=obs_data, image__grid=image_grid,
+    tic()
+    flux = parallel::mclapply(seq(1, sbin*sbin*vbin), .assign_flux, obs__data=obs_data, image__grid=image_grid,
                               lengths__grid=lengths_grid, temp_filt=tempfilt, redshift=z, mc.cores=numCores)
+    toc()
 
   } else if ("Lum" %in% names(obs_data$galaxy_obs)){ # if just M2L conversion
-    flux = parallel::mclapply(seq(1, sbin*sbin), .masslum2flux, obs__data=obs_data, image__grid=image_grid,
+    flux = parallel::mclapply(seq(1, sbin*sbin*vbin), .masslum2flux, obs__data=obs_data, image__grid=image_grid,
                               lengths__grid=lengths_grid, redshift=z, mc.cores=numCores)
   }
   flux = as.numeric(flux)
-  threshold_flux  = ProSpect::magAB2Jansky(threshold)
-  below_threshold = which(flux < threshold_flux)
   ap_region = obs_data$ap_region; ap_region[ap_region == 0] = NA
   outside_region = which(is.na(flux*as.vector(ap_region)))
 
-  flux[below_threshold] = 0 # remove any cells that aren't above the threshold
   flux[outside_region] = 0 # and any cells that are outside the aperture
-  for (nn in 1:length(below_threshold)){
-    image_grid[[below_threshold[nn]]] = integer(0)
-  } # remove any entries in image grid that are below the flux threshold
   for (mm in 1:length(outside_region)){
     image_grid[[outside_region[mm]]] = integer(0)
   } # remove any entries in image grid that are outside the aperture
 
-  flux = matrix(data = flux, nrow=sbin, ncol=sbin, byrow=FALSE)
+  flux = array(data = flux, dim=c(sbin,sbin,vbin))
 
   output = list("flux_img"   = flux,
                 "image_grid" = image_grid)
