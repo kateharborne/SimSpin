@@ -54,8 +54,8 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   ang_size     = celestial::cosdistAngScale(z, ref="Planck") # angular size given z, kpc/"
   lum_dist     = celestial::cosdistLumDist(z, ref="Planck")  # the luminosity distance, Mpc
   ap_size      = ang_size * fov                              # diameter size of the telescope, kpc
-  sbin         = floor(fov / pixel_sscale)                   # bin sizes in the x- & y/z_obs- axes
-  sbinsize     = ap_size / sbin                              # kpc per bin
+  sbin         = floor(fov / pixel_sscale)                   # number of spatial bins
+  sbinsize     = ap_size / sbin                              # spatial bin size (kpc per bin)
   vbinsize     = (pixel_vscale / central_wvl) * (3e8 / 1e3)  # km/s per velocity bin
   lsf_size     = ((lsf_fwhm / central_wvl) * (3e8 / 1e3)) / (2 * sqrt(2*log(2))) # velocity uncertainty (sd)
 
@@ -111,7 +111,7 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
     galaxy_cdf = .hexagonal_ap_cut(galaxy_df, sbin, sbinsize)
   }
 
-  vbin = ceiling((max(galaxy_cdf$vy_obs) - min(galaxy_cdf$vy_obs)) / vbinsize)
+  vbin = ceiling((max(galaxy_cdf$vy_obs) - min(galaxy_cdf$vy_obs)) / vbinsize) # number of velocity bins
 
   vseq = seq(-(vbin * vbinsize) / 2,
              (vbin * vbinsize) / 2, by=vbinsize) # velocity bin break positions
@@ -120,7 +120,8 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
              (sbin * sbinsize) / 2, by=sbinsize) # spatial bin break positions
 
   galaxy_cdf$binn = cut(galaxy_cdf$x, breaks=sseq, labels=F) +
-    (sbin * cut(galaxy_cdf$z_obs, breaks=sseq, labels=F)) - sbin              # assigning particles to positions in aperture
+    (sbin * cut(galaxy_cdf$z_obs, breaks=sseq, labels=F)) +
+    (sbin^2 * cut(galaxy_cdf$vy_obs, breaks=vseq, labels=F)) - (sbin^2 + sbin) # assigning particles to positions in cube
 
   if (length(present) == 1){
     if ("SSP" %in% names(simdata[[present[1]]])){
