@@ -24,7 +24,7 @@
 img_grid = function(obs_data, z=0.05, filter="g"){
 
   numCores = parallel::detectCores()
-  galIDs = as.data.frame(obs_data$galaxy_obs$binn) # spaxel that each particle sits in
+  galIDs = as.data.frame(obs_data$galaxy_obs$binn) # cell that each particle sits in
   sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
   vbin = obs_data$vbin # depth of cube
   image_grid = parallel::mclapply(seq(1,sbin*sbin*vbin), function(x) which(galIDs == x),
@@ -34,10 +34,8 @@ img_grid = function(obs_data, z=0.05, filter="g"){
   if ("Metallicity" %in% names(obs_data$galaxy_obs) & "Age" %in% names(obs_data$galaxy_obs)){ # if SSP is required
     if (filter=="g"){tempfilt=list(ProSpect::filt_g_SDSS)} # loading the filter
     if (filter=="r"){tempfilt=list(ProSpect::filt_r_SDSS)}
-    tic()
-    flux = parallel::mclapply(seq(1, sbin*sbin*vbin), .assign_flux, obs__data=obs_data, image__grid=image_grid,
+        flux = parallel::mclapply(seq(1, sbin*sbin*vbin), .assign_flux, obs__data=obs_data, image__grid=image_grid,
                               lengths__grid=lengths_grid, temp_filt=tempfilt, redshift=z, mc.cores=numCores)
-    toc()
 
   } else if ("Lum" %in% names(obs_data$galaxy_obs)){ # if just M2L conversion
     flux = parallel::mclapply(seq(1, sbin*sbin*vbin), .masslum2flux, obs__data=obs_data, image__grid=image_grid,

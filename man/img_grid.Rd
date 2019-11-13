@@ -4,7 +4,7 @@
 \alias{img_grid}
 \title{Creating a mock flux image.}
 \usage{
-img_grid(obs_data, z = 0.05, filter = "g", threshold = 25)
+img_grid(obs_data, z = 0.05, filter = "g")
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
