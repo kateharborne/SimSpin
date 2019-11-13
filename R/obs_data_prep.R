@@ -52,7 +52,6 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   sol_lum = 3.827e33;                                        # solar luminosity in erg s-1
 
   ang_size     = celestial::cosdistAngScale(z, ref="Planck") # angular size given z, kpc/"
-  lum_dist     = celestial::cosdistLumDist(z, ref="Planck")  # the luminosity distance, Mpc
   ap_size      = ang_size * fov                              # diameter size of the telescope, kpc
   sbin         = floor(fov / pixel_sscale)                   # number of spatial bins
   sbinsize     = ap_size / sbin                              # spatial bin size (kpc per bin)
@@ -252,8 +251,8 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
                 "vbinsize"    = vbinsize,
                 "lsf_size"    = lsf_size,
                 "ap_region"   = ap_region,
-                "pixel_sscale"= pixel_sscale,
-                "d_L"         = lum_dist)
+                "pixel_sscale"= pixel_sscale)
+                # "d_L"         = lum_dist)
 
   return(output)
 }
