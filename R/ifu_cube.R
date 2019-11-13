@@ -23,7 +23,7 @@
 #'
 
 ifu_cube = function(obs_data, img_data) {
-  tic("Setup")
+
   numCores     = parallel::detectCores()
   image_grid   = img_data$image_grid
   lengths_grid = lapply(image_grid, length)
@@ -31,63 +31,60 @@ ifu_cube = function(obs_data, img_data) {
   galaxy_obs   = obs_data$galaxy_obs
   sbin         = obs_data$sbin
   sbinsize     = obs_data$sbinsize
-  sseq         = seq(-(sbin * sbinsize) / 2, (sbin * sbinsize) / 2, by=sbinsize) # spatial bin break positions
-  xbins        = levels(cut(obs_data$galaxy_obs$x, breaks=sseq))
-  zbins        = levels(cut(obs_data$galaxy_obs$z_obs, breaks=sseq)) # spatial/velocity bins boundaries
+#  sseq         = seq(-(sbin * sbinsize) / 2, (sbin * sbinsize) / 2, by=sbinsize) # spatial bin break positions
+#  xbins        = levels(cut(obs_data$galaxy_obs$x, breaks=sseq))
+#  zbins        = levels(cut(obs_data$galaxy_obs$z_obs, breaks=sseq)) # spatial/velocity bins boundaries
 
   vbin         = obs_data$vbin
   vbinsize     = obs_data$vbinsize
   vseq         = seq(-(vbin * vbinsize) / 2, (vbin * vbinsize) / 2, by=vbinsize) # velocity bin break positions
-  vbins        = levels(cut(obs_data$galaxy_obs$vy_obs, breaks=vseq))
+#  vbins        = levels(cut(obs_data$galaxy_obs$vy_obs, breaks=vseq))
 
-  xbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)), as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", xbins))))
-  zbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", zbins)), as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", zbins))))
-  vbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", vbins)), as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", vbins))))
+#  xbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)), as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", xbins))))
+#  zbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", zbins)), as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", zbins))))
+#  vbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", vbins)), as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", vbins))))
 
   lsf_size     = obs_data$lsf_size
   cube         = array(data = 0, dim = c(sbin, sbin, vbin))
   ap_cube      = array(data = obs_data$ap_region, dim = c(sbin,sbin,vbin))
-  toc()
-  tic("Loop")
-  for (cell in seq(1, sbin*sbin)){
+
+  for (cell in seq(1, sbin*sbin*vbin)){ # for each cell in cube
     if (lengths_grid[[cell]] > 1){
-      coord = c((cell%/%sbin + 1), cell%%sbin)
-      if (cell%%sbin == 0){coord = c((cell%/%sbin), sbin)}
-      cell_mass = sum(obs_data$galaxy_obs$Mass[image_grid[[cell]]])
+      coord = c(cell%%sbin, (cell%%(sbin*sbin)%/%sbin + 1), cell%/%(sbin*sbin)+1)
+      if (cell%%sbin == 0 & cell%%(sbin*sbin) == 0){coord = c(sbin, sbin, cell%/%(sbin*sbin))} # case at the end of row & column
+      if (cell%%sbin == 0 & cell%%(sbin*sbin) != 0){coord = c(sbin, (cell%%(sbin*sbin)%/%sbin), cell%/%(sbin*sbin)+1)} # case at the end of row
       for (j in 1:lengths_grid[[cell]]){
-        cube[coord[2], coord[1],] = cube[coord[2], coord[1],] +
-          diff((img_data$flux_img[coord[2], coord[1]] *
-                  (obs_data$galaxy_obs$Mass[image_grid[[cell]][j]] / cell_mass)) *
-                 pnorm(vseq, mean=obs_data$galaxy_obs$vy_obs[image_grid[[cell]][j]], sd=lsf_size))
-        # adding the "gaussians" of each particle to the velocity bins
+          cube[coord[1], coord[2],] = cube[coord[1], coord[2],] +
+            diff(img_data$flux_img[coord[1], coord[2], coord[3]] *
+                   pnorm(vseq, mean=obs_data$galaxy_obs$vy_obs[image_grid[[cell]][j]], sd=lsf_size))
+          # adding the "gaussians" of each particle to the velocity bins
+        }
       }
-    } else {cell = cell + 1}
   }
-  toc()
+
   ## ellipticity calculation ## -------------------------------------------------------------------------------------------------------------------------------
-  tic("Ellipticity")
-  xbin_labels     = expand.grid(matrix(data = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)),
-                                                             as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", xbins)))), nrow = sbin, ncol = sbin))
-  zbin_labels     = expand.grid(t(matrix(data = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", zbins)),
-                                                               as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", zbins)))), nrow = sbin, ncol = sbin)))
+  # xbin_labels     = expand.grid(matrix(data = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)),
+  #                                                            as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", xbins)))), nrow = sbin, ncol = sbin))
+  # zbin_labels     = expand.grid(t(matrix(data = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", zbins)),
+  #                                                              as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", zbins)))), nrow = sbin, ncol = sbin)))
                                                                                                 # spatial coordinates in each spaxel in a column for
                                                                                                 #    ellipticity calculation
-  xcen       = .meanwt(xbin_labels, as.vector(img_data$flux_img))                               # calculating the centre of the galaxy
-  zcen       = .meanwt(zbin_labels, as.vector(img_data$flux_img))
-  sx         = sqrt(.varwt(xbin_labels, as.vector(img_data$flux_img), xcen))                    # calculating standard deviation along each direction
-  sz         = sqrt(.varwt(zbin_labels, as.vector(img_data$flux_img), zcen))
-  sxz        = .covarwt(xbin_labels, zbin_labels, as.vector(img_data$flux_img), xcen, zcen)     # calculating the covariance
-  temprad    = .cov2eigval(sx, sz, sxz)                                                         # solving for the eigenvalues to give the major and
-  major      = sqrt(abs(temprad$hi))                                                            #    minor axes lengths
-  minor      = sqrt(abs(temprad$lo))
-  axis_ratio = data.frame("a" = major, "b" = minor)                                             # axis ratio output, kpc
-  toc()
+  # xcen       = .meanwt(xbin_labels, as.vector(img_data$flux_img))                               # calculating the centre of the galaxy
+  # zcen       = .meanwt(zbin_labels, as.vector(img_data$flux_img))
+  # sx         = sqrt(.varwt(xbin_labels, as.vector(img_data$flux_img), xcen))                    # calculating standard deviation along each direction
+  # sz         = sqrt(.varwt(zbin_labels, as.vector(img_data$flux_img), zcen))
+  # sxz        = .covarwt(xbin_labels, zbin_labels, as.vector(img_data$flux_img), xcen, zcen)     # calculating the covariance
+  # temprad    = .cov2eigval(sx, sz, sxz)                                                         # solving for the eigenvalues to give the major and
+  # major      = sqrt(abs(temprad$hi))                                                            #    minor axes lengths
+  # minor      = sqrt(abs(temprad$lo))
+  # axis_ratio = data.frame("a" = major, "b" = minor)                                             # axis ratio output, kpc
+
   output = list("cube"        = cube,
-                "ap_region"   = ap_cube,
-                "xbin_labels" = xbin_ls,
-                "ybin_labels" = zbin_ls,
-                "vbin_labels" = vbin_ls,
-                "axis_ratio"  = axis_ratio)
+                "ap_region"   = ap_cube)
+                # "xbin_labels" = xbin_ls,
+                # "ybin_labels" = zbin_ls,
+                # "vbin_labels" = vbin_ls)
+                # "axis_ratio"  = axis_ratio)
 
 
   # galaxy_obs      = obs_data$galaxy_obs                                                         # data to populate the aperture

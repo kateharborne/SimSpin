@@ -10,7 +10,6 @@
 #' function.
 #'@param filter If Age/Metallicity is supplied, the filter within which the SED is generated.
 #'Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.
-#'@param threshold The magnitude limit of the observation in AB mag.
 #'@return Returns a list containing:
 #'\item{\code{$flux}}{A 2D array of flux in Jansky.}
 #'\item{\code{$image_grid}}{A list containing the indices of particles in each spaxel position.}
