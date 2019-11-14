@@ -29,9 +29,9 @@ A list of data.frames containing the particle information (\code{$Part}) for eac
 particle type requested from the simulation. Each data frame contains the position (x, y, z)
 and velocity (vx, vy, vz) information, along with the ID and mass of each particle. Also
 associated with each PartType element in the list is an array of luminosities, \code{$Lum}. If
-SSP information has been supplied, this will be a 2D array with a second wavelength array
-(\code{$Wav}) specifying the wavelength at which each luminosity is defined. Else, a single
-luminosity will be associated with each particle.
+SSP information has been supplied, instead of Luminosities, a data frame \code{$SSP} will be
+included in the list which contains the Metallicity and Ages of each particle such that spectra
+can be constructed at later part in the process.
 }
 \description{
 The purpose of this function is to take a SimSpin simulation file (an HDF5 file with particle
