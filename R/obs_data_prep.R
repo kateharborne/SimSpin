@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 29/11/2018)
+# Kate Harborne (last edit - 14/11/19)
 #'Prepare simulation data for observational kinematic analysis.
 #'
 #'The purpose of this function is to calculate the properties necessary for constructing an IFU
@@ -18,11 +18,14 @@
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
 #'@param filter When stellar particles and SEDs are provided, the filter used when converting
 #'spectra into luminosity. Options include "r" for SDSS r filter and "g" for the SDSS g filter.
+#'@param align Boolean indicating whether or not to align the semi-major axis with the x-axis.
 #'@return Returned is a list that contains:
 #' \item{\code{$galaxy_obs}}{A data frame of the observed particle information (which contains the
 #'   galaxy particle info from the GADGET file, with added coordinates \code{$galaxy_obs$z_obs},
-#'   \code{$galaxy_obs$r_obs}, and \code{$galaxy_obs$vy_obs} and particle fluxes,
-#'   \code{$galaxy_obs$flux}, in units of 1e-16 erg s-1 cm-2).}
+#'   \code{$galaxy_obs$r_obs}, and \code{$galaxy_obs$vy_obs}. \code{$galaxy_obs$binn} gives the cell
+#'   index in which each particle exists in the final cube. Depending on the \code{\link{sim_data}}
+#'   file provided, the Age and Metallicity of particles will be included if SSP has been requested,
+#'   Luminosity will be included per particle if SSP is not requested.}
 #' \item{\code{$sbin}}{The number of spatial bins.}
 #' \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
 #' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
@@ -30,7 +33,7 @@
 #' \item{\code{$vbin}}{The number of velocity bins.}
 #' \item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
 #' \item{\code{$lsf_size}}{The gaussian standard deviation of the line spread function in km/s.}
-#' \item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
+#' \item{\code{$ap_region}}{The aperture region mask used to remove flux outside of the specified
 #'  aperture.}
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
@@ -160,89 +163,6 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   }
   # adding the relevant Lum/SSP info to the trimmed particles for later processing
 
-  # If SSP is present, assign relevant Age/Metallicities. Else, assign luminoisty.
-  #  if (any(as.logical(SSP))){
-  #   if (length(SSP) == 1){
-  #     inc_ID = which(simdata[[present[1]]]$Part$ID %in% galaxy_cdf$ID)
-  #     galaxy_cdf$Age = simdata[[present[1]]]$SSP$Age[inc_ID] * 1e9
-  #     galaxy_cdf$Metallicity = simdata[[present[1]]]$SSP$Metallicity[inc_ID]
-  #   } else if (length(SSP) == 2){
-  #     inc_ID_1 = which(simdata[[present[1]]]$Part$ID %in% galaxy_cdf$ID)
-  #     inc_ID_2 = which(simdata[[present[2]]]$Part$ID %in% galaxy_cdf$ID)
-  #     galaxy_cdf$Age = c(simdata[[present[1]]]$SSP$Age[inc_ID_1] * 1e9, simdata[[present[2]]]$SSP$Age[inc_ID_2] * 1e9)
-  #     galaxy_cdf$Metallicity = c(simdata[[present[1]]]$SSP$Metallicity[inc_ID_1], simdata[[present[2]]]$SSP$Metallicity[inc_ID_2])
-  #   } else if (length(SSP) == 3){
-  #     inc_ID_1 = which(simdata[[present[1]]]$Part$ID %in% galaxy_cdf$ID)
-  #     inc_ID_2 = which(simdata[[present[2]]]$Part$ID %in% galaxy_cdf$ID)
-  #     inc_ID_3 = which(simdata[[present[3]]]$Part$ID %in% galaxy_cdf$ID)
-  #     galaxy_cdf$Age = c(simdata[[present[1]]]$SSP$Age[inc_ID_1] * 1e9, simdata[[present[2]]]$SSP$Age[inc_ID_2] * 1e9, simdata[[present[3]]]$SSP$Age[inc_ID_3] * 1e9)
-  #     galaxy_cdf$Metallicity = c(simdata[[present[1]]]$SSP$Metallicity[inc_ID_1], simdata[[present[2]]]$SSP$Metallicity[inc_ID_2], simdata[[present[3]]]$SSP$Metallicity[inc_ID_3])}
-  # } else {
-  #   if (length(present) == 1){
-  #     inc_ID = which(simdata[[present[1]]]$Part$ID %in% galaxy_cdf$ID)
-  #     galaxy_cdf$flux = (simdata[[present[1]]]$Lum[inc_ID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
-  #   } else if (length(present) == 2){
-  #     inc_ID_1 = which(simdata[[present[1]]]$Part$ID %in% galaxy_cdf$ID)
-  #     inc_ID_2 = which(simdata[[present[2]]]$Part$ID %in% galaxy_cdf$ID)
-  #     galaxy_cdf$flux = c((simdata[[present[1]]]$Lum[inc_ID_1] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2),
-  #                         (simdata[[present[2]]]$Lum[inc_ID_2] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2))
-  #   } else if (length(present) == 3){
-  #     inc_ID_1 = which(simdata[[present[1]]]$Part$ID %in% galaxy_cdf$ID)
-  #     inc_ID_2 = which(simdata[[present[2]]]$Part$ID %in% galaxy_cdf$ID)
-  #     inc_ID_3 = which(simdata[[present[3]]]$Part$ID %in% galaxy_cdf$ID)
-  #     galaxy_cdf$flux = c((simdata[[present[1]]]$Lum[inc_ID_1] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2),
-  #                         (simdata[[present[2]]]$Lum[inc_ID_2] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2),
-  #                         (simdata[[present[3]]]$Lum[inc_ID_3] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2))
-  #
-  #   }
-  # }
-
-  # tic()
-  # ID_grid = vector("list", sbin*sbin)
-  # for (i in 1:length(galaxy_cdf$ID)){
-  #   id = galaxy_cdf$binn[i]
-  #   ID_grid[[id]] = c(galaxy_cdf$ID[i], ID_grid[[id]])
-  # }
-  # toc()
-
-  # the number of velocity bins
-  # galaxy_cdf$flux = rep(0, nrow(galaxy_cdf))
-  #
-  # if ("PartType2" %in% names(simdata)){                    # if there are disc particles in the data file,
-  #   inc_discID = which(simdata$PartType2$Part$ID %in% galaxy_cdf$ID)
-  #   disc_ids = simdata$PartType2$Part$ID[inc_discID]
-  #   galaxy_cdf[(galaxy_cdf$ID %in% disc_ids),]$flux = (simdata$PartType2$Lum[inc_discID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
-  #   # calculating flux from disc particles fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
-  # }
-  #
-  # if ("PartType3" %in% names(simdata)){                    # if there are bulge particles in the data file,
-  #   inc_bulgeID = which(simdata$PartType3$Part$ID %in% galaxy_cdf$ID)
-  #   bulge_ids = simdata$PartType3$Part$ID[inc_bulgeID]
-  #   galaxy_cdf[(galaxy_cdf$ID %in% bulge_ids),]$flux = (simdata$PartType3$Lum[inc_bulgeID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
-  #   # calculating flux from bulge particles fluxes in units of (1e-16 erg s-1 cm-2 arcsecond-2)
-  # }
-
-  # if ("PartType4" %in% names(simdata)){                    # if there are stars in the data file,
-  #
-  #   inc_starID = which(simdata$PartType4$Part$ID %in% galaxy_cdf$ID)
-  #   star_ids = simdata$PartType4$Part$ID[inc_starID]
-  #
-  #   if (length(names(simdata$PartType4)) == 3){              #  and if there are spectra associated,
-  #     if (filter == "g"){tempfilt=list(ProSpect::filt_g_SDSS)} #  use ProSpect to get particle flux.
-  #     if (filter == "r"){tempfilt=list(ProSpect::filt_r_SDSS)}
-  #     star_flux = numeric(length = length(galaxy_cdf$ID))
-  #     j = 1
-  #     for (i in inc_starID){
-  #       galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux[j] =
-  #         ProSpect::photom_lum(wave = simdata$PartType4$Wav, lum = simdata$PartType4$Lum[i,], z = z,
-  #                              outtype = "Jansky", filters = tempfilt, ref="Planck") # flux density in Janksy
-  #       j = j+1
-  #     }
-  #   } else {
-  #     galaxy_cdf[(galaxy_cdf$ID %in% star_ids),]$flux = (simdata$PartType4$Lum[inc_starID] * sol_lum * (pixel_sscale^2)) / (1e-16 * 4 * pi * (lum_dist * 3.086e24)^2)
-  #   }
-  # }
-
   output = list("galaxy_obs"  = galaxy_cdf,
                 "sbin"        = sbin,
                 "sbinsize"    = sbinsize,
@@ -250,9 +170,7 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
                 "vbin"        = vbin,
                 "vbinsize"    = vbinsize,
                 "lsf_size"    = lsf_size,
-                "ap_region"   = ap_region,
-                "pixel_sscale"= pixel_sscale)
-                # "d_L"         = lum_dist)
+                "ap_region"   = ap_region)
 
   return(output)
 }
