@@ -14,8 +14,6 @@ function.}
 
 \item{filter}{If Age/Metallicity is supplied, the filter within which the SED is generated.
 Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
-
-\item{threshold}{The magnitude limit of the observation in AB mag.}
 }
 \value{
 Returns a list containing:

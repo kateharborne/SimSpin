@@ -1,13 +1,12 @@
-# Kate Harborne (last edit - 10/09/2019)
-#'Creating a mock flux image.
+# Kate Harborne (last edit - 14/11/2019)
+#'Generating the fluxes for each element of the IFU data-cube.
 #'
-#'The purpose of this function is to construct a mock flux image. It accepts output parameters from
-#' \code{obs_data_prep()} and returns a 2D array containing the flux at each spaxel position due to
-#' contributions from the particles. If particle ages and metallicities are supplied, an SED is
-#' generated in each spaxel using ProSpect. Else, the luminosity in each cell is converted to flux.
+#'The purpose of this function is to construct the mock flux values within each cell of the IFU
+#' cube. It accepts output parameters from \code{obs_data_prep()} and returns a 2D array containing
+#' the flux at each cell position due to contributions from the particles. If particle ages and
+#' metallicities are supplied, an SED is generated in each cell using ProSpect. Else, the
+#' luminosity in each cell is converted to flux.
 #'@param obs_data The list output from the \code{obs_data_prep()} function.
-#'@param z The projected redshift of the observation, as used in the \code{obs_data_prep()}
-#' function.
 #'@param filter If Age/Metallicity is supplied, the filter within which the SED is generated.
 #'Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.
 #'@return Returns a list containing:
@@ -20,9 +19,10 @@
 #'
 
 
-img_grid = function(obs_data, z=0.05, filter="g"){
+img_grid = function(obs_data, filter="g"){
 
   numCores = parallel::detectCores()
+  z = obs_data$z
   galIDs = as.data.frame(obs_data$galaxy_obs$binn) # cell that each particle sits in
   sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
   vbin = obs_data$vbin # depth of cube

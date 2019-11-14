@@ -26,6 +26,7 @@
 #'   index in which each particle exists in the final cube. Depending on the \code{\link{sim_data}}
 #'   file provided, the Age and Metallicity of particles will be included if SSP has been requested,
 #'   Luminosity will be included per particle if SSP is not requested.}
+#' \item{\code{$z}}{The projected redshift at which the observation is made.}
 #' \item{\code{$sbin}}{The number of spatial bins.}
 #' \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
 #' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
@@ -164,6 +165,7 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   # adding the relevant Lum/SSP info to the trimmed particles for later processing
 
   output = list("galaxy_obs"  = galaxy_cdf,
+                "z"           = z,
                 "sbin"        = sbin,
                 "sbinsize"    = sbinsize,
                 "angular_size"= ang_size,
