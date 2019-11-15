@@ -7,14 +7,9 @@
 find_kinematics(simdata, r200 = 200, z = 0.05, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
-  threshold = 25, filter = "g", measure_type = list(type = "fit", fac
   = 1), blur, radius_type = "Both", addSky = FALSE, mag_zero = 8.9,
   IFU_plot = TRUE)
 }
-\arguments{
-\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
-
-\item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{z}{The galaxy redshift.}
 
@@ -33,6 +28,9 @@ output in arcseconds.}
 filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
+
+\item{filter}{If Age/Metallicity is supplied, the filter within which the SED is generated.
+Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
 
 \item{threshold}{The flux threshold of the observation.}
 
@@ -83,9 +81,6 @@ automatically.}
 \value{
 A list containing:
 \item{\code{$datacube}}{The 3D array corresponding to the kinematic data cube.}
-\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
-\item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
-\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
  \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
 \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R} measured with circular
@@ -93,22 +88,16 @@ radii. \emph{(When \code{radius_type = "Both"} or \code{"Circular"}.)}}
 \item{\code{$obs_elambdar}}{The observed spin parameter \eqn{\lambda_R} measured with elliptical
 radii. \emph{(When \code{radius_type = "Both"} or \code{"Elliptical"}.)}}
 \item{\code{$vsigma}}{The observed V/\eqn{\sigma}.}
-\item{\code{$counts_img}}{The observed flux image.}
+\item{\code{$flux_img}}{The observed flux image.}
 \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
-\item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
- redshift.}
-\item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
-\item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
-\item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
- aperture.}
 }
 \description{
 The purpose of this basic function is to use the \code{SimSpin} package sub-functions to measure
 both the observable spin parameter, \eqn{\lambda_R}, and ratio V/\eqn{\sigma} of a simulated
 galaxy model. This function will call each required sub-function (\code{\link{obs_data_prep}},
-\code{\link{ifu_cube}}, \code{\link{blur_cube}}, \code{\link{find_reff}},
-\code{\link{obs_lambda}}, \code{\link{obs_vsigma}} and \code{\link{plot_ifu}}) and return the
+\code{\link{flux_grid}}, \code{\link{ifu_cube}}, \code{\link{blur_cube}},
+\code{\link{find_reff}}, \code{\link{kin_calc}}, and \code{\link{plot_ifu}}) and return the
 \eqn{\lambda_R} and the V/\eqn{\sigma} ratio within a specified measurement radius.
 }
 \examples{

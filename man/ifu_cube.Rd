@@ -4,33 +4,30 @@
 \alias{ifu_cube}
 \title{Creating a mock IFU kinematic data cube.}
 \usage{
-ifu_cube(obs_data, img_data)
+ifu_cube(obs_data, flux_data)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
 
-\item{img_grid}{The list output from the \code{img_grid()} function.}
+\item{flux_data}{The list output from the \code{flux_grid()} function.}
 }
 \value{
 Returns a list that contains:
 \item{\code{$cube}}{A mock IFU data cube as required for calculating the observed spin parameter}
-\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
-\item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
-\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
-\item{\code{$appregion}}{An image that describes the shape of the aperture such that any further
+\item{\code{$ap_region}}{An image that describes the shape of the aperture such that any further
  convolutions that are applied to mimic beam smearing or seeing can be trimmed to the
  appropriate aperture shape.}
-\item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
- \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
 }
 \description{
 The purpose of this function is to construct an IFU data cube. It accepts output parameters from
-\code{obs_data_prep()} and \code{img_grid()} and returns a 3D array containing the spatial and velocity corrdinates of
- each particle in the galaxy simulation in order to mimic the arrangement of an IFU data cube.
+\code{obs_data_prep()} and \code{flux_grid()} and returns a 3D array containing the spatial and
+ velocity corrdinates of each particle in the galaxy simulation in order to mimic the
+ arrangement of an IFU data cube.
 }
 \examples{
 galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 data        = obs_data_prep(simdata = galaxy_data)
-cube        = ifu_cube(obs_data  = data, threshold = 20)
+fluxes      = flux_grid(obs_data = data)
+cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
 
 }

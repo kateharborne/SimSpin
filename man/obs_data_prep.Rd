@@ -44,6 +44,7 @@ Returned is a list that contains:
   index in which each particle exists in the final cube. Depending on the \code{\link{sim_data}}
   file provided, the Age and Metallicity of particles will be included if SSP has been requested,
   Luminosity will be included per particle if SSP is not requested.}
+\item{\code{$z}}{The projected redshift at which the observation is made.}
 \item{\code{$sbin}}{The number of spatial bins.}
 \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
 \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided

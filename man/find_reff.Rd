@@ -4,8 +4,7 @@
 \alias{find_reff}
 \title{Find the effective radius of a simulated galaxy.}
 \usage{
-find_reff(simdata, r200 = 200, inc_deg, fract = 0.5, axis_ratio,
-  angular_size)
+find_reff(simdata, r200 = 200, inc_deg, fract = 0.5, axis_ratio)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -18,10 +17,7 @@ find_reff(simdata, r200 = 200, inc_deg, fract = 0.5, axis_ratio,
 0.5, i.e. Reff.}
 
 \item{axis_ratio}{A data frame containing the semi-major and semi-minor axes lengths for the
-observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.}
-
-\item{angular_size}{The kpc/'' scaling factor output by \code{\link{obs_data_prep}} used to give
-the axis ratios in both kpc and ''.}
+observed galaxy, as given by \code{\link{obs_imgs}}.}
 }
 \value{
 Returned is a data.frame containing the scaled axis ratio that describes the semi-major
@@ -37,12 +33,13 @@ galaxy is contained.
 \examples{
 galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 data        = obs_data_prep(simdata = galaxy_data)
-ifucube     = ifu_cube(obs_data = data)
+fluxes      = flux_grid(obs_data = data)
+cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
+images      = obs_images(obs_data = data, ifu_datacube = cube)
 
 output = find_reff(simdata      = galaxy_data,
                    r200         = 10,
                    inc_deg      = 0,
-                   axis_ratio   = ifucube$axis_ratio,
-                   angular_size = data$angular_size)
+                   axis_ratio   = images$axis_ratio)
 
 }

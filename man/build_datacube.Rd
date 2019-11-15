@@ -5,7 +5,7 @@
 \title{Constructing kinematic data cubes.}
 \usage{
 build_datacube(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
-  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, threshold, blur)
+  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, filter = "g", blur)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -30,7 +30,8 @@ filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
 
-\item{threshold}{The magnitude limit of the observation.}
+\item{filter}{If Age/Metallicity is supplied, the filter within which the SED is generated.
+Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
 
 \item{blur}{\emph{Optional} Specified to apply observational seeing effects to the cube. A list
 of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the
@@ -40,22 +41,13 @@ specifying the full-width half-maximum of the PSF given in units of arcseconds.}
 \value{
 A list containing:
 \item{\code{$datacube}}{A 3D array corresponding to the kinematic data cube.}
-\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
-\item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
-\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
-\item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
- \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
-\item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
-\item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
-\item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
-  redshift.}
 }
 \description{
 The purpose of this basic function is to use the \code{SimSpin} package sub-functions to
 construct an IFU kinematic data cube. This function will call each required sub-function
-(\code{\link{obs_data_prep}}, \code{\link{ifu_cube}}, \code{\link{blur_cube}}) and produce a 3D
-array corresponding to the kinematic data cube for that mock observation, the corresponding axes
-labels and the observed axis ratio of the observed galaxy.
+(\code{\link{obs_data_prep}}, \code{\link{flux_grid}}, \code{\link{ifu_cube}},
+\code{\link{blur_cube}}) and produce a 3D array corresponding to the kinematic data cube
+for that mock observation.
 }
 \examples{
 galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
@@ -67,7 +59,6 @@ cube = build_datacube(simdata      = galaxy_data,
                       lsf_fwhm     = 2.65,
                       pixel_sscale = 0.5,
                       pixel_vscale = 1.04,
-                      inc_deg      = 0,
-                      threshold    = 25)
+                      inc_deg      = 0)
 
 }

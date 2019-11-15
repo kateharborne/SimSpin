@@ -14,7 +14,7 @@ Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
 }
 \value{
 Returns a list containing:
-\item{\code{$flux_img}}{A 3D array of flux in Jansky.}
+\item{\code{$flux_grid}}{A 3D array of flux in Jansky.}
 \item{\code{$image_grid}}{A list containing the indices of particles in each spaxel position.}
 }
 \description{
