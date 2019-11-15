@@ -2,7 +2,7 @@
 #'Generating the fluxes for each element of the IFU data-cube.
 #'
 #'The purpose of this function is to construct the mock flux values within each cell of the IFU
-#' cube. It accepts output parameters from \code{obs_data_prep()} and returns a 2D array containing
+#' cube. It accepts output parameters from \code{obs_data_prep()} and returns a 3D array containing
 #' the flux at each cell position due to contributions from the particles. If particle ages and
 #' metallicities are supplied, an SED is generated in each cell using ProSpect. Else, the
 #' luminosity in each cell is converted to flux.
@@ -10,16 +10,16 @@
 #'@param filter If Age/Metallicity is supplied, the filter within which the SED is generated.
 #'Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.
 #'@return Returns a list containing:
-#'\item{\code{$flux}}{A 2D array of flux in Jansky.}
+#'\item{\code{$flux_img}}{A 3D array of flux in Jansky.}
 #'\item{\code{$image_grid}}{A list containing the indices of particles in each spaxel position.}
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
-#' flux_img    = img_grid(obs_data  = data)
+#' flux_img    = flux_grid(obs_data  = data)
 #'
 
 
-img_grid = function(obs_data, filter="g"){
+flux_grid = function(obs_data, filter="g"){
 
   numCores = parallel::detectCores()
   z = obs_data$z
