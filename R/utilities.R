@@ -185,3 +185,16 @@
   qnorm(runif(n, pnorm(a, mean, sd), pnorm(b, mean, sd)), mean, sd)
 }
 
+.image_nan <- function(z, zlim, col, na.color='gray', ...)
+{
+  zstep <- (zlim[2] - zlim[1]) / length(col); # step in the color palette
+  newz.na <- zlim[2] + zstep # new z for NA
+
+  z[which(is.na(z>zlim[2]))] <- newz.na # same for newz.na
+
+  zlim[2] <- zlim[2] + zstep # extend top limit to include the new value  na
+
+  col <- c(col, na.color) # we construct the new color range by including: na.color
+
+  magicaxis::magimage(z=z, zlim=zlim, col=col, ...) # we finally call image(...)
+}
