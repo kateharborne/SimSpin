@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 23/04/18)
+# Kate Harborne (last edit - 15/11/19)
 #'Find the effective radius of a simulated galaxy.
 #'
 #'The purpose of this function is to find the observed effective radius of a simulated galaxy
@@ -12,25 +12,24 @@
 #'@param fract The fraction of particles to be contained within the radius calculated. Default is
 #' 0.5, i.e. Reff.
 #'@param axis_ratio A data frame containing the semi-major and semi-minor axes lengths for the
-#' observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.
-#'@param angular_size The kpc/'' scaling factor output by \code{\link{obs_data_prep}} used to give
-#' the axis ratios in both kpc and ''.
+#' observed galaxy, as given by \code{\link{obs_imgs}}.
 #'@return Returned is a data.frame containing the scaled axis ratio that describes the semi-major
 #' and semi-minor axes of an ellipse that contains the specified fraction of the total number of
 #' particles.
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
-#' ifucube     = ifu_cube(obs_data = data)
+#' fluxes      = flux_grid(obs_data = data)
+#' cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
+#' images      = obs_images(obs_data = data, ifu_datacube = cube)
 #'
 #' output = find_reff(simdata      = galaxy_data,
 #'                    r200         = 10,
 #'                    inc_deg      = 0,
-#'                    axis_ratio   = ifucube$axis_ratio,
-#'                    angular_size = data$angular_size)
+#'                    axis_ratio   = images$axis_ratio)
 #'
 
-find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_size){
+find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
 
   result = grepl(paste(c("PartType2", "PartType3", "PartType4"), collapse = "|"), names(simdata))
   # finding the luminous matter within the simulation for imaging
@@ -50,6 +49,7 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_
   }
 
   inc_rad    = inc_deg * (pi / 180)                        # the galaxy inclination in radians
+  galaxy_data = .reorient_galaxy(galaxy_data)              # reorient galaxy to horizontal
   galaxy_df  = obs_galaxy(galaxy_data, centre=TRUE, inc_rad)
                                                            # extracting position & LOS velocities
 
@@ -87,11 +87,8 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_
       #  factor and increases in smaller increments until etotal > ntotal/2 again
       }
 
-    ellipse_axis_ratio = data.frame("a_kpc"     = axis_ratio$a * fac,
-                                    "b_kpc"     = axis_ratio$b * fac,
-                                    "a_arcsec"  = (axis_ratio$a * fac) / angular_size,
-                                    "b_arcsec"  = (axis_ratio$b * fac) / angular_size,
-                                    "angle"     = 90)
+    ellipse_axis_ratio = data.frame("a"     = axis_ratio$a * fac,
+                                    "b"     = axis_ratio$b * fac)
 
     return(ellipse_axis_ratio)
    }
@@ -124,11 +121,9 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_
       #  and decreases in smaller increments until etotal < ntotal/2 again
     }
 
-    ellipse_axis_ratio = data.frame("a_kpc"     = axis_ratio$a * fac,
-                                    "b_kpc"     = axis_ratio$b * fac,
-                                    "a_arcsec"  = (axis_ratio$a * fac) / angular_size,
-                                    "b_arcsec"  = (axis_ratio$b * fac) / angular_size,
-                                    "angle"     = 90)
+    ellipse_axis_ratio = data.frame("a"     = axis_ratio$a * fac,
+                                    "b"     = axis_ratio$b * fac)
+
     return(ellipse_axis_ratio)
   }
 }
