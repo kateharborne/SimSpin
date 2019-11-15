@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 14/11/2019)
+# Kate Harborne (last edit - 15/11/2019)
 #'Generating the fluxes for each element of the IFU data-cube.
 #'
 #'The purpose of this function is to construct the mock flux values within each cell of the IFU
@@ -10,7 +10,7 @@
 #'@param filter If Age/Metallicity is supplied, the filter within which the SED is generated.
 #'Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.
 #'@return Returns a list containing:
-#'\item{\code{$flux_img}}{A 3D array of flux in Jansky.}
+#'\item{\code{$flux_grid}}{A 3D array of flux in Jansky.}
 #'\item{\code{$image_grid}}{A list containing the indices of particles in each spaxel position.}
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
@@ -53,7 +53,7 @@ flux_grid = function(obs_data, filter="g"){
 
   flux = array(data = flux, dim=c(sbin,sbin,vbin))
 
-  output = list("flux_img"   = flux,
+  output = list("flux_grid"  = flux,
                 "image_grid" = image_grid)
   return(output)
 
