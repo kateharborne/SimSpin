@@ -37,7 +37,10 @@ plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plo
   dispersion_img = array(NA, dim=c(dim(obs_images$flux_img)[1]+20,dim(obs_images$flux_img)[2]+20))
   dispersion_img[11:(dim(obs_images$flux_img)[1]+10),11:(dim(obs_images$flux_img)[2]+10)] =
     obs_images$dispersion_img * ap_region
-  axis_data      = axis_ratio
+
+  bar_size = 5*round(((obs_data$sbinsize * obs_data$sbin) / 3)/5)
+
+  axis_data = axis_ratio
   sbin = dim(counts_img)[1]
   sbinsize = obs_data$sbinsize
   xcen = (sbin/2)
@@ -48,11 +51,18 @@ plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plo
   }
 
   if(any(which_plots == "Flux")){
-    par(mfcol=c(1,1), family="serif", font=1, cex=1.1, pty="s")
+    par(family="serif", font=1, cex=1.1, pty="s")
     .image_nan(z = asinh(counts_img),  zlim = range(c(asinh(obs_images$flux_img))),
                col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)),
                na.color='gray', xaxt="n", yaxt="n", ann=FALSE, magmap=FALSE, family="serif", font=1)
-    fields::image.plot(legend.only = TRUE, zlim = range(c(obs_images$flux_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("flux, 10"^{-16} * "erg s"^{-1} * "cm"^{-2} * "arcsec"^{-2}))
+    lines(c(5,(5+bar_size/obs_data$sbinsize)), c(3,3), col="black", lwd=2)
+    points(c(5,(5+bar_size/obs_data$sbinsize)), c(3,3), col="black", lwd=3, pch="|")
+    text(x = ((bar_size/obs_data$sbinsize) / 2)+5, y = 4, labels = c(paste(bar_size, " kpc")))
+
+    fields::image.plot(legend.only = TRUE, zlim = range(c(obs_images$flux_img)),
+                       col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), horizontal = TRUE, family="serif", font=1,
+                       legend.lab = expression("flux, Jy"))
+
     if (reff==TRUE){
       plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a / sbinsize, b = axis_data$b / sbinsize, border="red", lwd = 5, deg=TRUE)
     }
