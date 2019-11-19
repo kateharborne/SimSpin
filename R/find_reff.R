@@ -49,8 +49,9 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
   }
 
   inc_rad    = inc_deg * (pi / 180)                        # the galaxy inclination in radians
+  galaxy_data = cen_galaxy(galaxy_data) # centre data
   galaxy_data = .reorient_galaxy(galaxy_data)              # reorient galaxy to horizontal
-  galaxy_df  = obs_galaxy(galaxy_data, centre=TRUE, inc_rad)
+  galaxy_df  = obs_galaxy(galaxy_data, inc_rad)
                                                            # extracting position & LOS velocities
 
   galaxy_cdf = galaxy_df[galaxy_df$r_obs<r200,]            # removing particles beyond r200
