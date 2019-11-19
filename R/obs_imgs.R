@@ -91,7 +91,8 @@ obs_imgs = function(obs_data, ifu_datacube, threshold=25){
   output = list("flux_img"       = counts_img,
                 "velocity_img"   = velocity_img,
                 "dispersion_img" = dispersion_img,
-                "axis_ratio"     = axis_ratio)
+                "axis_ratio"     = axis_ratio,
+                "xbin_labels"    = xbin_ls)
 
   return(output)
 
