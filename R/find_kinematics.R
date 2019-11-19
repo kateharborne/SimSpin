@@ -222,11 +222,13 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                           "vsigma" = kinematics$obs_vsigma,
                           "flux_img"=images$flux_img,
                           "velocity_img"=images$velocity_img,
-                          "dispersion_img"=images$dispersion_img)
+                          "dispersion_img"=images$dispersion_img,
+                          "obs_data" = observe_data,
+                          "obs_images" = images)
 
 
-    if (IFU_plot == TRUE){
-      plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar)
+    if (IFU_plot != FALSE){
+      plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar, which_plots = IFU_plot)
       # plot IFU images
     }
 
@@ -361,10 +363,12 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                         "vsigma" = kinematics$obs_vsigma,
                         "flux_img"=images$flux_img,
                         "velocity_img"=images$velocity_img,
-                        "dispersion_img"=images$dispersion_img)
+                        "dispersion_img"=images$dispersion_img,
+                        "obs_data" = observe_data,
+                        "obs_images" = images)
 
-    if (IFU_plot == TRUE){
-      plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar)
+    if (IFU_plot != FALSE){
+      plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar, which_plots = IFU_plot)
     }
 
     return(output)
