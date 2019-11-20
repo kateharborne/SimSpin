@@ -86,7 +86,9 @@ obs_imgs = function(obs_data, ifu_datacube, threshold=25){
   temprad    = .cov2eigval(sx, sz, sxz) # solving for the eigenvalues to give the major and
   major      = sqrt(abs(temprad$hi))    #    minor axes lengths
   minor      = sqrt(abs(temprad$lo))
-  axis_ratio = data.frame("a" = major, "b" = minor) # axis ratio output, kpc
+  tempgrad   = .cov2eigvec(sx, sz, sxz)
+  ang        = (180-atan(tempgrad)*180/pi)%%180
+  axis_ratio = data.frame("a" = major, "b" = minor, "ang" = ang) # axis ratio output, kpc
 
   output = list("flux_img"       = counts_img,
                 "velocity_img"   = velocity_img,

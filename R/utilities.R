@@ -22,6 +22,12 @@
   return=(list(hi=(-b+sqrt(b^2-4*c))/2,lo=(-b-sqrt(b^2-4*c))/2))
 } # covariance eigenvalues
 
+.cov2eigvec=function(sx,sy,sxy){
+  eigval=.cov2eigval(sx,sy,sxy)$hi
+  eigvec=(sx^2-eigval)/sxy
+  return=(eigvec)
+}
+
 .losvd = function(v_los, m_v, s_v, h3, h4){
   y = (v_los - m_v) / s_v # value used in the LOSVD equation
   L_v =  (((1 / (sqrt(2 * pi))) * exp(-((y^2) / 2))) / s_v) *
@@ -200,4 +206,10 @@
   col <- c(col, na.color) # we construct the new color range by including: na.color
 
   magicaxis::magimage(z=z, zlim=zlim, col=col, ...) # we finally call image(...)
+}
+
+.ellipse = function(a, b, x, y, ang_deg){
+  ang_rad = ang_deg * (pi/180)
+  r = ((x*cos(ang_rad) + y*sin(ang_rad))^2 /a^2) + ((x*sin(ang_rad) - y*cos(ang_rad))^2 / b^2)
+  return(r)
 }

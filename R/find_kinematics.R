@@ -98,8 +98,9 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
-    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg) # prep simulation data in observer units
+    observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
+                                 central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
+                                 pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = TRUE) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
     images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold)
@@ -151,7 +152,8 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
     if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
       reff_ar      = data.frame("a"    = measure_type$axis_ratio$a,
-                                "b"    = measure_type$axis_ratio$b)
+                                "b"    = measure_type$axis_ratio$b,
+                                "ang"  = measure_type$axis_ratio$ang)
       # Reff at fixed specification
 
       if (addSky){
@@ -236,8 +238,9 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
   } else {                                                 # IF spatial blurring IS requested
 
-    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg) # prep simulation data in observer units
+    observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
+                                 central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
+                                 pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = TRUE) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
     blur_imgs    = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,

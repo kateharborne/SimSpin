@@ -64,7 +64,7 @@ plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plo
                        legend.lab = expression("flux, Jy"))
 
     if (reff==TRUE){
-      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a / sbinsize, b = axis_data$b / sbinsize, border="red", lwd = 5, deg=TRUE)
+      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a / sbinsize, b = axis_data$b / sbinsize, angle = axis_data$ang, border="red", lwd = 5, deg=TRUE)
     }
   }
 

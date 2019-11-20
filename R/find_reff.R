@@ -56,7 +56,12 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
 
   galaxy_cdf = galaxy_df[galaxy_df$r_obs<r200,]            # removing particles beyond r200
   ntotal     = as.numeric(nrow(galaxy_cdf))                # total number of particles in the galaxy within r200
-  elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axis_ratio$a^2) + (galaxy_cdf$z_obs^2 / axis_ratio$b^2)) <= 1]
+
+  a = axis_ratio$a
+  b = axis_ratio$b
+  ang = axis_ratio$ang # in degrees
+
+  elli = galaxy_cdf$x[(.ellipse(a = a, b = b, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang = ang)) <= 1]
                                                            # particles within the ellipse
   etotal = as.integer(length(elli))                        # number of particles within the ellipse
   fac = 1
@@ -64,8 +69,8 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
   if (etotal < ntotal*fract){
     while (etotal < ntotal*fract){
       fac  = fac + 0.01
-      axes = axis_ratio * fac
-      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      a_axes = a * fac; b_axes = b * fac
+      elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang = ang)) <= 1]
       etotal = length(elli)
       }
     # if there are fewer than ntotal/2 particles inside, the ellipse grows by small amount until
@@ -75,13 +80,13 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
 
     if (diff > (0.005 * ntotal*fract)){
       fac = fac - 0.01
-      axes = axis_ratio * fac
-      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      a_axes = a * fac; b_axes = b * fac
+      elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang = ang)) <= 1]
       etotal = length(elli)
       while (etotal < ntotal*fract){
         fac = fac + 0.0005
-        axes = axis_ratio * fac
-        elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+        a_axes = a * fac; b_axes = b * fac
+        elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang = ang)) <= 1]
         etotal = length(elli)
         }
       # if the difference is greater than 0.5% of ntotal/2, the ellipse shrinks again by one
@@ -89,7 +94,8 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
       }
 
     ellipse_axis_ratio = data.frame("a"     = axis_ratio$a * fac,
-                                    "b"     = axis_ratio$b * fac)
+                                    "b"     = axis_ratio$b * fac,
+                                    "ang"   = ang)
 
     return(ellipse_axis_ratio)
    }
@@ -98,8 +104,8 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
 
     while (etotal > ntotal*fract){
       fac  = fac - 0.01
-      axes = axis_ratio * fac
-      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      a_axes = a * fac; b_axes = b * fac
+      elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang = ang)) <= 1]
       etotal = length(elli)
     }
     # if there are more than ntotal/2 particles inside, the ellipse shrinks by small amount until
@@ -109,13 +115,13 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
 
     if (diff > (0.005 * ntotal*fract)){
       fac = fac + 0.01
-      axes = axis_ratio * fac
-      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      a_axes = a * fac; b_axes = b * fac
+      elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang = ang)) <= 1]
       etotal = length(elli)
       while (etotal > ntotal*fract){
         fac = fac - 0.0005
-        axes = axis_ratio * fac
-        elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+        a_axes = a * fac; b_axes = b * fac
+        elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang = ang)) <= 1]
         etotal = length(elli)
       }
       # if the difference is greater than 0.5% of ntotal/2, the ellipse grows again by one factor
@@ -123,7 +129,8 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
     }
 
     ellipse_axis_ratio = data.frame("a"     = axis_ratio$a * fac,
-                                    "b"     = axis_ratio$b * fac)
+                                    "b"     = axis_ratio$b * fac,
+                                    "ang"   = ang)
 
     return(ellipse_axis_ratio)
   }

@@ -35,17 +35,18 @@ kin_calc = function(obs_data, obs_images, axis_ratio){
   # radial positions within calcregion
 
   xcentre = sbin/2 + 0.5
-  ycentre = sbin/2 + 0.5                                 # finding the centre pixel of the image
+  ycentre = sbin/2 + 0.5
   a = axis_ratio$a / sbinsize
   b = axis_ratio$b / sbinsize
+  ang = axis_ratio$ang
 
-  if (a>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
+  if ((a*cos(ang))>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
   for (x in 1:sbin){
     for (y in 1:sbin){
-      xx = abs(x - xcentre)
-      yy = abs(y - ycentre)
-      rr = ((xx^2 / a^2) + (yy^2 / b^2))
+      xx = (x-xcentre)
+      yy = (y-ycentre)
+      rr = .ellipse(a = a, b = b, x = xx, y = yy, ang = ang)
       if (rr <= 1){
         calcregion_reff[x,y] = 1
         radius[x,y] = sqrt(xx^2 + yy^2) * sbinsize
@@ -60,8 +61,11 @@ kin_calc = function(obs_data, obs_images, axis_ratio){
   lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
   vsigma = sum(counts*velocity*velocity)/sum(counts*standard_dev*standard_dev)
 
-  output = list("obs_lr"     = lambda,
-                "obs_vsigma" = sqrt(vsigma))
+  output = list("obs_lr"         = lambda,
+                "obs_vsigma"     = sqrt(vsigma),
+                "flux_img"       = counts,
+                "velocity_img"   = velocity,
+                "dispersion_img" = standard_dev)
 
   return(output)
 
