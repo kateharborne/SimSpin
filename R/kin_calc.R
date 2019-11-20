@@ -39,6 +39,7 @@ kin_calc = function(obs_data, obs_images, axis_ratio){
   a = axis_ratio$a / sbinsize
   b = axis_ratio$b / sbinsize
   ang = axis_ratio$ang
+  ang = axis_ratio$ang * (pi/180)
 
   if ((a*cos(ang))>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
@@ -46,6 +47,8 @@ kin_calc = function(obs_data, obs_images, axis_ratio){
     for (y in 1:sbin){
       xx = (x-xcentre)
       yy = (y-ycentre)
+      xx = abs(x - xcentre)
+      yy = abs(y - ycentre)
       rr = .ellipse(a = a, b = b, x = xx, y = yy, ang = ang)
       if (rr <= 1){
         calcregion_reff[x,y] = 1
