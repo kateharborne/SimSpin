@@ -152,31 +152,31 @@
                           "Metallicity" = obs__data$galaxy_obs$Metallicity[image__grid[[X]]])
         temp = temp[order(temp$Age),] # fill a data frame and order by age
 
-      if (length(unique(temp$Age)) != length(temp$Age)){
-        # if there are any particles with the same age
-        nu = as.integer(which(table(temp$Age) > 1))
-        for (n in 1:length(nu)){
-          vals = which(temp$Age == temp$Age[nu[n]])
-          temp$Mass[vals[1]] = sum(temp$Mass[vals])
-          temp$Metallicity[vals[1]] = sum(temp$Metallicity[vals])
-          vals = vals[-1]
-          temp = temp[-vals,]
-          } # sum together all masses and metallicities such that we have a single particle at that age
-      }
-
-      if (length(temp$Age) > 1){ # if two particles are summed above to give more than a single particle
-          temp$cumMass = cumsum(temp$Mass) # cumulative sum of ages
-          tmp_SFHfunc = approxfun(x = c(temp$Age), y = c(0,diff(temp$cumMass)/diff(temp$Age)), yleft=0, yright=0)
-          # describe star formation rate in M_sol/yr as a function of age
-          tmp_Zfunc = approxfun(x = c(temp$Age), y = c(temp$Metallicity), yleft=0, yright=0)
-          # describe metallicity as a function of age
-          tmp_SFH = ProSpect::SFHfunc(massfunc = tmp_SFHfunc, Z = tmp_Zfunc, z=redshift, speclib = ProSpect::BC03lr,
-                                      outtype="Jansky",
-                                      filters = temp_filt, ref="Planck")
-          # generate a spectrum
-          flux = tmp_SFH$out$out
-          # convert to flux
+        if (length(unique(temp$Age)) != length(temp$Age)){
+          # if there are any particles with the same age
+          nu = as.integer(which(table(temp$Age) > 1))
+          for (n in 1:length(nu)){
+            vals = which(temp$Age == temp$Age[nu[n]])
+            temp$Mass[vals[1]] = sum(temp$Mass[vals])
+            temp$Metallicity[vals[1]] = sum(temp$Metallicity[vals])
+            vals = vals[-1]
+            temp = temp[-vals,]
+            } # sum together all masses and metallicities such that we have a single particle at that age
         }
+
+        if (length(temp$Age) > 1){ # if two particles are summed above to give more than a single particle
+            temp$cumMass = cumsum(temp$Mass) # cumulative sum of ages
+            tmp_SFHfunc = approxfun(x = c(temp$Age), y = c(0,diff(temp$cumMass)/diff(temp$Age)), yleft=0, yright=0)
+            # describe star formation rate in M_sol/yr as a function of age
+            tmp_Zfunc = approxfun(x = c(temp$Age), y = c(temp$Metallicity), yleft=0, yright=0)
+            # describe metallicity as a function of age
+            tmp_SFH = ProSpect::SFHfunc(massfunc = tmp_SFHfunc, Z = tmp_Zfunc, z=redshift, speclib = ProSpect::BC03lr,
+                                        outtype="Jansky",
+                                        filters = temp_filt, ref="Planck")
+            # generate a spectrum
+            flux = tmp_SFH$out$out
+            # convert to flux
+          } else {flux = 0} # if not, set flux to zero
       } else {flux=0}
 
   return(flux)
