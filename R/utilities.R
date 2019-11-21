@@ -93,9 +93,9 @@
   celestial::cosdistTravelTime((1 / x) - 1)
 }
 
-.part_spec = function(gal_0){
-  Z = ProSpect::interp_param(gal_0$Metallicity, ProSpect::BC03lr$Z, log = FALSE)
-  A = ProSpect::interp_param(gal_0$Age, ProSpect::BC03lr$Age, log = FALSE)
+.part_spec = function(Metallicity, Age, Mass){
+  Z = ProSpect::interp_param(Metallicity, ProSpect::BC03lr$Z, log = FALSE)
+  A = ProSpect::interp_param(Age, ProSpect::BC03lr$Age, log = FALSE)
 
   weights = data.frame("hihi" = Z$weight_hi * A$weight_hi,
                        "hilo" = Z$weight_hi * A$weight_lo,
@@ -105,8 +105,10 @@
   part_spec = array(data = NA, dim = c(nrow(weights), length(ProSpect::BC03lr$Wave)))
 
   for (i in 1:nrow(weights)){
-    part_spec[i,] = ((ProSpect::BC03lr$Zspec[[Z$ID_hi[i]]][A$ID_hi[i],] * weights$hihi[i]) + (ProSpect::BC03lr$Zspec[[Z$ID_hi[i]]][A$ID_lo[i],] * weights$hilo[i]) +
-                       (ProSpect::BC03lr$Zspec[[Z$ID_lo[i]]][A$ID_hi[i],] * weights$lohi[i]) + (ProSpect::BC03lr$Zspec[[Z$ID_lo[i]]][A$ID_lo[i],] * weights$lolo[i])) * gal_0$Mass[i] * 1e10
+    part_spec[i,] = ((ProSpect::BC03lr$Zspec[[Z$ID_hi[i]]][A$ID_hi[i],] * weights$hihi[i]) +
+                       (ProSpect::BC03lr$Zspec[[Z$ID_hi[i]]][A$ID_lo[i],] * weights$hilo[i]) +
+                       (ProSpect::BC03lr$Zspec[[Z$ID_lo[i]]][A$ID_hi[i],] * weights$lohi[i]) +
+                       (ProSpect::BC03lr$Zspec[[Z$ID_lo[i]]][A$ID_lo[i],] * weights$lolo[i])) * Mass
 
   }
 
@@ -146,44 +148,61 @@
 
 .assign_flux = function(X, obs__data, image__grid, lengths__grid, temp_filt, redshift){
       if (lengths__grid[[X]] > 1){ # if there are particles in the X
-        temp = data.frame("Age" = obs__data$galaxy_obs$Age[image__grid[[X]]] * 1e9,
-                          "Mass" = obs__data$galaxy_obs$Mass[image__grid[[X]]] * 1e10,
-                          "cumMass" = rep(NA, length(obs__data$galaxy_obs$Mass[image__grid[[X]]])),
-                          "Metallicity" = obs__data$galaxy_obs$Metallicity[image__grid[[X]]])
-        temp = temp[order(temp$Age),] # fill a data frame and order by age
+          temp = data.frame("Age" = obs__data$galaxy_obs$Age[image__grid[[X]]] * 1e9,
+                            "Mass" = obs__data$galaxy_obs$Mass[image__grid[[X]]] * 1e10,
+                            "cumMass" = rep(NA, length(obs__data$galaxy_obs$Mass[image__grid[[X]]])),
+                            "Metallicity" = obs__data$galaxy_obs$Metallicity[image__grid[[X]]])
+          temp = temp[order(temp$Age),] # fill a data frame and order by age
 
-        if (length(unique(temp$Age)) != length(temp$Age)){
-          # if there are any particles with the same age
-          nu = as.integer(which(table(temp$Age) > 1))
-          for (n in 1:length(nu)){
-            vals = which(temp$Age == temp$Age[nu[n]])
-            temp$Mass[vals[1]] = sum(temp$Mass[vals])
-            temp$Metallicity[vals[1]] = sum(temp$Metallicity[vals])
-            vals = vals[-1]
-            temp = temp[-vals,]
-            } # sum together all masses and metallicities such that we have a single particle at that age
-        }
+          if (length(unique(temp$Age)) != length(temp$Age)){
+            # if there are any particles with the same age
+            nu = as.integer(which(table(temp$Age) > 1))
+            for (n in 1:length(nu)){
+              vals = which(temp$Age == temp$Age[nu[n]])
+              temp$Mass[vals[1]] = sum(temp$Mass[vals])
+              temp$Metallicity[vals[1]] = mean(temp$Metallicity[vals])
+              vals = vals[-1]
+              temp = temp[-vals,]
+              } # sum together all masses and metallicities such that we have a single particle at that age
+          }
 
-        if (length(temp$Age) > 1){ # if two particles are summed above to give more than a single particle
-            temp$cumMass = cumsum(temp$Mass) # cumulative sum of ages
-            tmp_SFHfunc = approxfun(x = c(temp$Age), y = c(0,diff(temp$cumMass)/diff(temp$Age)), yleft=0, yright=0)
-            # describe star formation rate in M_sol/yr as a function of age
-            tmp_Zfunc = approxfun(x = c(temp$Age), y = c(temp$Metallicity), yleft=0, yright=0)
-            # describe metallicity as a function of age
-            tmp_SFH = ProSpect::SFHfunc(massfunc = tmp_SFHfunc, Z = tmp_Zfunc, z=redshift, speclib = ProSpect::BC03lr,
-                                        outtype="Jansky",
-                                        filters = temp_filt, ref="Planck")
-            # generate a spectrum
-            flux = tmp_SFH$out$out
-            # convert to flux
-          } else {flux = 0} # if not, set flux to zero
-      } else {flux=0}
+          if (length(temp$Age) > 1){ # if two particles are summed above to give more than a single particle
+              temp$cumMass = cumsum(temp$Mass) # cumulative sum of mass
+              temp$SFR = c(temp$cumMass/temp$Age)
+              tmp_SFHfunc= approxfun(x=c(temp$Age), y=c(temp$SFR), rule=2, yleft=temp$SFR[which.min(temp$Age)], yright=temp$SFR[which.max(temp$Age)])
+              # describe star formation rate in M_sol/yr as a function of age
+              tmp_Zfunc_approx = approxfun(x = c(temp$Age), y = c(temp$Metallicity), rule=2, yleft=temp$Metallicity[which.min(temp$Age)], yright=temp$Metallicity[which.max(temp$Age)])
+              tmp_Zfunc = function(age, ...){tmp_Zfunc_approx(age)}
+              # describe metallicity as a function of age
+              tmp_SFH = ProSpect::SFHfunc(massfunc = tmp_SFHfunc, Z = tmp_Zfunc, z=redshift, speclib = ProSpect::BC03lr,
+                                          outtype="Jansky",
+                                          filters = temp_filt, ref="Planck")
+              # generate a spectrum
+              flux = tmp_SFH$out$out
+              # convert to flux
+            } else {
+              age = temp$Age
+              metallicity = temp$Metallicity
+              mass = temp$Mass
+              spectra = .part_spec(Metallicity = metallicity, Age = age, Mass = mass)
+              flux = ProSpect::photom_lum(wave = ProSpect::BC03lr$Wave, lum = spectra[1,], outtype = "Jansky",
+                                          filters = temp_filt, z = redshift, ref = "Planck")
+            } # if not, set flux to zero
+      } else if (lengths__grid[[X]] == 1){ # if there is 1 particle in the X
+
+        A = obs__data$galaxy_obs$Age[image__grid[[X]]] * 1e9
+        Z = obs__data$galaxy_obs$Metallicity[image__grid[[X]]]
+        M = obs__data$galaxy_obs$Mass[image__grid[[X]]] * 1e10
+        spectra = .part_spec(Metallicity = Z, Age = A, Mass = M)
+        flux = ProSpect::photom_lum(wave = ProSpect::BC03lr$Wave, lum = spectra[1,], outtype = "Jansky",
+                                   filters = temp_filt, z = redshift, ref = "Planck")
+       } else {flux=0}
 
   return(flux)
 }
 
 .masslum2flux = function(X, obs__data, image__grid, lengths__grid, redshift){
-  if (lengths__grid[[X]] > 1){ # if there are particles in that grid cell
+  if (lengths__grid[[X]] > 0){ # if there are particles in that grid cell
     lum = sum(obs__data$galaxy_obs$Lum[image__grid[[X]]]) # sum luminosities in each cell
     flux = ProSpect::CGS2Jansky(lum * ProSpect::Lum2FluxFactor(z = redshift, ref="Planck")) # convert to flux in Janskys
   } else {flux=0}
