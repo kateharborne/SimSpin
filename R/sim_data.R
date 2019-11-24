@@ -193,18 +193,19 @@ sim_data = function(filename, ptype=NA, SSP=FALSE, m2l_disc=1, m2l_bulge=1, m2l_
       # if no Age/Metallicity is provided, use M2L ratio to calculate luminosity
       PartType4 = list("Part" = star_part, "Lum" = star_lum)
 
-    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType4"]])) == 9 && isFALSE(SSP)){
+    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType4"]])) == 10 && isFALSE(SSP)){
 
       star_lum = ((star_part$Mass * 1e10) / m2l_star)
       # if Age/Metallicity is provided, but SSP is false, use M2L ratio to calculate luminosity
       PartType4 = list("Part" = star_part, "Lum" = star_lum)
 
-    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType4"]])) == 9 && SSP){
+    } else if (length(hdf5r::list.datasets(galaxy_file[["PartType4"]])) == 10 && SSP){
 
       if ("Age" %in% substring(hdf5r::list.datasets(galaxy_file[["PartType4"]]), 1)){
 
         star_SSP = data.frame("Metallicity" = hdf5r::readDataSet(galaxy_file[["PartType4/Metallicity"]]),
-                              "Age"         = hdf5r::readDataSet(galaxy_file[["PartType4/Age"]]))
+                              "Age"         = hdf5r::readDataSet(galaxy_file[["PartType4/Age"]]),
+                              "InitialMass" = hdf5r::readDataSet(galaxy_file[["PartType4/InitialMass"]]))
 
         # if 9 datasets are provided and SSP is true, check if "Age" is already supplied
       } else { # if not, calculate the "Age" using celestial (performed in parallel)
@@ -214,7 +215,8 @@ sim_data = function(filename, ptype=NA, SSP=FALSE, m2l_disc=1, m2l_bulge=1, m2l_
         age = as.numeric(parallel::mclapply(sft, .SFTtoAge, mc.cores = numCores))
 
         star_SSP = data.frame("Metallicity" = hdf5r::readDataSet(galaxy_file[["PartType4/Metallicity"]]),
-                              "Age" = age)
+                              "Age" = age,
+                              "InitialMass" = hdf5r::readDataSet(galaxy_file[["PartType4/InitialMass"]]))
 
       }
 
