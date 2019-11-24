@@ -89,13 +89,13 @@
   return(trimdata)
 }
 
-.SFTtoAge = function(x){
-  celestial::cosdistTravelTime((1 / x) - 1)
+.SFTtoAge = function(a){
+  celestial::cosdistTravelTime((1 / a) - 1)
 }
 
 .part_spec = function(Metallicity, Age, Mass){
-  Z = ProSpect::interp_param(Metallicity, ProSpect::BC03lr$Z, log = FALSE)
-  A = ProSpect::interp_param(Age, ProSpect::BC03lr$Age, log = FALSE)
+  Z = ProSpect::interp_param(Metallicity, ProSpect::BC03lr$Z, log = TRUE)
+  A = ProSpect::interp_param(Age, ProSpect::BC03lr$Age, log = TRUE)
 
   weights = data.frame("hihi" = Z$weight_hi * A$weight_hi,
                        "hilo" = Z$weight_hi * A$weight_lo,
@@ -110,7 +110,6 @@
                (ProSpect::BC03lr$Zspec[[Z$ID_lo]][A$ID_lo,] * weights$lolo)) * Mass
 
   return(part_spec)
-
 }
 
 .reorient_galaxy = function(galaxy_data){
@@ -205,6 +204,7 @@
   if (lengths__grid[[X]] > 0){ # if there are particles in that grid cell
     lum = sum(obs__data$galaxy_obs$Lum[image__grid[[X]]]) # sum luminosities in each cell
     flux = ProSpect::CGS2Jansky(lum * ProSpect::Lum2FluxFactor(z = redshift, ref="Planck")) # convert to flux in Janskys
+    #flux = lum * ProSpect::Lum2FluxFactor(z = redshift, ref="Planck") # in CGS
   } else {flux=0}
   return(flux)
 }
@@ -213,8 +213,7 @@
   qnorm(runif(n, pnorm(a, mean, sd), pnorm(b, mean, sd)), mean, sd)
 }
 
-.image_nan <- function(z, zlim, col, na.color='gray', ...)
-{
+.image_nan <- function(z, zlim, col, na.color='gray', ...){
   zstep <- (zlim[2] - zlim[1]) / length(col); # step in the color palette
   newz.na <- zlim[2] + zstep # new z for NA
 
@@ -244,7 +243,7 @@
                            Age = ages[Y],
                            Mass = masses[Y])
       flux_each[Y] = ProSpect::photom_lum(wave = ProSpect::BC03lr$Wave, lum = spectra, outtype = "Jansky",
-                                  filters = temp_filt, z = redshift, ref = "Planck")
+                                          filters = temp_filt, z = redshift, ref = "Planck")
     }
     flux = sum(flux_each)
   } else {flux=0}
