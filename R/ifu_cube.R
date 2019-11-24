@@ -36,14 +36,15 @@ ifu_cube = function(obs_data, flux_data) {
   ap_cube      = array(data = obs_data$ap_region, dim = c(sbin,sbin,vbin))
 
   for (cell in seq(1, sbin*sbin*vbin)){ # for each cell in cube
-    if (lengths_grid[[cell]] > 1){
+    if (lengths_grid[[cell]] > 0){
       coord = c(cell%%sbin, (cell%%(sbin*sbin)%/%sbin + 1), cell%/%(sbin*sbin)+1)
       if (cell%%sbin == 0 & cell%%(sbin*sbin) == 0){coord = c(sbin, sbin, cell%/%(sbin*sbin))} # case at the end of row & column
       if (cell%%sbin == 0 & cell%%(sbin*sbin) != 0){coord = c(sbin, (cell%%(sbin*sbin)%/%sbin), cell%/%(sbin*sbin)+1)} # case at the end of row
       for (j in 1:lengths_grid[[cell]]){
-          cube[coord[1], coord[2],] = cube[coord[1], coord[2],] +
-            diff(flux_data$flux_grid[coord[1], coord[2], coord[3]] *
-                   pnorm(vseq, mean=obs_data$galaxy_obs$vy_obs[image_grid[[cell]][j]], sd=lsf_size))
+        cell_flux = flux_data$flux_grid[coord[1], coord[2], coord[3]]/lengths_grid[[cell]]
+        cube[coord[1], coord[2],] = cube[coord[1], coord[2],] +
+          diff((cell_flux*
+               pnorm(vseq, mean=obs_data$galaxy_obs$vy_obs[image_grid[[cell]][j]], sd=lsf_size)))
           # adding the "gaussians" of each particle to the velocity bins
         }
       }
