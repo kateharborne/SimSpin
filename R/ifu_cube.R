@@ -41,7 +41,8 @@ ifu_cube = function(obs_data, flux_data) {
       if (cell%%sbin == 0 & cell%%(sbin*sbin) == 0){coord = c(sbin, sbin, cell%/%(sbin*sbin))} # case at the end of row & column
       if (cell%%sbin == 0 & cell%%(sbin*sbin) != 0){coord = c(sbin, (cell%%(sbin*sbin)%/%sbin), cell%/%(sbin*sbin)+1)} # case at the end of row
       for (j in 1:lengths_grid[[cell]]){
-        cell_flux = flux_data$flux_grid[coord[1], coord[2], coord[3]]/lengths_grid[[cell]]
+        cell_mass = sum(obs_data$galaxy_obs$Mass[image_grid[[cell]]])
+        cell_flux = flux_data$flux_grid[coord[1], coord[2], coord[3]]*(obs_data$galaxy_obs$Mass[image_grid[[cell]]][j]/cell_mass)
         cube[coord[1], coord[2],] = cube[coord[1], coord[2],] +
           diff((cell_flux*
                pnorm(vseq, mean=obs_data$galaxy_obs$vy_obs[image_grid[[cell]][j]], sd=lsf_size)))
