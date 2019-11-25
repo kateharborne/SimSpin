@@ -252,7 +252,7 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = TRUE) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
-    blur_imgs    = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
+    blur_imgs = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
                              fwhm = blur$fwhm) # blur IFU cube
     blur_images = obs_imgs(obs_data = observe_data, ifu_datacube = blur_imgs, threshold = threshold)
 
@@ -310,7 +310,8 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
     if (measure_type$type == "fixed"){                 # fitting Reff from specified axis_ratio
       reff_ar      = data.frame("a"    = measure_type$axis_ratio$a,
-                                "b"    = measure_type$axis_ratio$b)
+                                "b"    = measure_type$axis_ratio$b,
+                                "ang"  = measure_type$axis_ratio$ang)
       # Reff at fixed specification
 
       if (addSky){
@@ -378,11 +379,11 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                         "obs_lambdar"=kinematics$obs_lambdar,
                         "obs_elambdar"=kinematics$obs_elambdar,
                         "obs_vsigma" = kinematics$obs_vsigma,
-                        "flux_img"=images$flux_img,
-                        "velocity_img"=images$velocity_img,
-                        "dispersion_img"=images$dispersion_img,
+                        "flux_img"=blur_images$flux_img,
+                        "velocity_img"=blur_images$velocity_img,
+                        "dispersion_img"=blur_images$dispersion_img,
                         "obs_data" = observe_data,
-                        "obs_images" = images)
+                        "obs_images" = blur_images)
 
     if (IFU_plot != FALSE){
       plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar, which_plots = IFU_plot)
