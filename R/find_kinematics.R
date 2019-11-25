@@ -228,8 +228,9 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
       output       = list("datacube"=ifu_imgs$cube,
                           "axis_ratio"=reff_ar,
-                          "lambda_r"=kinematics$obs_lr,
-                          "vsigma" = kinematics$obs_vsigma,
+                          "obs_lambdar"=kinematics$obs_lambdar,
+                          "obs_elambdar"=kinematics$obs_elambdar,
+                          "obs_vsigma" = kinematics$obs_vsigma,
                           "flux_img"=images$flux_img,
                           "velocity_img"=images$velocity_img,
                           "dispersion_img"=images$dispersion_img,
@@ -374,8 +375,9 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
     output       = list("datacube"=ifu_imgs$cube,
                         "axis_ratio"=reff_ar,
-                        "lambda_r"=kinematics$obs_lr,
-                        "vsigma" = kinematics$obs_vsigma,
+                        "obs_lambdar"=kinematics$obs_lambdar,
+                        "obs_elambdar"=kinematics$obs_elambdar,
+                        "obs_vsigma" = kinematics$obs_vsigma,
                         "flux_img"=images$flux_img,
                         "velocity_img"=images$velocity_img,
                         "dispersion_img"=images$dispersion_img,
