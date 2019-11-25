@@ -10,7 +10,8 @@ find_kinematics(simdata, r200 = 200, z = 0.05, fov = 15,
   = 1), blur, radius_type = "Both", addSky = FALSE, mag_zero = 8.9,
   IFU_plot = TRUE)
   align = TRUE, filter = "g", threshold = 25,
-  measure_type = list(type = "fit", fac = 1), blur, IFU_plot = FALSE)
+  measure_type = list(type = "fit", fac = 1), blur,
+  radius_type = "Both", IFU_plot = FALSE)
 }
 
 \item{z}{The galaxy redshift.}

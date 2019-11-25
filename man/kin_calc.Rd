@@ -8,6 +8,7 @@ obs_kinematics(ifu_datacube, reff_axisratio, sbinsize,
   radius_type = "Both", addSky = FALSE, threshold = 25,
   mag_zero = 8.9, pixel_sscale = 0.5)
 kin_calc(obs_data, obs_images, axisratio)
+kin_calc(obs_data, obs_images, axis_ratio, radius_type = "Both")
 }
 \arguments{
 \item{obs_data}{The list output from the function \code{\link{obs_data_prep}}.}
