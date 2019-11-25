@@ -23,7 +23,7 @@
 #' images      = obs_images(obs_data = data, ifu_datacube = cube)
 #' kinematics  = kin_calc(obs_data = data, obs_images = images, axis_ratio = images$axis_ratio)
 
-kin_calc = function(obs_data, obs_images, axis_ratio){
+kin_calc = function(obs_data, obs_images, axis_ratio, radius_type = "Both"){
 
   sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
   vbin = obs_data$vbin # depth of cube
@@ -32,6 +32,7 @@ kin_calc = function(obs_data, obs_images, axis_ratio){
   calcregion_reff = matrix(data = 0, nrow=sbin, ncol=sbin)
   # values within reff
   radius          = matrix(data = 0, nrow=sbin, ncol=sbin)
+  eradius         = matrix(data = 0, nrow=sbin, ncol=sbin)
   # radial positions within calcregion
 
   xcentre = sbin/2 + 0.5
@@ -40,6 +41,7 @@ kin_calc = function(obs_data, obs_images, axis_ratio){
   b = axis_ratio$b / sbinsize
   ang = axis_ratio$ang
   ang = axis_ratio$ang * (pi/180)
+  ellipticity = 1 - sqrt(b^2 / a^2)
 
   if ((a*cos(ang))>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
@@ -53,6 +55,7 @@ kin_calc = function(obs_data, obs_images, axis_ratio){
       if (rr <= 1){
         calcregion_reff[x,y] = 1
         radius[x,y] = sqrt(xx^2 + yy^2) * sbinsize
+        eradius[x,y] = sqrt(((xx^2 * (1 - ellipticity)^2) + yy^2)/(1 - ellipticity)^2) * sbinsize
       }
     }
   }
@@ -61,14 +64,30 @@ kin_calc = function(obs_data, obs_images, axis_ratio){
   velocity = obs_images$velocity_img * calcregion_reff
   standard_dev = obs_images$dispersion_img * calcregion_reff
 
-  lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
-  vsigma = sum(counts*velocity*velocity)/sum(counts*standard_dev*standard_dev)
-
-  output = list("obs_lr"         = lambda,
-                "obs_vsigma"     = sqrt(vsigma),
-                "flux_img"       = counts,
-                "velocity_img"   = velocity,
-                "dispersion_img" = standard_dev)
+  if (radius_type == "Both" | radius_type == "both"){
+    lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
+    elambda = sum(counts*eradius*abs(velocity))/sum(counts*eradius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
+    output = list("obs_lambdar"    = lambda,
+                  "obs_elambdar"   = elambda,
+                  "obs_vsigma"     = sqrt(vsigma),
+                  "counts_img"     = counts_img,
+                  "velocity_img"   = velocity_img,
+                  "dispersion_img" = dispersion_img)
+  } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
+    elambda = sum(counts*eradius*abs(velocity))/sum(counts*eradius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
+    output = list("obs_elambdar"   = elambda,
+                  "obs_vsigma"     = sqrt(vsigma),
+                  "counts_img"     = counts_img,
+                  "velocity_img"   = velocity_img,
+                  "dispersion_img" = dispersion_img)
+  } else if (radius_type == "Circular" | radius_type == "circular"){
+    lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
+    output = list("obs_lambdar"    = lambda,
+                  "obs_vsigma"     = sqrt(vsigma),
+                  "counts_img"     = counts_img,
+                  "velocity_img"   = velocity_img,
+                  "dispersion_img" = dispersion_img)
+  }
 
   return(output)
 

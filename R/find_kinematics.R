@@ -95,6 +95,8 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                          pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25, filter="g",
                          measure_type = list(type="fit", fac=1), blur,
                          radius_type = "Both", addSky = FALSE, mag_zero = 8.9, IFU_plot = TRUE){
+                         pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, align=TRUE, filter="g", threshold=25,
+                         measure_type = list(type="fit", fac=1), blur, radius_type = "Both", IFU_plot=FALSE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
@@ -124,6 +126,10 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                     sbinsize = observe_data$sbinsize, radius_type=radius_type)
         # measure kinematics within specified Reff
       }
+      kinematics = kin_calc(obs_data = observe_data,
+                            obs_images = images,axis_ratio = reff_ar,
+                            radius_type = radius_type)
+      # measure kinematics within specified Reff
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
@@ -146,7 +152,8 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       }
 
       kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = images, axis_ratio = reff_ar)
+                            obs_images = images, axis_ratio = reff_ar,
+                            radius_type = radius_type)
       # measure kinematics within specified Reff
     }
 
@@ -213,7 +220,8 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       reff_ar$b = reff_ar$b * measure_type$fac
 
       kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = images, axis_ratio = reff_ar)
+                            obs_images = images, axis_ratio = reff_ar,
+                            radius_type = radius_type)
       # measure kinematics within specified Reff
 
     }
@@ -268,6 +276,8 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
         # measure kinematics within specified Reff
       }
       kinematics = kin_calc(obs_data = observe_data,
+                            obs_images = blur_images, axis_ratio = reff_ar,
+                            radius_type = radius_type)
       # measure kinematics within specified Reff
 
     }
@@ -292,7 +302,8 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       }
       # Reff from data & supplied axis ratio
       kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = blur_images, axis_ratio = reff_ar)
+                            obs_images = blur_images, axis_ratio = reff_ar,
+                            radius_type = radius_type)
       # measure kinematics within specified Reff
     }
 
@@ -357,7 +368,8 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       reff_ar$b = reff_ar$b * measure_type$fac
 
       kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = blur_images, axis_ratio = reff_ar)
+                            obs_images = blur_images, axis_ratio = reff_ar,
+                            radius_type = radius_type)
     }
 
     output       = list("datacube"=ifu_imgs$cube,
