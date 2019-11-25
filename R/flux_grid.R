@@ -46,10 +46,12 @@ flux_grid = function(obs_data, filter="g"){
   ap_region = obs_data$ap_region; ap_region[ap_region == 0] = NA
   outside_region = which(is.na(flux*as.vector(ap_region)))
 
-  flux[outside_region] = 0 # and any cells that are outside the aperture
-  for (mm in 1:length(outside_region)){
-    image_grid[[outside_region[mm]]] = integer(0)
-  } # remove any entries in image grid that are outside the aperture
+  if (length(outside_region) != 0){
+    flux[outside_region] = 0 # and any cells that are outside the aperture
+    for (mm in 1:length(outside_region)){
+      image_grid[[outside_region[mm]]] = integer(0)
+    } # remove any entries in image grid that are outside the aperture
+  }
 
   flux = array(data = flux, dim=c(sbin,sbin,vbin))
 
