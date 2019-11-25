@@ -64,29 +64,31 @@ kin_calc = function(obs_data, obs_images, axis_ratio, radius_type = "Both"){
   velocity = obs_images$velocity_img * calcregion_reff
   standard_dev = obs_images$dispersion_img * calcregion_reff
 
+  vsigma = sum(counts*velocity*velocity)/sum(counts*standard_dev*standard_dev)
+
   if (radius_type == "Both" | radius_type == "both"){
     lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
     elambda = sum(counts*eradius*abs(velocity))/sum(counts*eradius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
     output = list("obs_lambdar"    = lambda,
                   "obs_elambdar"   = elambda,
                   "obs_vsigma"     = sqrt(vsigma),
-                  "counts_img"     = counts_img,
-                  "velocity_img"   = velocity_img,
-                  "dispersion_img" = dispersion_img)
+                  "flux_img"       = counts,
+                  "velocity_img"   = velocity,
+                  "dispersion_img" = standard_dev)
   } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
     elambda = sum(counts*eradius*abs(velocity))/sum(counts*eradius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
     output = list("obs_elambdar"   = elambda,
                   "obs_vsigma"     = sqrt(vsigma),
-                  "counts_img"     = counts_img,
-                  "velocity_img"   = velocity_img,
-                  "dispersion_img" = dispersion_img)
+                  "flux_img"       = counts,
+                  "velocity_img"   = velocity,
+                  "dispersion_img" = standard_dev)
   } else if (radius_type == "Circular" | radius_type == "circular"){
     lambda = sum(counts*radius*abs(velocity))/sum(counts*radius*(sqrt(velocity*velocity + standard_dev*standard_dev)))
     output = list("obs_lambdar"    = lambda,
                   "obs_vsigma"     = sqrt(vsigma),
-                  "counts_img"     = counts_img,
-                  "velocity_img"   = velocity_img,
-                  "dispersion_img" = dispersion_img)
+                  "flux_img"       = counts,
+                  "velocity_img"   = velocity,
+                  "dispersion_img" = standard_dev)
   }
 
   return(output)
