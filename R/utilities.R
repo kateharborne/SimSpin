@@ -219,7 +219,7 @@
 
   z[which(is.na(z>zlim[2]))] <- newz.na # same for newz.na
 
-  zlim[2] <- zlim[2] + zstep # extend top limit to include the new value  na
+  zlim[2] <- zlim[2] + zstep # extend top limit to include the new value na
 
   col <- c(col, na.color) # we construct the new color range by including: na.color
 
