@@ -51,13 +51,13 @@ plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plo
   }
 
   if(any(which_plots == "Flux")){
-    par(family="serif", font=1, cex=1.1, pty="s")
+    par(family="serif", font=1, cex=1, pty="s")
     .image_nan(z = asinh(counts_img),  zlim = range(c(asinh(obs_images$flux_img))),
                col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)),
                na.color='gray', xaxt="n", yaxt="n", ann=FALSE, magmap=FALSE, family="serif", font=1)
-    lines(c(5,(5+bar_size/obs_data$sbinsize)), c(3,3), col="black", lwd=2)
-    points(c(5,(5+bar_size/obs_data$sbinsize)), c(3,3), col="black", lwd=3, pch="|")
-    text(x = ((bar_size/obs_data$sbinsize) / 2)+5, y = 4, labels = c(paste(bar_size, " kpc")))
+    lines(c(5,(5+bar_size/obs_data$sbinsize)), c(5,5), col="black", lwd=2)
+    points(c(5,(5+bar_size/obs_data$sbinsize)), c(5,5), col="black", lwd=3, pch="|")
+    text(x = ((bar_size/obs_data$sbinsize) / 2)+5, y = 7, labels = c(paste(bar_size, " kpc")))
 
     fields::image.plot(legend.only = TRUE, zlim = range(c(obs_images$flux_img)),
                        col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(100)), horizontal = TRUE, family="serif", font=1,
@@ -69,7 +69,7 @@ plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plo
   }
 
   if(any(which_plots == "Velocity")){
-    par(family="serif", font=1, cex=1.1, pty="s")
+    par(family="serif", font=1, cex=1, pty="s")
     .image_nan(z = velocity_img,  zlim = range(c(obs_images$velocity_img)),
                col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)),
                na.color='gray', xaxt="n", yaxt="n", ann=FALSE, magmap=FALSE, family="serif", font=1)
@@ -80,7 +80,7 @@ plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plo
   }
 
   if(any(which_plots == "Dispersion")){
-    par(family="serif", font=1, cex=1.1, pty="s")
+    par(family="serif", font=1, cex=1, pty="s")
     .image_nan(z = dispersion_img,  zlim = range(c(obs_images$dispersion_img)),
                col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(200)),
                na.color='gray', xaxt="n", yaxt="n", ann=FALSE, magmap=FALSE, family="serif", font=1)
