@@ -115,6 +115,7 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   }
 
   vbin = ceiling((max(galaxy_cdf$vy_obs) - min(galaxy_cdf$vy_obs)) / vbinsize) # number of velocity bins
+  if (vbin <= 2){vbin = 3}
 
   vseq = seq(-(vbin * vbinsize) / 2,
              (vbin * vbinsize) / 2, by=vbinsize) # velocity bin break positions
