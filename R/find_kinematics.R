@@ -127,7 +127,7 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
         # measure kinematics within specified Reff
       }
       kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = images,axis_ratio = reff_ar,
+                            obs_images = images, axis_ratio = reff_ar,
                             radius_type = radius_type)
       # measure kinematics within specified Reff
     }
@@ -226,6 +226,11 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
     }
 
+    if (IFU_plot != FALSE){
+      plot_ifu(obs_data = observe_data, obs_images = images, reff=IFU_plot$reff, axis_ratio=reff_ar, which_plots = IFU_plot$which_plots)
+      # plot IFU images
+    }
+
       output       = list("datacube"=ifu_imgs$cube,
                           "axis_ratio"=reff_ar,
                           "obs_lambdar"=kinematics$obs_lambdar,
@@ -237,11 +242,6 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                           "obs_data" = observe_data,
                           "obs_images" = images)
 
-
-    if (IFU_plot != FALSE){
-      plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar, which_plots = IFU_plot)
-      # plot IFU images
-    }
 
     return(output)
 
