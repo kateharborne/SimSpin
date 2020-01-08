@@ -48,7 +48,7 @@ Rcpp::List cen_galaxy(Rcpp::DataFrame part_data) {
                             Rcpp::Named("z")         = z,
                             Rcpp::Named("vx")        = vx,
                             Rcpp::Named("vy")        = vy,
-                            Rcpp::Named("vz")        = vy,
+                            Rcpp::Named("vz")        = vz,
                             Rcpp::Named("Mass")      = Mass);
 
   return(df);
