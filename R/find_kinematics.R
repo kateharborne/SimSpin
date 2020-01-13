@@ -20,6 +20,8 @@
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
+#'@param filter When stellar particles and SEDs are provided, the filter used when converting
+#'spectra into luminosity. Options include "r" for SDSS r filter and "g" for the SDSS g filter.
 #'@param threshold The flux threshold of the observation.
 #'@param measure_type A list specifying the radius within which the kinematics are measured. There
 #' are three options for this:
