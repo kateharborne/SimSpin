@@ -40,7 +40,7 @@
 #'@param radius_type The method of computing radii - "Circular" i.e. \eqn{r^{2} = x^{2} + y{2}} or
 #'"Elliptical" where r is the semi-major axis of the ellipse having an axis ratio \eqn{b/a} on
 #'which the pixel lies, i.e.
-#'\eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}. Default is "Both" such
+#'\eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}}. Default is "Both" such
 #'that both \eqn{\lambda_R} values are returned.
 #'@param blur \emph{Optional} Specify if you wish to apply observational seeing effects to the
 #' cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies

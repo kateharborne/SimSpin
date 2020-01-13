@@ -59,6 +59,12 @@ the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian
 \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of
 arcseconds.}
 
+\item{radius_type}{The method of computing radii - "Circular" i.e. \eqn{r^{2} = x^{2} + y{2}} or
+"Elliptical" where r is the semi-major axis of the ellipse having an axis ratio \eqn{b/a} on
+which the pixel lies, i.e.
+\eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}}. Default is "Both" such
+that both \eqn{\lambda_R} values are returned.}
+
 \item{IFU_plot}{\emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
 LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
 automatically.}
