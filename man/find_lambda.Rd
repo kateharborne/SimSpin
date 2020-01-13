@@ -35,6 +35,9 @@ filter output in angstroms.}
 
 \item{threshold}{The flux threshold of the observation.}
 
+\item{filter}{When stellar particles and SEDs are provided, the filter used when converting
+spectra into luminosity. Options include "r" for SDSS r filter and "g" for the SDSS g filter.}
+
 \item{measure_type}{A list specifying the radius within which \eqn{\lambda_R} is measured. There
 are three options for this:
 \enumerate{

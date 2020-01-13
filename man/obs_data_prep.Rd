@@ -31,6 +31,9 @@ output in arcseconds.}
 filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
+
+\item{filter}{When stellar particles and SEDs are provided, the filter used when converting
+spectra into luminosity. Options include "r" for SDSS r filter and "g" for the SDSS g filter.}
 }
 \value{
 Returned is a list that contains:
