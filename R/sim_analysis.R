@@ -236,7 +236,7 @@ sim_analysis = function(simdata, bin_type="r", rmax=200, rbin=200, DM_profile=NA
       }
                                                             # enclosed mass within outer radius
       profile$logp[j] =
-        log10(grp_mass / (pi * rmax * ((profile$cr[j] * profile$cr[j]) - (rbin_labels[j] * rbin_labels[j]))))
+        log10(grp_mass / (pi * 2 * rmax * ((profile$cr[j] * profile$cr[j]) - (rbin_labels[j] * rbin_labels[j]))))
                                                             # log10 of shell density
       grp_Jx = sum(grp$Jx)                                  # angular momentum components of shell
       grp_Jy = sum(grp$Jy)
