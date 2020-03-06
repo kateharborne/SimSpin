@@ -17,7 +17,8 @@ Imports:
     fields,
     RColorBrewer,
     plotrix,
-    FITSio
+    FITSio,
+    ProFound
 Depends:
     celestial
 RoxygenNote: 6.1.1

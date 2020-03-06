@@ -6,7 +6,8 @@
 \usage{
 sim_FITSimage(out_image, out_data, z, pixel_sscale, psf_fwhm = 0,
   r200 = 200, r50 = 10, Hdisk = 5.64, Ahalo = 34.5,
-  Abulge = 3.45, out_file, obs_name = "SimSpin datacube")
+  Abulge = 3.45, out_file, obs_name = "SimSpin datacube",
+  addSky = FALSE, threshold = 25, mag_zero = 8.9)
 }
 \arguments{
 \item{out_image}{The counts/velocity/dispersion image output from \code{\link{find_lambda}} or
@@ -38,6 +39,15 @@ output in arcseconds.}
 
 \item{obs_name}{A string that describes the name of the observation. Default is "SimSpin
 datacube".}
+
+\item{addSky}{A boolean to specify whether to add sky noise to the output images. Default is
+FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
+below.}
+
+\item{threshold}{The magnitude limit of the observation.}
+
+\item{mag_zero}{The magnitude zero point with regards to the mangitude system being used (e.g.
+AB or Vega).}
 }
 \value{
 Outputs a standard format FITS file.

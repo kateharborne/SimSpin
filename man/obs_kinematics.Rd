@@ -5,7 +5,8 @@
 \title{Calculating the observed kinematics, \eqn{\lambda_R} and V/\eqn{\sigma}}
 \usage{
 obs_kinematics(ifu_datacube, reff_axisratio, sbinsize,
-  radius_type = "Both")
+  radius_type = "Both", addSky = FALSE, threshold = 25,
+  mag_zero = 8.9, pixel_sscale = 0.5)
 }
 \arguments{
 \item{ifu_datacube}{The list output from the function \code{\link{ifu_cube}} containing the mock
@@ -22,6 +23,18 @@ function.}
 which the pixel lies, i.e.
 \eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}}. Default is "Both" such
 that both \eqn{\lambda_R} values are returned.}
+
+\item{addSky}{A boolean to specify whether to add sky noise to the output images. Default is
+FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
+below.}
+
+\item{threshold}{The magnitude limit of the observation.}
+
+\item{mag_zero}{The magnitude zero point with regards to the mangitude system being used (e.g.
+AB or Vega).}
+
+\item{pixel_sscale}{The pixel_sscale input for \code{\link{obs_data_prep}} for calculating
+the level of sky noise, if requested.}
 }
 \value{
 Returns a list that contains:

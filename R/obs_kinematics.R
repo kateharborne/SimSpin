@@ -17,6 +17,14 @@
 #'which the pixel lies, i.e.
 #'\eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}}. Default is "Both" such
 #'that both \eqn{\lambda_R} values are returned.
+#'@param addSky A boolean to specify whether to add sky noise to the output images. Default is
+#' FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
+#' below.
+#'@param threshold The magnitude limit of the observation.
+#'@param mag_zero The magnitude zero point with regards to the mangitude system being used (e.g.
+#' AB or Vega).
+#'@param pixel_sscale The pixel_sscale input for \code{\link{obs_data_prep}} for calculating
+#' the level of sky noise, if requested.
 #'@return Returns a list that contains:
 #' \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R} measured with circular
 #' radii. \emph{(When \code{radius_type = "Both"} or \code{"Circular"}.)}}
@@ -41,7 +49,8 @@
 #'                          sbinsize       = data$sbinsize)
 #'
 
-obs_kinematics = function(ifu_datacube, reff_axisratio, sbinsize, radius_type = "Both"){
+obs_kinematics = function(ifu_datacube, reff_axisratio, sbinsize, radius_type = "Both", addSky = FALSE,
+                          threshold = 25, mag_zero = 8.9, pixel_sscale=0.5){
 
   sbin            = length(ifu_datacube$xbin_labels)       # number of spatial bins in data cube
   vbin            = length(ifu_datacube$vbin_labels)
@@ -92,6 +101,17 @@ obs_kinematics = function(ifu_datacube, reff_axisratio, sbinsize, radius_type = 
   velocity_img[(is.na(velocity_img))]     = 0            # mean velocity image
   standard_dev[(is.na(standard_dev))]     = 0            # velocity dispersion
   dispersion_img[(is.na(dispersion_img))] = 0            # velocity dispersion image
+
+  if (addSky){
+    skyRMS = ProFound::profoundSB2Flux(threshold, mag_zero, pixel_sscale)
+    noise = rnorm(dim(counts)[1]^2, sd=skyRMS)
+    counts = (counts+noise)*calcregion_reff[,,1]
+    velocity = (velocity+noise)*calcregion_reff[,,1]
+    standard_dev = (standard_dev+noise)*calcregion_reff[,,1]
+    counts_img = counts_img+noise
+    velocity_img = velocity_img+noise
+    dispersion_img = dispersion_img+noise
+  }
 
   vsigma = sum(counts*velocity*velocity)/sum(counts*standard_dev*standard_dev)
 

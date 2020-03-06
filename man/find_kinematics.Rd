@@ -8,7 +8,8 @@ find_kinematics(simdata, r200 = 200, z = 0.05, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
   threshold = 25, filter = "g", measure_type = list(type = "fit", fac
-  = 1), blur, radius_type = "Both", IFU_plot = TRUE)
+  = 1), blur, radius_type = "Both", addSky = FALSE, mag_zero = 8.9,
+  IFU_plot = TRUE)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -67,6 +68,13 @@ arcseconds.}
 which the pixel lies, i.e.
 \eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}}. Default is "Both" such
 that both \eqn{\lambda_R} values are returned.}
+
+\item{addSky}{A boolean to specify whether to add sky noise to the output images. Default is
+FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
+below.}
+
+\item{mag_zero}{The magnitude zero point with regards to the mangitude system being used (e.g.
+AB or Vega).}
 
 \item{IFU_plot}{\emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
 LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output

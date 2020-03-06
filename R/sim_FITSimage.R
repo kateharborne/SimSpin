@@ -22,6 +22,12 @@
 #'@param out_file A string describing the path and file name of the FITS file to be written.
 #'@param obs_name A string that describes the name of the observation. Default is "SimSpin
 #' datacube".
+#'@param addSky A boolean to specify whether to add sky noise to the output images. Default is
+#' FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
+#' below.
+#'@param threshold The magnitude limit of the observation.
+#'@param mag_zero The magnitude zero point with regards to the mangitude system being used (e.g.
+#' AB or Vega).
 #'
 #'@return Outputs a standard format FITS file.
 #'@examples
@@ -49,7 +55,13 @@
 
 
 sim_FITSimage = function(out_image, out_data, z, pixel_sscale, psf_fwhm=0, r200=200, r50=10,
-                         Hdisk=5.64, Ahalo=34.5, Abulge=3.45, out_file, obs_name="SimSpin datacube"){
+                         Hdisk=5.64, Ahalo=34.5, Abulge=3.45, out_file, obs_name="SimSpin datacube",
+                         addSky = FALSE, threshold=25, mag_zero=8.9){
+
+  if (addSky){
+    skyRMS = ProFound::profoundSB2Flux(threshold, mag_zero, pixel_sscale)
+    out_image = out_image+rnorm(dim(out_image)[1]^2, sd=skyRMS)
+  }
 
   crpix_sim = c(dim(out_data$datacube)[1]/2, dim(out_data$datacube)[2]/2)
   cdelt_sim = c(pixel_sscale, pixel_sscale)
