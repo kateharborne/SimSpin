@@ -23,24 +23,34 @@ flux_grid = function(obs_data, filter="g"){
 
   numCores = parallel::detectCores()
   z = obs_data$z
+  LumDist_Mpc = celestial::cosdistLumDist(z, ref="Planck")
+  l2f = ProSpect::Lum2FluxFactor(z, ref="Planck")
   galIDs = as.data.frame(obs_data$galaxy_obs$binn) # cell that each particle sits in
   sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
   vbin = obs_data$vbin # depth of cube
   cube_size = sbin*sbin*vbin
+  #occupied_cells = unique(galIDs)[[1]] # which cell positions actually contain particles?
   image_grid = vector("list", cube_size)
   image_grid = parallel::mclapply(seq(1,cube_size), function(x) which(galIDs == x),
-                     mc.cores=numCores) # list of particles that exist in each spaxel
+                                  mc.cores=numCores) # list of particles that exist in each spaxels
+  #occupied_grid = vector("list", length(occupied_cells))
+  #occupied_grid = parallel::mclapply(occupied_cells, function(x) which(galIDs == x),
+  #                                   mc.cores=numCores)
+  #for (i in 1:length(occupied_cells)){
+  #  image_grid[[occupied_cells[i]]] = occupied_grid[[i]] # list of particles that exist in each spaxel
+  #}
   lengths_grid = lapply(image_grid, length) # number of particles in each spaxel
 
   if ("Metallicity" %in% names(obs_data$galaxy_obs) & "Age" %in% names(obs_data$galaxy_obs)){ # if SSP is required
     if (filter=="g"){tempfilt=list(ProSpect::filt_g_SDSS)} # loading the filter
     if (filter=="r"){tempfilt=list(ProSpect::filt_r_SDSS)}
         flux = parallel::mclapply(seq(1, cube_size), .assign_flux, obs__data=obs_data, image__grid=image_grid,
-                              lengths__grid=lengths_grid, temp_filt=tempfilt, redshift=z, mc.cores=numCores)
+                                  lengths__grid=lengths_grid, temp_filt=tempfilt, redshift=z, lumdist=LumDist_Mpc,
+                                  mc.cores=numCores)
 
   } else if ("Lum" %in% names(obs_data$galaxy_obs)){ # if just M2L conversion
     flux = parallel::mclapply(seq(1, cube_size), .masslum2flux, obs__data=obs_data, image__grid=image_grid,
-                              lengths__grid=lengths_grid, redshift=z, mc.cores=numCores)
+                              lengths__grid=lengths_grid, lumdist=l2f, mc.cores=numCores)
   }
   flux = as.numeric(flux)
   ap_region = obs_data$ap_region; ap_region[ap_region == 0] = NA
@@ -57,6 +67,7 @@ flux_grid = function(obs_data, filter="g"){
 
   output = list("flux_grid"  = flux,
                 "image_grid" = image_grid)
+
   return(output)
 
 }
