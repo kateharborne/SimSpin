@@ -29,16 +29,16 @@ flux_grid = function(obs_data, filter="g"){
   sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
   vbin = obs_data$vbin # depth of cube
   cube_size = sbin*sbin*vbin
-  #occupied_cells = unique(galIDs)[[1]] # which cell positions actually contain particles?
+  occupied_cells = unique(galIDs)[[1]] # which cell positions actually contain particles?
   image_grid = vector("list", cube_size)
   image_grid = parallel::mclapply(seq(1,cube_size), function(x) which(galIDs == x),
                                   mc.cores=numCores) # list of particles that exist in each spaxels
-  #occupied_grid = vector("list", length(occupied_cells))
-  #occupied_grid = parallel::mclapply(occupied_cells, function(x) which(galIDs == x),
-  #                                   mc.cores=numCores)
-  #for (i in 1:length(occupied_cells)){
-  #  image_grid[[occupied_cells[i]]] = occupied_grid[[i]] # list of particles that exist in each spaxel
-  #}
+  occupied_grid = vector("list", length(occupied_cells))
+  occupied_grid = parallel::mclapply(occupied_cells, function(x) which(galIDs == x),
+                                    mc.cores=numCores)
+  for (i in 1:length(occupied_cells)){
+   image_grid[[occupied_cells[i]]] = occupied_grid[[i]] # list of particles that exist in each spaxel
+  }
   lengths_grid = lapply(image_grid, length) # number of particles in each spaxel
 
   if ("Metallicity" %in% names(obs_data$galaxy_obs) & "Age" %in% names(obs_data$galaxy_obs)){ # if SSP is required
