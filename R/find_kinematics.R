@@ -57,8 +57,10 @@
 #'@param mag_zero The magnitude zero point with regards to the mangitude system being used (e.g.
 #' AB or Vega).
 #'@param IFU_plot \emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
-#'LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
-#'automatically.
+#'LOS velocity and LOS velocity dispersion images. If \code{TRUE}, all plots are output
+#'automatically. Else, if list provided, parameters "reff" and "which_plots" are required, i.e.
+#'\code{IFU_plot = list(reff = TRUE, which_plots = c("Flux", "Velocity"))}, where \code{reff} dictates
+#'whether measurement ellipse is plotted or not and \code{which_plots} dictates which plots are shown.
 #'@return A list containing:
 #' \item{\code{$datacube}}{The 3D array corresponding to the kinematic data cube.}
 #' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
@@ -98,7 +100,7 @@
 find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
                          pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25, filter="g",
                          measure_type = list(type="fit", fac=1), blur, align=FALSE,
-                         radius_type = "Both", addSky = FALSE, mag_zero = 8.9, IFU_plot = TRUE){
+                         radius_type = "Both", addSky = FALSE, mag_zero = 8.9, IFU_plot = FALSE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
@@ -106,7 +108,7 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter)
-    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
+    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold)
 
     if (addSky){
       images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold, addSky = TRUE,
@@ -142,9 +144,14 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                           radius_type = radius_type)
 
     if (IFU_plot != FALSE){
-      plot_ifu(obs_data = observe_data, obs_images = images, reff=IFU_plot$reff, axis_ratio=reff_ar,
-               which_plots = IFU_plot$which_plots)
-      # plot IFU images
+      if (IFU_plot == TRUE){
+        plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar,
+                 which_plots = NA)
+      } else {
+        plot_ifu(obs_data = observe_data, obs_images = images, reff=IFU_plot$reff, axis_ratio=reff_ar,
+                 which_plots = IFU_plot$which_plots)
+        # plot IFU images
+      }
     }
 
     if (radius_type == "Both" | radius_type == "both") {
@@ -191,9 +198,9 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter)
-    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
+    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold)
     blur_imgs = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
-                             fwhm = blur$fwhm) # blur IFU cube
+                             fwhm = blur$fwhm, threshold = threshold) # blur IFU cube
     if (addSky){
       images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold,
                         addSky = TRUE, mag_zero = mag_zero, pixel_sscale = pixel_sscale)
@@ -231,8 +238,16 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                           radius_type = radius_type)
 
     if (IFU_plot != FALSE){
-      plot_ifu(obs_data = observe_data, obs_images = blur_images, reff=TRUE, axis_ratio=reff_ar, which_plots = IFU_plot)
+      if (IFU_plot == TRUE){
+        plot_ifu(obs_data = observe_data, obs_images = blur_images, reff=TRUE, axis_ratio=reff_ar,
+                 which_plots = NA)
+      } else {
+        plot_ifu(obs_data = observe_data, obs_images = blur_images, reff=IFU_plot$reff, axis_ratio=reff_ar,
+                 which_plots = IFU_plot$which_plots)
+        # plot IFU images
+      }
     }
+
 
     if (radius_type == "Both" | radius_type == "both") {
       output = list("datacube" = blur_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,

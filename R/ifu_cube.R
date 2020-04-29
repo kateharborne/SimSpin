@@ -7,6 +7,7 @@
 #'  arrangement of an IFU data cube.
 #'@param obs_data The list output from the \code{obs_data_prep()} function.
 #'@param flux_data The list output from the \code{flux_grid()} function.
+#'@param threshold The magnitude limit of the observation in AB mag.
 #'@return Returns a list that contains:
 #' \item{\code{$cube}}{A mock IFU data cube as required for calculating the observed spin parameter}
 #' \item{\code{$ap_region}}{An image that describes the shape of the aperture such that any further
@@ -22,7 +23,7 @@
 #' cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
 #'
 
-ifu_cube = function(obs_data, flux_data) {
+ifu_cube = function(obs_data, flux_data, threshold=25) {
 
   numCores     = parallel::detectCores()
   image_grid   = flux_data$image_grid
@@ -68,6 +69,12 @@ ifu_cube = function(obs_data, flux_data) {
           # adding the "gaussians" of each particle to the velocity bins
         }
       }
+  }
+  threshold_flux = ProSpect::magAB2Jansky(threshold)
+
+  for (i in 1:vbin){
+    below_threshold = which(cube[,,i]<threshold_flux)
+    cube[,,i][below_threshold] = 0
   }
 
   output = list("cube"        = cube,

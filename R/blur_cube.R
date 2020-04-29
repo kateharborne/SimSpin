@@ -7,6 +7,7 @@
 #' IFU cube and the aperture region image (\code{$ap_region}).
 #'@param psf The type of PSF with choices of "Gaussian" or "Moffat".
 #'@param fwhm The full-width half-maximum size of the chosen PSF specified here in arcseconds.
+#'@param threshold The magnitude limit of the observation in AB mag.
 #'@return Returns a list that contains:
 #' \item{\code{$blurcube}}{The original IFU cube produced by the function \code{\link{ifu_cube}},
 #'  but blurred with the specified PSF.}
@@ -30,7 +31,7 @@
 #'
 
 
-blur_cube = function(obs_data, ifu_datacube, psf, fwhm){
+blur_cube = function(obs_data, ifu_datacube, psf, fwhm, threshold){
 
   fwhm_scaled     = (fwhm * obs_data$angular_size)/ obs_data$sbinsize  # the fwhm scaled to image pixel dimensions
   sbin            = obs_data$sbin # number of spatial bins in data cube
@@ -48,6 +49,13 @@ blur_cube = function(obs_data, ifu_datacube, psf, fwhm){
   blurcube        = array(data = 0, dim = c(sbin, sbin, vbin))
   for (c in 1:vbin){
     blurcube[,,c] = ProFit::profitBruteConv(ifu_datacube$cube[,,c], psf_k)
+  }
+
+  threshold_flux = ProSpect::magAB2Jansky(threshold)
+
+  for (i in 1:vbin){
+    below_threshold = which(blurcube[,,i]<threshold_flux)
+    blurcube[,,i][below_threshold] = 0
   }
                                                      # apply PSF to spatial plane via convolution
   blurcube    = blurcube * ifu_datacube$ap_region    # trimming cube to data within the aperture
