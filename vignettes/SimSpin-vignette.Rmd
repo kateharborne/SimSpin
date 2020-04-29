@@ -111,13 +111,12 @@ SAMI_cube_phys = build_datacube(simdata      = galaxy_file,
                                 lsf_fwhm     = 2.56, 
                                 pixel_sscale = 0.5, 
                                 pixel_vscale = 1.04, 
-                                inc_deg      = 70,
-                                threshold    = 25)       
+                                inc_deg      = 70)       
 ```
 
 ``` {r, echo=FALSE, fig.width=5, fig.height=5, message=FALSE, warning=FALSE, results="hide", fig.align="center"}
 png(file="SAMI_cube_phys%02d.png", width=456, height=500)
-for (i in 1:length(SAMI_cube_phys$vbin_labels)){
+for (i in 1:dim(SAMI_cube_phys$datacube)[3]){
   magicaxis::magimage(SAMI_cube_phys$datacube[,,i], xaxt="n", yaxt="n", ann=FALSE, col=rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)))
   legend("topright", inset=c(0.05,0.05), paste("v = ", round(SAMI_cube_phys$vbin_labels[i], digits=3)), text.col = "white", bty="n", cex=0.9)
 }
@@ -151,7 +150,6 @@ SAMI_cube_blur = build_datacube(simdata      = galaxy_file,
                                 pixel_sscale = 0.5, 
                                 pixel_vscale = 1.04, 
                                 inc_deg      = 70,
-                                threshold    = 25, 
                                 blur         = list("psf" = "Moffat", "fwhm" = 2))       
 ```
 
@@ -170,7 +168,7 @@ fields::image.plot(legend.only = TRUE, zlim = range(c(apply(SAMI_cube_blur$datac
 
 ### Measuring observable galaxy kinematics
 
-The main purpose of the `SimSpin` package is to measure the observable spin parameter, $\lambda_R$. The final basic function, `find_lambda()`, starts by building an IFU data cube, as done above, and then analyses that cube to calculate $\lambda_R$. Each cube is collapsed along each spaxel to create three images of the observed galaxy in projection: a flux image, a line-of-sight (LOS) velocity image and a LOS velocity dispersion image. The function then uses these images to calculate the the observed $\lambda_R$.
+The main purpose of the `SimSpin` package is to measure the observable spin parameter, $\lambda_R$. The final basic function, `find_kinematics()`, starts by building an IFU data cube, as done above, and then analyses that cube to calculate $\lambda_R$. Each cube is collapsed along each spaxel to create three images of the observed galaxy in projection: a flux image, a line-of-sight (LOS) velocity image and a LOS velocity dispersion image. The function then uses these images to calculate the the observed $\lambda_R$.
 
 First we calculate the effective radius of the observed galaxy. The observed axis ratio is calculated by examining the covariance of the spatial arrangement of the particles in projection. An ellipse with this axis ratio is then grown from the centre of the simulation until half the total number of particles are contained. This is one effective radius, R$_{eff}$.
 
@@ -181,19 +179,19 @@ where $F_i$ is the observed flux taken from the flux image, $R_i$ is the radial 
 
 
 ```{r} 
-SAMI_lambda = find_lambda(simdata      = galaxy_file,  
-                          r200         = 200, 
-                          z            = 0.06, 
-                          fov          = 15, 
-                          ap_shape     = "circular", 
-                          central_wvl  = 4800, 
-                          lsf_fwhm     = 2.56, 
-                          pixel_sscale = 0.5, 
-                          pixel_vscale = 1.04, 
-                          inc_deg      = 70,
-                          measure_type = list(type = "fit", fac = 1), 
-                          threshold    = 25, 
-                          blur         = list("psf" = "Moffat", "fwhm" = 2))
+SAMI_lambda = find_kinematics(simdata      = galaxy_file,  
+                              r200         = 200, 
+                              z            = 0.06, 
+                              fov          = 15, 
+                              ap_shape     = "circular", 
+                              central_wvl  = 4800, 
+                              lsf_fwhm     = 2.56, 
+                              pixel_sscale = 0.5, 
+                              pixel_vscale = 1.04, 
+                              inc_deg      = 70,
+                              measure_type = list(type = "fit", fac = 1), 
+                              threshold    = 25, 
+                              blur         = list("psf" = "Moffat", "fwhm" = 2))
                          
 
 SAMI_lambda$lambda_r # the observed lambda_R spin parameter
@@ -204,19 +202,19 @@ This function will return the observed spin parameter (`$obs_lambdar`), three IF
 If the measurement radius specified is larger than the aperture, the function will return a warning.
 
 ```{r}
-SAMI_lambda_warning = find_lambda(simdata = galaxy_file,
-                                  r200 = 200, 
-                                  z = 0.06, 
-                                  fov = 15, 
-                                  ap_shape = "circular", 
-                                  central_wvl = 4800,
-                                  lsf_fwhm = 2.56, 
-                                  pixel_sscale = 0.5, 
-                                  pixel_vscale = 1.04, 
-                                  inc_deg = 70,
-                                  measure_type = list(type = "fit", fac = 5),  
-                                  threshold = 25, 
-                                  blur = list("psf" = "Moffat", "fwhm" = 2))
+SAMI_lambda_warning = find_kinematics(simdata = galaxy_file,
+                                      r200 = 200, 
+                                      z = 0.06, 
+                                      fov = 15, 
+                                      ap_shape = "circular", 
+                                      central_wvl = 4800,
+                                      lsf_fwhm = 2.56, 
+                                      pixel_sscale = 0.5, 
+                                      pixel_vscale = 1.04, 
+                                      inc_deg = 70,
+                                      measure_type = list(type = "fit", fac = 5),  
+                                      threshold = 25, 
+                                      blur = list("psf" = "Moffat", "fwhm" = 2))
 ```
 
 The level of blurring applied and the measurement radius within which $\lambda_R$ is measured can be optionally altered to study the effects that these choices have on the measurement. If the `measurement_radius` or `blur` arguments are missing, no atmospheric seeing conditions will be applied and $\lambda_R$ will, by default, be measured within 1 effective radius. 
