@@ -31,24 +31,9 @@ obs_imgs = function(obs_data, ifu_datacube, threshold=25, addSky=FALSE,
 
   sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
   vbin = obs_data$vbin # depth of cube
-  vbinsize = obs_data$vbinsize
-  sbinsize = obs_data$sbinsize
-  vseq         = seq(-(vbin * vbinsize) / 2, (vbin * vbinsize) / 2, by=vbinsize)
-  # velocity bin break positions
-  sseq         = seq(-(sbin * sbinsize) / 2, (sbin * sbinsize) / 2, by=sbinsize)
-  # spatial bin break positions
-
-  xbins        = levels(cut(obs_data$galaxy_obs$x, breaks=sseq))
-  zbins        = levels(cut(obs_data$galaxy_obs$z_obs, breaks=sseq))
-  # spatial/velocity bins boundaries
-  vbins        = levels(cut(obs_data$galaxy_obs$vy_obs, breaks=vseq))
-
-  xbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)),
-                                as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", xbins))))
-  zbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", zbins)),
-                                as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", zbins))))
-  vbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", vbins)),
-                                as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", vbins))))
+  xbin_ls      = ifu_datacube$xbin_labels
+  zbin_ls      = ifu_datacube$zbin_labels
+  vbin_ls      = ifu_datacube$vbin_labels
 
   counts_img = apply(ifu_datacube$cube, c(1,2), sum)
   velocity_img   = matrix(data=0, nrow=sbin, ncol=sbin)
@@ -79,13 +64,9 @@ obs_imgs = function(obs_data, ifu_datacube, threshold=25, addSky=FALSE,
   velocity_img = velocity_img*obs_data$ap_region
   dispersion_img = dispersion_img*obs_data$ap_region
 
-  xbin_labels     = expand.grid(matrix(data =
-                                         rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)),
-                                                        as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", xbins)))),
+  xbin_labels     = expand.grid(matrix(data = xbin_ls,
                                        nrow = sbin, ncol = sbin))
-  zbin_labels     = expand.grid(t(matrix(data =
-                                           rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", zbins)),
-                                                          as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", zbins)))),
+  zbin_labels     = expand.grid(t(matrix(data = zbin_ls,
                                          nrow = sbin, ncol = sbin)))
   #spatial coordinates in each spaxel in a column for ellipticity calculation
 
@@ -104,8 +85,7 @@ obs_imgs = function(obs_data, ifu_datacube, threshold=25, addSky=FALSE,
   output = list("flux_img"       = counts_img,
                 "velocity_img"   = velocity_img,
                 "dispersion_img" = dispersion_img,
-                "axis_ratio"     = axis_ratio,
-                "xbin_labels"    = xbin_ls)
+                "axis_ratio"     = axis_ratio)
 
   return(output)
 
