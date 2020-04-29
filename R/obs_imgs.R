@@ -26,7 +26,8 @@
 #' images      = obs_images(obs_data = data, ifu_datacube = cube)
 #'
 
-obs_imgs = function(obs_data, ifu_datacube, threshold=25){
+obs_imgs = function(obs_data, ifu_datacube, threshold=25, addSky=FALSE,
+                    mag_zero=8.9, pixel_sscale=0.5){
 
   sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
   vbin = obs_data$vbin # depth of cube
@@ -49,13 +50,7 @@ obs_imgs = function(obs_data, ifu_datacube, threshold=25){
   vbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", vbins)),
                                 as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", vbins))))
 
-  threshold_flux = ProSpect::magAB2Jansky(threshold)
-
   counts_img = apply(ifu_datacube$cube, c(1,2), sum)
-
-  below_threshold = which(counts_img<threshold_flux)
-  counts_img[below_threshold] = 0
-
   velocity_img   = matrix(data=0, nrow=sbin, ncol=sbin)
   dispersion_img = matrix(data=0, nrow=sbin, ncol=sbin)
   for (c in 1:sbin){
@@ -65,8 +60,24 @@ obs_imgs = function(obs_data, ifu_datacube, threshold=25){
     }
   }
 
+  if (addSky){
+    skyRMS = ProFound::profoundSB2Flux(threshold, mag_zero, pixel_sscale)
+    noise = rnorm(dim(counts_img)[1]^2, sd=skyRMS)
+    counts_img = counts_img+noise
+    velocity_img = velocity_img+noise
+    dispersion_img = dispersion_img+noise
+  }
+
+  threshold_flux = ProSpect::magAB2Jansky(threshold)
+
+  below_threshold = which(counts_img<threshold_flux)
+  counts_img[below_threshold] = 0;
   velocity_img[(is.na(velocity_img))] = 0; velocity_img[below_threshold] = 0
   dispersion_img[(is.na(dispersion_img))] = 0; dispersion_img[below_threshold] = 0
+
+  counts_img = counts_img*obs_data$ap_region
+  velocity_img = velocity_img*obs_data$ap_region
+  dispersion_img = dispersion_img*obs_data$ap_region
 
   xbin_labels     = expand.grid(matrix(data =
                                          rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)),
