@@ -5,7 +5,8 @@
 \title{Constructing kinematic data cubes.}
 \usage{
 build_datacube(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
-  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, filter = "g", blur)
+  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, filter = "g", blur,
+  align = FALSE)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -37,10 +38,15 @@ Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
 of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the
 PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}. \code{"fwhm"} is a numeric
 specifying the full-width half-maximum of the PSF given in units of arcseconds.}
+
+\item{align}{Boolean indicating whether or not to align the semi-major axis with the x-axis.}
 }
 \value{
 A list containing:
 \item{\code{$datacube}}{A 3D array corresponding to the kinematic data cube.}
+\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+\item{\code{$zbin_labels}}{Bin labels for the z-spatial dimension.}
+\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 }
 \description{
 The purpose of this basic function is to use the \code{SimSpin} package sub-functions to

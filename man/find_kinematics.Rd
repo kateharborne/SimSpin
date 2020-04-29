@@ -8,7 +8,7 @@ find_kinematics(simdata, r200 = 200, z = 0.05, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
   threshold = 25, filter = "g", measure_type = list(type = "fit", fac
-  = 1), blur, align = TRUE, radius_type = "Both", addSky = FALSE,
+  = 1), blur, align = FALSE, radius_type = "Both", addSky = FALSE,
   mag_zero = 8.9, IFU_plot = TRUE)
 }
 \arguments{
@@ -85,6 +85,9 @@ automatically.}
 \value{
 A list containing:
 \item{\code{$datacube}}{The 3D array corresponding to the kinematic data cube.}
+\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+\item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
+\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
  \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
 \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R} measured with circular

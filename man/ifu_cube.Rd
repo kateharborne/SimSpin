@@ -17,6 +17,9 @@ Returns a list that contains:
 \item{\code{$ap_region}}{An image that describes the shape of the aperture such that any further
  convolutions that are applied to mimic beam smearing or seeing can be trimmed to the
  appropriate aperture shape.}
+\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+\item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
+\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 }
 \description{
 The purpose of this function is to construct an IFU data cube. It accepts output parameters from
