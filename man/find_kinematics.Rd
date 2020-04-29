@@ -9,7 +9,7 @@ find_kinematics(simdata, r200 = 200, z = 0.05, fov = 15,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
   threshold = 25, filter = "g", measure_type = list(type = "fit", fac
   = 1), blur, align = FALSE, radius_type = "Both", addSky = FALSE,
-  mag_zero = 8.9, IFU_plot = TRUE)
+  mag_zero = 8.9, IFU_plot = FALSE)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -79,8 +79,10 @@ below.}
 AB or Vega).}
 
 \item{IFU_plot}{\emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
-LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
-automatically.}
+LOS velocity and LOS velocity dispersion images. If \code{TRUE}, all plots are output
+automatically. Else, if list provided, parameters "reff" and "which_plots" are required, i.e.
+\code{IFU_plot = list(reff = TRUE, which_plots = c("Flux", "Velocity"))}, where \code{reff} dictates
+whether measurement ellipse is plotted or not and \code{which_plots} dictates which plots are shown.}
 }
 \value{
 A list containing:

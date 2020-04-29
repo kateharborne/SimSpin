@@ -4,7 +4,7 @@
 \alias{blur_cube}
 \title{Mimicking seeing conditions for the IFU data cube.}
 \usage{
-blur_cube(obs_data, ifu_datacube, psf, fwhm)
+blur_cube(obs_data, ifu_datacube, psf, fwhm, threshold)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
@@ -15,6 +15,8 @@ IFU cube and the aperture region image (\code{$ap_region}).}
 \item{psf}{The type of PSF with choices of "Gaussian" or "Moffat".}
 
 \item{fwhm}{The full-width half-maximum size of the chosen PSF specified here in arcseconds.}
+
+\item{threshold}{The magnitude limit of the observation in AB mag.}
 }
 \value{
 Returns a list that contains:

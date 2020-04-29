@@ -4,12 +4,14 @@
 \alias{ifu_cube}
 \title{Creating a mock IFU kinematic data cube.}
 \usage{
-ifu_cube(obs_data, flux_data)
+ifu_cube(obs_data, flux_data, threshold = 25)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
 
 \item{flux_data}{The list output from the \code{flux_grid()} function.}
+
+\item{threshold}{The magnitude limit of the observation in AB mag.}
 }
 \value{
 Returns a list that contains:
