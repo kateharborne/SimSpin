@@ -93,10 +93,8 @@
 
 find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
                          pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25, filter="g",
-                         measure_type = list(type="fit", fac=1), blur,
+                         measure_type = list(type="fit", fac=1), blur, align=TRUE,
                          radius_type = "Both", addSky = FALSE, mag_zero = 8.9, IFU_plot = TRUE){
-                         pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, align=TRUE, filter="g", threshold=25,
-                         measure_type = list(type="fit", fac=1), blur, radius_type = "Both", IFU_plot=FALSE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
