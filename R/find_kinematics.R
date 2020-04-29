@@ -100,10 +100,16 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
     observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
-                                 pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = TRUE) # prep simulation data in observer units
+                                 pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
-    images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold)
+
+    if (addSky){
+      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold, addSky = TRUE,
+                        mag_zero = mag_zero, pixel_sscale = pixel_sscale)
+    } else {
+      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold)
+    }
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
       reff_ar      = find_reff(simdata, r200, inc_deg,
@@ -111,23 +117,6 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
       # Reff from data & measured axis ratio
       reff_ar$a = reff_ar$a * measure_type$fac
       reff_ar$b = reff_ar$b * measure_type$fac
-
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
-      kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = images, axis_ratio = reff_ar,
-                            radius_type = radius_type)
-      # measure kinematics within specified Reff
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
@@ -135,24 +124,6 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                axis_ratio = measure_type$axis_ratio,
                                fract = measure_type$fract)
       # Reff from data & supplied axis ratio
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
-
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
-
-      kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = images, axis_ratio = reff_ar,
-                            radius_type = radius_type)
-      # measure kinematics within specified Reff
     }
 
     if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
@@ -160,21 +131,16 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                 "b"    = measure_type$axis_ratio$b,
                                 "ang"  = measure_type$axis_ratio$ang)
       # Reff at fixed specification
+    }
 
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
+    kinematics = kin_calc(obs_data = observe_data,
+                          obs_images = images, axis_ratio = reff_ar,
+                          radius_type = radius_type)
 
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
-
+    if (IFU_plot != FALSE){
+      plot_ifu(obs_data = observe_data, obs_images = images, reff=IFU_plot$reff, axis_ratio=reff_ar,
+               which_plots = IFU_plot$which_plots)
+      # plot IFU images
     }
 
     if (radius_type == "Both" | radius_type == "both") {
@@ -214,31 +180,6 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                           "d_L"=observe_data$d_L,
                           "appregion"=observe_data$appregion)
     }
-      reff_ar$a = reff_ar$a * measure_type$fac
-      reff_ar$b = reff_ar$b * measure_type$fac
-
-      kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = images, axis_ratio = reff_ar,
-                            radius_type = radius_type)
-      # measure kinematics within specified Reff
-
-    }
-
-    if (IFU_plot != FALSE){
-      plot_ifu(obs_data = observe_data, obs_images = images, reff=IFU_plot$reff, axis_ratio=reff_ar, which_plots = IFU_plot$which_plots)
-      # plot IFU images
-    }
-
-      output       = list("datacube"=ifu_imgs$cube,
-                          "axis_ratio"=reff_ar,
-                          "obs_lambdar"=kinematics$obs_lambdar,
-                          "obs_elambdar"=kinematics$obs_elambdar,
-                          "obs_vsigma" = kinematics$obs_vsigma,
-                          "flux_img"=images$flux_img,
-                          "velocity_img"=images$velocity_img,
-                          "dispersion_img"=images$dispersion_img,
-                          "obs_data" = observe_data,
-                          "obs_images" = images)
 
 
     return(output)
@@ -247,84 +188,49 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
 
     observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
-                                 pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = TRUE) # prep simulation data in observer units
+                                 pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
     blur_imgs = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
                              fwhm = blur$fwhm) # blur IFU cube
-    blur_images = obs_imgs(obs_data = observe_data, ifu_datacube = blur_imgs, threshold = threshold)
-
+    if (addSky){
+      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold,
+                        addSky = TRUE, mag_zero = mag_zero, pixel_sscale = pixel_sscale)
+      blur_images = obs_imgs(obs_data = observe_data, ifu_datacube = blur_imgs, threshold = threshold,
+                             addSky = TRUE, mag_zero = mag_zero, pixel_sscale = pixel_sscale)
+    } else {
+      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold)
+      blur_images = obs_imgs(obs_data = observe_data, ifu_datacube = blur_imgs, threshold = threshold)
+    }
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
-      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold)
       reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = images$axis_ratio)
       # Reff from data & measured axis ratio
       reff_ar$a = reff_ar$a * measure_type$fac
       reff_ar$b = reff_ar$b * measure_type$fac
-
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
-      kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = blur_images, axis_ratio = reff_ar,
-                            radius_type = radius_type)
-      # measure kinematics within specified Reff
-
     }
 
+    if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
       reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
                                fract = measure_type$fract)
-      # Reff from data and measured axis ratio
-
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
-
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
       # Reff from data & supplied axis ratio
-      kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = blur_images, axis_ratio = reff_ar,
-                            radius_type = radius_type)
-      # measure kinematics within specified Reff
     }
 
-    if (measure_type$type == "fixed"){                 # fitting Reff from specified axis_ratio
+    if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
       reff_ar      = data.frame("a"    = measure_type$axis_ratio$a,
                                 "b"    = measure_type$axis_ratio$b,
                                 "ang"  = measure_type$axis_ratio$ang)
       # Reff at fixed specification
+    }
 
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
+    kinematics = kin_calc(obs_data = observe_data,
+                          obs_images = blur_images, axis_ratio = reff_ar,
+                          radius_type = radius_type)
 
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
+    if (IFU_plot != FALSE){
+      plot_ifu(obs_data = observe_data, obs_images = blur_images, reff=TRUE, axis_ratio=reff_ar, which_plots = IFU_plot)
     }
 
     if (radius_type == "Both" | radius_type == "both") {
@@ -364,28 +270,6 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                      "d_L"=observe_data$d_L,
                      "appregion" = observe_data$appregion)
       }
-      reff_ar$a = reff_ar$a * measure_type$fac
-      reff_ar$b = reff_ar$b * measure_type$fac
-
-      kinematics = kin_calc(obs_data = observe_data,
-                            obs_images = blur_images, axis_ratio = reff_ar,
-                            radius_type = radius_type)
-    }
-
-    output       = list("datacube"=ifu_imgs$cube,
-                        "axis_ratio"=reff_ar,
-                        "obs_lambdar"=kinematics$obs_lambdar,
-                        "obs_elambdar"=kinematics$obs_elambdar,
-                        "obs_vsigma" = kinematics$obs_vsigma,
-                        "flux_img"=blur_images$flux_img,
-                        "velocity_img"=blur_images$velocity_img,
-                        "dispersion_img"=blur_images$dispersion_img,
-                        "obs_data" = observe_data,
-                        "obs_images" = blur_images)
-
-    if (IFU_plot != FALSE){
-      plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar, which_plots = IFU_plot)
-    }
 
     return(output)
 
