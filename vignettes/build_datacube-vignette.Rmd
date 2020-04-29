@@ -70,7 +70,7 @@ SAMI = array(data = NA, dim = c(30, 15, 30))
 for (n in 1:30){
  SAMI[,,n] = SAMI_datacube$datacube[,n,] 
 }
-SAMI[SAMI < 1.4] = NA
+SAMI[SAMI < 2.4e7] = NA
 plot3D::slice3D(x = -14.5:14.5, y = seq(-160, 160, length.out = 6), z = -14.5:14.5, 
                 colvar = SAMI[,6:11,], 
                 ys = seq(-160, 160, length.out = 6),  zs = NULL, xs = NULL,
@@ -110,7 +110,7 @@ blur = array(data = NA, dim = c(30, 15, 30))
 for (n in 1:30){
  blur[,,n] = SAMI_datacube_blur$datacube[,n,] 
 }
-blur[blur < 1.4] = NA
+blur[blur < 2.4e7] = NA
 plot3D::slice3D(x = -14.5:14.5, y = seq(-160, 160, length.out = 6), z = -14.5:14.5, 
                 colvar = blur[,6:11,], 
                 ys = seq(-160, 160, length.out = 6),  zs = NULL, xs = NULL,
@@ -130,4 +130,4 @@ plot3D::slicecont3D(x = -14.5:14.5, y = seq(-160, 160, length.out = 6), z = -14.
 
 Here we see the effect we would expect. The rotation of the galaxy is less apparent when the observation is blurred as the central dispersion from the bulge of the galaxy is spread out and becomes more dominant. 
 
-Overall, this function will produce something similar to an kinematic data cube. If you then wish to go on to produce flux, velocity and velocity dispersion maps or make calculations of the observed galaxy kinematics, you can use the function `find_lambda()` or `find_vsigma()` from the `SimSpin` package. 
+Overall, this function will produce something similar to an kinematic data cube. If you then wish to go on to produce flux, velocity and velocity dispersion maps or make calculations of the observed galaxy kinematics, you can use the function `find_kinematics()` from the `SimSpin` package. 
