@@ -14,6 +14,16 @@ obs_imgs(obs_data, ifu_datacube, threshold = 25, addSky = FALSE,
 IFU cube and the apperture region image (\code{$appregion}).}
 
 \item{threshold}{The magnitude limit of the observation in AB mag.}
+
+\item{addSky}{A boolean to specify whether to add sky noise to the output images. Default is
+FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
+below.}
+
+\item{mag_zero}{The magnitude zero point with regards to the mangitude system being used (e.g.
+AB or Vega).}
+
+\item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope
+output in arcseconds.}
 }
 \value{
 Returns a list containing:

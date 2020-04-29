@@ -8,7 +8,14 @@
 #'@param obs_data The list output from the \code{obs_data_prep()} function.
 #'@param ifu_datacube The list output from the function \code{\link{ifu_cube}} containing the mock
 #' IFU cube and the apperture region image (\code{$appregion}).
+#'@param addSky A boolean to specify whether to add sky noise to the output images. Default is
+#' FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
+#' below.
+#'@param mag_zero The magnitude zero point with regards to the mangitude system being used (e.g.
+#' AB or Vega).
 #'@param threshold The magnitude limit of the observation in AB mag.
+#'@param pixel_sscale The corresponding spatial pixel scale associated with a given telescope
+#' output in arcseconds.
 #'@return Returns a list containing:
 #'\item{\code{$flux_img}}{The flux image produced from flattening the cube along the velocity
 #'domain.}

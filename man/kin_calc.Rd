@@ -15,6 +15,12 @@ velocity and dispersion images.}
 \item{axis_ratio}{The axis ratio of the effective radius ellipse. This can be taken from the
 output of \code{\link{obs_imgs}}, or another data frame can be provided containing the semi-major
 (\code{$a}) and semi-minor axes (\code{$b}) in kpc.}
+
+\item{radius_type}{The method of computing radii - "Circular" i.e. \eqn{r^{2} = x^{2} + y{2}} or
+"Elliptical" where r is the semi-major axis of the ellipse having an axis ratio \eqn{b/a} on
+which the pixel lies, i.e.
+\eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}}. Default is "Both" such
+that both \eqn{\lambda_R} values are returned.}
 }
 \value{
 Returns a list that contains:

@@ -28,7 +28,7 @@ Returns three plots - a flux image, a velcoity image and a dispersion image.
 }
 \description{
 The purpose of this function is to plot the useful images expracted from the IFU cube produced.
-Input the aperture region and images produced by the \code{\link{find_lambda}} function and the
+Input the aperture region and images produced by the \code{\link{find_kinematics}} function and the
 output will be the flux, velocity and dispersion maps.
 }
 \examples{

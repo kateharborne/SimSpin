@@ -2,7 +2,7 @@
 #'Plotting the flux, velocity and dipsersion image output from the IFU kinematic cube.
 #'
 #'The purpose of this function is to plot the useful images expracted from the IFU cube produced.
-#' Input the aperture region and images produced by the \code{\link{find_lambda}} function and the
+#' Input the aperture region and images produced by the \code{\link{find_kinematics}} function and the
 #' output will be the flux, velocity and dispersion maps.
 #'
 #'@param obs_data The list output from the function \code{\link{obs_data_prep}}.
