@@ -4,7 +4,8 @@
 \alias{obs_imgs}
 \title{Creating images from a mock IFU kinematic data cube.}
 \usage{
-obs_imgs(obs_data, ifu_datacube, threshold = 25)
+obs_imgs(obs_data, ifu_datacube, threshold = 25, addSky = FALSE,
+  mag_zero = 8.9, pixel_sscale = 0.5)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}

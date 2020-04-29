@@ -13,8 +13,14 @@
 #'output of \code{\link{obs_imgs}}, or another data frame can be provided containing the semi-major
 #'(\code{$a}) and semi-minor axes (\code{$b}) in kpc.
 #'@return Returns a list that contains:
-#' \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R}.}
-#' \item{\code{$obs_vsigma}}{The observed V/\eqn{\sigma}.}
+#' \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R} measured with circular
+#' radii. \emph{(When \code{radius_type = "Both"} or \code{"Circular"}.)}}
+#' \item{\code{$obs_elambdar}}{The observed spin parameter \eqn{\lambda_R} measured with elliptical
+#' radii. \emph{(When \code{radius_type = "Both"} or \code{"Elliptical"}.)}}
+#' \item{\code{$obs_vsigma}}{The observed V/\eqn{\sigma} value.}
+#' \item{\code{$counts_img}}{The observed flux image.}
+#' \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
+#' \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
@@ -40,10 +46,10 @@ kin_calc = function(obs_data, obs_images, axis_ratio, radius_type = "Both"){
   a = axis_ratio$a / sbinsize
   b = axis_ratio$b / sbinsize
   ang = axis_ratio$ang
-  ang = axis_ratio$ang * (pi/180)
+  ang_rad = axis_ratio$ang * (pi/180)
   ellipticity = 1 - sqrt(b^2 / a^2)
 
-  if ((a*cos(ang))>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
+  if (a*cos(ang_rad)>(sbin/2)){cat("WARNING: reff > aperture, the value of $obs_lambdar produced will not be the true value evaluated at reff.", "\n")}
 
   for (x in 1:sbin){
     for (y in 1:sbin){

@@ -50,6 +50,7 @@
 #' the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}.
 #' \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of
 #' arcseconds.
+#'@param align Boolean indicating whether or not to align the semi-major axis with the x-axis.
 #'@param addSky A boolean to specify whether to add sky noise to the output images. Default is
 #' FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
 #' below.

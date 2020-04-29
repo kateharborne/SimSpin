@@ -7,12 +7,14 @@
 find_kinematics(simdata, r200 = 200, z = 0.05, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
-  = 1), blur, radius_type = "Both", addSky = FALSE, mag_zero = 8.9,
-  IFU_plot = TRUE)
-  align = TRUE, filter = "g", threshold = 25,
-  measure_type = list(type = "fit", fac = 1), blur,
-  radius_type = "Both", IFU_plot = FALSE)
+  threshold = 25, filter = "g", measure_type = list(type = "fit", fac
+  = 1), blur, align = TRUE, radius_type = "Both", addSky = FALSE,
+  mag_zero = 8.9, IFU_plot = TRUE)
 }
+\arguments{
+\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
+
+\item{r200}{The virial radius specified in the simulation, kpc.}
 
 \item{z}{The galaxy redshift.}
 
@@ -32,13 +34,10 @@ filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
 
-\item{filter}{If Age/Metallicity is supplied, the filter within which the SED is generated.
-Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
-
 \item{threshold}{The flux threshold of the observation.}
 
-\item{filter}{When stellar particles and SEDs are provided, the filter used when converting
-spectra into luminosity. Options include "r" for SDSS r filter and "g" for the SDSS g filter.}
+\item{filter}{If Age/Metallicity is supplied, the filter within which the SED is generated.
+Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
 
 \item{measure_type}{A list specifying the radius within which the kinematics are measured. There
 are three options for this:
@@ -63,6 +62,8 @@ cube. A list of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf
 the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}.
 \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of
 arcseconds.}
+
+\item{align}{Boolean indicating whether or not to align the semi-major axis with the x-axis.}
 
 \item{radius_type}{The method of computing radii - "Circular" i.e. \eqn{r^{2} = x^{2} + y{2}} or
 "Elliptical" where r is the semi-major axis of the ellipse having an axis ratio \eqn{b/a} on
