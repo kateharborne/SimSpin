@@ -12,6 +12,11 @@
 #'@param axis_ratio The axis ratio of the effective radius ellipse. This can be taken from the
 #'output of \code{\link{obs_imgs}}, or another data frame can be provided containing the semi-major
 #'(\code{$a}) and semi-minor axes (\code{$b}) in kpc.
+#'@param radius_type The method of computing radii - "Circular" i.e. \eqn{r^{2} = x^{2} + y{2}} or
+#'"Elliptical" where r is the semi-major axis of the ellipse having an axis ratio \eqn{b/a} on
+#'which the pixel lies, i.e.
+#'\eqn{r^{2} = \frac{x^{2} (1 - \epsilon)^{2} + y^{2}}{(1 - \epsilon)^2}}. Default is "Both" such
+#'that both \eqn{\lambda_R} values are returned.
 #'@return Returns a list that contains:
 #' \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R} measured with circular
 #' radii. \emph{(When \code{radius_type = "Both"} or \code{"Circular"}.)}}
@@ -57,7 +62,7 @@ kin_calc = function(obs_data, obs_images, axis_ratio, radius_type = "Both"){
       yy = (y-ycentre)
       xx = abs(x - xcentre)
       yy = abs(y - ycentre)
-      rr = .ellipse(a = a, b = b, x = xx, y = yy, ang = ang)
+      rr = .ellipse(a = a, b = b, x = xx, y = yy, ang_deg = ang)
       if (rr <= 1){
         calcregion_reff[x,y] = 1
         radius[x,y] = sqrt(xx^2 + yy^2) * sbinsize
