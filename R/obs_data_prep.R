@@ -50,7 +50,7 @@
 #'
 
 obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800,
-                         lsf_fwhm=2.65, pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, align=TRUE){
+                         lsf_fwhm=2.65, pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, align=FALSE){
 
   set.seed(42);
   sol_lum = 3.827e33;                                        # solar luminosity in erg s-1
