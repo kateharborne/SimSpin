@@ -12,6 +12,9 @@
 #' \item{\code{$ap_region}}{An image that describes the shape of the aperture such that any further
 #'  convolutions that are applied to mimic beam smearing or seeing can be trimmed to the
 #'  appropriate aperture shape.}
+#' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+#' \item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
+#' \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
@@ -26,11 +29,27 @@ ifu_cube = function(obs_data, flux_data) {
   lengths_grid = lapply(image_grid, length) # how many particles in each cell?
 
   galaxy_obs   = obs_data$galaxy_obs
-  sbin         = obs_data$sbin
-  sbinsize     = obs_data$sbinsize
-  vbin         = obs_data$vbin
-  vbinsize     = obs_data$vbinsize
-  vseq         = seq(-(vbin * vbinsize) / 2, (vbin * vbinsize) / 2, by=vbinsize) # velocity bin break positions
+
+  sbin = obs_data$sbin # dimensions of the final image = sbin*sbin
+  vbin = obs_data$vbin # depth of cube
+  vbinsize = obs_data$vbinsize
+  sbinsize = obs_data$sbinsize
+  vseq         = seq(-(vbin * vbinsize) / 2, (vbin * vbinsize) / 2, by=vbinsize)
+  # velocity bin break positions
+  sseq         = seq(-(sbin * sbinsize) / 2, (sbin * sbinsize) / 2, by=sbinsize)
+  # spatial bin break positions
+
+  xbins        = levels(cut(obs_data$galaxy_obs$x, breaks=sseq))
+  zbins        = levels(cut(obs_data$galaxy_obs$z_obs, breaks=sseq))
+  # spatial/velocity bins boundaries
+  vbins        = levels(cut(obs_data$galaxy_obs$vy_obs, breaks=vseq))
+
+  xbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", xbins)),
+                                as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", xbins))))
+  zbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", zbins)),
+                                as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", zbins))))
+  vbin_ls      = rowMeans(cbind(as.numeric(sub("\\((.+),.*", "\\1", vbins)),
+                                as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", vbins))))
   lsf_size     = obs_data$lsf_size
   cube         = array(data = 0, dim = c(sbin, sbin, vbin))
   ap_cube      = array(data = obs_data$ap_region, dim = c(sbin,sbin,vbin))
@@ -52,7 +71,10 @@ ifu_cube = function(obs_data, flux_data) {
   }
 
   output = list("cube"        = cube,
-                "ap_region"   = ap_cube)
+                "ap_region"   = ap_cube,
+                "xbin_labels" = xbin_ls,
+                "zbin_labels" = zbin_ls,
+                "vbin_labels" = vbin_ls)
 
   return(output)
 

@@ -13,6 +13,9 @@
 #' \item{\code{$ap_region}}{An image that describes the shape of the aperture such that any further
 #'  convolutions that are applied to mimic beam smearing or seeing can be trimmed to the
 #'  appropriate aperture shape.}
+#' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+#' \item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
+#' \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 #'@examples
 #'  galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #'  data        = obs_data_prep(galaxy_data)
@@ -50,7 +53,10 @@ blur_cube = function(obs_data, ifu_datacube, psf, fwhm){
   blurcube    = blurcube * ifu_datacube$ap_region    # trimming cube to data within the aperture
 
   output = list("cube"        = blurcube,
-                "ap_region"   = ifu_datacube$ap_region)
+                "ap_region"   = ifu_datacube$ap_region,
+                "xbin_labels" = ifu_datacube$xbin_labels,
+                "zbin_labels" = ifu_datacube$zbin_labels,
+                "vbin_labels" = ifu_datacube$vbin_labels)
 
   return(output)
 }

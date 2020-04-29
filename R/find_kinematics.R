@@ -61,6 +61,9 @@
 #'automatically.
 #'@return A list containing:
 #' \item{\code{$datacube}}{The 3D array corresponding to the kinematic data cube.}
+#' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
+#' \item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
+#' \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
 #' \item{\code{$axis_ratio}}{The axis ratio of the observed galaxy in the form of a data frame where
 #'  \code{$a} is the semi-major axis and \code{$b} is the semi-minor axis given in kpc.}
 #' \item{\code{$obs_lambdar}}{The observed spin parameter \eqn{\lambda_R} measured with circular
@@ -94,7 +97,7 @@
 
 find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
                          pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25, filter="g",
-                         measure_type = list(type="fit", fac=1), blur, align=TRUE,
+                         measure_type = list(type="fit", fac=1), blur, align=FALSE,
                          radius_type = "Both", addSky = FALSE, mag_zero = 8.9, IFU_plot = TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
@@ -145,41 +148,38 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
     }
 
     if (radius_type == "Both" | radius_type == "both") {
-      output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
-                          "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
+      output       = list("datacube"=ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                          "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                           "axis_ratio"=reff_ar, "lambda_r"=kinematics$obs_lambdar,
                           "elambda_r"=kinematics$obs_elambdar,  "vsigma" = kinematics$obs_vsigma,
-                          "counts_img"=kinematics$counts_img, "velocity_img"=kinematics$velocity_img,
+                          "counts_img"=kinematics$flux_img, "velocity_img"=kinematics$velocity_img,
                           "dispersion_img"=kinematics$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
-                          "d_L"=observe_data$d_L,
-                          "appregion"=observe_data$appregion)
+                          "ap_region"=observe_data$ap_region)
     } else if (radius_type == "Circular" | radius_type == "circular") {
-      output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
-                          "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
+      output       = list("datacube"=ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                          "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                           "axis_ratio"=reff_ar, "lambda_r"=kinematics$obs_lambdar,
                           "vsigma" = kinematics$obs_vsigma,
-                          "counts_img"=kinematics$counts_img, "velocity_img"=kinematics$velocity_img,
+                          "counts_img"=kinematics$flux_img, "velocity_img"=kinematics$velocity_img,
                           "dispersion_img"=kinematics$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
-                          "d_L"=observe_data$d_L,
-                          "appregion"=observe_data$appregion)
+                          "ap_region"=observe_data$ap_region)
     } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
-      output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
-                          "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
+      output       = list("datacube"=ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                          "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                           "axis_ratio"=reff_ar,
                           "elambda_r"=kinematics$obs_elambdar,  "vsigma" = kinematics$obs_vsigma,
-                          "counts_img"=kinematics$counts_img, "velocity_img"=kinematics$velocity_img,
+                          "counts_img"=kinematics$flux_img, "velocity_img"=kinematics$velocity_img,
                           "dispersion_img"=kinematics$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
-                          "d_L"=observe_data$d_L,
-                          "appregion"=observe_data$appregion)
+                          "ap_region"=observe_data$ap_region)
     }
 
 
@@ -235,41 +235,38 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
     }
 
     if (radius_type == "Both" | radius_type == "both") {
-      output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
-                    "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
+      output = list("datacube" = blur_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                    "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                     "axis_ratio" = reff_ar, "lambda_r" = kinematics$obs_lambdar,
                     "elambda_r" = kinematics$obs_elambdar, "vsigma" = kinematics$obs_vsigma,
-                    "counts_img" = kinematics$counts_img, "velocity_img" = kinematics$velocity_img,
+                    "counts_img" = kinematics$flux_img, "velocity_img" = kinematics$velocity_img,
                     "dispersion_img" = kinematics$dispersion_img,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
-                    "d_L"=observe_data$d_L,
-                    "appregion" = observe_data$appregion)
+                    "ap_region" = observe_data$ap_region)
     } else if (radius_type == "Circular" | radius_type == "circular") {
-      output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
-                    "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
+      output = list("datacube" = blur_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                    "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                     "axis_ratio" = reff_ar, "lambda_r" = kinematics$obs_lambdar,
                     "vsigma" = kinematics$obs_vsigma,
-                    "counts_img" = kinematics$counts_img, "velocity_img" = kinematics$velocity_img,
+                    "counts_img" = kinematics$flux_img, "velocity_img" = kinematics$velocity_img,
                     "dispersion_img" = kinematics$dispersion_img,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
-                    "d_L"=observe_data$d_L,
-                    "appregion" = observe_data$appregion)
+                    "ap_region" = observe_data$ap_region)
      } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
-       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
-                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
+       output = list("datacube" = blur_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                     "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                      "axis_ratio" = reff_ar,
                      "elambda_r" = kinematics$obs_elambdar, "vsigma" = kinematics$obs_vsigma,
-                     "counts_img" = kinematics$counts_img, "velocity_img" = kinematics$velocity_img,
+                     "counts_img" = kinematics$flux_img, "velocity_img" = kinematics$velocity_img,
                      "dispersion_img" = kinematics$dispersion_img,
                      "angular_size" = observe_data$angular_size,
                      "sbinsize"= observe_data$sbinsize,
                      "vbinsize" = observe_data$vbinsize,
-                     "d_L"=observe_data$d_L,
-                     "appregion" = observe_data$appregion)
+                     "ap_region" = observe_data$ap_region)
       }
 
     return(output)
