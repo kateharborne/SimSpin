@@ -19,7 +19,6 @@
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
-#'@param threshold The flux threshold of the observation.
 #'@param filter If Age/Metallicity is supplied, the filter within which the SED is generated.
 #'Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.
 #'@param align Boolean indicating whether or not to align the semi-major axis with the x-axis.
@@ -49,7 +48,7 @@
 
 build_datacube = function(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
                           lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, filter="g",
-                          blur, align=FALSE, threshold = 25, multi_thread=TRUE){
+                          blur, align=FALSE, multi_thread=TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
@@ -57,7 +56,7 @@ build_datacube = function(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
-    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold) # construct IFU data cube
+    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
 
     output       = list("datacube"     = ifu_imgs$cube,
                         "xbin_labels"  = ifu_imgs$xbin_labels,
@@ -72,9 +71,9 @@ build_datacube = function(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
-    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold) # construct IFU data cube
+    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes) # construct IFU data cube
     blur_imgs = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
-                             fwhm = blur$fwhm, threshold = threshold)
+                             fwhm = blur$fwhm)
                                                            # blur IFU data cube
 
     output       = list("datacube"     = blur_imgs$cube,

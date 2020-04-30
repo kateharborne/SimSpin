@@ -111,7 +111,7 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
-    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold)
+    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes)
 
     if (addSky){
       images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold, addSky = TRUE,
@@ -201,9 +201,9 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
     fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
-    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold)
+    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes)
     blur_imgs = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
-                             fwhm = blur$fwhm, threshold = threshold) # blur IFU cube
+                             fwhm = blur$fwhm) # blur IFU cube
     if (addSky){
       images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold,
                         addSky = TRUE, mag_zero = mag_zero, pixel_sscale = pixel_sscale)

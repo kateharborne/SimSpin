@@ -59,7 +59,6 @@ SAMI_datacube =
                  pixel_sscale = 0.5,         # spatial pixel scale size in ''
                  pixel_vscale = 1.04,        # velocity pixel scale size in angstroms
                  inc_deg      = 90,          # projected galaxy inclination in degrees
-                 threshold    = 25,          # magnitude limit of the observation
                  multi_thread = FALSE)
 ```
 
@@ -101,8 +100,7 @@ SAMI_datacube_blur =
                  lsf_fwhm     = 2.65,     
                  pixel_sscale = 0.5,         
                  pixel_vscale = 1.04,        
-                 inc_deg      = 90,      
-                 threshold    = 25,          
+                 inc_deg      = 90,          
                  blur         = list("psf" = "Moffat", "fwhm" = 2), # specifying the PSF and fwhm
                  multi_thread = FALSE)
 ```
