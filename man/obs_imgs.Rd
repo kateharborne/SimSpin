@@ -44,8 +44,8 @@ images (flux, line-of-sight velocity and line-of-sight velocity dispersion).
 \examples{
 galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 data        = obs_data_prep(simdata = galaxy_data)
-fluxes      = flux_grid(obs_data = data)
+fluxes      = flux_grid(obs_data = data, multi_thread=FALSE)
 cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
-images      = obs_images(obs_data = data, ifu_datacube = cube)
+images      = obs_imgs(obs_data = data, ifu_datacube = cube)
 
 }

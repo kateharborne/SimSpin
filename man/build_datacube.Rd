@@ -6,7 +6,7 @@
 \usage{
 build_datacube(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
   lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, filter = "g", blur,
-  align = FALSE, threshold = 25)
+  align = FALSE, threshold = 25, multi_thread = TRUE)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -42,6 +42,8 @@ specifying the full-width half-maximum of the PSF given in units of arcseconds.}
 \item{align}{Boolean indicating whether or not to align the semi-major axis with the x-axis.}
 
 \item{threshold}{The flux threshold of the observation.}
+
+\item{multi_thread}{A boolean specifying whether you would like to multi-thread the process.}
 }
 \value{
 A list containing:
@@ -67,6 +69,7 @@ cube = build_datacube(simdata      = galaxy_data,
                       lsf_fwhm     = 2.65,
                       pixel_sscale = 0.5,
                       pixel_vscale = 1.04,
-                      inc_deg      = 0)
+                      inc_deg      = 0,
+                      multi_thread = FALSE)
 
 }

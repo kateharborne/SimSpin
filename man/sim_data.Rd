@@ -5,7 +5,7 @@
 \title{Prepare simulation data for SimSpin}
 \usage{
 sim_data(filename, ptype = NA, SSP = FALSE, m2l_disc = 1,
-  m2l_bulge = 1, m2l_star = 1)
+  m2l_bulge = 1, m2l_star = 1, multi_thread = TRUE)
 }
 \arguments{
 \item{filename}{The SimSpin HDF5 file containing the particle information of the galaxy.}
@@ -23,6 +23,8 @@ to TRUE and no Age/Metallicity information is present in the file, function will
 
 \item{m2l_star}{If no SSP file is specified and stellar particles exist in the file, the
 mass-to-light ratio of the stellar component in solar units.}
+
+\item{multi_thread}{A boolean specifying whether you would like to multi-thread the process.}
 }
 \value{
 A list of data.frames containing the particle information (\code{$Part}) for each

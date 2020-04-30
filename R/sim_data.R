@@ -17,6 +17,7 @@
 #'@param m2l_bulge The mass-to-light ratio of the bulge component in solar units.
 #'@param m2l_star If no SSP file is specified and stellar particles exist in the file, the
 #' mass-to-light ratio of the stellar component in solar units.
+#'@param multi_thread A boolean specifying whether you would like to multi-thread the process.
 #'
 #'@return A list of data.frames containing the particle information (\code{$Part}) for each
 #' particle type requested from the simulation. Each data frame contains the position (x, y, z)
@@ -28,7 +29,7 @@
 #'@examples
 #' output = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 
-sim_data = function(filename, ptype=NA, SSP=FALSE, m2l_disc=1, m2l_bulge=1, m2l_star=1){
+sim_data = function(filename, ptype=NA, SSP=FALSE, m2l_disc=1, m2l_bulge=1, m2l_star=1, multi_thread=TRUE){
 
   galaxy_file = hdf5r::h5file(filename, mode = "r")           # reading in the snapshot data
   ppart = substring(hdf5r::list.groups(galaxy_file), 1)
@@ -117,7 +118,7 @@ sim_data = function(filename, ptype=NA, SSP=FALSE, m2l_disc=1, m2l_bulge=1, m2l_
 
         # if 9 datasets are provided and SSP is true, check if "Age" is already supplied
       } else { # if not, calculate the "Age" using celestial (performed in parallel)
-        numCores = parallel::detectCores()
+        if (multi_thread){numCores = parallel::detectCores()} else {numCores = 1}
         sft = hdf5r::readDataSet(galaxy_file[["PartType2/StellarFormationTime"]])
         age = as.numeric(parallel::mclapply(sft, .SFTtoAge, mc.cores = numCores))
 
@@ -170,7 +171,7 @@ sim_data = function(filename, ptype=NA, SSP=FALSE, m2l_disc=1, m2l_bulge=1, m2l_
 
         # if 9 datasets are provided and SSP is true, check if "Age" is already supplied
       } else { # if not, calculate the "Age" using celestial (performed in parallel)
-        numCores = parallel::detectCores()
+        if (multi_thread){numCores = parallel::detectCores()} else {numCores = 1}
         sft = hdf5r::readDataSet(galaxy_file[["PartType3/StellarFormationTime"]])
         age = as.numeric(parallel::mclapply(sft, .SFTtoAge, mc.cores = numCores))
 
@@ -234,7 +235,7 @@ sim_data = function(filename, ptype=NA, SSP=FALSE, m2l_disc=1, m2l_bulge=1, m2l_
         # if 9 datasets are provided and SSP is true, check if "Age" is already supplied
       } else { # if not, calculate the "Age" using celestial (performed in parallel)
 
-        numCores = parallel::detectCores()
+        if (multi_thread){numCores = parallel::detectCores()} else {numCores = 1}
         sft = hdf5r::readDataSet(galaxy_file[["PartType4/StellarFormationTime"]])
         age = as.numeric(parallel::mclapply(sft, .SFTtoAge, mc.cores = numCores))
 

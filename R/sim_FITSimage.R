@@ -48,7 +48,8 @@
 #'                                                                   "b"=1.7,
 #'                                                                   "angle"=90),
 #'                                           fac = 1),
-#'                       IFU_plot     = FALSE)
+#'                       IFU_plot     = FALSE,
+#'                       multi_thread = FALSE)
 #' sim_FITSimage(out_image = kin$counts_img, out_data = kin, z = 0.1, pixel_sscale = 0.5,
 #' out_file = "simdata_example.fits")
 #' unlink("simdata_example.fits")

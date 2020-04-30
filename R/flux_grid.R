@@ -9,19 +9,20 @@
 #'@param obs_data The list output from the \code{obs_data_prep()} function.
 #'@param filter If Age/Metallicity is supplied, the filter within which the SED is generated.
 #'Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.
+#'@param multi_thread A boolean specifying whether you would like to multi-thread the process.
 #'@return Returns a list containing:
 #'\item{\code{$flux_grid}}{A 3D array of flux in Jansky.}
 #'\item{\code{$image_grid}}{A list containing the indices of particles in each spaxel position.}
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
-#' flux_img    = flux_grid(obs_data  = data)
+#' flux_img    = flux_grid(obs_data  = data, multi_thread=FALSE)
 #'
 
 
-flux_grid = function(obs_data, filter="g"){
+flux_grid = function(obs_data, filter="g", multi_thread=TRUE){
 
-  numCores = parallel::detectCores()
+  if (multi_thread){numCores = parallel::detectCores()} else {numCores = 1}
   z = obs_data$z
   LumDist_Mpc = celestial::cosdistLumDist(z, ref="Planck")
   l2f = ProSpect::Lum2FluxFactor(z, ref="Planck")

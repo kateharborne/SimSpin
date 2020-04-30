@@ -40,7 +40,8 @@
 #'                       measure_type = list(type = "fixed",
 #'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
 #'                                           fac = 1),
-#'                       IFU_plot     = FALSE)
+#'                       IFU_plot     = FALSE,
+#'                       multi_thread = FALSE)
 #' sim_FITS(out_data = kin, pixel_sscale = 0.5, pixel_vscale = 1.04, z=0.1, r200=200, r50=10,
 #' Hdisk=5, Ahalo=34.5, Abulge=3.45, out_file = "simdata_example.fits")
 #' unlink("simdata_example.fits")

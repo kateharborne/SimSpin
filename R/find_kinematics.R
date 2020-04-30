@@ -61,6 +61,8 @@
 #'automatically. Else, if list provided, parameters "reff" and "which_plots" are required, i.e.
 #'\code{IFU_plot = list(reff = TRUE, which_plots = c("Flux", "Velocity"))}, where \code{reff} dictates
 #'whether measurement ellipse is plotted or not and \code{which_plots} dictates which plots are shown.
+#'@param multi_thread A boolean specifying whether you would like to multi-thread the process.
+#'
 #'@return A list containing:
 #' \item{\code{$datacube}}{The 3D array corresponding to the kinematic data cube.}
 #' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
@@ -94,20 +96,21 @@
 #'                                                                          "b"=1.7,
 #'                                                                          "angle"=90),
 #'                                                  fac = 1),
-#'                              IFU_plot     = FALSE)
+#'                              IFU_plot     = FALSE,
+#'                              multi_thread = FALSE)
 #'
 
 find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
                          pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25, filter="g",
-                         measure_type = list(type="fit", fac=1), blur, align=FALSE,
-                         radius_type = "Both", addSky = FALSE, mag_zero = 8.9, IFU_plot = FALSE){
+                         measure_type = list(type="fit", fac=1), blur, align=FALSE, radius_type = "Both",
+                         addSky = FALSE, mag_zero = 8.9, IFU_plot = FALSE, multi_thread=TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
     observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
-    fluxes = flux_grid(obs_data = observe_data, filter = filter)
+    fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold)
 
     if (addSky){
@@ -197,7 +200,7 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
     observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
-    fluxes = flux_grid(obs_data = observe_data, filter = filter)
+    fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold)
     blur_imgs = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
                              fwhm = blur$fwhm, threshold = threshold) # blur IFU cube

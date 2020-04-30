@@ -20,18 +20,17 @@
 #'@examples
 #'  galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #'  data        = obs_data_prep(galaxy_data)
-#'  fluxes      = flux_grid(obs_data = data)
+#'  fluxes      = flux_grid(obs_data = data, multi_thread = FALSE)
 #'  cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
 #'
-#'  blurcube  = blur_cube(ifu_datacube   = ifucube,
-#'                        sbinsize       = data$sbinsize,
+#'  blurcube  = blur_cube(obs_data       = data,
+#'                        ifu_datacube   = cube,
 #'                        psf            = "Moffat",
-#'                        fwhm           = 0.5,
-#'                        angular_size   = data$angular_size)
+#'                        fwhm           = 0.5)
 #'
 
 
-blur_cube = function(obs_data, ifu_datacube, psf, fwhm, threshold){
+blur_cube = function(obs_data, ifu_datacube, psf, fwhm, threshold=25){
 
   fwhm_scaled     = (fwhm * obs_data$angular_size)/ obs_data$sbinsize  # the fwhm scaled to image pixel dimensions
   sbin            = obs_data$sbin # number of spatial bins in data cube

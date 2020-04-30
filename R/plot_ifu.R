@@ -19,9 +19,9 @@
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
-#' fluxes      = flux_grid(obs_data = data)
+#' fluxes      = flux_grid(obs_data = data, multi_thread=FALSE)
 #' cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
-#' images      = obs_images(obs_data = data, ifu_datacube = cube)
+#' images      = obs_imgs(obs_data = data, ifu_datacube = cube)
 #' plot_ifu(obs_data = data, obs_images = images)
 
 plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plots=NA){

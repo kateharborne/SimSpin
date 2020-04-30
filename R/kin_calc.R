@@ -29,9 +29,9 @@
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
-#' fluxes      = flux_grid(obs_data = data)
+#' fluxes      = flux_grid(obs_data = data, multi_thread=FALSE)
 #' cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
-#' images      = obs_images(obs_data = data, ifu_datacube = cube)
+#' images      = obs_imgs(obs_data = data, ifu_datacube = cube)
 #' kinematics  = kin_calc(obs_data = data, obs_images = images, axis_ratio = images$axis_ratio)
 
 kin_calc = function(obs_data, obs_images, axis_ratio, radius_type = "Both"){

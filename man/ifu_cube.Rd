@@ -32,7 +32,7 @@ The purpose of this function is to construct an IFU data cube. It accepts output
 \examples{
 galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 data        = obs_data_prep(simdata = galaxy_data)
-fluxes      = flux_grid(obs_data = data)
+fluxes      = flux_grid(obs_data = data, multi_thread=FALSE)
 cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
 
 }

@@ -4,7 +4,7 @@
 \alias{blur_cube}
 \title{Mimicking seeing conditions for the IFU data cube.}
 \usage{
-blur_cube(obs_data, ifu_datacube, psf, fwhm, threshold)
+blur_cube(obs_data, ifu_datacube, psf, fwhm, threshold = 25)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
@@ -35,13 +35,12 @@ The purpose of this function is to mimic the spatial blurring caused by seeing a
 \examples{
  galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
  data        = obs_data_prep(galaxy_data)
- fluxes      = flux_grid(obs_data = data)
+ fluxes      = flux_grid(obs_data = data, multi_thread = FALSE)
  cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
 
- blurcube  = blur_cube(ifu_datacube   = ifucube,
-                       sbinsize       = data$sbinsize,
+ blurcube  = blur_cube(obs_data       = data,
+                       ifu_datacube   = cube,
                        psf            = "Moffat",
-                       fwhm           = 0.5,
-                       angular_size   = data$angular_size)
+                       fwhm           = 0.5)
 
 }

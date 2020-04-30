@@ -27,6 +27,7 @@
 #' of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the
 #' PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}. \code{"fwhm"} is a numeric
 #' specifying the full-width half-maximum of the PSF given in units of arcseconds.
+#'@param multi_thread A boolean specifying whether you would like to multi-thread the process.
 #'@return A list containing:
 #' \item{\code{$datacube}}{A 3D array corresponding to the kinematic data cube.}
 #' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
@@ -42,19 +43,20 @@
 #'                       lsf_fwhm     = 2.65,
 #'                       pixel_sscale = 0.5,
 #'                       pixel_vscale = 1.04,
-#'                       inc_deg      = 0)
+#'                       inc_deg      = 0,
+#'                       multi_thread = FALSE)
 #'
 
 build_datacube = function(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
                           lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, filter="g",
-                          blur, align=FALSE, threshold = 25){
+                          blur, align=FALSE, threshold = 25, multi_thread=TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
     observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
-    fluxes = flux_grid(obs_data = observe_data, filter = filter)
+    fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold) # construct IFU data cube
 
     output       = list("datacube"     = ifu_imgs$cube,
@@ -69,7 +71,7 @@ build_datacube = function(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
     observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
                                  central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
                                  pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
-    fluxes = flux_grid(obs_data = observe_data, filter = filter)
+    fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
     ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold) # construct IFU data cube
     blur_imgs = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
                              fwhm = blur$fwhm, threshold = threshold)

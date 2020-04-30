@@ -38,6 +38,7 @@ S0_lambda = find_kinematics(simdata      = galaxy_file,
                             pixel_vscale = 1.04,
                             inc_deg      = 70,
                             threshold    = 25,
-                            measure_type = list(type="fit", fac=1))
+                            measure_type = list(type="fit", fac=1),
+                            multi_thread = FALSE)
 }
 \keyword{data}

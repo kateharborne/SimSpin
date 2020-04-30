@@ -4,13 +4,15 @@
 \alias{flux_grid}
 \title{Generating the fluxes for each element of the IFU data-cube.}
 \usage{
-flux_grid(obs_data, filter = "g")
+flux_grid(obs_data, filter = "g", multi_thread = TRUE)
 }
 \arguments{
 \item{obs_data}{The list output from the \code{obs_data_prep()} function.}
 
 \item{filter}{If Age/Metallicity is supplied, the filter within which the SED is generated.
 Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
+
+\item{multi_thread}{A boolean specifying whether you would like to multi-thread the process.}
 }
 \value{
 Returns a list containing:
@@ -27,6 +29,6 @@ luminosity in each cell is converted to flux.
 \examples{
 galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 data        = obs_data_prep(simdata = galaxy_data)
-flux_img    = flux_grid(obs_data  = data)
+flux_img    = flux_grid(obs_data  = data, multi_thread=FALSE)
 
 }

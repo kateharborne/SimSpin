@@ -28,9 +28,9 @@
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
-#' fluxes      = flux_grid(obs_data = data)
+#' fluxes      = flux_grid(obs_data = data, multi_thread=FALSE)
 #' cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
-#' images      = obs_images(obs_data = data, ifu_datacube = cube)
+#' images      = obs_imgs(obs_data = data, ifu_datacube = cube)
 #'
 
 obs_imgs = function(obs_data, ifu_datacube, threshold=25, addSky=FALSE,

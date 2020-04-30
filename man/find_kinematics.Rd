@@ -9,7 +9,7 @@ find_kinematics(simdata, r200 = 200, z = 0.05, fov = 15,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
   threshold = 25, filter = "g", measure_type = list(type = "fit", fac
   = 1), blur, align = FALSE, radius_type = "Both", addSky = FALSE,
-  mag_zero = 8.9, IFU_plot = FALSE)
+  mag_zero = 8.9, IFU_plot = FALSE, multi_thread = TRUE)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -83,6 +83,8 @@ LOS velocity and LOS velocity dispersion images. If \code{TRUE}, all plots are o
 automatically. Else, if list provided, parameters "reff" and "which_plots" are required, i.e.
 \code{IFU_plot = list(reff = TRUE, which_plots = c("Flux", "Velocity"))}, where \code{reff} dictates
 whether measurement ellipse is plotted or not and \code{which_plots} dictates which plots are shown.}
+
+\item{multi_thread}{A boolean specifying whether you would like to multi-thread the process.}
 }
 \value{
 A list containing:
@@ -127,6 +129,7 @@ kinematics = find_kinematics(simdata      = galaxy_data,
                                                                          "b"=1.7,
                                                                          "angle"=90),
                                                  fac = 1),
-                             IFU_plot     = FALSE)
+                             IFU_plot     = FALSE,
+                             multi_thread = FALSE)
 
 }
