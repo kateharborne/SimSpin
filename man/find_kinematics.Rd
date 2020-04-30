@@ -8,8 +8,8 @@ find_kinematics(simdata, r200 = 200, z = 0.05, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
   threshold = 25, filter = "g", measure_type = list(type = "fit", fac
-  = 1), blur, radius_type = "Both", addSky = FALSE, mag_zero = 8.9,
-  IFU_plot = TRUE)
+  = 1), blur, align = FALSE, radius_type = "Both", addSky = FALSE,
+  mag_zero = 8.9, IFU_plot = FALSE, multi_thread = TRUE)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -36,8 +36,8 @@ filter output in angstroms.}
 
 \item{threshold}{The flux threshold of the observation.}
 
-\item{filter}{When stellar particles and SEDs are provided, the filter used when converting
-spectra into luminosity. Options include "r" for SDSS r filter and "g" for the SDSS g filter.}
+\item{filter}{If Age/Metallicity is supplied, the filter within which the SED is generated.
+Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
 
 \item{measure_type}{A list specifying the radius within which the kinematics are measured. There
 are three options for this:
@@ -63,6 +63,8 @@ the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian
 \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of
 arcseconds.}
 
+\item{align}{Boolean indicating whether or not to align the semi-major axis with the x-axis.}
+
 \item{radius_type}{The method of computing radii - "Circular" i.e. \eqn{r^{2} = x^{2} + y{2}} or
 "Elliptical" where r is the semi-major axis of the ellipse having an axis ratio \eqn{b/a} on
 which the pixel lies, i.e.
@@ -77,8 +79,12 @@ below.}
 AB or Vega).}
 
 \item{IFU_plot}{\emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
-LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
-automatically.}
+LOS velocity and LOS velocity dispersion images. If \code{TRUE}, all plots are output
+automatically. Else, if list provided, parameters "reff" and "which_plots" are required, i.e.
+\code{IFU_plot = list(reff = TRUE, which_plots = c("Flux", "Velocity"))}, where \code{reff} dictates
+whether measurement ellipse is plotted or not and \code{which_plots} dictates which plots are shown.}
+
+\item{multi_thread}{A boolean specifying whether you would like to multi-thread the process.}
 }
 \value{
 A list containing:
@@ -93,22 +99,16 @@ radii. \emph{(When \code{radius_type = "Both"} or \code{"Circular"}.)}}
 \item{\code{$obs_elambdar}}{The observed spin parameter \eqn{\lambda_R} measured with elliptical
 radii. \emph{(When \code{radius_type = "Both"} or \code{"Elliptical"}.)}}
 \item{\code{$vsigma}}{The observed V/\eqn{\sigma}.}
-\item{\code{$counts_img}}{The observed flux image.}
+\item{\code{$flux_img}}{The observed flux image.}
 \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
-\item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
- redshift.}
-\item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
-\item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
-\item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
- aperture.}
 }
 \description{
 The purpose of this basic function is to use the \code{SimSpin} package sub-functions to measure
 both the observable spin parameter, \eqn{\lambda_R}, and ratio V/\eqn{\sigma} of a simulated
 galaxy model. This function will call each required sub-function (\code{\link{obs_data_prep}},
-\code{\link{ifu_cube}}, \code{\link{blur_cube}}, \code{\link{find_reff}},
-\code{\link{obs_lambda}}, \code{\link{obs_vsigma}} and \code{\link{plot_ifu}}) and return the
+\code{\link{flux_grid}}, \code{\link{ifu_cube}}, \code{\link{blur_cube}},
+\code{\link{find_reff}}, \code{\link{kin_calc}}, and \code{\link{plot_ifu}}) and return the
 \eqn{\lambda_R} and the V/\eqn{\sigma} ratio within a specified measurement radius.
 }
 \examples{
@@ -129,6 +129,7 @@ kinematics = find_kinematics(simdata      = galaxy_data,
                                                                          "b"=1.7,
                                                                          "angle"=90),
                                                  fac = 1),
-                             IFU_plot     = FALSE)
+                             IFU_plot     = FALSE,
+                             multi_thread = FALSE)
 
 }

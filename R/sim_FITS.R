@@ -4,16 +4,16 @@
 #'The purpose of this function is to write out the data cube produced by SimSpin into the common
 #' astronomy FITS data format.
 #'
-#'@param out_data The list output from \code{\link{build_datacube}}, \code{\link{find_lambda}} or
-#' \code{\link{find_vsigma}}.
+#'@param out_data The list output from \code{\link{build_datacube}} or
+#' \code{\link{find_kinematics}}.
 #'@param pixel_sscale The corresponding spatial pixel scale associated with a given telescope
 #' output in arcseconds.
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
 #'@param z The redshift projected distance at which
-#'\code{\link{find_lambda}}/\code{\link{find_vsigma}} was run.
+#'\code{\link{find_kinematics}} was run.
 #'@param psf_fwhm The FWHM of the PSF used for spatial blurring used when
-#' \code{\link{find_lambda}}/\code{\link{find_vsigma}} was run.
+#' \code{\link{find_kinematics}} was run.
 #'@param r200 The virial radius specified in the simulation, kpc.
 #'@param r50 The half mass radius specified by the simulation, kpc.
 #'@param Hdisk The scale length of the disk component in the simulation, kpc.
@@ -26,7 +26,7 @@
 #'@return Outputs a standard format FITS file.
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-#' lambdar = find_lambda(simdata      = galaxy_data,
+#' kin = find_kinematics(simdata      = galaxy_data,
 #'                       r200         = 200,
 #'                       z            = 0.1,
 #'                       fov          = 15,
@@ -40,8 +40,9 @@
 #'                       measure_type = list(type = "fixed",
 #'                                           axis_ratio = data.frame("a"=3.5, "b"=1.7, "angle"=90),
 #'                                           fac = 1),
-#'                       IFU_plot     = FALSE)
-#' sim_FITS(out_data = lambdar, pixel_sscale = 0.5, pixel_vscale = 1.04, z=0.1, r200=200, r50=10,
+#'                       IFU_plot     = FALSE,
+#'                       multi_thread = FALSE)
+#' sim_FITS(out_data = kin, pixel_sscale = 0.5, pixel_vscale = 1.04, z=0.1, r200=200, r50=10,
 #' Hdisk=5, Ahalo=34.5, Abulge=3.45, out_file = "simdata_example.fits")
 #' unlink("simdata_example.fits")
 

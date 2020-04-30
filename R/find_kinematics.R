@@ -1,11 +1,11 @@
-# Kate Harborne (last edit - 16/06/2019)
+# Kate Harborne (last edit - 15/11/2019)
 #'Measuring observable galaxy kinematics.
 #'
 #'The purpose of this basic function is to use the \code{SimSpin} package sub-functions to measure
 #' both the observable spin parameter, \eqn{\lambda_R}, and ratio V/\eqn{\sigma} of a simulated
 #' galaxy model. This function will call each required sub-function (\code{\link{obs_data_prep}},
-#' \code{\link{ifu_cube}}, \code{\link{blur_cube}}, \code{\link{find_reff}},
-#' \code{\link{obs_lambda}}, \code{\link{obs_vsigma}} and \code{\link{plot_ifu}}) and return the
+#' \code{\link{flux_grid}}, \code{\link{ifu_cube}}, \code{\link{blur_cube}},
+#' \code{\link{find_reff}}, \code{\link{kin_calc}}, and \code{\link{plot_ifu}}) and return the
 #' \eqn{\lambda_R} and the V/\eqn{\sigma} ratio within a specified measurement radius.
 #'
 #'@param simdata The simulation information data.frame output by \code{\link{sim_data}}.
@@ -20,8 +20,8 @@
 #'@param pixel_vscale The corresponding velocity pixel scale associated with a given telescope
 #' filter output in angstroms.
 #'@param inc_deg The inclination at which to observe the galaxy in degrees.
-#'@param filter When stellar particles and SEDs are provided, the filter used when converting
-#'spectra into luminosity. Options include "r" for SDSS r filter and "g" for the SDSS g filter.
+#'@param filter If Age/Metallicity is supplied, the filter within which the SED is generated.
+#'Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.
 #'@param threshold The flux threshold of the observation.
 #'@param measure_type A list specifying the radius within which the kinematics are measured. There
 #' are three options for this:
@@ -50,14 +50,19 @@
 #' the shape of the PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}.
 #' \code{"fwhm"} is a numeric specifying the full-width half-maximum of the PSF given in units of
 #' arcseconds.
+#'@param align Boolean indicating whether or not to align the semi-major axis with the x-axis.
 #'@param addSky A boolean to specify whether to add sky noise to the output images. Default is
 #' FALSE. If TRUE, further parameters including \code{mag_threshold} and \code{mag_zero} described
 #' below.
 #'@param mag_zero The magnitude zero point with regards to the mangitude system being used (e.g.
 #' AB or Vega).
 #'@param IFU_plot \emph{Optional} If specified \code{FALSE}, the function will not output the IFU flux,
-#'LOS velocity and LOS velocity dispersion images. Default is \code{TRUE}, where plots are output
-#'automatically.
+#'LOS velocity and LOS velocity dispersion images. If \code{TRUE}, all plots are output
+#'automatically. Else, if list provided, parameters "reff" and "which_plots" are required, i.e.
+#'\code{IFU_plot = list(reff = TRUE, which_plots = c("Flux", "Velocity"))}, where \code{reff} dictates
+#'whether measurement ellipse is plotted or not and \code{which_plots} dictates which plots are shown.
+#'@param multi_thread A boolean specifying whether you would like to multi-thread the process.
+#'
 #'@return A list containing:
 #' \item{\code{$datacube}}{The 3D array corresponding to the kinematic data cube.}
 #' \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
@@ -70,16 +75,9 @@
 #' \item{\code{$obs_elambdar}}{The observed spin parameter \eqn{\lambda_R} measured with elliptical
 #' radii. \emph{(When \code{radius_type = "Both"} or \code{"Elliptical"}.)}}
 #' \item{\code{$vsigma}}{The observed V/\eqn{\sigma}.}
-#' \item{\code{$counts_img}}{The observed flux image.}
+#' \item{\code{$flux_img}}{The observed flux image.}
 #' \item{\code{$velocity_img}}{The observed line-of-sight velocity image.}
 #' \item{\code{$dispersion_img}}{The observed line-of-sight velocity dispersion image.}
-#' \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
-#'  redshift.}
-#' \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
-#' \item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
-#' \item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
-#'  aperture.}
-#'
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' kinematics = find_kinematics(simdata      = galaxy_data,
@@ -98,263 +96,196 @@
 #'                                                                          "b"=1.7,
 #'                                                                          "angle"=90),
 #'                                                  fac = 1),
-#'                              IFU_plot     = FALSE)
+#'                              IFU_plot     = FALSE,
+#'                              multi_thread = FALSE)
 #'
 
 find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular", central_wvl=4800, lsf_fwhm=2.65,
                          pixel_sscale=0.5, pixel_vscale=1.04, inc_deg=70, threshold=25, filter="g",
-                         measure_type = list(type="fit", fac=1), blur,
-                         radius_type = "Both", addSky = FALSE, mag_zero = 8.9, IFU_plot = TRUE){
+                         measure_type = list(type="fit", fac=1), blur, align=FALSE, radius_type = "Both",
+                         addSky = FALSE, mag_zero = 8.9, IFU_plot = FALSE, multi_thread=TRUE){
 
   if (missing(blur)) {                                     # IF spatial blurring IS NOT requested
 
-    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg, filter)
-    # prep simulation data in observer units
-    ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
+    observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
+                                 central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
+                                 pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
+    fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
+    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold)
+
+    if (addSky){
+      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold, addSky = TRUE,
+                        mag_zero = mag_zero, pixel_sscale = pixel_sscale)
+    } else {
+      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold)
+    }
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
       reff_ar      = find_reff(simdata, r200, inc_deg,
-                               axis_ratio = ifu_imgs$axis_ratio,
-                               angular_size = observe_data$angular_size)
+                               axis_ratio = images$axis_ratio)
       # Reff from data & measured axis ratio
-      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
-      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
-      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
-      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
-
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
+      reff_ar$a = reff_ar$a * measure_type$fac
+      reff_ar$b = reff_ar$b * measure_type$fac
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
       reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
-                               angular_size = observe_data$angular_size,
                                fract = measure_type$fract)
       # Reff from data & supplied axis ratio
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
-
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
-
     }
 
     if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
-      reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
-                                "b_kpc"    = measure_type$axis_ratio$b,
-                                "a_arcsec" = measure_type$axis_ratio$a / observe_data$angular_size,
-                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size,
-                                "angle"    = measure_type$axis_ratio$ang)
+      reff_ar      = data.frame("a"    = measure_type$axis_ratio$a,
+                                "b"    = measure_type$axis_ratio$b,
+                                "ang"  = measure_type$axis_ratio$ang)
       # Reff at fixed specification
-      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
-      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
-      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
-      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+    }
 
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
+    kinematics = kin_calc(obs_data = observe_data,
+                          obs_images = images, axis_ratio = reff_ar,
+                          radius_type = radius_type)
 
+    if (IFU_plot != FALSE){
+      if (IFU_plot == TRUE){
+        plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar,
+                 which_plots = NA)
       } else {
-        kinematics = obs_kinematics(ifu_datacube = ifu_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
+        plot_ifu(obs_data = observe_data, obs_images = images, reff=IFU_plot$reff, axis_ratio=reff_ar,
+                 which_plots = IFU_plot$which_plots)
+        # plot IFU images
       }
-
     }
 
     if (radius_type == "Both" | radius_type == "both") {
-      output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
-                          "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
+      output       = list("datacube"=ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                          "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                           "axis_ratio"=reff_ar, "lambda_r"=kinematics$obs_lambdar,
                           "elambda_r"=kinematics$obs_elambdar,  "vsigma" = kinematics$obs_vsigma,
-                          "counts_img"=kinematics$counts_img, "velocity_img"=kinematics$velocity_img,
+                          "counts_img"=kinematics$flux_img, "velocity_img"=kinematics$velocity_img,
                           "dispersion_img"=kinematics$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
-                          "d_L"=observe_data$d_L,
-                          "appregion"=observe_data$appregion)
+                          "ap_region"=observe_data$ap_region)
     } else if (radius_type == "Circular" | radius_type == "circular") {
-      output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
-                          "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
+      output       = list("datacube"=ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                          "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                           "axis_ratio"=reff_ar, "lambda_r"=kinematics$obs_lambdar,
                           "vsigma" = kinematics$obs_vsigma,
-                          "counts_img"=kinematics$counts_img, "velocity_img"=kinematics$velocity_img,
+                          "counts_img"=kinematics$flux_img, "velocity_img"=kinematics$velocity_img,
                           "dispersion_img"=kinematics$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
-                          "d_L"=observe_data$d_L,
-                          "appregion"=observe_data$appregion)
+                          "ap_region"=observe_data$ap_region)
     } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
-      output       = list("datacube"=ifu_imgs$cube, "xbin_labels"=ifu_imgs$xbin_labels,
-                          "ybin_labels"=ifu_imgs$ybin_labels, "vbin_labels"=ifu_imgs$vbin_labels,
+      output       = list("datacube"=ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                          "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                           "axis_ratio"=reff_ar,
                           "elambda_r"=kinematics$obs_elambdar,  "vsigma" = kinematics$obs_vsigma,
-                          "counts_img"=kinematics$counts_img, "velocity_img"=kinematics$velocity_img,
+                          "counts_img"=kinematics$flux_img, "velocity_img"=kinematics$velocity_img,
                           "dispersion_img"=kinematics$dispersion_img,
                           "angular_size"=observe_data$angular_size,
                           "sbinsize"=observe_data$sbinsize,
                           "vbinsize"=observe_data$vbinsize,
-                          "d_L"=observe_data$d_L,
-                          "appregion"=observe_data$appregion)
+                          "ap_region"=observe_data$ap_region)
     }
 
-    if (IFU_plot == TRUE){
-      plot_ifu(output)   # plot IFU images
-    }
 
     return(output)
 
   } else {                                                 # IF spatial blurring IS requested
 
-    observe_data = obs_data_prep(simdata, r200, z, fov, ap_shape, central_wvl, lsf_fwhm,
-                                 pixel_sscale, pixel_vscale, inc_deg, filter)
-    # prep simulation data in observer units
-    ifu_imgs     = ifu_cube(observe_data, threshold)       # construct IFU data cube
-    blur_imgs    = blur_cube(ifu_imgs, sbinsize = observe_data$sbinsize, psf = blur$psf,
-                             fwhm = blur$fwhm, angular_size = observe_data$angular_size)
-    # blur IFU cube
+    observe_data = obs_data_prep(simdata = simdata, r200 = r200, z = z, fov = fov, ap_shape = ap_shape,
+                                 central_wvl = central_wvl, lsf_fwhm = lsf_fwhm, pixel_sscale = pixel_sscale,
+                                 pixel_vscale = pixel_vscale, inc_deg = inc_deg, align = align) # prep simulation data in observer units
+    fluxes = flux_grid(obs_data = observe_data, filter = filter, multi_thread = multi_thread)
+    ifu_imgs = ifu_cube(obs_data = observe_data, flux_data = fluxes, threshold = threshold)
+    blur_imgs = blur_cube(obs_data = observe_data, ifu_datacube = ifu_imgs, psf = blur$psf,
+                             fwhm = blur$fwhm, threshold = threshold) # blur IFU cube
+    if (addSky){
+      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold,
+                        addSky = TRUE, mag_zero = mag_zero, pixel_sscale = pixel_sscale)
+      blur_images = obs_imgs(obs_data = observe_data, ifu_datacube = blur_imgs, threshold = threshold,
+                             addSky = TRUE, mag_zero = mag_zero, pixel_sscale = pixel_sscale)
+    } else {
+      images = obs_imgs(obs_data = observe_data, ifu_datacube = ifu_imgs, threshold = threshold)
+      blur_images = obs_imgs(obs_data = observe_data, ifu_datacube = blur_imgs, threshold = threshold)
+    }
 
     if (measure_type$type == "fit"){                       # fit Reff from the unblurred counts_img
       reff_ar      = find_reff(simdata, r200, inc_deg,
-                               axis_ratio = ifu_imgs$axis_ratio,
-                               angular_size = observe_data$angular_size)
+                               axis_ratio = images$axis_ratio)
       # Reff from data & measured axis ratio
-      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
-      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
-      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
-      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
-
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
+      reff_ar$a = reff_ar$a * measure_type$fac
+      reff_ar$b = reff_ar$b * measure_type$fac
     }
 
     if (measure_type$type == "specified"){                 # fitting Reff from specified axis_ratio
       reff_ar      = find_reff(simdata, r200, inc_deg,
                                axis_ratio = measure_type$axis_ratio,
-                               angular_size = observe_data$angular_size,
                                fract = measure_type$fract)
-      # Reff from data and measured axis ratio
-
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
-
-      } else {
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
-      }
+      # Reff from data & supplied axis ratio
     }
 
-    if (measure_type$type == "fixed"){                 # fitting Reff from specified axis_ratio
-      reff_ar      = data.frame("a_kpc"    = measure_type$axis_ratio$a,
-                                "b_kpc"    = measure_type$axis_ratio$b,
-                                "a_arcsec" = measure_type$axis_ratio$a / observe_data$angular_size,
-                                "b_arcsec" = measure_type$axis_ratio$b / observe_data$angular_size,
-                                "angle"    = measure_type$axis_ratio$ang)
+    if (measure_type$type == "fixed"){                     # fitting Reff from specified axis_ratio
+      reff_ar      = data.frame("a"    = measure_type$axis_ratio$a,
+                                "b"    = measure_type$axis_ratio$b,
+                                "ang"  = measure_type$axis_ratio$ang)
       # Reff at fixed specification
-      reff_ar$a_kpc = reff_ar$a_kpc * measure_type$fac
-      reff_ar$b_kpc = reff_ar$b_kpc * measure_type$fac
-      reff_ar$a_arcsec = reff_ar$a_arcsec * measure_type$fac
-      reff_ar$b_arcsec = reff_ar$b_arcsec * measure_type$fac
+    }
 
-      if (addSky){
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type,
-                                    addSky = TRUE, mag_zero = mag_zero, threshold = threshold,
-                                    pixel_sscale = pixel_sscale)
+    kinematics = kin_calc(obs_data = observe_data,
+                          obs_images = blur_images, axis_ratio = reff_ar,
+                          radius_type = radius_type)
 
+    if (IFU_plot != FALSE){
+      if (IFU_plot == TRUE){
+        plot_ifu(obs_data = observe_data, obs_images = blur_images, reff=TRUE, axis_ratio=reff_ar,
+                 which_plots = NA)
       } else {
-        kinematics = obs_kinematics(ifu_datacube = blur_imgs,
-                                    reff_axisratio = reff_ar,
-                                    sbinsize = observe_data$sbinsize, radius_type=radius_type)
-        # measure kinematics within specified Reff
+        plot_ifu(obs_data = observe_data, obs_images = blur_images, reff=IFU_plot$reff, axis_ratio=reff_ar,
+                 which_plots = IFU_plot$which_plots)
+        # plot IFU images
       }
     }
+
 
     if (radius_type == "Both" | radius_type == "both") {
-      output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
-                    "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
+      output = list("datacube" = blur_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                    "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                     "axis_ratio" = reff_ar, "lambda_r" = kinematics$obs_lambdar,
                     "elambda_r" = kinematics$obs_elambdar, "vsigma" = kinematics$obs_vsigma,
-                    "counts_img" = kinematics$counts_img, "velocity_img" = kinematics$velocity_img,
+                    "counts_img" = kinematics$flux_img, "velocity_img" = kinematics$velocity_img,
                     "dispersion_img" = kinematics$dispersion_img,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
-                    "d_L"=observe_data$d_L,
-                    "appregion" = observe_data$appregion)
+                    "ap_region" = observe_data$ap_region)
     } else if (radius_type == "Circular" | radius_type == "circular") {
-      output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
-                    "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
+      output = list("datacube" = blur_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                    "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                     "axis_ratio" = reff_ar, "lambda_r" = kinematics$obs_lambdar,
                     "vsigma" = kinematics$obs_vsigma,
-                    "counts_img" = kinematics$counts_img, "velocity_img" = kinematics$velocity_img,
+                    "counts_img" = kinematics$flux_img, "velocity_img" = kinematics$velocity_img,
                     "dispersion_img" = kinematics$dispersion_img,
                     "angular_size" = observe_data$angular_size,
                     "sbinsize"= observe_data$sbinsize,
                     "vbinsize" = observe_data$vbinsize,
-                    "d_L"=observe_data$d_L,
-                    "appregion" = observe_data$appregion)
+                    "ap_region" = observe_data$ap_region)
      } else if (radius_type == "Elliptical" | radius_type == "elliptical") {
-       output = list("datacube" = blur_imgs$cube, "xbin_labels" = blur_imgs$xbin_labels,
-                     "ybin_labels" = blur_imgs$ybin_labels, "vbin_labels" = blur_imgs$vbin_labels,
+       output = list("datacube" = blur_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
+                     "zbin_labels" = ifu_imgs$zbin_labels, "vbin_labels" = ifu_imgs$vbin_labels,
                      "axis_ratio" = reff_ar,
                      "elambda_r" = kinematics$obs_elambdar, "vsigma" = kinematics$obs_vsigma,
-                     "counts_img" = kinematics$counts_img, "velocity_img" = kinematics$velocity_img,
+                     "counts_img" = kinematics$flux_img, "velocity_img" = kinematics$velocity_img,
                      "dispersion_img" = kinematics$dispersion_img,
                      "angular_size" = observe_data$angular_size,
                      "sbinsize"= observe_data$sbinsize,
                      "vbinsize" = observe_data$vbinsize,
-                     "d_L"=observe_data$d_L,
-                     "appregion" = observe_data$appregion)
+                     "ap_region" = observe_data$ap_region)
       }
-
-    if (IFU_plot == TRUE){
-      plot_ifu(output)   # plot IFU images
-    }
 
     return(output)
 

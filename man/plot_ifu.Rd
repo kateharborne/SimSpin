@@ -4,14 +4,21 @@
 \alias{plot_ifu}
 \title{Plotting the flux, velocity and dipsersion image output from the IFU kinematic cube.}
 \usage{
-plot_ifu(lambda, reff = TRUE, which_plots = NA)
+plot_ifu(obs_data, obs_images, reff = FALSE, axis_ratio = NULL,
+  which_plots = NA)
 }
 \arguments{
-\item{lambda}{The list output from the function \code{\link{find_lambda}} containing the flux,
+\item{obs_data}{The list output from the function \code{\link{obs_data_prep}}.}
+
+\item{obs_images}{The list output from the function \code{\link{obs_imgs}} containing the flux,
 velocity and dispersion images.}
 
 \item{reff}{Boolean specifying whether or not you would like the effective radius ellipse to be
-plotted over the image. Default is TRUE.}
+plotted over the image. Default is FALSE.}
+
+\item{axis_ratio}{The axis ratio of the effective radius ellipse. This can be taken from the
+output of \code{\link{obs_imgs}}, or another data frame can be provided containing the semi-major
+(\code{$a}) and semi-minor axes (\code{$b}) in kpc.}
 
 \item{which_plots}{String describing which plots you wish to show - any combination of "Flux",
 "Velocity" or "Dispersion". Default is NA, which will plot all three.}
@@ -21,12 +28,14 @@ Returns three plots - a flux image, a velcoity image and a dispersion image.
 }
 \description{
 The purpose of this function is to plot the useful images expracted from the IFU cube produced.
-Input the aperture region and images produced by the \code{\link{find_lambda}} function and the
+Input the aperture region and images produced by the \code{\link{find_kinematics}} function and the
 output will be the flux, velocity and dispersion maps.
 }
 \examples{
 galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-lambdar = find_lambda(simdata = galaxy_data)
-plot_ifu(lambdar)
-
+data        = obs_data_prep(simdata = galaxy_data)
+fluxes      = flux_grid(obs_data = data, multi_thread=FALSE)
+cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
+images      = obs_imgs(obs_data = data, ifu_datacube = cube)
+plot_ifu(obs_data = data, obs_images = images)
 }

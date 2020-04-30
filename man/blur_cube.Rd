@@ -4,26 +4,27 @@
 \alias{blur_cube}
 \title{Mimicking seeing conditions for the IFU data cube.}
 \usage{
-blur_cube(ifu_datacube, sbinsize, psf, fwhm, angular_size)
+blur_cube(obs_data, ifu_datacube, psf, fwhm, threshold = 25)
 }
 \arguments{
-\item{ifu_datacube}{The list output from the function \code{\link{ifu_cube}} containing the mock
-IFU cube and the aperture region image (\code{$appregion}).}
+\item{obs_data}{The list output from the \code{obs_data_prep()} function.}
 
-\item{sbinsize}{The size of each spatial bin in kpc, output from the function
-\code{\link{obs_data_prep}}.}
+\item{ifu_datacube}{The list output from the function \code{\link{ifu_cube}} containing the mock
+IFU cube and the aperture region image (\code{$ap_region}).}
 
 \item{psf}{The type of PSF with choices of "Gaussian" or "Moffat".}
 
 \item{fwhm}{The full-width half-maximum size of the chosen PSF specified here in arcseconds.}
 
-\item{angular_size}{The conversion factor for a given redshift between kpc and arcseconds as
-produced by the \code{\link{obs_data_prep}} function.}
+\item{threshold}{The magnitude limit of the observation in AB mag.}
 }
 \value{
 Returns a list that contains:
 \item{\code{$blurcube}}{The original IFU cube produced by the function \code{\link{ifu_cube}},
-but blurred with the specified PSF.}
+ but blurred with the specified PSF.}
+\item{\code{$ap_region}}{An image that describes the shape of the aperture such that any further
+ convolutions that are applied to mimic beam smearing or seeing can be trimmed to the
+ appropriate aperture shape.}
 \item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
 \item{\code{$ybin_labels}}{Bin labels for the y-spatial dimension.}
 \item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
@@ -33,13 +34,13 @@ The purpose of this function is to mimic the spatial blurring caused by seeing a
 }
 \examples{
  galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
- data      = obs_data_prep(galaxy_data)
- ifucube   = ifu_cube(obs_data = data)
+ data        = obs_data_prep(galaxy_data)
+ fluxes      = flux_grid(obs_data = data, multi_thread = FALSE)
+ cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
 
- blurcube  = blur_cube(ifu_datacube   = ifucube,
-                       sbinsize       = data$sbinsize,
+ blurcube  = blur_cube(obs_data       = data,
+                       ifu_datacube   = cube,
                        psf            = "Moffat",
-                       fwhm           = 0.5,
-                       angular_size   = data$angular_size)
+                       fwhm           = 0.5)
 
 }

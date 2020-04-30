@@ -4,13 +4,10 @@
 \alias{obs_galaxy}
 \title{Constructing galaxy observation data from the Gadget output file data.}
 \usage{
-obs_galaxy(part_data, centre, inc_rad)
+obs_galaxy(part_data, inc_rad)
 }
 \arguments{
 \item{part_data}{The concatenated data frames output by \code{\link{sim_data}}.}
-
-\item{centre}{A logical that tells the function to centre the galaxy about its centre of mass
-and velocity or not (i.e. TRUE or FALSE).}
 
 \item{inc_rad}{The observed inclination angle in radians.}
 }
@@ -30,6 +27,5 @@ user supplied inclination.
   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
 
   output = obs_galaxy(part_data = galaxy_data,
-                      centre    = TRUE,
                       inc_rad   = 0)
 }

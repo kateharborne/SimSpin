@@ -10,6 +10,6 @@ importFrom("ProFit", "profitMakeGaussianPSF", "profitBruteConv", "profitCubaMoff
 importFrom("plotrix", "draw.ellipse")
 importFrom("FITSio", "writeFITSim", "addKwv", "newKwv")
 importFrom("grDevices", "colorRampPalette")
-importFrom("graphics", "par")
-importFrom("stats", "approxfun", "density", "pnorm", "setNames", "rnorm")
+importFrom("graphics", "par", "lines", "points", "text")
+importFrom("stats", "approxfun", "density", "pnorm", "setNames", "rnorm", "qnorm", "runif")
 importFrom("ProFound", "profoundSB2Flux")

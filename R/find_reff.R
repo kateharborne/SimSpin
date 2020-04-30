@@ -1,4 +1,4 @@
-# Kate Harborne (last edit - 23/04/18)
+# Kate Harborne (last edit - 15/11/19)
 #'Find the effective radius of a simulated galaxy.
 #'
 #'The purpose of this function is to find the observed effective radius of a simulated galaxy
@@ -12,25 +12,24 @@
 #'@param fract The fraction of particles to be contained within the radius calculated. Default is
 #' 0.5, i.e. Reff.
 #'@param axis_ratio A data frame containing the semi-major and semi-minor axes lengths for the
-#' observed galaxy, as given by \code{\link{ifu_cube}} or \code{\link{blur_cube}}.
-#'@param angular_size The kpc/'' scaling factor output by \code{\link{obs_data_prep}} used to give
-#' the axis ratios in both kpc and ''.
+#' observed galaxy, as given by \code{\link{obs_imgs}}.
 #'@return Returned is a data.frame containing the scaled axis ratio that describes the semi-major
 #' and semi-minor axes of an ellipse that contains the specified fraction of the total number of
 #' particles.
 #'@examples
 #' galaxy_data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 #' data        = obs_data_prep(simdata = galaxy_data)
-#' ifucube     = ifu_cube(obs_data = data)
+#' fluxes      = flux_grid(obs_data = data, multi_thread=FALSE)
+#' cube        = ifu_cube(obs_data  = data, flux_data = fluxes)
+#' images      = obs_imgs(obs_data = data, ifu_datacube = cube)
 #'
 #' output = find_reff(simdata      = galaxy_data,
 #'                    r200         = 10,
 #'                    inc_deg      = 0,
-#'                    axis_ratio   = ifucube$axis_ratio,
-#'                    angular_size = data$angular_size)
+#'                    axis_ratio   = images$axis_ratio)
 #'
 
-find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_size){
+find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio){
 
   result = grepl(paste(c("PartType2", "PartType3", "PartType4"), collapse = "|"), names(simdata))
   # finding the luminous matter within the simulation for imaging
@@ -50,12 +49,19 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_
   }
 
   inc_rad    = inc_deg * (pi / 180)                        # the galaxy inclination in radians
-  galaxy_df  = obs_galaxy(galaxy_data, centre=TRUE, inc_rad)
+  galaxy_data = cen_galaxy(galaxy_data) # centre data
+  galaxy_data = .reorient_galaxy(galaxy_data)              # reorient galaxy to horizontal
+  galaxy_df  = obs_galaxy(galaxy_data, inc_rad)
                                                            # extracting position & LOS velocities
 
   galaxy_cdf = galaxy_df[galaxy_df$r_obs<r200,]            # removing particles beyond r200
   ntotal     = as.numeric(nrow(galaxy_cdf))                # total number of particles in the galaxy within r200
-  elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axis_ratio$a^2) + (galaxy_cdf$z_obs^2 / axis_ratio$b^2)) <= 1]
+
+  a = axis_ratio$a
+  b = axis_ratio$b
+  ang = axis_ratio$ang # in degrees
+
+  elli = galaxy_cdf$x[(.ellipse(a = a, b = b, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang_deg = ang)) <= 1]
                                                            # particles within the ellipse
   etotal = as.integer(length(elli))                        # number of particles within the ellipse
   fac = 1
@@ -63,8 +69,8 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_
   if (etotal < ntotal*fract){
     while (etotal < ntotal*fract){
       fac  = fac + 0.01
-      axes = axis_ratio * fac
-      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      a_axes = a * fac; b_axes = b * fac
+      elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang_deg = ang)) <= 1]
       etotal = length(elli)
       }
     # if there are fewer than ntotal/2 particles inside, the ellipse grows by small amount until
@@ -74,24 +80,22 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_
 
     if (diff > (0.005 * ntotal*fract)){
       fac = fac - 0.01
-      axes = axis_ratio * fac
-      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      a_axes = a * fac; b_axes = b * fac
+      elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang_deg = ang)) <= 1]
       etotal = length(elli)
       while (etotal < ntotal*fract){
         fac = fac + 0.0005
-        axes = axis_ratio * fac
-        elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+        a_axes = a * fac; b_axes = b * fac
+        elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang_deg = ang)) <= 1]
         etotal = length(elli)
         }
       # if the difference is greater than 0.5% of ntotal/2, the ellipse shrinks again by one
       #  factor and increases in smaller increments until etotal > ntotal/2 again
       }
 
-    ellipse_axis_ratio = data.frame("a_kpc"     = axis_ratio$a * fac,
-                                    "b_kpc"     = axis_ratio$b * fac,
-                                    "a_arcsec"  = (axis_ratio$a * fac) / angular_size,
-                                    "b_arcsec"  = (axis_ratio$b * fac) / angular_size,
-                                    "angle"     = 90)
+    ellipse_axis_ratio = data.frame("a"     = axis_ratio$a * fac,
+                                    "b"     = axis_ratio$b * fac,
+                                    "ang"   = ang)
 
     return(ellipse_axis_ratio)
    }
@@ -100,8 +104,8 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_
 
     while (etotal > ntotal*fract){
       fac  = fac - 0.01
-      axes = axis_ratio * fac
-      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      a_axes = a * fac; b_axes = b * fac
+      elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang_deg = ang)) <= 1]
       etotal = length(elli)
     }
     # if there are more than ntotal/2 particles inside, the ellipse shrinks by small amount until
@@ -111,24 +115,23 @@ find_reff = function(simdata, r200=200, inc_deg, fract=0.5, axis_ratio, angular_
 
     if (diff > (0.005 * ntotal*fract)){
       fac = fac + 0.01
-      axes = axis_ratio * fac
-      elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+      a_axes = a * fac; b_axes = b * fac
+      elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang_deg = ang)) <= 1]
       etotal = length(elli)
       while (etotal > ntotal*fract){
         fac = fac - 0.0005
-        axes = axis_ratio * fac
-        elli = galaxy_cdf$x[((galaxy_cdf$x^2  / axes$a^2) + (galaxy_cdf$z_obs^2 / axes$b^2)) <= 1]
+        a_axes = a * fac; b_axes = b * fac
+        elli = galaxy_cdf$x[(.ellipse(a = a_axes, b = b_axes, x = galaxy_cdf$x, y = galaxy_cdf$z_obs, ang_deg = ang)) <= 1]
         etotal = length(elli)
       }
       # if the difference is greater than 0.5% of ntotal/2, the ellipse grows again by one factor
       #  and decreases in smaller increments until etotal < ntotal/2 again
     }
 
-    ellipse_axis_ratio = data.frame("a_kpc"     = axis_ratio$a * fac,
-                                    "b_kpc"     = axis_ratio$b * fac,
-                                    "a_arcsec"  = (axis_ratio$a * fac) / angular_size,
-                                    "b_arcsec"  = (axis_ratio$b * fac) / angular_size,
-                                    "angle"     = 90)
+    ellipse_axis_ratio = data.frame("a"     = axis_ratio$a * fac,
+                                    "b"     = axis_ratio$b * fac,
+                                    "ang"   = ang)
+
     return(ellipse_axis_ratio)
   }
 }

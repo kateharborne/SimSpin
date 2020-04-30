@@ -7,7 +7,7 @@
 obs_data_prep(simdata, r200 = 200, z = 0.05, fov = 15,
   ap_shape = "circular", central_wvl = 4800, lsf_fwhm = 2.65,
   pixel_sscale = 0.5, pixel_vscale = 1.04, inc_deg = 70,
-  filter = "g")
+  align = FALSE)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
@@ -32,15 +32,17 @@ filter output in angstroms.}
 
 \item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
 
-\item{filter}{When stellar particles and SEDs are provided, the filter used when converting
-spectra into luminosity. Options include "r" for SDSS r filter and "g" for the SDSS g filter.}
+\item{align}{Boolean indicating whether or not to align the semi-major axis with the x-axis.}
 }
 \value{
 Returned is a list that contains:
 \item{\code{$galaxy_obs}}{A data frame of the observed particle information (which contains the
   galaxy particle info from the GADGET file, with added coordinates \code{$galaxy_obs$z_obs},
-  \code{$galaxy_obs$r_obs}, and \code{$galaxy_obs$vy_obs} and particle fluxes,
-  \code{$galaxy_obs$flux}, in units of 1e-16 erg s-1 cm-2).}
+  \code{$galaxy_obs$r_obs}, and \code{$galaxy_obs$vy_obs}. \code{$galaxy_obs$binn} gives the cell
+  index in which each particle exists in the final cube. Depending on the \code{\link{sim_data}}
+  file provided, the Age and Metallicity of particles will be included if SSP has been requested,
+  Luminosity will be included per particle if SSP is not requested.}
+\item{\code{$z}}{The projected redshift at which the observation is made.}
 \item{\code{$sbin}}{The number of spatial bins.}
 \item{\code{$sbinsize}}{The size of the spatial bins in kpc.}
 \item{\code{$angular_size}}{The angular size of the galaxy in kpc/arcecond at the provided
@@ -48,7 +50,7 @@ Returned is a list that contains:
 \item{\code{$vbin}}{The number of velocity bins.}
 \item{\code{$vbinsize}}{The size of the velocity bins in km/s.}
 \item{\code{$lsf_size}}{The gaussian standard deviation of the line spread function in km/s.}
-\item{\code{$appregion}}{The aperture region mask used to remove flux outside of the specified
+\item{\code{$ap_region}}{The aperture region mask used to remove flux outside of the specified
  aperture.}
 }
 \description{

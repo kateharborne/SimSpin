@@ -19,9 +19,9 @@ rf = colorRampPalette(rev(brewer.pal(10,'Spectral')))
 pal = rf(7)
 ```
 
-Here, we examine the flexibility of the `find_lambda()` function - 
+Here, we examine the flexibility of the `find_kinematics()` function - 
 
-`find_lambda(simdata, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, threshold, measure_type = list("type"="fit", "fac"=1), blur, dispersion_analysis = FALSE)`
+`find_kinematics(simdata, r200 = 200, z, fov, ap_shape, central_wvl, lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, threshold, measure_type = list("type"="fit", "fac"=1), blur, dispersion_analysis = FALSE)`
 
 The purpose of this function is to construct a synthetic integral field unit (IFU) kinematic data cube from N-body particle simulations and use this cube to construct flux, line-of-sight (LOS) velocity and LOS velocity dispersion maps for kinematic analysis. The observed spin parameter, $\lambda_R$ is found from these maps.
 
@@ -55,17 +55,19 @@ galaxy_file = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="S
                        m2l_bulge    = 1)           # bulge mass-to-light in solar units)
 
 SAMI_noseeing_1Reff = 
-  find_lambda(simdata      = galaxy_file,
-              z            = 0.04,        # redshift (i.e. projected distance)
-              fov          = 15,          # field-of-view of IFU in ''
-              ap_shape     = "circular",  # shape of the aperture 
-              central_wvl  = 4800,        # central filter wavelength in angstroms
-              lsf_fwhm     = 2.65,        # line-spread-function FWHM in angstroms
-              pixel_sscale = 0.5,         # spatial pixel scale size in ''
-              pixel_vscale = 1.04,        # velocity pixel scale size in angstroms
-              inc_deg      = 75,          # projected galaxy inclination in degrees
-              threshold    = 26,          # magnitude limit of the observation
-              measure_type = list("type"="fit", "fac"=1)) # measurement radius
+  find_kinematics(simdata      = galaxy_file,
+                  z            = 0.05,        # redshift (i.e. projected distance)
+                  fov          = 15,          # field-of-view of IFU in ''
+                  ap_shape     = "circular",  # shape of the aperture 
+                  central_wvl  = 4800,        # central filter wavelength in angstroms
+                  lsf_fwhm     = 2.65,        # line-spread-function FWHM in angstroms
+                  pixel_sscale = 0.5,         # spatial pixel scale size in ''
+                  pixel_vscale = 1.04,        # velocity pixel scale size in angstroms
+                  inc_deg      = 75,          # projected galaxy inclination in degrees
+                  threshold    = 26,          # magnitude limit of the observation
+                  measure_type = list("type"="fit", "fac"=1), # measurement radius
+                  IFU_plot     = TRUE,
+                  multi_thread = FALSE)
               
 ```
 
@@ -79,8 +81,8 @@ The function automatically plots the images of each of the observed maps produce
 
 ``` {r, fig.width=3.25, fig.height=4} 
 SAMI_fwhm2_1Reff = 
-  find_lambda(simdata      = galaxy_file,
-              z            = 0.04,      
+  find_kinematics(simdata      = galaxy_file,
+              z            = 0.05,      
               fov          = 15,       
               ap_shape     = "circular",  
               central_wvl  = 4800,        
@@ -91,9 +93,12 @@ SAMI_fwhm2_1Reff =
               threshold    = 26,          
               measure_type = list("type"="specified", 
                                   "fract"=0.5,
-                                  "axis_ratio"=data.frame("a"=SAMI_noseeing_1Reff$axis_ratio$a_kpc,
-                                                          "b"=SAMI_noseeing_1Reff$axis_ratio$b_kpc)),  
-              blur         = list("psf" = "Moffat", "fwhm" = 2)) # specifying the PSF and fwhm
+                                  "axis_ratio"=list("a"=SAMI_noseeing_1Reff$axis_ratio$a,
+                                                    "b"=SAMI_noseeing_1Reff$axis_ratio$b,
+                                                    "ang"=0)),  
+              blur         = list("psf" = "Moffat", "fwhm" = 2), # specifying the PSF and fwhm
+              IFU_plot     = TRUE,
+              multi_thread = FALSE)
               
 ```
 
@@ -105,8 +110,8 @@ We have chosen to specify the axis ratio in this case via `measure_type = list("
 
 ``` {r, fig.width=3.25, fig.height=4} 
 MaNGA_fwhm2_1Reff = 
-  find_lambda(simdata      = galaxy_file,
-              z            = 0.04,      
+  find_kinematics(simdata      = galaxy_file,
+              z            = 0.05,      
               fov          = 32,       
               ap_shape     = "hexagonal",  
               central_wvl  = 5000,        
@@ -116,7 +121,9 @@ MaNGA_fwhm2_1Reff =
               inc_deg      = 75,          
               threshold    = 26,          
               measure_type = list("type"="fit", "fac"=1), 
-              blur         = list("psf" = "Moffat", "fwhm" = 2))
+              blur         = list("psf" = "Moffat", "fwhm" = 2),
+              IFU_plot     = TRUE,
+              multi_thread = FALSE)
               
 ```
 
@@ -130,8 +137,8 @@ However, if we want to compare between the same observations on each telescope, 
 
 ``` {r, fig.width=3.25, fig.height=4} 
 MaNGA_fwhm2_1SAMIReff = 
-  find_lambda(simdata      = galaxy_file,
-              z            = 0.04,      
+  find_kinematics(simdata = galaxy_file,
+              z            = 0.05,      
               fov          = 32,       
               ap_shape     = "hexagonal",  
               central_wvl  = 5000,        
@@ -142,10 +149,12 @@ MaNGA_fwhm2_1SAMIReff =
               threshold    = 26,          
               measure_type = list("type"="fixed", 
                                   "fac"=1, 
-                                  "axis_ratio"=data.frame("a"=SAMI_noseeing_1Reff$axis_ratio$a_kpc,
-                                                          "b"=SAMI_noseeing_1Reff$axis_ratio$b_kpc,
-                                                          "angle"=90)), 
-              blur         = list("psf" = "Moffat", "fwhm" = 2)) 
+                                  "axis_ratio"=data.frame("a"=SAMI_noseeing_1Reff$axis_ratio$a,
+                                                          "b"=SAMI_noseeing_1Reff$axis_ratio$b,
+                                                          "angle"=0)), 
+              blur         = list("psf" = "Moffat", "fwhm" = 2),
+              IFU_plot     = TRUE,
+              multi_thread = FALSE)
               
 ```
 
@@ -161,4 +170,4 @@ legend("topright", inset=c(0.02,0.02), c(expression("1. SAMI, 1 R"["eff"]*", no 
 
 ```
 
-Overall, we have demonstrated 4 different ways of using the `find_lambda()` function in the `SimSpin` package. To compare these observed values to the value of spin inherent to the model, consider using the `sim_analysis()` function. Other walk-through from this package can be found at <https://rpubs.com/kateharborne>.
+Overall, we have demonstrated 4 different ways of using the `find_kinematics()` function in the `SimSpin` package. To compare these observed values to the value of spin inherent to the model, consider using the `sim_analysis()` function. Other walk-through from this package can be found at <https://rpubs.com/kateharborne>.

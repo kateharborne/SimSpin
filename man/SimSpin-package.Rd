@@ -28,16 +28,17 @@ Maintainer: \packageMaintainer{SimSpin}
 \examples{
 galaxy_file = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
 
-S0_lambda = find_lambda(simdata      = galaxy_file,
-                        z            = 0.05,
-                        fov          = 15,
-                        ap_shape     = "circular",
-                        central_wvl  = 4800,
-                        lsf_fwhm     = 2.65,
-                        pixel_sscale = 0.5,
-                        pixel_vscale = 1.04,
-                        inc_deg      = 70,
-                        threshold    = 25,
-                        measure_type = list(type="fit", fac=1))
+S0_lambda = find_kinematics(simdata      = galaxy_file,
+                            z            = 0.05,
+                            fov          = 15,
+                            ap_shape     = "circular",
+                            central_wvl  = 4800,
+                            lsf_fwhm     = 2.65,
+                            pixel_sscale = 0.5,
+                            pixel_vscale = 1.04,
+                            inc_deg      = 70,
+                            threshold    = 25,
+                            measure_type = list(type="fit", fac=1),
+                            multi_thread = FALSE)
 }
 \keyword{data}
