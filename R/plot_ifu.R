@@ -75,7 +75,7 @@ plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plo
                na.color='gray', xaxt="n", yaxt="n", ann=FALSE, magmap=FALSE, family="serif", font=1)
     fields::image.plot(legend.only = TRUE, zlim = range(c(obs_images$velocity_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(100)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
     if (reff==TRUE){
-      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a / sbinsize, b = axis_data$b / sbinsize, border="red", lwd = 5, deg=TRUE)
+      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a / sbinsize, b = axis_data$b / sbinsize, angle = axis_data$ang, border="red", lwd = 5, deg=TRUE)
     }
   }
 
@@ -86,7 +86,7 @@ plot_ifu = function(obs_data, obs_images, reff=FALSE, axis_ratio=NULL, which_plo
                na.color='gray', xaxt="n", yaxt="n", ann=FALSE, magmap=FALSE, family="serif", font=1)
     fields::image.plot(legend.only = TRUE, zlim = range(c(obs_images$dispersion_img)), col = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu")[1:5])(200)), horizontal = TRUE, family="serif", font=1, legend.lab = expression("dispersion"[LOS] * ", km s"^{-1}))
     if (reff==TRUE){
-      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a / sbinsize, b = axis_data$b / sbinsize, border="red", lwd = 5, deg=TRUE)
+      plotrix::draw.ellipse(x = xcen, y = ycen, a = axis_data$a / sbinsize, b = axis_data$b / sbinsize, angle = axis_data$ang, border="red", lwd = 5, deg=TRUE)
     }
   }
 }
