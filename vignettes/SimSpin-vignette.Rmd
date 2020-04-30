@@ -111,7 +111,8 @@ SAMI_cube_phys = build_datacube(simdata      = galaxy_file,
                                 lsf_fwhm     = 2.56, 
                                 pixel_sscale = 0.5, 
                                 pixel_vscale = 1.04, 
-                                inc_deg      = 70)       
+                                inc_deg      = 70,
+                                multi_thread = FALSE)
 ```
 
 ``` {r, echo=FALSE, fig.width=5, fig.height=5, message=FALSE, warning=FALSE, results="hide", fig.align="center"}
@@ -150,7 +151,8 @@ SAMI_cube_blur = build_datacube(simdata      = galaxy_file,
                                 pixel_sscale = 0.5, 
                                 pixel_vscale = 1.04, 
                                 inc_deg      = 70,
-                                blur         = list("psf" = "Moffat", "fwhm" = 2))       
+                                blur         = list("psf" = "Moffat", "fwhm" = 2),
+                                multi_thread = FALSE)       
 ```
 
 The output of this function is in the same format as before, but with the data cube convolved such that the images produced are blurred by the form ("Moffat") and degree (2'') specified by `list("psf" = "Moffat", "fwhm" = 2)`. 
@@ -191,7 +193,8 @@ SAMI_lambda = find_kinematics(simdata      = galaxy_file,
                               inc_deg      = 70,
                               measure_type = list(type = "fit", fac = 1), 
                               threshold    = 25, 
-                              blur         = list("psf" = "Moffat", "fwhm" = 2))
+                              blur         = list("psf" = "Moffat", "fwhm" = 2),
+                              multi_thread = FALSE)
                          
 
 SAMI_lambda$lambda_r # the observed lambda_R spin parameter
@@ -214,7 +217,8 @@ SAMI_lambda_warning = find_kinematics(simdata = galaxy_file,
                                       inc_deg = 70,
                                       measure_type = list(type = "fit", fac = 5),  
                                       threshold = 25, 
-                                      blur = list("psf" = "Moffat", "fwhm" = 2))
+                                      blur = list("psf" = "Moffat", "fwhm" = 2),
+                                      multi_thread = FALSE)
 ```
 
 The level of blurring applied and the measurement radius within which $\lambda_R$ is measured can be optionally altered to study the effects that these choices have on the measurement. If the `measurement_radius` or `blur` arguments are missing, no atmospheric seeing conditions will be applied and $\lambda_R$ will, by default, be measured within 1 effective radius. 

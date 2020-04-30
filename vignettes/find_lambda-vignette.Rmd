@@ -66,7 +66,8 @@ SAMI_noseeing_1Reff =
                   inc_deg      = 75,          # projected galaxy inclination in degrees
                   threshold    = 26,          # magnitude limit of the observation
                   measure_type = list("type"="fit", "fac"=1), # measurement radius
-                  IFU_plot     = TRUE)
+                  IFU_plot     = TRUE,
+                  multi_thread = FALSE)
               
 ```
 
@@ -96,7 +97,8 @@ SAMI_fwhm2_1Reff =
                                                     "b"=SAMI_noseeing_1Reff$axis_ratio$b,
                                                     "ang"=0)),  
               blur         = list("psf" = "Moffat", "fwhm" = 2), # specifying the PSF and fwhm
-              IFU_plot     = TRUE)
+              IFU_plot     = TRUE,
+              multi_thread = FALSE)
               
 ```
 
@@ -120,7 +122,8 @@ MaNGA_fwhm2_1Reff =
               threshold    = 26,          
               measure_type = list("type"="fit", "fac"=1), 
               blur         = list("psf" = "Moffat", "fwhm" = 2),
-              IFU_plot     = TRUE)
+              IFU_plot     = TRUE,
+              multi_thread = FALSE)
               
 ```
 
@@ -150,7 +153,8 @@ MaNGA_fwhm2_1SAMIReff =
                                                           "b"=SAMI_noseeing_1Reff$axis_ratio$b,
                                                           "angle"=0)), 
               blur         = list("psf" = "Moffat", "fwhm" = 2),
-              IFU_plot     = TRUE)
+              IFU_plot     = TRUE,
+              multi_thread = FALSE)
               
 ```
 

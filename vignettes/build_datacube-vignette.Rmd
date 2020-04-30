@@ -59,7 +59,8 @@ SAMI_datacube =
                  pixel_sscale = 0.5,         # spatial pixel scale size in ''
                  pixel_vscale = 1.04,        # velocity pixel scale size in angstroms
                  inc_deg      = 90,          # projected galaxy inclination in degrees
-                 threshold    = 25)          # magnitude limit of the observation
+                 threshold    = 25,          # magnitude limit of the observation
+                 multi_thread = FALSE)
 ```
 
 If we examine the output of this function, we get a kinematic data cube (`SAMI_datacube$datacube`) which contains the spatial distribution of particles that fall into different velocity bins. We can tell in the plot below that our galaxy is rotating, as each velocity plane shows the distribution of particles travelling at that speed. Other outputs include the x- and y- spatial and velocity bin labels in units of '' and km s$^{-1}$ respectively (`SAMI_datacube$xbin_labels`, `SAMI_datacube$ybin_labels`, `SAMI_datacube$zbin_labels`). 
@@ -102,7 +103,8 @@ SAMI_datacube_blur =
                  pixel_vscale = 1.04,        
                  inc_deg      = 90,      
                  threshold    = 25,          
-                 blur         = list("psf" = "Moffat", "fwhm" = 2)) # specifying the PSF and fwhm
+                 blur         = list("psf" = "Moffat", "fwhm" = 2), # specifying the PSF and fwhm
+                 multi_thread = FALSE)
 ```
 
 ```{r, echo=FALSE, fig.width=7, fig.height=7, fig.align="center"}
