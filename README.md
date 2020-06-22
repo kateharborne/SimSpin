@@ -48,20 +48,21 @@ If you would rather generate the SimSpin file independently, the expected file f
 >> /PartType1 
 >>> ...
 ```
-We use the same PartType definition as Gadget: PartTypeX where 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars. For PartType0-3, each PartType group contains the same data sets as above. If the simulation contains stars, the Age and Metallicity information for each particle is also included:
+We use the same PartType definition as Gadget: PartTypeX where 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars. For PartType0-3, each PartType group contains the same data sets as above. If the simulation contains stars, the Initial Mass, Stellar Formation Time and Metallicity information for each particle is also included:
 
 ```
 > SimSpin_example.hdf5
 >> /PartType4
->>> /PartType4/Age
 >>> /PartType4/Mass
->>> /PartType4/Metallicity
 >>> /PartType4/vx        
 >>> /PartType4/vy
 >>> /PartType4/vz
 >>> /PartType4/x
 >>> /PartType4/y
 >>> /PartType4/z
+>>> /PartType4/InitialMass
+>>> /PartType4/StellarFormationTime
+>>> /PartType4/Metallicity
 ```
 If the file is set up in this way, the simulation data can easily be read into the SimSpin package. 
 
