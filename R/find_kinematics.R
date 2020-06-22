@@ -147,18 +147,16 @@ find_kinematics=function(simdata, r200 = 200, z=0.05, fov=15, ap_shape="circular
                           radius_type = radius_type)
 
     if (!is.list(IFU_plot)){
-      if (IFU_plot != FALSE){
-        if (IFU_plot == TRUE){
-          plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar,
-                   which_plots = NA)
-        }
+      if (IFU_plot){
+        plot_ifu(obs_data = observe_data, obs_images = images, reff=TRUE, axis_ratio=reff_ar,
+                 which_plots = NA)
       }
-    } else {
+      } else if (is.list(IFU_plot)){
         plot_ifu(obs_data = observe_data, obs_images = images, reff=IFU_plot$reff, axis_ratio=reff_ar,
                  which_plots = IFU_plot$which_plots)
         # plot IFU images
       }
-    }
+
 
     if (radius_type == "Both" | radius_type == "both") {
       output       = list("datacube"=ifu_imgs$cube, "xbin_labels" = ifu_imgs$xbin_labels,
