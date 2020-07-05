@@ -66,5 +66,12 @@ We use the same PartType definition as Gadget: PartTypeX where 0 - gas, 1 - dark
 ```
 If the file is set up in this way, the simulation data can easily be read into the SimSpin package. 
 
+### Citation
+If you use this code in any of your own published research, please make sure to include the following citation in your bibliography:
+
+K.E. Harborne, C.Power and A.S.G. Robotham, (2020), ["SIMSPIN - Constructing mock IFS kinematic data cubes"](https://ui.adsabs.harvard.edu/abs/2020PASA...37...16H/abstract), Publications of the Astronomical Society of Australia, Volume 37, article id. e016
+
+K.E. Harborne, (2019), ["SimSpin: Kinematic analysis of galaxy simulations"](https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract), Astrophysics Source Code Library, record ascl:1903.006
+
 ### References
-A. Pontzen, R Roskar, G. Stinson and R. Woods, (2013), "pynbody: N-Body/SPH analysis for python",  Astrophysics Source Code Library, record ascl:1305.002
+A. Pontzen, R Roskar, G. Stinson and R. Woods, (2013), ["pynbody: N-Body/SPH analysis for python"](https://ui.adsabs.harvard.edu/abs/2013ascl.soft05002P/abstract),  Astrophysics Source Code Library, record ascl:1305.002
