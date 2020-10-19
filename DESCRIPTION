@@ -27,3 +27,5 @@ Suggests: knitr,
     plot3D,
     ProSpect
 VignetteBuilder: knitr
+Remotes:
+    asgr/ProSpect
