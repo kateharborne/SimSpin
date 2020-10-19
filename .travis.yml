@@ -2,11 +2,15 @@
 
 language: R
 cache: packages
+r: release
 
 os:
   - osx
   - linux
 
 before_install:
-  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; else brew install hdf5; fi
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; fi
 
+r_github_packages:
+  - asgr/ProSpect
+  - asgr/ProFound
