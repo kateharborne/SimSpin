@@ -1,4 +1,8 @@
 # SimSpin
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.com/kateharborne/SimSpin.svg?branch=master)](https://travis-ci.com/kateharborne/SimSpin)
+<!-- badges: end -->
+
 SimSpin - A package for the kinematic analysis of galaxy simulations
 
 The purpose of the Simspin R-package is to take a galaxy simulation and measure an the kinematics of that model as if it had been observed using an IFU. A kinematic data cube can be produced using the functions in this package; from this cube, "observables" can be measured. Specifically, the observable spin parameter, &#955;<sub>r</sub>. This package, once installed, is fully documented and tested.
