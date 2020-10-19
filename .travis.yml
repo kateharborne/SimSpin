@@ -8,5 +8,5 @@ os:
   - linux
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install libhdf5-dev
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; else brew install hdf5; fi
+
