@@ -2,3 +2,11 @@
 
 language: R
 cache: packages
+
+os:
+  - osx
+  - linux
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libhdf5-dev
