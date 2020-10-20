@@ -11,6 +11,9 @@ os:
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; fi
 
-r_github_packages:
-  - asgr/ProSpect
-  - asgr/ProFound
+install:
+  - R -e 'devtools::install_deps(dep = T)'
+
+script:
+  - R CMD build .
+  - R CMD check *tar.gz
