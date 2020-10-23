@@ -3,14 +3,62 @@
 
 library(hdf5r)
 
-read_snap = function(filename, ...){
+make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
+                             disk_Z=0.024, bulge_Z=0.001, template="BC03lr", ...){
 
   galaxy_data = tryCatch(expr = {.read_gadget(filename, ...)},
-                         error = function(e){.read_hdf5(filename, ...)})
+                         error = function(e){.read_hdf5(filename, cores, ...)})
 
-  return(galaxy_data)
+  galaxy_data$part = cen_galaxy(galaxy_data$part)
+
+  Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
+
+  if(!"ssp" %in% names(galaxy_data)){ # if the SSP field does not come from the snapshot file, must be working with N-body
+
+    n_disk = galaxy_data$head$Npart[3]; n_bulge = galaxy_data$head$Npart[4] # number of disk and bulge particles
+    n_stars = n_disk + n_bulge # total number of "stars"
+    galaxy_data$ssp = data.frame("Initial_Mass"=numeric(n_stars), "Age"=numeric(n_stars),
+                                 "Metallicity"=numeric(n_stars))
+    galaxy_data$ssp$Initial_Mass = galaxy_data$part$Mass[Npart_sum[2]+1:Npart_sum[4]]/2 # assuming the initial mass is half of the current mass
+
+    if (n_disk > 0 & n_bulge > 0){ # assigning ages and metallities to disk and bulge particles (if present in snap)
+      galaxy_data$ssp$Age[1:n_disk] = disk_age
+      galaxy_data$ssp$Age[(n_disk+1):n_stars] = bulge_age
+      galaxy_data$ssp$Metallicity[1:n_disk] = disk_Z
+      galaxy_data$ssp$Metallicity[(n_disk+1):n_stars] = bulge_Z
+    } else if (n_disk > 0 & n_bulge == 0){
+      galaxy_data$ssp$Age = disk_age
+      galaxy_data$ssp$Metallicity = disk_Z
+    } else if (n_disk == 0 & n_bulge > 0){
+      galaxy_data$ssp$Age = bulge_age
+      galaxy_data$ssp$Metallicity = bulge_Z
+    }
+
+  }
+
+  if(template == "BC03lr" | template == "BC03" | template == "bc03" | template == "bc03lr"){
+    temp = ProSpect::BC03lr
+  } else if (template == "BC03hr" | template == "bc03hr"){
+    temp = ProSpect::BC03hr
+  } else if (template == "EMILES" | template == "emiles"){
+    temp = ProSpect::EMILES
+  }
+
+  n_stars = length(galaxy_data$ssp$Age) # number of "stellar" particles
+  id_stars = seq(Npart_sum[2]+1, Npart_sum[5]) # ids of "stellar" particles
+  simspin_file = matrix(data=NA, nrow=7+length(temp$Zspec[[1]][1,]), ncol=n_stars)
+  simspin_file[1,] = seq(1, n_stars)
+  simspin_file[2,] = galaxy_data$part$x[id_stars]
+  simspin_file[3,] = galaxy_data$part$y[id_stars]
+  simspin_file[4,] = galaxy_data$part$z[id_stars]
+  simspin_file[5,] = galaxy_data$part$vx[id_stars]
+  simspin_file[6,] = galaxy_data$part$vy[id_stars]
+  simspin_file[7,] = galaxy_data$part$vz[id_stars]
+
+  return()
 }
 
+# Function for reading in Gadget binary files
 .read_gadget = function(f, verbose = FALSE){
   data = file(f, "rb") # open file for reading in binary mode
 
@@ -80,7 +128,8 @@ read_snap = function(filename, ...){
 
 }
 
-.read_hdf5   = function(f, verbose = FALSE){
+# Function for reading in Gadget HDF5 files and EAGLE HDF5 files
+.read_hdf5   = function(f, cores, verbose = FALSE){
 
   data          = hdf5r::h5file(f, mode="r")
 
@@ -157,10 +206,11 @@ read_snap = function(filename, ...){
   part$z = pos[3,]; part$vz = vel[3,]
 
   if (eagle){ # reading the details from EAGLE files for simple stellar population
-    ssp = list("Initial_Mass"=numeric(length=Nall[5]), "Stellar_Formation_Time"=numeric(length = Nall[5]),
+    ssp = list("Initial_Mass"=numeric(length=Nall[5]), "Age"=numeric(length = Nall[5]),
                "Metallicity"=numeric(length=Nall[5]))
     ssp$Initial_Mass = hdf5r::readDataSet(data[["PartType4/InitialMass"]])
-    ssp$Stellar_Formation_Time = hdf5r::readDataSet(data[["PartType4/StellarFormationTime"]])
+    Stellar_Formation_Time = hdf5r::readDataSet(data[["PartType4/StellarFormationTime"]])
+    ssp$Age = as.numeric(.SFTtoAge2(a = Stellar_Formation_Time, cores = cores))
     ssp$Metallicity = hdf5r::readDataSet(data[["PartType4/SmoothedMetallicity"]])
   }
 
@@ -169,4 +219,34 @@ read_snap = function(filename, ...){
   if(verbose){cat("Done reading HDF5 snapshot file. \n")}
   if(eagle){return(list(part=part, head=head, ssp=ssp))}else{return(list(part=part, head=head))}
 
+}
+
+# Function for computing the stellar age from the formation time in parallel
+.SFTtoAge2 = function(a, cores=1){
+  c1 = snow::makeCluster(cores)
+  doSNOW::registerDoSNOW(c1)
+  output = foreach(i = 1:length(a), .packages = "celestial")%dopar%{celestial::cosdistTravelTime((1 / a[i]) - 1)}
+  closeAllConnections()
+
+  return(output)
+}
+
+# Function to generate spectra
+.part_spec = function(Metallicity, Age, Mass, Template){
+  Z = ProSpect::interp_quick(Metallicity, Template$Z, log = TRUE)
+  A = ProSpect::interp_quick(Age, Template$Age, log = TRUE)
+
+  weights = data.frame("hihi" = Z$wt_hi * A$wt_hi,
+                       "hilo" = Z$wt_hi * A$wt_lo,
+                       "lohi" = Z$wt_lo * A$wt_hi,
+                       "lolo" = Z$wt_lo * A$wt_lo)
+
+  part_spec = array(data = NA, dim = c(1, length(Template$Wave)))
+
+  part_spec = ((Template$Zspec[[Z$ID_hi]][A$ID_hi,] * weights$hihi) +
+               (Template$Zspec[[Z$ID_hi]][A$ID_lo,] * weights$hilo) +
+               (Template$Zspec[[Z$ID_lo]][A$ID_hi,] * weights$lohi) +
+               (Template$Zspec[[Z$ID_lo]][A$ID_lo,] * weights$lolo)) * Mass
+
+  return(part_spec)
 }
