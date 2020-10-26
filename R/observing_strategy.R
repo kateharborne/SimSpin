@@ -4,14 +4,14 @@
 observing_strategy = function(z = 0.1, inc_deg = 70, blur = F, fwhm=2, psf="Gaussian"){
 
   if(blur){
-    if(psf == "Gaussian" | psf == "gaussian"){
+    if(stringr::str_to_upper(psf) == "GAUSSIAN"){
       output = list(z       = z,
                     inc_deg = inc_deg,
                     blur    = T,
                     fwhm    = fwhm,
                     psf     = "Gaussian")
     }
-    if(psf == "Moffat" | psf == "moffat"){
+    if(stringr::str_to_upper(psf) == "MOFFAT"){
       output = list(z       = z,
                     inc_deg = inc_deg,
                     blur    = T,
