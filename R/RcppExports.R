@@ -7,6 +7,7 @@
 #'
 #' @param part_data The particles from which you would like to calculate the
 #' angular momentum vector, J.
+<<<<<<< HEAD
 #' @return The numeric vector describing the magnitudes of each component of
 #' the angular momentum.
 #' @examples
@@ -15,6 +16,9 @@
 #'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
 #'                            "vz"=stats::rnorm(100), "Mass"=rep(1,100))
 #'   J = angmom_galaxy(galaxy_data)
+=======
+#'
+>>>>>>> Updating new example files and DESCRIPTION for travis.
 #' @export
 angmom_galaxy <- function(part_data) {
     .Call('_SimSpin_angmom_galaxy', PACKAGE = 'SimSpin', part_data)
@@ -48,12 +52,6 @@ cen_galaxy <- function(part_data) {
 #' @return Returns a data frame containing the original particle information plus the observed
 #'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 #'  sight velocity (\code{$vy_obs}) at the given inclination.
-#' @examples
-#'   data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-#'   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
-#'
-#'   output = obs_galaxy(part_data = galaxy_data,
-#'                       inc_rad   = 0)
 #' @export
 obs_galaxy <- function(part_data, inc_rad) {
     .Call('_SimSpin_obs_galaxy', PACKAGE = 'SimSpin', part_data, inc_rad)
@@ -63,6 +61,7 @@ obs_galaxy <- function(part_data, inc_rad) {
 #'
 #' The purpose of this function is to compute the radial coordinates.
 #'
+<<<<<<< HEAD
 #' @param part_data A data.frame describing the particles ID, positions,
 #'  velocities and masses.
 #' @return The radius of the particle positions.
@@ -72,6 +71,9 @@ obs_galaxy <- function(part_data, inc_rad) {
 #'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
 #'                            "vz"=stats::rnorm(100), "Mass"=rep(1,100))
 #'   r = r_galaxy(galaxy_data)
+=======
+#' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
+>>>>>>> Updating new example files and DESCRIPTION for travis.
 #' @export
 r_galaxy <- function(part_data) {
     .Call('_SimSpin_r_galaxy', PACKAGE = 'SimSpin', part_data)
