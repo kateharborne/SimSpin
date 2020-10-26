@@ -43,7 +43,7 @@
 } # Gauss-Hermite coefficients
 
 
-.circular_ap=function(sbin){
+.circular_ap_old=function(sbin){
   ap_region = matrix(data = 0, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
   xcentre = sbin/2 + 0.5; ycentre = sbin/2 + 0.5
   x = matrix(data = rep(seq(1,sbin), each=sbin), nrow = sbin, ncol = sbin)
@@ -54,7 +54,7 @@
   return(ap_region)
 }
 
-.hexagonal_ap=function(sbin){
+.hexagonal_ap_old=function(sbin){
   ap_region = matrix(data = 0, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
   xcentre = sbin/2 + 0.5; ycentre = sbin/2 + 0.5
   for (x in 1:sbin){
@@ -89,11 +89,11 @@
   return(trimdata)
 }
 
-.SFTtoAge = function(a){
+.SFTtoAge_old = function(a){
   celestial::cosdistTravelTime((1 / a) - 1)
 }
 
-.part_spec = function(Metallicity, Age, Mass){
+.part_spec_old = function(Metallicity, Age, Mass){
   Z = ProSpect::interp_param(Metallicity, ProSpect::BC03lr$Z, log = TRUE)
   A = ProSpect::interp_param(Age, ProSpect::BC03lr$Age, log = TRUE)
 
@@ -125,7 +125,6 @@
   inertiaTensor[2,1] = inertiaTensor[1,2]
   inertiaTensor[3,1] = inertiaTensor[1,3]
   inertiaTensor[3,2] = inertiaTensor[2,3]
-
 
   # step 2: find eigen vectors and reorder such that x is the major axis
   eigen_vec = eigen(inertiaTensor)$vectors
