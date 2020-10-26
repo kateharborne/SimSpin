@@ -1,4 +1,4 @@
-// Kate Harborne (last edit - 29/11/2018)
+// Kate Harborne (last edit - 26/10/2020)
 #include <Rcpp.h>
 #include <cmath>
 using namespace Rcpp;
@@ -15,12 +15,6 @@ using namespace Rcpp;
 //' @return Returns a data frame containing the original particle information plus the observed
 //'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 //'  sight velocity (\code{$vy_obs}) at the given inclination.
-//' @examples
-//'   data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-//'   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
-//'
-//'   output = obs_galaxy(part_data = galaxy_data,
-//'                       inc_rad   = 0)
 //' @export
 // [[Rcpp::export]]
 Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad) {
@@ -32,26 +26,29 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad) {
   Rcpp::NumericVector vx        = part_data["vx"];
   Rcpp::NumericVector vy        = part_data["vy"];
   Rcpp::NumericVector vz        = part_data["vz"];
-  Rcpp::NumericVector Mass      = part_data["Mass"];
 
   int n = x.size();
 
   Rcpp::NumericVector r(n), z_obs(n), vy_obs(n), r_obs(n);
   for(int i=0; i<n; i++){
-    r[i]      = ::sqrt((x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]));
-    z_obs[i]  = ::sin(inc_rad) * z[i] + ::cos(inc_rad) * y[i];
-    vy_obs[i] = ::cos(inc_rad) * vz[i] - ::sin(inc_rad) * vy[i];
-    r_obs[i]  = ::sqrt((x[i] * x[i]) + (z_obs[i] * z_obs[i]));
+    r[i]      = sqrt((x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]));
+    z_obs[i]  = sin(inc_rad) * z[i] + cos(inc_rad) * y[i];
+    vy_obs[i] = cos(inc_rad) * vz[i] - sin(inc_rad) * vy[i];
+    r_obs[i]  = sqrt((x[i] * x[i]) + (z_obs[i] * z_obs[i]));
   }
 
   Rcpp::DataFrame df =
     Rcpp::DataFrame::create(Rcpp::Named("ID")        = ID,
                             Rcpp::Named("x")         = x,
+                            Rcpp::Named("y")         = y,
+                            Rcpp::Named("z")         = z,
+                            Rcpp::Named("vx")        = vx,
+                            Rcpp::Named("vy")        = vy,
+                            Rcpp::Named("vz")        = vz,
                             Rcpp::Named("r")         = r,
                             Rcpp::Named("z_obs")     = z_obs,
                             Rcpp::Named("r_obs")     = r_obs,
-                            Rcpp::Named("vy_obs")    = vy_obs,
-                            Rcpp::Named("Mass")      = Mass);
+                            Rcpp::Named("vy_obs")    = vy_obs);
 
   return(df);
 
