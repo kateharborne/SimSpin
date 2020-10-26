@@ -18,12 +18,15 @@ Imports:
     RColorBrewer,
     plotrix,
     FITSio,
-    ProFound
+    ProFound,
+    foreach
 Depends:
     celestial
 RoxygenNote: 6.1.1
-Suggests: knitr,
+Suggests: 
+    knitr,
     rmarkdown,
     plot3D,
-    ProSpect
+    ProSpect,
+    testthat
 VignetteBuilder: knitr
