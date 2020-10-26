@@ -1,17 +1,62 @@
-# Kate Harborne - 16/10/2020
-# SimSpin v2.0.0 - read_snapshot() function
+# Author: Kate Harborne
+# Date: 22/10/2020
+# Title: Testing the make_simspin_file.R code
+#'Reformating isolated galaxy simulations to contain spectra.
+#'
+#'The purpose of this function is to construct a SimSpin file containing the
+#' mock spectra for each particle contained within the galaxy simulation file.
+#' If the snapshot provided is from a cosmological simulation, the SEDs
+#' generated will be with respect to the Stellar Formation Time/Age, Metallicity
+#' and Initial Mass of each stellar particle. If the system is an N-body model,
+#' stellar particles are assumed to have an age and metallicity as provided to
+#' the function as \code{disk_age}, \code{bulge_age}, \code{disk_Z} and
+#' \code{bulge_Z}. Returned is an .fst file in a SimSpin readable format.
+#'
+#'@param filename The path to the snapshot file.
+#'@param cores The number of cores across which to multi-thread the problem.
+#'@param disk_age The age of the disk particles in Gyr.
+#'@param bulge_age The age of the bulge particles in Gyr.
+#'@param disk_Z The metallicity of the disk particles in Gyr.
+#'@param bulge_Z The metallicity of the bulge particles in Gyr.
+#'@param template The stellar templates from which to derive the SEDs. Options
+#' include "BC03lr" (GALEXEV low resolution, Bruzual & Charlot 2003), "BC03hr"
+#' (GALEXEV high resolution, Bruzual & Charlot 2003) or "EMILES" (Vazdekis et
+#' al, 2016).
+#'@param output The path at which the output file is written. If not provided,
+#' file will be written at the location of the input filename with the addition
+#' of "_spectra.fst".
+#'@param overwrite If true, and the file already exists at the output location,
+#' a new file will be written over the old one.
+#'@return Returns an .fst file tat contains a matrix of particle positions,
+#' velocities, and spectra.
+#'@examples
+#'make_simspin_file(filename = system.file("extdata", "SimSpin_example_Gadget",
+#'                                          package = "SimSpin"),
+#'                  output=tempfile())
+#'
 
-library(hdf5r)
 
 make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
-                             disk_Z=0.024, bulge_Z=0.001, template="BC03lr", ...){
+                             disk_Z=0.024, bulge_Z=0.001, template="BC03lr",
+                             output, overwrite = F, ...){
+
+  if(missing(output)){
+    output = paste(sub('\\..*', '', filename), "_spectra.fst", sep="")
+  }
+
+  if(file.exists(output) & !overwrite){
+    stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
+               "If you wish to overwrite this file, please specify 'overwrite=T'. \n"))
+  }
 
   galaxy_data = tryCatch(expr = {.read_gadget(filename, ...)},
                          error = function(e){.read_hdf5(filename, cores, ...)})
 
-  galaxy_data$part = cen_galaxy(galaxy_data$part)
-
   Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
+
+  galaxy_data$part = cen_galaxy(galaxy_data$part) # centering the galaxy
+
+  galaxy_data = .align(galaxy_data) # align angular momentum vector with z-axis
 
   if(!"ssp" %in% names(galaxy_data)){ # if the SSP field does not come from the snapshot file, must be working with N-body
 
@@ -36,26 +81,34 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   }
 
-  if(template == "BC03lr" | template == "BC03" | template == "bc03" | template == "bc03lr"){
+  if(stringr::str_to_upper(template) == "BC03LR" | stringr::str_to_upper(template) == "BC03"){
     temp = ProSpect::BC03lr
-  } else if (template == "BC03hr" | template == "bc03hr"){
+  } else if (stringr::str_to_upper(template) == "BC03HR"){
     temp = ProSpect::BC03hr
-  } else if (template == "EMILES" | template == "emiles"){
+  } else if (stringr::str_to_upper(template) == "EMILES"){
     temp = ProSpect::EMILES
   }
 
   n_stars = length(galaxy_data$ssp$Age) # number of "stellar" particles
+  wavelengths = length(temp$Wave)
   id_stars = seq(Npart_sum[2]+1, Npart_sum[5]) # ids of "stellar" particles
-  simspin_file = matrix(data=NA, nrow=7+length(temp$Zspec[[1]][1,]), ncol=n_stars)
-  simspin_file[1,] = seq(1, n_stars)
-  simspin_file[2,] = galaxy_data$part$x[id_stars]
-  simspin_file[3,] = galaxy_data$part$y[id_stars]
-  simspin_file[4,] = galaxy_data$part$z[id_stars]
-  simspin_file[5,] = galaxy_data$part$vx[id_stars]
-  simspin_file[6,] = galaxy_data$part$vy[id_stars]
-  simspin_file[7,] = galaxy_data$part$vz[id_stars]
+  simspin_file = matrix(data=NA, nrow=(7+wavelengths), ncol=n_stars+1)
+  simspin_file[1,] = seq(0, n_stars)
+  simspin_file[2,] = c(NA, galaxy_data$part$x[id_stars])
+  simspin_file[3,] = c(NA, galaxy_data$part$y[id_stars])
+  simspin_file[4,] = c(NA, galaxy_data$part$z[id_stars])
+  simspin_file[5,] = c(NA, galaxy_data$part$vx[id_stars])
+  simspin_file[6,] = c(NA, galaxy_data$part$vy[id_stars])
+  simspin_file[7,] = c(NA, galaxy_data$part$vz[id_stars])
+  simspin_file[8:(wavelengths+7),1] = temp$Wave
+  simspin_file[8:(wavelengths+7),2:(n_stars+1)] = .part_spec(Metallicity = galaxy_data$ssp$Metallicity,
+                                                             Age = galaxy_data$ssp$Age,
+                                                             Mass = galaxy_data$ssp$Initial_Mass,
+                                                             Template = temp, cores = cores)
 
-  return()
+  fst::write_fst(as.data.frame(simspin_file), path = output, compress = 100)
+
+  return(cat("SimSpin file written to: ", output, "\n"))
 }
 
 # Function for reading in Gadget binary files
@@ -201,18 +254,29 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     }
   }
 
-  part$x = pos[1,]; part$vx = vel[1,]
-  part$y = pos[2,]; part$vy = vel[2,]
-  part$z = pos[3,]; part$vz = vel[3,]
-
   if (eagle){ # reading the details from EAGLE files for simple stellar population
     ssp = list("Initial_Mass"=numeric(length=Nall[5]), "Age"=numeric(length = Nall[5]),
                "Metallicity"=numeric(length=Nall[5]))
     ssp$Initial_Mass = hdf5r::readDataSet(data[["PartType4/InitialMass"]])
     Stellar_Formation_Time = hdf5r::readDataSet(data[["PartType4/StellarFormationTime"]])
-    ssp$Age = as.numeric(.SFTtoAge2(a = Stellar_Formation_Time, cores = cores))
+    ssp$Age = as.numeric(.SFTtoAge(a = Stellar_Formation_Time, cores = cores))
     ssp$Metallicity = hdf5r::readDataSet(data[["PartType4/SmoothedMetallicity"]])
+
+    a_coor = hdf5r::h5attr(data[["PartType4/Coordinates"]], "aexp-scale-exponent")
+    h_coor = hdf5r::h5attr(data[["PartType4/Coordinates"]], "h-scale-exponent")
+    a_velo = hdf5r::h5attr(data[["PartType4/Velocity"]], "aexp-scale-exponent")
+    h_velo = hdf5r::h5attr(data[["PartType4/Velocity"]], "h-scale-exponent")
+    a_mass = hdf5r::h5attr(data[["PartType4/Mass"]], "aexp-scale-exponent")
+    h_mass = hdf5r::h5attr(data[["PartType4/Mass"]], "h-scale-exponent")
+
+    pos = pos * head$Time^(a_coor) * head$HubbleParam^(h_coor) * 1e3
+    vel = vel * head$Time^(a_velo) * head$HubbleParam^(h_velo)
+    part$Mass = part$Mass * head$Time^(a_mass) * head$HubbleParam^(h_mass)
   }
+
+  part$x = pos[1,]; part$vx = vel[1,]
+  part$y = pos[2,]; part$vy = vel[2,]
+  part$z = pos[3,]; part$vz = vel[3,]
 
   hdf5r::h5close(data)
 
@@ -222,7 +286,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 }
 
 # Function for computing the stellar age from the formation time in parallel
-.SFTtoAge2 = function(a, cores=1){
+.SFTtoAge = function(a, cores=1){
   c1 = snow::makeCluster(cores)
   doSNOW::registerDoSNOW(c1)
   output = foreach(i = 1:length(a), .packages = "celestial")%dopar%{celestial::cosdistTravelTime((1 / a[i]) - 1)}
@@ -232,21 +296,91 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 }
 
 # Function to generate spectra
-.part_spec = function(Metallicity, Age, Mass, Template){
-  Z = ProSpect::interp_quick(Metallicity, Template$Z, log = TRUE)
-  A = ProSpect::interp_quick(Age, Template$Age, log = TRUE)
+.part_spec = function(Metallicity, Age, Mass, Template, cores){
+  c1 = snow::makeCluster(cores)
+  doSNOW::registerDoSNOW(c1)
+  part_spec = foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin"))%dopar%{
+    Z = as.numeric(ProSpect::interp_quick(Metallicity[i], Template$Z, log = TRUE))
+    A = as.numeric(ProSpect::interp_quick(Age[i]*1e9, Template$Age, log = TRUE))
 
-  weights = data.frame("hihi" = Z$wt_hi * A$wt_hi,
-                       "hilo" = Z$wt_hi * A$wt_lo,
-                       "lohi" = Z$wt_lo * A$wt_hi,
-                       "lolo" = Z$wt_lo * A$wt_lo)
+    weights = data.frame("hihi" = Z[4] * A[4],   # ID_lo = 1, ID_hi = 2, wt_lo = 3, wt_hi = 4
+                         "hilo" = Z[4] * A[3],
+                         "lohi" = Z[3] * A[4],
+                         "lolo" = Z[3] * A[3])
 
-  part_spec = array(data = NA, dim = c(1, length(Template$Wave)))
+    part_spec = array(data = NA, dim = c(1, length(Template$Wave)))
 
-  part_spec = ((Template$Zspec[[Z$ID_hi]][A$ID_hi,] * weights$hihi) +
-               (Template$Zspec[[Z$ID_hi]][A$ID_lo,] * weights$hilo) +
-               (Template$Zspec[[Z$ID_lo]][A$ID_hi,] * weights$lohi) +
-               (Template$Zspec[[Z$ID_lo]][A$ID_lo,] * weights$lolo)) * Mass
+    part_spec = ((Template$Zspec[[Z[2]]][A[2],] * weights$hihi) +
+                 (Template$Zspec[[Z[2]]][A[1],] * weights$hilo) +
+                 (Template$Zspec[[Z[1]]][A[2],] * weights$lohi) +
+                 (Template$Zspec[[Z[1]]][A[1],] * weights$lolo)) * Mass[i] * 1e10
 
-  return(part_spec)
+    return(part_spec)
+  }
+  closeAllConnections()
+  output = matrix(unlist(part_spec, use.names=FALSE), ncol = length(Metallicity), byrow = FALSE)
+
+  return(output)
+}
+
+# Function to flip galaxy if Jz is upside-down
+.flip = function(galaxy_data){
+
+    rot_mat = matrix(c(1,0,0,0,-1,0,0,0,-1), nrow = 3, ncol=3)
+
+    new_coor =  rot_mat %*% rbind(galaxy_data$part$x, galaxy_data$part$y, galaxy_data$part$z)
+    new_vel =  rot_mat %*% rbind(galaxy_data$part$vx, galaxy_data$part$vy, galaxy_data$part$vz)
+
+    galaxy_data$part$x = new_coor[1,]; galaxy_data$part$y = new_coor[2,]; galaxy_data$part$z = new_coor[3,];
+    galaxy_data$part$vx = new_vel[1,]; galaxy_data$part$vy = new_vel[2,]; galaxy_data$part$vz = new_vel[3,];
+
+    return(galaxy_data)
+}
+
+# Function to align galaxy
+.align = function(galaxy_data){
+
+  Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
+
+  # To align the galaxy edge-on, align the J vector of inner 10kpc of disk with
+  # the z axis. Inner 10kc of disk is chosen using preferentially gas, then stars,
+  # then disk particles (in the case that the former does not exist in the sim).
+  no_angmom = galaxy_data$head$Npart[1] # number of gas particles for computing angmom
+  angmom_ids = c(1, no_angmom) # ids of gas particles
+  if (no_angmom == 0){
+    no_angmom = galaxy_data$head$Npart[5] # number of stellar particles
+    angmom_ids = c(Npart_sum[4]+1, Npart_sum[5]) # ids of star particles
+    if (no_angmom == 0){
+      no_angmom = galaxy_data$head$Npart[3] # number of disk particles
+      angmom_ids = c(Npart_sum[2]+1,Npart_sum[3]) # ids of disk particles
+    }
+  }
+  # pulling out the disk from which to compute J
+  r = r_galaxy(galaxy_data$part[angmom_ids[1]:angmom_ids[2],]) # compute radial coordinates
+  J = angmom_galaxy(galaxy_data$part[angmom_ids[1]:angmom_ids[2],][r < 0.33*max(r),]) # compute J
+  J_norm = matrix(J/(sqrt(J[1]^2 + J[2]^2 + J[3]^2)), nrow=1, ncol=3)
+
+  v = c(J_norm[2], -J_norm[1], 0) # unit vector normal to J and z-axis, about which we want to rotate
+  c = J_norm[3] # giving cos(angle)
+  s = sqrt(v[1]^2 + v[2]^2) # giving sin(angle)
+
+  if (J_norm[3] == -1){
+    galaxy_data = .flip(galaxy_data)
+    return(galaxy_data)
+  }
+  if (J_norm[3] == 1){
+    return(galaxy_data)
+  }
+
+  v_x = matrix(data = c(0, v[3], -v[2], -v[3], 0, v[1], v[2], -v[1], 0), nrow = 3, ncol = 3) # skew-symmetric cross product
+  I = matrix(data = c(1, 0, 0, 0, 1, 0, 0, 0, 1), nrow = 3, ncol = 3) # identity matrix
+  rot_mat = I + v_x + (1/(1+c))*(v_x %*% v_x) # rotation matrix via Rodrigues Rotation Formula: wikipedia.org/wiki/Rodrigues'_rotation_formula
+
+  new_coor =  rot_mat %*% rbind(galaxy_data$part$x, galaxy_data$part$y, galaxy_data$part$z)
+  new_vel =  rot_mat %*% rbind(galaxy_data$part$vx, galaxy_data$part$vy, galaxy_data$part$vz)
+
+  galaxy_data$part$x = new_coor[1,]; galaxy_data$part$y = new_coor[2,]; galaxy_data$part$z = new_coor[3,];
+  galaxy_data$part$vx = new_vel[1,]; galaxy_data$part$vy = new_vel[2,]; galaxy_data$part$vz = new_vel[3,];
+
+  return(galaxy_data)
 }
