@@ -12,21 +12,14 @@ LinkingTo: Rcpp
 Imports:
     Rcpp,
     hdf5r,
-    magicaxis,
-    ProFit,
-    fields,
-    RColorBrewer,
-    plotrix,
     FITSio,
-    ProFound,
-    foreach
+    foreach,
+    snow,
+    doSNOW,
+    doParallel
 Depends:
     celestial
 RoxygenNote: 6.1.1
 Suggests: 
-    knitr,
-    rmarkdown,
-    plot3D,
     ProSpect,
     testthat
-VignetteBuilder: knitr
