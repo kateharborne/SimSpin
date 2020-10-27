@@ -58,7 +58,8 @@ observation = function(telescope, observing_strategy){
                 spatial_res     = telescope$spatial_res,
                 wave_bin        = length(wave_seq),
                 wave_res        = telescope$wave_res,
-                wave_seq        = wave_seq)
+                wave_seq        = wave_seq,
+                c               = 299792.458)
 
   class(output) <- "observation"
 
