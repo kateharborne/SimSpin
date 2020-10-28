@@ -7,7 +7,14 @@
 #'
 #' @param part_data The particles from which you would like to calculate the
 #' angular momentum vector, J.
-#'
+#' @return The numeric vector describing the magnitudes of each component of
+#' the angular momentum.
+#' @examples
+#'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+#'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+#'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+#'                            "vz"=stats::rnorm(100), "Mass"=rep(1,100))
+#'   J = angmom_galaxy(galaxy_data)
 #' @export
 angmom_galaxy <- function(part_data) {
     .Call('_SimSpin_angmom_galaxy', PACKAGE = 'SimSpin', part_data)
@@ -18,12 +25,15 @@ angmom_galaxy <- function(part_data) {
 #' The purpose of this function is to centre the galaxy such that the origin of the
 #' system lies at (0,0,0).
 #'
-#' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
+#' @param part_data A data.frame describing the particles ID, positions,
+#'  velocities and masses.
+#' @return The input data.frame with positions and velocities centered.
 #' @examples
-#'   data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-#'   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
-#'
-#'   output = cen_galaxy(part_data = galaxy_data)
+#'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+#'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+#'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+#'                            "vz"=stats::rnorm(100), "Mass"=rep(1,100))
+#'   centered_galaxy = cen_galaxy(galaxy_data)
 #' @export
 cen_galaxy <- function(part_data) {
     .Call('_SimSpin_cen_galaxy', PACKAGE = 'SimSpin', part_data)
@@ -31,16 +41,21 @@ cen_galaxy <- function(part_data) {
 
 #' Constructing galaxy observation data from the Gadget output file data.
 #'
-#' The purpose of this function is to produce the observable features of simulation data when
-#' taking mock IFU observations. It accepts particle information output from the
-#' \code{\link{sim_data}} function and returns the observable galaxy properties projected at a
-#' user supplied inclination.
+#' The purpose of this function is to produce the observable features of
+#' simulation data when taking mock IFU observations.
 #'
-#' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
+#' @param part_data A data.frame describing the particles ID, positions, and
+#'  velocities.
 #' @param inc_rad The observed inclination angle in radians.
 #' @return Returns a data frame containing the original particle information plus the observed
 #'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 #'  sight velocity (\code{$vy_obs}) at the given inclination.
+#' @examples
+#'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+#'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+#'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+#'                            "vz"=stats::rnorm(100))
+#'   observed_data = obs_galaxy(galaxy_data, inc_rad = 1.047)
 #' @export
 obs_galaxy <- function(part_data, inc_rad) {
     .Call('_SimSpin_obs_galaxy', PACKAGE = 'SimSpin', part_data, inc_rad)
@@ -50,36 +65,17 @@ obs_galaxy <- function(part_data, inc_rad) {
 #'
 #' The purpose of this function is to compute the radial coordinates.
 #'
-#' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
+#' @param part_data A data.frame describing the particles ID, positions,
+#'  velocities and masses.
+#' @return The radius of the particle positions.
+#' @examples
+#'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+#'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+#'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+#'                            "vz"=stats::rnorm(100), "Mass"=rep(1,100))
+#'   r = r_galaxy(galaxy_data)
 #' @export
 r_galaxy <- function(part_data) {
     .Call('_SimSpin_r_galaxy', PACKAGE = 'SimSpin', part_data)
-}
-
-#' Constructing galaxy simulation data from the Gadget output file data
-#'
-#' The purpose of this function is to produce the extra kinematic features for simulation data in
-#' spherical polar coordinates. It accepts particle information output from the
-#' \code{\link{sim_data}} function and returns several additional galaxy properties that are
-#' useful for deriving the galaxy kinematics.
-#'
-#' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
-#' @param centre A logical that tells the function to centre the galaxy about its centre of mass
-#'  or not (i.e. TRUE or FALSE).
-#' @return Returns a data frame containing the particle \code{$ID}, \code{$x-}, \code{$y-} and
-#'  \code{$z-}positions and corresponding velocities (\code{$vx, $vy } and \code{$vz}), along with
-#'  the spherical polar coordinates (\code{$r}, \code{$theta} and \code{$phi}) and associated
-#'  velocities (\code{$vr}, \code{$vtheta} and \code{$vphi}), the cylindrical radial coordinate
-#'  and its associated velocity (\code{$cr} and \code{$vcr}) and the mass of each particle
-#'  (\code{$Mass}) and their angular momentum components (\code{$Jx}, \code{$Jy},\code{$Jz}).
-#' @examples
-#'   data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-#'   galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
-#'
-#'   output = sim_galaxy(part_data = galaxy_data,
-#'                       centre    = TRUE)
-#' @export
-sim_galaxy <- function(part_data, centre) {
-    .Call('_SimSpin_sim_galaxy', PACKAGE = 'SimSpin', part_data, centre)
 }
 
