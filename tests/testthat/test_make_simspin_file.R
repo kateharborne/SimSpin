@@ -25,6 +25,11 @@ test_that("Error when output file already exists and overwrite = F",{
   expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst", sep="")))
 })
 
+# Test that the function fails when the template provided is unsupported
+test_that("Error when template is unsupported", {
+  expect_error(make_simspin_file(ss_eagle, template = "abcd", output = paste(temp_loc, "eagle_test_spectra.fst", sep="")))
+})
+
 # Test that the function will overwrite if overwrite = T
 test_that("Test that old files can be overwritten", {
   expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst", sep=""),
