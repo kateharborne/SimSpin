@@ -9,26 +9,21 @@ License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
+Depends: R (>= 3.0)
 Imports:
-    fields,
+    celestial,
+    data.table,
+    doSNOW,
+    doParallel,
     FITSio,
+    foreach,
+    fst,
     hdf5r,
-    magicaxis,
-    plotrix,
-    plot3D,
     ProFit,
-    ProFound,
-    ProSpect (>= 1.0.7),
+    ProSpect,
     Rcpp,
-    RColorBrewer
-Depends:
-    celestial
+    stringr,
+    snow
 RoxygenNote: 7.1.1
 Suggests: 
-    knitr,
-    rmarkdown
-VignetteBuilder: knitr
-Remotes:
-    asgr/ProSpect,
-    ICRAR/ProFit
-
+    testthat
