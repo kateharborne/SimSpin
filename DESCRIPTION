@@ -9,17 +9,21 @@ License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
+Depends: R (>= 3.0)
 Imports:
-    Rcpp,
-    hdf5r,
+    celestial,
+    data.table,
+    doSNOW,
+    doParallel,
     FITSio,
     foreach,
-    snow,
-    doSNOW,
-    doParallel
-Depends:
-    celestial
-RoxygenNote: 6.1.1
-Suggests: 
+    fst,
+    hdf5r,
+    ProFit,
     ProSpect,
+    Rcpp,
+    stringr,
+    snow
+RoxygenNote: 7.1.1
+Suggests: 
     testthat
