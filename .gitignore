@@ -2,7 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
+<<<<<<< HEAD
 .DS_store
+=======
+.DS_Store
+>>>>>>> Updating examples so thatthey don't depend on the .fst file (that has been removed from inst data because it's too big!).
 src/*.o
 src/*.so
 src/*.dll

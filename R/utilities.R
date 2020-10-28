@@ -2,6 +2,75 @@
 # Date: 27/10/2020
 # Title: Utilities functions (i.e. hidden functions from the user)
 
+# Function for reading in Gadget binary files
+.read_gadget = function(f, verbose = FALSE){
+  data = file(f, "rb") # open file for reading in binary mode
+
+  block         = readBin(data, "integer", n=1) #block size field, giving the length of the header
+  if(block!=256){close(data); stop("Not a binary file. Trying HDF5 reader...")}
+  if(verbose){cat("Reading in header.\n")}
+  Npart         = readBin(data, "integer", n=6) # number of particles of each type in this file
+  Massarr       = readBin(data, "numeric", n=6, size=8) # mass of each particle type. set to 0 for present particles means read mass in mass block.
+  Time          = readBin(data, "numeric", n=1, size=8) # time of output, or expansion factor for cosmological simulations
+  Redshift      = readBin(data, "numeric", n=1, size=8) # z = 1/(a-1)
+  FlagSfr       = readBin(data, "integer", n=1) # flag for star formation
+  FlagFeedback  = readBin(data, "integer", n=1) # flag for feedback
+  Nall          = readBin(data, "integer", n=6) # total number of particles of each type in the simulation
+  FlagCooling   = readBin(data, "integer", n=1) # flag for cooling
+  NumFiles      = readBin(data, "integer", n=1) # number of files in each snapshot
+  BoxSize       = readBin(data, "numeric", n=1, size=8) # box size if periodic boundary conditions are used
+  Omega0        = readBin(data, "numeric", n=1, size=8) # matter density at z=0 in units of critical density
+  OmegaLambda   = readBin(data, "numeric", n=1, size=8) # vacuum energy density at z=0 in units of critical density
+  HubbleParam   = readBin(data, "numeric", n=1, size=8) # the Hubble constant in units of 100 kms^-1Mpc^-1
+  FlagAge       = readBin(data, "integer", n=1) # Creation time of stars
+  FlagMetals    = readBin(data, "integer", n=1) # Metalliticy values
+  NallHW        = readBin(data, "integer", n=6) # For simulations with more than 2^32 particles
+  flag_entr_ics = readBin(data, "integer", n=1) # flags that ICs contain entropy rather than thermal energy in the U block
+  empty         = readBin(data, "integer", n=15) # unused empty bytes at the end of the header
+  block         = readBin(data, "integer", n=1)
+
+  # Reading in the positions block
+  block         = readBin(data, "integer", n=1)
+  if(verbose){cat("Reading in positions for", block/4/3, "particles. \n")}
+  pos           = readBin(data, "numeric", n=block/4, size=4)
+  block         = readBin(data, "integer", n=1)
+
+  # Reading in the velocities block
+  block         = readBin(data, "integer", n=1)
+  if(verbose){cat("Reading in velocities for", block/4/3, "particles. \n")}
+  vel           = readBin(data, "numeric", n=block/4, size=4)
+  block         = readBin(data, "integer", n=1)
+
+  # Reading in the ID's block
+  block         = readBin(data, "integer", n=1)
+  if(verbose){cat("Reading in IDs for", block/4, "particles. \n")}
+  id            = readBin(data, "integer", n=block/4, size=4)
+  block         = readBin(data, "integer", n=1)
+
+  # Reading in the mass block
+  block         = readBin(data, "integer", n=1)
+  if(verbose){cat("Reading in masses for", block/4, "particles. \n")}
+  masses        = readBin(data, "numeric", n=block/4, size=4)
+  block         = readBin(data, "integer", n=1)
+
+  close(data)
+
+  extract = ((1:floor(sum(Npart)))*3)-2 # giving integers of x/vx within pos/vel
+  part = data.frame("ID" = id,
+                    "x" = pos[extract], "y"=pos[extract+1], "z"=pos[extract+2],
+                    "vx" = vel[extract], "vy" = vel[extract+1], "vz"=vel[extract+2],
+                    "Mass" = masses)
+  head = list("Npart" = Npart, "Massarr" = Massarr, "Time" = Time, "Redshift" = Redshift,
+              "FlagSfr" = FlagSfr, "FlagFeedback" = FlagFeedback, "Nall" = Nall,
+              "FlagCooling" = FlagCooling, "NumFiles" = NumFiles, "BoxSize" = BoxSize,
+              "Omega0" = Omega0, "OmegaLambda" = OmegaLambda, "HubbleParam" = HubbleParam,
+              "FlagAge" = FlagAge, "FlagMetals" = FlagMetals, "NallHW" = NallHW,
+              "flag_entr_ics" = flag_entr_ics)
+
+  if(verbose){cat("Done reading Gadget snapshot file. \n")}
+  return(list(part=part, head=head))
+
+}
 
 # Function for reading in Gadget HDF5 files and EAGLE HDF5 files
 .read_hdf5   = function(f, cores, verbose = FALSE){
