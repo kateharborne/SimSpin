@@ -5,16 +5,21 @@ using namespace Rcpp;
 
 //' Constructing galaxy observation data from the Gadget output file data.
 //'
-//' The purpose of this function is to produce the observable features of simulation data when
-//' taking mock IFU observations. It accepts particle information output from the
-//' \code{\link{sim_data}} function and returns the observable galaxy properties projected at a
-//' user supplied inclination.
+//' The purpose of this function is to produce the observable features of
+//' simulation data when taking mock IFU observations.
 //'
-//' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
+//' @param part_data A data.frame describing the particles ID, positions, and
+//'  velocities.
 //' @param inc_rad The observed inclination angle in radians.
 //' @return Returns a data frame containing the original particle information plus the observed
 //'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 //'  sight velocity (\code{$vy_obs}) at the given inclination.
+//' @examples
+//'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+//'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+//'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+//'                            "vz"=stats::rnorm(100))
+//'   observed_data = obs_galaxy(galaxy_data, inc_rad = 1.047)
 //' @export
 // [[Rcpp::export]]
 Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad) {

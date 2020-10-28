@@ -7,7 +7,15 @@ using namespace Rcpp;
 //'
 //' The purpose of this function is to compute the radial coordinates.
 //'
-//' @param part_data The concatenated data frames output by \code{\link{sim_data}}.
+//' @param part_data A data.frame describing the particles ID, positions,
+//'  velocities and masses.
+//' @return The radius of the particle positions.
+//' @examples
+//'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+//'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+//'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+//'                            "vz"=stats::rnorm(100), "Mass"=rep(1,100))
+//'   r = r_galaxy(galaxy_data)
 //' @export
 // [[Rcpp::export]]
 
