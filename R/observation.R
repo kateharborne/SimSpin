@@ -1,7 +1,22 @@
 # Author: Kate Harborne
 # Date: 26/10/2020
 # Title: Observation function to generate observation properties
-
+#
+#'A class to describe the basic properties of the observation
+#'
+#'The purpose of this function is to generate an object that describes how the
+#' galaxy has been observed.
+#'
+#'@param telescope A \code{telescope} object.
+#'@param observing_strategy An \code{observing_strategy} object.
+#'@return Returns an object of class "observation" that summarises the
+#' properties of the observation. Run within the \code{build_datacube()}
+#' function.
+#'@examples
+#'sami = telescope(type="SAMI")
+#'conditions = observing_strategy()
+#'observation_summary = observation(telescope=sami, observing_strategy=conditions)
+#'
 observation = function(telescope, observing_strategy){
 
   ang_size      = celestial::cosdistAngScale(observing_strategy$z, ref="Planck") # angular size given z, kpc/"
@@ -61,34 +76,7 @@ observation = function(telescope, observing_strategy){
                 wave_seq        = wave_seq,
                 c               = 299792.458)
 
-  class(output) <- "observation"
-
   return(output)
 }
 
-.circular_ap=function(sbin){
-  ap_region = matrix(data = NA, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
-  xcentre = sbin/2 + 0.5; ycentre = sbin/2 + 0.5
-  x = matrix(data = rep(seq(1,sbin), each=sbin), nrow = sbin, ncol = sbin)
-  y = matrix(data = rep(seq(sbin,1), sbin), nrow = sbin, ncol = sbin)
-  xx = x - xcentre; yy = y - ycentre
-  rr = sqrt(xx^2 + yy^2)
-  ap_region[rr<= sbin/2] = 1
-  return(as.vector(ap_region))
-}
 
-.hexagonal_ap=function(sbin){
-  ap_region = matrix(data = NA, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
-  xcentre = sbin/2 + 0.5; ycentre = sbin/2 + 0.5
-  for (x in 1:sbin){
-    for (y in 1:sbin){
-      xx = x - xcentre
-      yy = y - ycentre
-      rr = (2 * (sbin / 4) * (sbin * sqrt(3) / 4)) - ((sbin / 4) ) * abs(yy) - ((sbin * sqrt(3) / 4)) * abs(xx)
-      if ((rr >= 0) && (abs(xx) < sbin/2) && (abs(yy) < (sbin  * sqrt(3) / 4))){
-        ap_region[x,y] = 1
-      }
-    }
-  }
-  return(as.vector(ap_region))
-}
