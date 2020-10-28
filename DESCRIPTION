@@ -19,6 +19,7 @@ Imports:
     foreach,
     fst,
     hdf5r,
+    ProSpect,
     ProFit,
     Rcpp,
     stringr,
