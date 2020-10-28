@@ -5,14 +5,16 @@
 library(testthat)
 context("Testing build_datacube function.\n")
 
-ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.fst", package = "SimSpin")
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 temp_loc = tempdir()
-
+make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
 
 # Testing that build_datacube will run
 test_that("Initial run of build_datacube function with defaults.", {
-  expect_vector(build_datacube(simspin_file = ss_gadget, telescope = telescope(type="SAMI"),
+  expect_vector(build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""), telescope = telescope(type="SAMI"),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45)), ptype=list(), size = 2)
-  expect_vector(build_datacube(simspin_file = ss_gadget, telescope = telescope(type="MaNGA"),
+  expect_vector(build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""), telescope = telescope(type="MaNGA"),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), ptype=list(), size = 2)
 })
+
+unlink(paste(temp_loc, "spectra.fst", sep=""))

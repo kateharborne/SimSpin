@@ -25,13 +25,15 @@ The purpose of this function is to write the spectral cube generated using
 the \code{build_datacube()} function to a FITS file.
 }
 \examples{
-telescope = telescope(type="SAMI")
-observing_strategy = observing_strategy(z = 0.05, inc_deg = 90)
-cube = build_datacube(simspin_file = system.file("extdata",
-                                                "SimSpin_example_Gadget_spectra.fst",
-                                                 package = "SimSpin"),
-                     telescope = telescope,
-                     observing_strategy = observing_strategy)
-write_simspin_FITS(output_file = tempfile(), simspin_cube = cube$spectral_cube,
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+temp_loc = tempdir()
+make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
+cube = build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""),
+                     telescope = telescope(type="SAMI"),
+                     observing_strategy = observing_strategy())
+write_simspin_FITS(output_file = paste(temp_loc, "cube.fits", sep=""),
+                  simspin_cube = cube$spectral_cube,
                   observation = cube$observation)
+unlink(paste(temp_loc, "spectra.fst", sep=""))
+unlink(paste(temp_loc, "cube.fits", sep=""))
 }
