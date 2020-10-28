@@ -20,10 +20,11 @@ Imports:
     fst,
     hdf5r,
     ProFit,
-    ProSpect,
     Rcpp,
     stringr,
     snow
 RoxygenNote: 7.1.1
 Suggests: 
     testthat
+Remotes:
+    ProSpect
