@@ -73,25 +73,25 @@ test_that("observing_strategy() issues error when incompatible parameters are gi
 
 # Testing that you can generate an observation with each of the telescope types
 test_that("Initial run of observation() function with default types #1.", {
-  expect_vector(observation(telescope(type="SAMI"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+  expect_vector(observation(telescope(type="SAMI"), observing_strategy = observing_strategy()), ptype=list(), size = 20)
 })
 
 test_that("Initial run of observation() function with default types #2.", {
-  expect_vector(observation(telescope(type="MaNGA"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+  expect_vector(observation(telescope(type="MaNGA"), observing_strategy = observing_strategy()), ptype=list(), size = 20)
 })
 
 test_that("Initial run of observation() function with default types #3.", {
-  expect_vector(observation(telescope(type="Hector"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+  expect_vector(observation(telescope(type="Hector"), observing_strategy = observing_strategy()), ptype=list(), size = 20)
 })
 
 test_that("Initial run of observation() function with default types #4.", {
-  expect_vector(observation(telescope(type="CALIFA"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+  expect_vector(observation(telescope(type="CALIFA"), observing_strategy = observing_strategy()), ptype=list(), size = 20)
 })
 
 test_that("Initial run of observation() function with default types #5 - w/o blur.", {
-  expect_vector(observation(telescope(type="IFU"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+  expect_vector(observation(telescope(type="IFU"), observing_strategy = observing_strategy()), ptype=list(), size = 20)
 })
 
 test_that("Initial run of observation() function with default types #6 w/ blur.", {
-  expect_vector(observation(telescope(type="IFU"), observing_strategy = observing_strategy(blur=T)), ptype=list(), size = 18)
+  expect_vector(observation(telescope(type="IFU"), observing_strategy = observing_strategy(blur=T)), ptype=list(), size = 20)
 })

@@ -20,6 +20,7 @@
 observation = function(telescope, observing_strategy){
 
   ang_size      = celestial::cosdistAngScale(observing_strategy$z, ref="Planck") # angular size given z, kpc/"
+  lum_dist      = celestial::cosdistLumDist(observing_strategy$z, ref="Planck") # computing Luminosity Distance in units of Mpc
   aperture_size = ang_size * telescope$fov                 # diameter size of the telescope, kpc
   sbin_size     = aperture_size / telescope$sbin           # spatial bin size (kpc per bin)
   sbin_seq      = seq(-(telescope$sbin * sbin_size) / 2,
@@ -65,6 +66,7 @@ observation = function(telescope, observing_strategy){
                 inc_deg         = observing_strategy$inc_deg,
                 inc_rad         = observing_strategy$inc_deg * (pi/180),
                 lsf_fwhm        = telescope$lsf_fwhm,
+                lum_dist        = lum_dist,
                 psf_fwhm        = psf_fwhm,
                 psf_kernel      = psf_k,
                 sbin            = telescope$sbin,
@@ -74,7 +76,8 @@ observation = function(telescope, observing_strategy){
                 wave_bin        = length(wave_seq),
                 wave_res        = telescope$wave_res,
                 wave_seq        = wave_seq,
-                c               = 299792.458)
+                c               = 299792.458,
+                z               = observing_strategy$z)
 
   return(output)
 }
