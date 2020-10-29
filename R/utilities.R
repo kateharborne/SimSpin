@@ -192,7 +192,7 @@
   c1 = snow::makeCluster(cores)
   doSNOW::registerDoSNOW(c1)
   i = integer()
-  part_spec = foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "doParallel"))%dopar%{
+  part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "foreach")) %dopar% {
     Z = as.numeric(ProSpect::interp_quick(Metallicity[i], Template$Z, log = TRUE))
     A = as.numeric(ProSpect::interp_quick(Age[i]*1e9, Template$Age, log = TRUE))
 
