@@ -5,27 +5,23 @@ r: release
 
 os:
   - linux
-  - osx
-
-osx_image: xcode8
 
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; fi
 
-r_github_packages:
-  - r-lib/testthat
-  - asgr/ProSpect
-
 r_packages:
   - covr
+  - testthat
+
+r_github_packages:
+  - asgr/ProSpect
 
 script:
   - R CMD build .
   - R CMD check *tar.gz --as-cran
 
-# only report coverage after build is successful
 after_success:
   - Rscript -e 'covr::codecov()'
 
 after_failure:
-  - cat  "/Users/travis/build/kateharborne/SimSpin/SimSpin.Rcheck/00check.log"
+  - cat "/Users/travis/build/kateharborne/SimSpin/SimSpin.Rcheck/00check.log"
