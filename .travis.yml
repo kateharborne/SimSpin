@@ -9,6 +9,14 @@ os:
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; fi
 
+addons:
+  apt:
+    update: true
+    packages:
+       -   x11proto-xf86vidmode-dev
+       -   xvfb
+       -   libxxf86vm-dev
+
 r_packages:
   - covr
   - testthat
@@ -18,7 +26,7 @@ r_github_packages:
 
 script:
   - R CMD build .
-  - R CMD check *tar.gz --as-cran
+  - xvfb-run R CMD check *tar.gz --as-cran
 
 after_success:
   - Rscript -e 'covr::codecov()'
