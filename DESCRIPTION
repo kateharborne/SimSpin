@@ -14,13 +14,11 @@ Imports:
     celestial,
     data.table,
     doSNOW,
-    doParallel,
     FITSio,
     fst,
     hdf5r,
     ProSpect,
     ProFit,
-    parallel,
     Rcpp,
     stringr,
     snow

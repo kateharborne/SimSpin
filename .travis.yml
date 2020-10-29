@@ -5,17 +5,17 @@ cache: packages
 r: release
 
 os:
-  - osx
   - linux
+  - osx
 
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; fi
 
+r_github_packages: asgr/ProSpect
+
 script:
   - R CMD build .
-  - R CMD check *tar.gz
-
-r_github_packages: asgr/ProSpect
+  - R CMD check --as-cran *tar.gz
 
 # for codecov
 r_packages:
