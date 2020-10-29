@@ -24,3 +24,6 @@ r_packages:
 # only report coverage after build is successful
 after_success:
   - Rscript -e 'covr::codecov()'
+
+after_failure:
+  - cat  "/Users/travis/build/kateharborne/SimSpin/SimSpin.Rcheck/00check.log"
