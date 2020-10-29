@@ -17,6 +17,9 @@ addons:
        -   xvfb
        -   libxxf86vm-dev
 
+before_script:
+  - "export DISPLAY=:99.0"
+
 r_packages:
   - covr
   - testthat

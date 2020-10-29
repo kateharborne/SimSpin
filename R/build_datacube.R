@@ -53,7 +53,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
 
-  wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+  original_wave  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1] # read original wavelengths
+  wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
 
   spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
 
