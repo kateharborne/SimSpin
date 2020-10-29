@@ -1,28 +1,27 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: R
-cache: packages
 r: release
 
 os:
   - linux
   - osx
 
+osx_image: xcode8
+
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; fi
 
-install:
-- R -e 'devtools::install_deps(dep = T)'
+r_github_packages:
+  - r-lib/testthat
+  - asgr/ProSpect
 
-r_github_packages: asgr/ProSpect
+r_packages:
+  - covr
 
 script:
   - R CMD build .
-  - R CMD check --as-cran *tar.gz
-
-# for codecov
-r_packages:
-  - covr
+  - R CMD check *tar.gz --as-cran
 
 # only report coverage after build is successful
 after_success:
