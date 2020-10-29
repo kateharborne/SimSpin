@@ -12,16 +12,29 @@ ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSp
 temp_loc = tempdir()
 
 # Test that they the function runs successfully without error
-test_that("Initial run of each simulation type.", {
+test_that("Initial run of each simulation type - Gadget.", {
   expect_null(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst", sep="")))
+})
+
+test_that("Initial run of each simulation type - HDF5", {
   expect_null(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst", sep="")))
+})
+
+test_that("Initial run of each simulation type - EAGLE", {
   expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst", sep="")))
 })
 
 # Test that the function fails when the file already exists
-test_that("Error when output file already exists and overwrite = F",{
+test_that("Error when output file already exists and overwrite = F - Gadget",{
   expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst", sep="")))
+
+  })
+
+test_that("Error when output file already exists and overwrite = F - HDF5",{
   expect_error(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst", sep="")))
+})
+
+test_that("Error when output file already exists and overwrite = F - EAGLE",{
   expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst", sep="")))
 })
 
