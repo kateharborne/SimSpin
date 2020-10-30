@@ -6,6 +6,8 @@ r: release
 os:
   - linux
 
+warnings_are_errors: false
+
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; fi
 
