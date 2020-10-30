@@ -32,7 +32,7 @@ r_github_packages:
   - asgr/ProSpect
 
 script:
-  - R CMD build .
+  - xvfb-run R CMD build . --compact-vignettes=gs+qpdf
   - xvfb-run R CMD check *tar.gz --as-cran
 
 after_success:
