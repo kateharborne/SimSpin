@@ -65,7 +65,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
      velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i] # the LOS velocities of each particle
      wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
      wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
-     spectra[i,] = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq)
+     luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq)
+     spectra[i,] = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) # flux in units erg/s/cm^2/Ang
      if (verbose){cat(i, "... ", sep = "")}
   }
 
