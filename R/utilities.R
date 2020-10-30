@@ -2,6 +2,10 @@
 # Date: 27/10/2020
 # Title: Utilities functions (i.e. hidden functions from the user)
 
+# Some useful constants:
+.lsol_to_erg = 3.828e33
+.mpc_to_cm = 3.08568e+24
+
 # Function for reading in Gadget binary files
 .read_gadget = function(f, verbose = FALSE){
   data = file(f, "rb") # open file for reading in binary mode
