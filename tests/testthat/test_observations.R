@@ -95,3 +95,9 @@ test_that("Initial run of observation() function with default types #5 - w/o blu
 test_that("Initial run of observation() function with default types #6 w/ blur.", {
   expect_vector(observation(telescope(type="IFU"), observing_strategy = observing_strategy(blur=T)), ptype=list(), size = 20)
 })
+
+# Testing that the psf produced is symmetrical
+test_that("The PSF shape produced is symmetrical - Gaussian", {
+  expect_true(isSymmetric(observation(telescope(type="SAMI"), observing_strategy = observing_strategy(blur=T))$psf_kernel, tol = 1e-7))
+  expect_true(isSymmetric(observation(telescope(type="SAMI"), observing_strategy = observing_strategy(blur=T, psf="Moffat"))$psf_kernel, tol = 1e-7))
+})
