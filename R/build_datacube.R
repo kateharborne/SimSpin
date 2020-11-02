@@ -72,6 +72,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   cube = array(data = spectra, dim = c(observation$sbin, observation$sbin, observation$wave_bin))
 
+  if (observation$psf_fwhm > 0){
+    if (verbose){cat("Convolving cube with PSF... \n")    }
+    cube = blur_datacube(cube = list("spectral_cube" = cube,
+                                     "observation" = observation)) # apply psf convolution to each cube plane
+  }
+
   if (verbose){cat("Done! \n")}
 
   if (write_fits){

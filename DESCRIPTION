@@ -27,3 +27,4 @@ Suggests:
     testthat
 Remotes:
     asgr/ProSpect
+    ICRAR/ProFit
