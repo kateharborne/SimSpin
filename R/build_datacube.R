@@ -25,6 +25,7 @@
 #'@return Returns an .fits file that contains a the generated spectral cube and
 #' relevant header describing the mock observation.
 #'@examples
+#'\dontrun{
 #'ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 #'temp_loc = tempdir()
 #'make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
@@ -32,6 +33,8 @@
 #'                      telescope = telescope(type="SAMI"),
 #'                      observing_strategy = observing_strategy())
 #'unlink(paste(temp_loc, "spectra.fst", sep=""))
+#'}
+#'
 
 
 build_datacube = function(simspin_file, telescope, observing_strategy,

@@ -11,6 +11,7 @@
 #'@return Returns a new list that contains the spectral cube produced by
 #' \code{\link{build_datacube}}, but with the seeing conditions applied.
 #'@examples
+#'\dontrun{
 #'ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 #'temp_loc = tempdir()
 #'make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
@@ -18,7 +19,8 @@
 #'                      telescope = telescope(type="SAMI"),
 #'                      observing_strategy = observing_strategy())
 #'unlink(paste(temp_loc, "spectra.fst", sep=""))
-
+#'}
+#'
 
 blur_datacube = function(cube){
 

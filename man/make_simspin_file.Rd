@@ -59,8 +59,10 @@ the function as \code{disk_age}, \code{bulge_age}, \code{disk_Z} and
 \code{bulge_Z}. Returned is an .fst file in a SimSpin readable format.
 }
 \examples{
-make_simspin_file(filename = system.file("extdata", "SimSpin_example_Gadget",
+\dontrun{
+make_simspin_file(filename = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
                                          package = "SimSpin"),
                  output=tempfile())
+}
 
 }
