@@ -1,42 +1,50 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+# Travis CI configuration file
 
-language: R
-r: release
+language: r
+cache: packages
+dist: xenial
+services: [xvfb]
 
-os:
-  - linux
+# Build matrix - testing on at least one Linux and one MacOS
+matrix:
+  include:
+    - os: linus
+      r: release
+    - os: osx
+      osx_image: xcode11
+
+r_packages:
+  - covr
+  - testthat
+  - rmarkdown
 
 warnings_are_errors: false
 
 before_install:
-  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then sudo apt-get install libhdf5-dev; fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then Rscript -e "install.packages('pracma', type = 'source')"; fi
+
+# Additional packages that are not fetched from CRAN
+# Care must be taken to specify the packages in their dependency order
+
+bioc_packages: EBImage
+r_github_packages:
+  - asgr/celestial
+  - asgr/ProSpect
+  - ICRAR/ProFit
+  - asgr/magicaxis
 
 addons:
   apt:
     update: true
     packages:
-       -   x11proto-xf86vidmode-dev
-       -   xvfb
-       -   libxxf86vm-dev
-       -   tcl8.5-dev
-       -   tk8.5-dev
+       - libhdf5-dev
+       - libfftw3-dev
+       - libnlopt-dev
+       - devscripts
 
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
-
-r_packages:
-  - covr
-  - testthat
-
-r_github_packages:
-  - asgr/ProSpect
-  - ICRAR/ProFit
-
-script:
-  - xvfb-run R CMD build . --compact-vignettes=gs+qpdf
-  - xvfb-run R CMD check *tar.gz --as-cran
+brew_packages: fftw
 
 after_success:
   - Rscript -e 'covr::codecov()'
