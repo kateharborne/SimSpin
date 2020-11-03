@@ -56,6 +56,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   original_wave  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1] # read original wavelengths
   wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
 
+  spec_res_sigma_sq = observation$lsf_fwhm^2 - diff(wavelength)[1]^2
+  if (spec_res_sigma_sq < 0){
+    warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
+    cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", diff(wavelength)[1], " A. \n")
+    cat("No LSF will be applied in this case.\n")
+    LSF_conv = FALSE
+  } else {
+    LSF_conv = TRUE
+    lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2))))
+  }
+
   spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
 
   if (verbose){cat("Generating spectra per spaxel... \n")}
@@ -64,8 +75,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
      intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8) # reading relavent spectra from the fst file
      velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i] # the LOS velocities of each particle
      wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
-     wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
+     wave_shift = ((velocity_los / .speed_of_light) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
      luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq)
+     if (LSF_conv){
+       luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=lsf_sigma)
+     }
+     luminosity = .add_noise(luminosity, observation$signal_to_noise)
      spectra[i,] = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) # flux in units erg/s/cm^2/Ang
      if (verbose){cat(i, "... ", sep = "")}
   }

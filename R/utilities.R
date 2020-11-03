@@ -3,8 +3,9 @@
 # Title: Utilities functions (i.e. hidden functions from the user)
 
 # Some useful constants:
-.lsol_to_erg = 3.828e33
-.mpc_to_cm = 3.08568e+24
+.lsol_to_erg    = 3.828e33
+.mpc_to_cm      = 3.08568e+24
+.speed_of_light = 299792.458
 
 # Function for reading in Gadget binary files
 .read_gadget = function(f, verbose = FALSE){
@@ -321,4 +322,18 @@
   return(spaxel_spectra)
 }
 
+# Function to apply LSF to spectra
+.lsf_convolution = function(observation, luminosity, lsf_sigma){
+  lum = numeric(length(observation$wave_seq))
+  for (j in 1:length(observation$wave_seq)){
+    lum = lum + (luminosity[j]*diff(pnorm(observation$wave_edges, mean = observation$wave_seq[j], sd = lsf_sigma)))
+  }
+  return(lum)
+}
 
+# Function to add noise
+.add_noise = function(luminosity, S2N){
+  noise_level = min(luminosity) / S2N
+  noise = stats::rpois(length(luminosity), lambda = noise_level)
+  noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
+}
