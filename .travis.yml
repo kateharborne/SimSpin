@@ -9,7 +9,7 @@ services: [xvfb]
 # Build matrix - testing on at least one Linux and one MacOS
 matrix:
   include:
-    - os: linus
+    - os: linux
       r: release
     - os: osx
       osx_image: xcode11
@@ -47,9 +47,6 @@ addons:
 brew_packages:
   - fftw
   - hdf5
-
-after_success:
-  - Rscript -e 'covr::codecov()'
 
 after_failure:
   - cat "/Users/travis/build/kateharborne/SimSpin/SimSpin.Rcheck/00check.log"
