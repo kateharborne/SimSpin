@@ -11,7 +11,8 @@ telescope(
   wave_range = c(3700, 5700),
   spatial_res = 0.5,
   wave_res = 1.04,
-  lsf_fwhm = 2.65
+  lsf_fwhm = 2.65,
+  signal_to_noise = 10
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ IFU (i.e. \code{c(wave_min, wave_max)}.}
 
 \item{lsf_fwhm}{Numeric describing the full-width half-maximum of the Gaussian
 line spread function.}
+
+\item{signal_to_noise}{Numeric describing the minimum signal-to-noise ratio per
+angstrom.}
 }
 \value{
 Returns an object of class "telescope" that describes the properties

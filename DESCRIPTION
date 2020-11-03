@@ -21,7 +21,9 @@ Imports:
     ProFit,
     Rcpp,
     stringr,
-    snow
+    snow,
+    stats,
+    utils
 RoxygenNote: 7.1.1
 Suggests: 
     testthat
