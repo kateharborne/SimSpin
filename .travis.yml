@@ -18,6 +18,8 @@ addons:
        -   x11proto-xf86vidmode-dev
        -   xvfb
        -   libxxf86vm-dev
+       -   tcl8.5-dev
+       -   tk8.5-dev
 
 before_script:
   - "export DISPLAY=:99.0"
