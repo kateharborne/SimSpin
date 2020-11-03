@@ -18,6 +18,7 @@ The purpose of this function is to apply a convolution kernel to each spatial
 plane of the cube produced in \code{\link{build_datacube}}.
 }
 \examples{
+\dontrun{
 ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 temp_loc = tempdir()
 make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
@@ -25,4 +26,6 @@ cube = build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""),
                      telescope = telescope(type="SAMI"),
                      observing_strategy = observing_strategy())
 unlink(paste(temp_loc, "spectra.fst", sep=""))
+}
+
 }

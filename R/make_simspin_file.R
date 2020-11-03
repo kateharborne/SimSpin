@@ -31,9 +31,11 @@
 #'@return Returns an .fst file that contains a matrix of particle positions,
 #' velocities, and spectra.
 #'@examples
-#'make_simspin_file(filename = system.file("extdata", "SimSpin_example_Gadget",
+#'\dontrun{
+#'make_simspin_file(filename = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
 #'                                          package = "SimSpin"),
 #'                  output=tempfile())
+#'}
 #'
 
 make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
