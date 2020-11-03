@@ -34,10 +34,11 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad) {
 
   int n = x.size();
 
-  Rcpp::NumericVector r(n), z_obs(n), vy_obs(n), r_obs(n);
+  Rcpp::NumericVector r(n), z_obs(n), y_obs(n), vy_obs(n), r_obs(n);
   for(int i=0; i<n; i++){
     r[i]      = sqrt((x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]));
     z_obs[i]  = sin(inc_rad) * z[i] + cos(inc_rad) * y[i];
+    y_obs[i]  = cos(inc_rad) * z[i] - sin(inc_rad) * y[i];
     vy_obs[i] = cos(inc_rad) * vz[i] - sin(inc_rad) * vy[i];
     r_obs[i]  = sqrt((x[i] * x[i]) + (z_obs[i] * z_obs[i]));
   }
@@ -52,6 +53,7 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad) {
                             Rcpp::Named("vz")        = vz,
                             Rcpp::Named("r")         = r,
                             Rcpp::Named("z_obs")     = z_obs,
+                            Rcpp::Named("y_obs")     = y_obs,
                             Rcpp::Named("r_obs")     = r_obs,
                             Rcpp::Named("vy_obs")    = vy_obs);
 

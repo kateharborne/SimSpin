@@ -58,6 +58,8 @@ observation = function(telescope, observing_strategy){
     psf_k = NULL
   }
 
+  wave_edges = seq(wave_seq[1] - (telescope$wave_res/2), tail(wave_seq, n=1) + (telescope$wave_res/2), by=telescope$wave_res)
+
   output = list(ang_size        = ang_size,
                 aperture_region = aperture_region,
                 aperture_shape  = telescope$aperture_shape,
@@ -73,10 +75,11 @@ observation = function(telescope, observing_strategy){
                 sbin_seq        = sbin_seq,
                 sbin_size       = sbin_size,
                 spatial_res     = telescope$spatial_res,
+                signal_to_noise = telescope$signal_to_noise,
                 wave_bin        = length(wave_seq),
                 wave_res        = telescope$wave_res,
                 wave_seq        = wave_seq,
-                c               = 299792.458,
+                wave_edges      = wave_edges,
                 z               = observing_strategy$z)
 
   return(output)
