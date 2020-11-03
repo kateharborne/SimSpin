@@ -25,8 +25,6 @@ before_install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then sudo apt-get install libhdf5-dev; fi
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then Rscript -e "install.packages('pracma', type = 'source')"; fi
 
-install: travis_wait mvn install # for when examples take too long to run...
-
 # Additional packages that are not fetched from CRAN
 # Care must be taken to specify the packages in their dependency order
 
