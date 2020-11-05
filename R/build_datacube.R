@@ -58,8 +58,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   original_wave  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1] # read original wavelengths
   wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
+  lsf_fwhm   = (observation$z * observation$lsf_fwhm) + observation$lsf_fwhm # adjusting the LSF for the resolution at z
 
-  spec_res_sigma_sq = observation$lsf_fwhm^2 - diff(wavelength)[1]^2
+  spec_res_sigma_sq = lsf_fwhm^2 - diff(wavelength)[1]^2
   if (spec_res_sigma_sq < 0){
     warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
     cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", diff(wavelength)[1], " A. \n")
@@ -83,7 +84,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
      if (LSF_conv){
        luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=lsf_sigma)
      }
-     luminosity = .add_noise(luminosity, observation$signal_to_noise)
+     if (!is.na(observation$signal_to_noise) | observation$signal_to_noise == 0){
+       luminosity = .add_noise(luminosity, observation$signal_to_noise)
+     }
      spectra[i,] = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) # flux in units erg/s/cm^2/Ang
      if (verbose){cat(i, "... ", sep = "")}
   }
