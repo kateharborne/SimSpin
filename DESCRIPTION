@@ -17,7 +17,7 @@ Imports:
     FITSio,
     fst,
     hdf5r,
-    ProSpect,
+    ProSpect (>= 1.0.7),
     ProFit,
     Rcpp,
     stringr,
