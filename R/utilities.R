@@ -187,6 +187,7 @@
   if (cores > 1) {
     cl = snow::makeCluster(cores)
     doSNOW::registerDoSNOW(cl)
+    i = integer()
     output = foreach(i = 1:length(a), .packages = "celestial") %dopar% { cosdist(a[i]) }
     closeAllConnections()
   }
@@ -219,6 +220,7 @@
   if (cores > 1) {
     cl = snow::makeCluster(cores)
     doSNOW::registerDoSNOW(cl)
+    i = integer()
     part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "foreach")) %dopar% {
       f(Metallicity[i], Age[i], Mass[i])
     }
