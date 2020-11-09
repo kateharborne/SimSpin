@@ -42,8 +42,10 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              disk_Z=0.024, bulge_Z=0.001, template="BC03lr",
                              output, overwrite = F, verbose = F){
 
+  temp_name = stringr::str_to_upper(template)
+
   if(missing(output)){
-    output = paste(sub('\\..*', '', filename), "_spectra.fst", sep="")
+    output = paste(sub('\\..*', '', filename), "_", temp_name, ".fst", sep="")
   }
 
   if(file.exists(output) & !overwrite){
@@ -51,11 +53,11 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                "If you wish to overwrite this file, please specify 'overwrite=T'. \n"))
   }
 
-  if(stringr::str_to_upper(template) == "BC03LR" | stringr::str_to_upper(template) == "BC03"){
+  if(temp_name == "BC03LR" | temp_name == "BC03"){
     temp = ProSpect::BC03lr
-  } else if (stringr::str_to_upper(template) == "BC03HR"){
+  } else if (temp_name == "BC03HR"){
     temp = ProSpect::BC03hr
-  } else if (stringr::str_to_upper(template) == "EMILES"){
+  } else if (temp_name == "EMILES"){
     temp = ProSpect::EMILES
   } else {
     stop("Error: template specified is unavailable. \n Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'")
@@ -94,21 +96,20 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
   n_stars = length(galaxy_data$ssp$Age) # number of "stellar" particles
-  wavelengths = length(temp$Wave)
   id_stars = seq(Npart_sum[2]+1, Npart_sum[5]) # ids of "stellar" particles
-  simspin_file = matrix(data=NA, nrow=(7+wavelengths), ncol=n_stars+1)
-  simspin_file[1,] = seq(0, n_stars)
-  simspin_file[2,] = c(NA, galaxy_data$part$x[id_stars])
-  simspin_file[3,] = c(NA, galaxy_data$part$y[id_stars])
-  simspin_file[4,] = c(NA, galaxy_data$part$z[id_stars])
-  simspin_file[5,] = c(NA, galaxy_data$part$vx[id_stars])
-  simspin_file[6,] = c(NA, galaxy_data$part$vy[id_stars])
-  simspin_file[7,] = c(NA, galaxy_data$part$vz[id_stars])
-  simspin_file[8:(wavelengths+7),1] = temp$Wave
-  simspin_file[8:(wavelengths+7),2:(n_stars+1)] = .part_spec(Metallicity = galaxy_data$ssp$Metallicity,
-                                                             Age = galaxy_data$ssp$Age,
-                                                             Mass = galaxy_data$ssp$Initial_Mass,
-                                                             Template = temp, cores = cores)
+  simspin_file = matrix(data=NA, nrow=(9+8), ncol=n_stars) # nrow = 9 (template, id, 3 positions, 3 velocities, initial mass) + 8 (4 weights for spectra, 4 template ids)
+  simspin_file[1,1] = paste(temp_name)
+  simspin_file[2,] = seq(1, n_stars)
+  simspin_file[3,] = galaxy_data$part$x[id_stars]
+  simspin_file[4,] = galaxy_data$part$y[id_stars]
+  simspin_file[5,] = galaxy_data$part$z[id_stars]
+  simspin_file[6,] = galaxy_data$part$vx[id_stars]
+  simspin_file[7,] = galaxy_data$part$vy[id_stars]
+  simspin_file[8,] = galaxy_data$part$vz[id_stars]
+  simspin_file[9,] = galaxy_data$ssp$Initial_Mass
+  simspin_file[10:17,] = .spectra_weights(Metallicity = galaxy_data$ssp$Metallicity,
+                                         Age = galaxy_data$ssp$Age,
+                                         Template = temp)
 
   fst::write_fst(as.data.frame(simspin_file), path = output, compress = 100)
 
