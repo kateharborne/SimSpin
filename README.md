@@ -1,6 +1,6 @@
 # SimSpin
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.com/kateharborne/SimSpin.svg?branch=master)](https://travis-ci.com/kateharborne/SimSpin)
+[![Travis build status](https://travis-ci.com/kateharborne/SimSpin.svg?branch=dev)](https://travis-ci.com/kateharborne/SimSpin)
 <!-- badges: end -->
 
 SimSpin - A package for the kinematic analysis of galaxy simulations

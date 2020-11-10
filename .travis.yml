@@ -48,5 +48,5 @@ brew_packages:
   - fftw
   - hdf5
 
-after_failure:
-  - cat "/Users/travis/build/kateharborne/SimSpin/SimSpin.Rcheck/00check.log"
+after_success:
+  - Rscript -e 'library(covr); codecov()'
