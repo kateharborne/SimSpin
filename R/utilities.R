@@ -197,6 +197,34 @@
   return(output)
 }
 
+# Function to calculate spectral weights
+.spectra_weights = function(Metallicity, Age, Template){
+  temp_metals = as.numeric(Template[[1]])
+  temp_ages   = as.numeric(Template[[2]])
+  sw = function(metallicity, age){
+    Z = as.numeric(ProSpect::interp_quick(metallicity, temp_metals, log = TRUE))
+    A = as.numeric(ProSpect::interp_quick(age * 1e9, temp_ages, log = TRUE))
+    return(c(Z, A))
+    }
+  weights = mapply(sw, Metallicity, Age)
+  return(weights)
+}
+
+# Function to generate spectra from spectral weights
+.compute_spectra = function(Weights, Mass, Template){
+  cs = function(w, mass){
+    spectra = ((Template$Zspec[[w[2]]][w[6],] * w[4]*w[8]) +
+               (Template$Zspec[[w[2]]][w[5],] * w[4]*w[7]) +
+               (Template$Zspec[[w[1]]][w[6],] * w[3]*w[8]) +
+               (Template$Zspec[[w[1]]][w[5],] * w[3]*w[7])) * 1e10 * mass
+  return(spectra)
+  }
+
+  intrinsic_spectra = matrix(unlist(mapply(cs, Weights, Mass)), nrow=length(Mass), byrow=T)
+
+  return(intrinsic_spectra)
+}
+
 # Function to generate spectra
 .part_spec = function(Metallicity, Age, Mass, Template, cores){
   f = function(metallicity, age, mass) {
@@ -327,7 +355,7 @@
 
   shifted_spectra = vector(mode = "list", length = dim(shifted_wave)[1])
   for(j in 1:dim(shifted_wave)[1]){
-    shifted_spectra[[j]] = stats::approx(x = shifted_wave[j,], y = spectra[,j], xout = wave_seq, rule=1)[2]
+    shifted_spectra[[j]] = stats::approx(x = shifted_wave[j,], y = spectra[j,], xout = wave_seq, rule=1)[2]
   }
   output = matrix(unlist(shifted_spectra, use.names=FALSE), nrow = dim(shifted_wave)[1], byrow = TRUE)
   spaxel_spectra = colSums(output)

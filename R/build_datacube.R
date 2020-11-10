@@ -43,8 +43,20 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (verbose){cat("Computing observation parameters... \n")}
   observation = observation(telescope = telescope, observing_strategy = observing_strategy)
 
-  galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+  temp_name = fst::read_fst(simspin_file, from = 1, to = 1)[[1]]
+  if(temp_name == "BC03LR" | temp_name == "BC03"){
+    temp = ProSpect::BC03lr
+  } else if (temp_name == "BC03HR"){
+    temp = ProSpect::BC03hr
+  } else if (temp_name == "EMILES"){
+    temp = ProSpect::EMILES
+  } else {
+    stop("Error: template specified is unavailable. \n Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'")
+  }
+
+  galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 2, to = 8)) #read in position and velocity data
   colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+  galaxy_data = as.data.frame(lapply(galaxy_data, as.numeric))
 
   galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
 
@@ -56,11 +68,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
 
-  original_wave  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1] # read original wavelengths
+  original_wave  = temp$Wave # read original wavelengths
   wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
   lsf_fwhm   = (observation$z * observation$lsf_fwhm) + observation$lsf_fwhm # adjusting the LSF for the resolution at z
 
-  spec_res_sigma_sq = lsf_fwhm^2 - diff(wavelength)[1]^2
+  spec_res_sigma_sq = lsf_fwhm^2 - (wavelength[2]-wavelength[1])^2
   if (spec_res_sigma_sq < 0){
     warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
     cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", diff(wavelength)[1], " A. \n")
@@ -75,8 +87,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   if (verbose){cat("Generating spectra per spaxel... \n")}
   for (i in sort(unique(galaxy_data$pixel_pos))){ # computing the spectra at each occupied spatial pixel position
-     particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
-     intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8) # reading relavent spectra from the fst file
+     particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i])) # IDs are indexed from the column numbers
+     spectra_weights = lapply(fst::read_fst(simspin_file, columns = particle_IDs, from = 10), as.numeric) # reading relavent spectra from the fst file
+     mass = unlist(lapply(fst::read_fst(simspin_file, columns = particle_IDs, from = 9, to=9), as.numeric), use.names = F)
+     intrinsic_spectra = .compute_spectra(spectra_weights, mass, temp)
      velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i] # the LOS velocities of each particle
      wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
      wave_shift = ((velocity_los / .speed_of_light) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
