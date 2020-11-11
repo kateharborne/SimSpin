@@ -50,7 +50,8 @@ test_that("spectra are weighted by mass correctly", {
 
 # Testing that the velocity shift functions work as expected
 test_that("velocity shift for wavelengths work correctly", {
-  wavelength = Template$Wave
+
+  wavelength = ProSpect::EMILES$Wave
   velocity_los = c(27.04932, 40.94573)
   wave = matrix(data = rep(wavelength, length(velocity_los)), nrow = length(velocity_los), byrow=T)
   wave_shift = ((velocity_los / .speed_of_light) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
