@@ -112,7 +112,7 @@
   return(part_spec)
 }
 
-.reorient_galaxy = function(galaxy_data){
+.reorient_galaxy_OLD = function(galaxy_data){
 
   # step 1: define the moment of inertia tensor
   inertiaTensor = matrix(nrow=3, ncol=3)
@@ -133,6 +133,49 @@
   rot_mat = t(eigen_vec) # tranpose to get rotation matrix
 
   # step 5: rotate coordinates using rotation matrix
+  new_coor =  rot_mat %*% rbind(galaxy_data$x, galaxy_data$y, galaxy_data$z)
+  new_vel =  rot_mat %*% rbind(galaxy_data$vx, galaxy_data$vy, galaxy_data$vz)
+
+  galaxy_data$x = new_coor[1,]; galaxy_data$y = new_coor[2,]; galaxy_data$z = new_coor[3,];
+  galaxy_data$vx = new_vel[1,]; galaxy_data$vy = new_vel[2,]; galaxy_data$vz = new_vel[3,];
+
+  return(galaxy_data)
+}
+
+.reorient_galaxy = function(galaxy_data){
+  r = r_galaxy(galaxy_data)
+  J = angmom_galaxy(galaxy_data[r < 0.33*max(r),]) # compute J
+  J_norm = matrix(J/(sqrt(J[1]^2 + J[2]^2 + J[3]^2)), nrow=1, ncol=3)
+
+  v = c(J_norm[2], -J_norm[1], 0) # unit vector normal to J and z-axis, about which we want to rotate
+  c = J_norm[3] # giving cos(angle)
+  s = sqrt(v[1]^2 + v[2]^2) # giving sin(angle)
+
+  if (J_norm[3] == -1){
+    galaxy_data = .flip(galaxy_data)
+    return(galaxy_data)
+  }
+  if (J_norm[3] == 1){
+    return(galaxy_data)
+  }
+
+  v_x = matrix(data = c(0, v[3], -v[2], -v[3], 0, v[1], v[2], -v[1], 0), nrow = 3, ncol = 3) # skew-symmetric cross product
+  I = matrix(data = c(1, 0, 0, 0, 1, 0, 0, 0, 1), nrow = 3, ncol = 3) # identity matrix
+  rot_mat = I + v_x + (1/(1+c))*(v_x %*% v_x) # rotation matrix via Rodrigues Rotation Formula: wikipedia.org/wiki/Rodrigues'_rotation_formula
+
+  new_coor =  rot_mat %*% rbind(galaxy_data$x, galaxy_data$y, galaxy_data$z)
+  new_vel =  rot_mat %*% rbind(galaxy_data$vx, galaxy_data$vy, galaxy_data$vz)
+
+  galaxy_data$x = new_coor[1,]; galaxy_data$y = new_coor[2,]; galaxy_data$z = new_coor[3,];
+  galaxy_data$vx = new_vel[1,]; galaxy_data$vy = new_vel[2,]; galaxy_data$vz = new_vel[3,];
+
+  return(galaxy_data)
+}
+
+.flip = function(galaxy_data){
+
+  rot_mat = matrix(c(1,0,0,0,-1,0,0,0,-1), nrow = 3, ncol=3)
+
   new_coor =  rot_mat %*% rbind(galaxy_data$x, galaxy_data$y, galaxy_data$z)
   new_vel =  rot_mat %*% rbind(galaxy_data$vx, galaxy_data$vy, galaxy_data$vz)
 
