@@ -365,11 +365,14 @@
 
 # Function to apply LSF to spectra
 .lsf_convolution = function(observation, luminosity, lsf_sigma){
-  lum = numeric(length(observation$wave_seq))
-  for (j in 1:length(observation$wave_seq)){
-    lum = lum + (luminosity[j]*diff(pnorm(observation$wave_edges, mean = observation$wave_seq[j], sd = lsf_sigma)))
-  }
-  return(lum)
+
+  scaled_sigma = lsf_sigma / observation$wave_res # scaling the size of the gaussian to match the pixel dimensions
+  kernel = dnorm(seq(-scaled_sigma*5,scaled_sigma*5,length.out = 25), mean = 0, sd = scaled_sigma)
+  lsf_gauss = kernel/sum(kernel)
+  lum = stats::convolve(luminosity, lsf_gauss, type="open")
+  end = (length(luminosity) + length(lsf_gauss) - 1) - 12
+
+  return(lum[13:end])
 }
 
 # Function to add noise
