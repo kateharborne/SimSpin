@@ -55,8 +55,8 @@
 #' unlink("simdata_example.fits")
 
 
-sim_FITSimage = function(out_image, out_data, z, pixel_sscale, psf_fwhm=0, r200=200, r50=10,
-                         Hdisk=5.64, Ahalo=34.5, Abulge=3.45, out_file, obs_name="SimSpin datacube",
+sim_FITSimage = function(out_image, out_data, z, pixel_sscale, psf_fwhm=0,
+                         out_file, obs_name="SimSpin datacube",
                          addSky = FALSE, threshold=25, mag_zero=8.9){
 
   if (addSky){
@@ -64,22 +64,17 @@ sim_FITSimage = function(out_image, out_data, z, pixel_sscale, psf_fwhm=0, r200=
     out_image = out_image+rnorm(dim(out_image)[1]^2, sd=skyRMS)
   }
 
-  crpix_sim = c(dim(out_data$datacube)[1]/2, dim(out_data$datacube)[2]/2)
+  crpix_sim = c(dim(out_data$cube)[1]/2, dim(out_data$cube)[2]/2)
   cdelt_sim = c(pixel_sscale, pixel_sscale)
   crval_sim = c(round(out_data$xbin_labels[length(out_data$xbin_labels)/2] + cdelt_sim[1]/2),
                 round(out_data$xbin_labels[length(out_data$xbin_labels)/2] + cdelt_sim[2]/2))
-  len_sim   = c(dim(out_data$datacube)[1], dim(out_data$datacube)[2])
+  len_sim   = c(dim(out_data$cube)[1], dim(out_data$cube)[2])
   ctype_sim = c("X-Spaxel Size", "Y-Spaxel Size")
   cunit_sim = c("arcsec", "arcsec")
   head_sim = FITSio::newKwv("KEYWORD", "VALUE", "NOTE")
   head_sim = FITSio::addKwv("REDSHIFT", z, "redshift, z", header=head_sim)
   head_sim = FITSio::addKwv("SPIXSIZE", out_data$sbinsize, "spatial size, kpc/pixel", header=head_sim)
   head_sim = FITSio::addKwv("PSFFWHM", psf_fwhm, "FWHM, arcsec", header=head_sim)
-  head_sim = FITSio::addKwv("SIMR200", r200, "virial radius from sim, kpc", header=head_sim)
-  head_sim = FITSio::addKwv("SIMHDISK", Hdisk, "disk scale length from sim, kpc", header=head_sim)
-  head_sim = FITSio::addKwv("SIMAHALO", Ahalo, "halo scale height from sim, kpc", header=head_sim)
-  head_sim = FITSio::addKwv("SIMABULG", Abulge, "bulge scale height from sim, kpc", header=head_sim)
-  head_sim = FITSio::addKwv("HALFMASS", r50, "half mass radius of sim, kpc", header=head_sim)
 
   FITSio::writeFITSim(out_image, file = out_file, c1 = obs_name,
                       crpixn = crpix_sim,
