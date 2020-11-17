@@ -84,6 +84,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   }
 
   spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
+  vel_los = array(data = NA, dim = observation$sbin^2)
+  dis_los = array(data = NA, dim = observation$sbin^2)
 
   if (verbose){cat("Generating spectra per spaxel... \n")}
   for (i in sort(unique(galaxy_data$pixel_pos))){ # computing the spectra at each occupied spatial pixel position
@@ -92,6 +94,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
      mass = unlist(lapply(fst::read_fst(simspin_file, columns = particle_IDs, from = 9, to=9), as.numeric), use.names = F)
      intrinsic_spectra = .compute_spectra(spectra_weights, mass, temp)
      velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i] # the LOS velocities of each particle
+     vel_los[i] = mean(velocity_los)
+     dis_los[i] = sd(velocity_los)
      wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
      wave_shift = ((velocity_los / .speed_of_light) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
      luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq)
@@ -106,6 +110,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   }
 
   cube = array(data = spectra, dim = c(observation$sbin, observation$sbin, observation$wave_bin))
+  vel_image = array(data = vel_los, dim = c(observation$sbin, observation$sbin))
+  dis_image = array(data = dis_los, dim = c(observation$sbin, observation$sbin))
 
   if (observation$psf_fwhm > 0){
     if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -126,8 +132,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     write_simspin_FITS(output_file = output_location, simspin_cube = cube, observation = observation)
   }
 
-  output = list("spectral_cube" = cube,
-                "observation"   = observation)
+  output = list("spectral_cube"    = cube,
+                "observation"      = observation,
+                "velocity_image"   = vel_image,
+                "dispersion_image" = dis_image)
 
   return(output)
 }
