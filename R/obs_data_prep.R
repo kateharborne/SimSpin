@@ -103,7 +103,7 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   galaxy_df   = galaxy_df[(galaxy_df$r < r200),] # removing particles beyond r200
 
   if (ap_shape == "circular"){
-    galaxy_cdf  = .circular_ap_cut(galaxy_df, ap_size)
+    galaxy_cdf  = .circular_ap_cut(galaxy_df, ap_size, sbinsize)
   } # removing particles outside aperture
   if (ap_shape == "square"){
     galaxy_cdf = .square_ap_cut(galaxy_df, sbin, sbinsize)

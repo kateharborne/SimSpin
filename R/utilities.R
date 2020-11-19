@@ -70,21 +70,21 @@
   return(ap_region)
 }
 
-.circular_ap_cut=function(galaxy_df, ap_size){
-  trimdata = galaxy_df[galaxy_df$r_obs < (ap_size / 2),]
+.circular_ap_cut=function(galaxy_df, ap_size, sbinsize){
+  trimdata = galaxy_df[galaxy_df$r_obs < ((ap_size / 2) + (sbinsize / 2)),]
   return(trimdata)
 }
 
 .square_ap_cut=function(galaxy_df, sbin, sbinsize){
-  galaxy_cdf  = galaxy_df[abs(galaxy_df$x) < (sbin / 2) * sbinsize,]
-  trimdata    = galaxy_cdf[abs(galaxy_cdf$z_obs) < (sbin / 2) * sbinsize,]
+  galaxy_cdf  = galaxy_df[abs(galaxy_df$x) < (((sbin+1)/ 2) * sbinsize),]
+  trimdata    = galaxy_cdf[abs(galaxy_cdf$z_obs) < (((sbin+1) / 2) * sbinsize),]
   return(trimdata)
 }
 
 .hexagonal_ap_cut=function(galaxy_df, sbin, sbinsize){
-  galaxy_cdf  = galaxy_df[abs(galaxy_df$x) < (sbin / 2) * sbinsize,]
-  galaxy_cdf  = galaxy_cdf[abs(galaxy_cdf$z_obs) < (sbin  * sqrt(3) / 4) * sbinsize,]
-  dotprod     = (2 * (sbin / 4) * sbinsize * (sbin * sqrt(3) / 4) * sbinsize) - ((sbin / 4) * sbinsize) * abs(galaxy_cdf$z_obs) - ((sbin * sqrt(3) / 4) * sbinsize) * abs(galaxy_cdf$x)
+  galaxy_cdf  = galaxy_df[abs(galaxy_df$x) < (((sbin+1) / 2) * sbinsize),]
+  galaxy_cdf  = galaxy_cdf[abs(galaxy_cdf$z_obs) < (((sbin+1)  * sqrt(3) / 4) * sbinsize),]
+  dotprod     = (2 * ((sbin+1) / 4) * sbinsize * ((sbin+1) * sqrt(3) / 4) * sbinsize) - (((sbin+1) / 4) * sbinsize) * abs(galaxy_cdf$z_obs) - (((sbin+1) * sqrt(3) / 4) * sbinsize) * abs(galaxy_cdf$x)
   trimdata  = galaxy_cdf[dotprod >= 0,]
   return(trimdata)
 }
