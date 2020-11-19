@@ -100,20 +100,13 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
     galaxy_data = .reorient_galaxy(galaxy_data) # reorient galaxies such that the semimajor axis lies along the x
   }
   galaxy_df   = obs_galaxy(galaxy_data, inc_deg * (pi / 180)) # extracting the position and LOS data
-  galaxy_df   = galaxy_df[(galaxy_df$r < r200),] # removing particles beyond r200
-
-  if (ap_shape == "circular"){
-    galaxy_cdf  = .circular_ap_cut(galaxy_df, ap_size)
-  } # removing particles outside aperture
-  if (ap_shape == "square"){
-    galaxy_cdf = .square_ap_cut(galaxy_df, sbin, sbinsize)
-  }
-  if (ap_shape == "hexagonal"){
-    galaxy_cdf = .hexagonal_ap_cut(galaxy_df, sbin, sbinsize)
-  }
+  galaxy_cdf  = galaxy_df[(galaxy_df$r < r200),] # removing particles beyond r200
 
   vbin = ceiling((max(abs(galaxy_cdf$vy_obs))*2) / vbinsize) # number of velocity bins
   if (vbin <= 2){vbin = 3}
+
+  pixel_index  = seq(1,sbin*sbin*vbin, by=1)
+  pixel_region  = array(ap_region, dim = c(sbin,sbin,vbin)) * pixel_index
 
   vseq = seq(-(vbin * vbinsize) / 2,
              (vbin * vbinsize) / 2, by=vbinsize) # velocity bin break positions
@@ -124,6 +117,9 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   galaxy_cdf$binn = cut(galaxy_cdf$x, breaks=sseq, labels=F) +
     (sbin * cut(galaxy_cdf$z_obs, breaks=sseq, labels=F)) +
     (sbin^2 * cut(galaxy_cdf$vy_obs, breaks=vseq, labels=F)) - (sbin^2 + sbin) # assigning particles to positions in cube
+
+  galaxy_cdf = galaxy_cdf[!is.na(galaxy_cdf$binn),]
+  galaxy_cdf = galaxy_cdf[galaxy_cdf$binn %in% pixel_region,]
 
   if (length(present) == 1){
     if ("SSP" %in% names(simdata[[present[1]]])){
