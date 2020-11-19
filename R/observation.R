@@ -29,13 +29,13 @@ observation = function(telescope, observing_strategy){
   pixel_index   = seq(1,telescope$sbin*telescope$sbin, by=1)
 
   if (telescope$aperture_shape == "circular"){
-    aperture_region = .circular_ap(telescope$sbin) * pixel_index
+    aperture_region = .circular_ap(telescope$sbin)
   }  # circular apperture mask
   if (telescope$aperture_shape == "square"){
-    aperture_region = matrix(data = 1, ncol = telescope$sbin, nrow = telescope$sbin) * pixel_index
+    aperture_region = matrix(data = 1, ncol = telescope$sbin, nrow = telescope$sbin)
   }    # square apperture mask
   if (telescope$aperture_shape == "hexagonal"){
-    aperture_region = .hexagonal_ap(telescope$sbin) * pixel_index
+    aperture_region = .hexagonal_ap(telescope$sbin)
   }
 
   if (observing_strategy$blur){
@@ -69,6 +69,7 @@ observation = function(telescope, observing_strategy){
                 inc_rad         = observing_strategy$inc_deg * (pi/180),
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
+                pixel_region    = aperture_region * pixel_index,
                 psf_fwhm        = psf_fwhm,
                 psf_kernel      = psf_k,
                 sbin            = telescope$sbin,
