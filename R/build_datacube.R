@@ -66,7 +66,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
 
-  galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+  galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$pixel_region,] # trimming particles that lie outside the aperture of the telescope
 
   original_wave  = temp$Wave # read original wavelengths
   wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
