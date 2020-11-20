@@ -78,10 +78,10 @@
   Z = ProSpect::interp_param(Metallicity, ProSpect::BC03lr$Z, log = TRUE)
   A = ProSpect::interp_param(Age, ProSpect::BC03lr$Age, log = TRUE)
 
-  weights = data.frame("hihi" = Z$weight_hi * A$weight_hi,
-                       "hilo" = Z$weight_hi * A$weight_lo,
-                       "lohi" = Z$weight_lo * A$weight_hi,
-                       "lolo" = Z$weight_lo * A$weight_lo)
+  weights = data.frame("hihi" = Z$wt_hi * A$wt_hi,
+                       "hilo" = Z$wt_hi * A$wt_lo,
+                       "lohi" = Z$wt_lo * A$wt_hi,
+                       "lolo" = Z$wt_lo * A$wt_lo)
 
   part_spec = array(data = NA, dim = c(1, length(ProSpect::BC03lr$Wave)))
 
