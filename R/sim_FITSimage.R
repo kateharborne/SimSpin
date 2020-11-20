@@ -14,11 +14,6 @@
 #' \code{\link{find_kinematics}} was run.
 #'@param psf_fwhm The FWHM of the PSF used for spatial blurring used when
 #' \code{\link{find_kinematics}} was run.
-#'@param r200 The virial radius specified in the simulation, kpc.
-#'@param r50 The half mass radius specified by the simulation, kpc.
-#'@param Hdisk The scale length of the disk component in the simulation, kpc.
-#'@param Ahalo The scale height of the dark matter halo component in the simulation, kpc.
-#'@param Abulge The scale height of the bulge component in the simulation, kpc.
 #'@param out_file A string describing the path and file name of the FITS file to be written.
 #'@param obs_name A string that describes the name of the observation. Default is "SimSpin
 #' datacube".

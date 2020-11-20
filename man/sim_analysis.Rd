@@ -4,8 +4,7 @@
 \alias{sim_analysis}
 \title{Kinematic analysis of simulation data.}
 \usage{
-sim_analysis(simdata, bin_type = "r", rmax = 200, rbin = 200,
-  DM_profile = NA)
+sim_analysis(simdata, bin_type = "r", rmax = 200, rbin = 200, DM_profile = NA)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}

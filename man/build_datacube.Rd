@@ -4,9 +4,22 @@
 \alias{build_datacube}
 \title{Constructing kinematic data cubes.}
 \usage{
-build_datacube(simdata, r200 = 200, z, fov, ap_shape, central_wvl,
-  lsf_fwhm, pixel_sscale, pixel_vscale, inc_deg, filter = "g", blur,
-  align = FALSE, multi_thread = TRUE)
+build_datacube(
+  simdata,
+  r200 = 200,
+  z,
+  fov,
+  ap_shape,
+  central_wvl,
+  lsf_fwhm,
+  pixel_sscale,
+  pixel_vscale,
+  inc_deg,
+  filter = "g",
+  blur,
+  align = FALSE,
+  multi_thread = TRUE
+)
 }
 \arguments{
 \item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}

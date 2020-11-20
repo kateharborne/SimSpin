@@ -4,9 +4,20 @@
 \alias{sim_FITS}
 \title{Generate a FITS file for the data cube produced in SimSpin}
 \usage{
-sim_FITS(out_data, z, pixel_sscale, pixel_vscale, psf_fwhm = 0,
-  r200 = 200, r50 = 10, Hdisk = 5.64, Ahalo = 34.5,
-  Abulge = 3.45, out_file, obs_name = "SimSpin datacube")
+sim_FITS(
+  out_data,
+  z,
+  pixel_sscale,
+  pixel_vscale,
+  psf_fwhm = 0,
+  r200 = 200,
+  r50 = 10,
+  Hdisk = 5.64,
+  Ahalo = 34.5,
+  Abulge = 3.45,
+  out_file,
+  obs_name = "SimSpin datacube"
+)
 }
 \arguments{
 \item{out_data}{The list output from \code{\link{build_datacube}} or

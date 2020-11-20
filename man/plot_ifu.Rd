@@ -4,8 +4,13 @@
 \alias{plot_ifu}
 \title{Plotting the flux, velocity and dipsersion image output from the IFU kinematic cube.}
 \usage{
-plot_ifu(obs_data, obs_images, reff = FALSE, axis_ratio = NULL,
-  which_plots = NA)
+plot_ifu(
+  obs_data,
+  obs_images,
+  reff = FALSE,
+  axis_ratio = NULL,
+  which_plots = NA
+)
 }
 \arguments{
 \item{obs_data}{The list output from the function \code{\link{obs_data_prep}}.}

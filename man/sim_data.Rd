@@ -4,8 +4,15 @@
 \alias{sim_data}
 \title{Prepare simulation data for SimSpin}
 \usage{
-sim_data(filename, ptype = NA, SSP = FALSE, m2l_disc = 1,
-  m2l_bulge = 1, m2l_star = 1, multi_thread = TRUE)
+sim_data(
+  filename,
+  ptype = NA,
+  SSP = FALSE,
+  m2l_disc = 1,
+  m2l_bulge = 1,
+  m2l_star = 1,
+  multi_thread = TRUE
+)
 }
 \arguments{
 \item{filename}{The SimSpin HDF5 file containing the particle information of the galaxy.}

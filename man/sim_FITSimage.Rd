@@ -4,10 +4,18 @@
 \alias{sim_FITSimage}
 \title{Generate a FITS file for the data cube produced in SimSpin}
 \usage{
-sim_FITSimage(out_image, out_data, z, pixel_sscale, psf_fwhm = 0,
-  r200 = 200, r50 = 10, Hdisk = 5.64, Ahalo = 34.5,
-  Abulge = 3.45, out_file, obs_name = "SimSpin datacube",
-  addSky = FALSE, threshold = 25, mag_zero = 8.9)
+sim_FITSimage(
+  out_image,
+  out_data,
+  z,
+  pixel_sscale,
+  psf_fwhm = 0,
+  out_file,
+  obs_name = "SimSpin datacube",
+  addSky = FALSE,
+  threshold = 25,
+  mag_zero = 8.9
+)
 }
 \arguments{
 \item{out_image}{The counts/velocity/dispersion image output from \code{\link{find_kinematics}}
@@ -24,16 +32,6 @@ output in arcseconds.}
 
 \item{psf_fwhm}{The FWHM of the PSF used for spatial blurring used when
 \code{\link{find_kinematics}} was run.}
-
-\item{r200}{The virial radius specified in the simulation, kpc.}
-
-\item{r50}{The half mass radius specified by the simulation, kpc.}
-
-\item{Hdisk}{The scale length of the disk component in the simulation, kpc.}
-
-\item{Ahalo}{The scale height of the dark matter halo component in the simulation, kpc.}
-
-\item{Abulge}{The scale height of the bulge component in the simulation, kpc.}
 
 \item{out_file}{A string describing the path and file name of the FITS file to be written.}
 
