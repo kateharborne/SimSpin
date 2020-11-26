@@ -102,24 +102,26 @@ obs_data_prep = function(simdata, r200=200, z=0.05, fov=15, ap_shape="circular",
   galaxy_df   = obs_galaxy(galaxy_data, inc_deg * (pi / 180)) # extracting the position and LOS data
   galaxy_cdf  = galaxy_df[(galaxy_df$r < r200),] # removing particles beyond r200
 
+  sseq        = seq(-(sbin * sbinsize) / 2,
+                   (sbin * sbinsize) / 2, by=sbinsize) # spatial bin break positions
+
+  pixel_pos   = cut(galaxy_cdf$x, breaks=sseq, labels=F) +
+                   (sbin * cut(galaxy_cdf$z_obs, breaks=sseq, labels=F)) - (sbin) # Initial indexing of particles into spatial bins
+
+  pixel_index  = seq(1,sbin*sbin, by=1)
+  pixel_region  = array(ap_region, dim = c(sbin,sbin)) * pixel_index
+
+  galaxy_cdf = galaxy_cdf[pixel_pos %in% pixel_region,] # cutting particles that fall outside of the observation aperture
+
   vbin = ceiling((max(abs(galaxy_cdf$vy_obs))*2) / vbinsize) # number of velocity bins
   if (vbin <= 2){vbin = 3}
-
-  pixel_index  = seq(1,sbin*sbin*vbin, by=1)
-  pixel_region  = array(ap_region, dim = c(sbin,sbin,vbin)) * pixel_index
 
   vseq = seq(-(vbin * vbinsize) / 2,
              (vbin * vbinsize) / 2, by=vbinsize) # velocity bin break positions
 
-  sseq = seq(-(sbin * sbinsize) / 2,
-             (sbin * sbinsize) / 2, by=sbinsize) # spatial bin break positions
-
   galaxy_cdf$binn = cut(galaxy_cdf$x, breaks=sseq, labels=F) +
     (sbin * cut(galaxy_cdf$z_obs, breaks=sseq, labels=F)) +
     (sbin^2 * cut(galaxy_cdf$vy_obs, breaks=vseq, labels=F)) - (sbin^2 + sbin) # assigning particles to positions in cube
-
-  galaxy_cdf = galaxy_cdf[!is.na(galaxy_cdf$binn),]
-  galaxy_cdf = galaxy_cdf[galaxy_cdf$binn %in% pixel_region,]
 
   if (length(present) == 1){
     if ("SSP" %in% names(simdata[[present[1]]])){
