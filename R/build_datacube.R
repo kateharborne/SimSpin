@@ -64,8 +64,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
     (observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
 
-  galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
-
   galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$pixel_region,] # trimming particles that lie outside the aperture of the telescope
 
   original_wave  = temp$Wave # read original wavelengths
