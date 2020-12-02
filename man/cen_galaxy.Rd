@@ -7,7 +7,13 @@
 cen_galaxy(part_data)
 }
 \arguments{
-\item{part_data}{The concatenated data frames output by \code{\link{sim_data}}.}
+\item{part_data}{A data.frame describing the particles ID, positions,
+velocities and masses.}
+}
+\value{
+A list containing the input data.frame with positions and velocities
+ centered, as well as the median coordiantes and velocities of the original
+ distribution
 }
 \description{
 The purpose of this function is to centre the galaxy such that the origin of the
