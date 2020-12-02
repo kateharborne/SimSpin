@@ -61,26 +61,37 @@
   close(data)
 
   extract = ((1:floor(sum(Npart)))*3)-2 # giving integers of x/vx within pos/vel
-  part = data.frame("ID" = id,
+
+  part = data.frame("ID" = id,          # the particle data table
                     "x" = pos[extract], "y"=pos[extract+1], "z"=pos[extract+2],
                     "vx" = vel[extract], "vy" = vel[extract+1], "vz"=vel[extract+2],
                     "Mass" = masses)
-  head = list("Npart" = Npart, "Massarr" = Massarr, "Time" = Time, "Redshift" = Redshift,
-              "FlagSfr" = FlagSfr, "FlagFeedback" = FlagFeedback, "Nall" = Nall,
-              "FlagCooling" = FlagCooling, "NumFiles" = NumFiles, "BoxSize" = BoxSize,
-              "Omega0" = Omega0, "OmegaLambda" = OmegaLambda, "HubbleParam" = HubbleParam,
-              "FlagAge" = FlagAge, "FlagMetals" = FlagMetals, "NallHW" = NallHW,
-              "flag_entr_ics" = flag_entr_ics)
+
+  head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
+              "Time" = Time, "Redshift" = Redshift, # relevent simulation data
+              "Nall" = Nall) # number of particles in the original file
 
   if(verbose){cat("Done reading Gadget snapshot file. \n")}
-  return(list(part=part, head=head))
+
+  Npart_sum = cumsum(Npart) # cumulative number of each particle type
+
+  if(verbose){cat("Writing stellar particles... \n")}
+  star_part = part[(Npart_sum[2]+1):Npart_sum[5],]
+
+  if (Npart[1] > 0){
+    if(verbose){cat("Writing gas particles... \n")}
+    gas_part = part[1:Npart_sum[1],]
+  } else {gas_part = NULL}
+
+  if(verbose){cat("Done! \n")}
+  return(list(star_part = star_part, gas_part = gas_part, head = head))
 
 }
 
 # Function for reading in Gadget HDF5 files and EAGLE HDF5 files
-.read_hdf5   = function(f, cores, verbose = FALSE){
+.read_hdf5   = function(f, cores=1, verbose = FALSE){
 
-  data          = hdf5r::h5file(f, mode="r")
+  data = hdf5r::h5file(f, mode="r")
 
   if(length(hdf5r::list.attributes(data[["Header"]])) > 17){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
   if(verbose & eagle){cat("EAGLE input snapshot detected.\n")}
@@ -90,74 +101,76 @@
   Massarr       = hdf5r::h5attr(data[["Header"]], "MassTable")
   Time          = hdf5r::h5attr(data[["Header"]], "Time")
   Redshift      = hdf5r::h5attr(data[["Header"]], "Redshift")
-  FlagSfr       = hdf5r::h5attr(data[["Header"]], "Flag_Sfr")
-  FlagFeedback  = hdf5r::h5attr(data[["Header"]], "Flag_Feedback")
   Nall          = hdf5r::h5attr(data[["Header"]], "NumPart_Total")
-  FlagCooling   = hdf5r::h5attr(data[["Header"]], "Flag_Cooling")
-  NumFiles      = hdf5r::h5attr(data[["Header"]], "NumFilesPerSnapshot")
-  BoxSize       = hdf5r::h5attr(data[["Header"]], "BoxSize")
-  Omega0        = hdf5r::h5attr(data[["Header"]], "Omega0")
-  OmegaLambda   = hdf5r::h5attr(data[["Header"]], "OmegaLambda")
   HubbleParam   = hdf5r::h5attr(data[["Header"]], "HubbleParam")
-  FlagAge       = hdf5r::h5attr(data[["Header"]], "Flag_StellarAge")
-  FlagMetals    = hdf5r::h5attr(data[["Header"]], "Flag_Metals")
-  NallHW        = hdf5r::h5attr(data[["Header"]], "NumPart_Total_HighWord")
-  if (eagle){
-    flag_entr_ics = 0L
-  } else {
-    flag_entr_ics = hdf5r::h5attr(data[["Header"]], "Flag_Entropy_ICs")
-  }
 
-  head = list("Npart" = Npart, "Massarr" = Massarr, "Time" = Time, "Redshift" = Redshift,
-              "FlagSfr" = FlagSfr, "FlagFeedback" = FlagFeedback, "Nall" = Nall,
-              "FlagCooling" = FlagCooling, "NumFiles" = NumFiles, "BoxSize" = BoxSize,
-              "Omega0" = Omega0, "OmegaLambda" = OmegaLambda, "HubbleParam" = HubbleParam,
-              "FlagAge" = FlagAge, "FlagMetals" = FlagMetals, "NallHW" = NallHW,
-              "flag_entr_ics" = flag_entr_ics)
+  n_stellar      = c(0,0,Npart[3],Npart[4],Npart[5],0) # sum of all "stellar" particles in the file
 
-  present_types  = which(Npart > 0) # Which PartType groups will be present in the file?
-  Npart_sum      = cumsum(Nall) # Particle indices of each type
-  Ntotal         = sum(Nall) # total number of all particle types
+  # First considering the stellar properties. If Bulge and Disk particles are present,
+  # we need to make sure that are ordered correctly in the output so that they can
+  # be assigned the correct SEDs.
+  present_stars  = which(Npart > 0)[which(Npart > 0) %in% c(3,4,5)] # which stellar groups are present in the file?
+
+  stellar_sum    = sum(n_stellar)
+  Npart_sum      = cumsum(n_stellar) # particle indices of each type
   mass_excpt     = which(Massarr > 0) # are any masses listed in the header?
 
-  part = data.frame("ID" = numeric(Ntotal),
-                    "x" = numeric(Ntotal), "y" = numeric(Ntotal), "z" = numeric(Ntotal),
-                    "vx" = numeric(Ntotal), "vy" = numeric(Ntotal), "vz" = numeric(Ntotal),
-                    "Mass" = numeric(Ntotal))
+  star_part = data.frame("ID" = numeric(stellar_sum),
+                         "x" = numeric(stellar_sum), "y" = numeric(stellar_sum), "z" = numeric(stellar_sum),
+                         "vx" = numeric(stellar_sum), "vy" = numeric(stellar_sum), "vz" = numeric(stellar_sum),
+                         "Mass" = numeric(stellar_sum))
 
-  pos = array(NA, dim=c(3, Ntotal))
-  vel = array(NA, dim=c(3, Ntotal))
+  head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and star particles
+              "Time" = Time, "Redshift" = Redshift, # relevent simulation data
+              "Nall" = Nall)  # number of particles in the original file
 
-  if(verbose){cat("Reading particle properties. \n")}
+  star_pos = array(NA, dim=c(3, stellar_sum))
+  star_vel = array(NA, dim=c(3, stellar_sum))
 
-  for (i in 1:length(present_types)){
+  if(verbose){cat("Reading stellar particle properties. \n")}
+
+  for (i in 1:length(present_stars)){
+
     if (i == 1){
-      i_start = 1; i_end = Npart_sum[present_types[i]]
+      i_start = 1; i_end = Npart_sum[present_stars[i]]
     } else {
-      i_start = Npart_sum[present_types[i-1]]+1; i_end = Npart_sum[present_types[i]]
+      i_start = Npart_sum[present_stars[i-1]]+1; i_end = Npart_sum[present_stars[i]]
     } # computing the indices of the particles of each present PartType
-    pos[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_types[i]-1, "/Coordinates", sep="")]]) # reading x, y, z coordinates
-    if (eagle){vel[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_types[i]-1, "/Velocity", sep="")]])}else{
-      vel[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_types[i]-1, "/Velocities", sep="")]])
-    } # reading vx, vy, vz velocities (called "Velocity" in EAGLE snapshots and "Velocities" Gadget HDF5 files)
-    part$ID[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_types[i]-1, "/ParticleIDs", sep="")]]) # reading particle IDs
-    if (length(mass_excpt)!=0 & present_types[i] %in% mass_excpt){ # if masses have been specified in header, use these
-      part$Mass[i_start:i_end] = Massarr[present_types[i]]
+
+    # reading x, y, z coordinates
+    star_pos[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Coordinates", sep="")]])
+
+    # reading vx, vy, vz velocities (called "Velocity" in EAGLE snapshots and "Velocities" Gadget HDF5 files)
+    if (eagle){
+      star_vel[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Velocity", sep="")]])
+      } else {
+      star_vel[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Velocities", sep="")]])
+      }
+
+    # reading particle IDs
+    star_part$ID[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/ParticleIDs", sep="")]])
+
+    # reading masses
+    if (length(mass_excpt)!=0 & present_stars[i] %in% mass_excpt){ # if masses have been specified in header, use these
+      star_part$Mass[i_start:i_end] = Massarr[present_stars[i]]
     } else { # else, read masses from PartType ("Mass" in EAGLE snapshots and "Masses" in Gadget HDF5 files)
-      if (eagle){part$Mass[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_types[i]-1, "/Mass", sep="")]])}else{
-        part$Mass[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_types[i]-1, "/Masses", sep="")]])
+      if (eagle){
+        star_part$Mass[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Mass", sep="")]])
+        } else {
+        star_part$Mass[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Masses", sep="")]])
       }
     }
   }
 
   if (eagle){ # reading the details from EAGLE files for simple stellar population
-    ssp = list("Initial_Mass"=numeric(length=Nall[5]), "Age"=numeric(length = Nall[5]),
-               "Metallicity"=numeric(length=Nall[5]))
+    ssp = list("Initial_Mass"=numeric(length=stellar_sum), "Age"=numeric(length=stellar_sum),
+               "Metallicity"=numeric(length=stellar_sum))
     ssp$Initial_Mass = hdf5r::readDataSet(data[["PartType4/InitialMass"]])
     Stellar_Formation_Time = hdf5r::readDataSet(data[["PartType4/StellarFormationTime"]])
     ssp$Age = as.numeric(.SFTtoAge(a = Stellar_Formation_Time, cores = cores))
     ssp$Metallicity = hdf5r::readDataSet(data[["PartType4/SmoothedMetallicity"]])
 
+    # coordinate transform from co-moving to physical coordinates
     a_coor = hdf5r::h5attr(data[["PartType4/Coordinates"]], "aexp-scale-exponent")
     h_coor = hdf5r::h5attr(data[["PartType4/Coordinates"]], "h-scale-exponent")
     a_velo = hdf5r::h5attr(data[["PartType4/Velocity"]], "aexp-scale-exponent")
@@ -165,20 +178,74 @@
     a_mass = hdf5r::h5attr(data[["PartType4/Mass"]], "aexp-scale-exponent")
     h_mass = hdf5r::h5attr(data[["PartType4/Mass"]], "h-scale-exponent")
 
-    pos = pos * head$Time^(a_coor) * head$HubbleParam^(h_coor) * 1e3
-    vel = vel * head$Time^(a_velo) * head$HubbleParam^(h_velo)
-    part$Mass = part$Mass * head$Time^(a_mass) * head$HubbleParam^(h_mass)
+    star_pos = star_pos * Time^(a_coor) * HubbleParam^(h_coor) * 1e3
+    star_vel = star_vel * Time^(a_velo) * HubbleParam^(h_velo)
+    star_part$Mass = star_part$Mass * Time^(a_mass) * HubbleParam^(h_mass)
   }
 
-  part$x = pos[1,]; part$vx = vel[1,]
-  part$y = pos[2,]; part$vy = vel[2,]
-  part$z = pos[3,]; part$vz = vel[3,]
+  # sort stellar coord & vel into x, y, ..., vz
+  star_part$x = star_pos[1,]; star_part$vx = star_vel[1,]
+  star_part$y = star_pos[2,]; star_part$vy = star_vel[2,]
+  star_part$z = star_pos[3,]; star_part$vz = star_vel[3,]
+
+  if (Npart[1] > 0){ # If gas is present in the simulation
+    if(verbose){cat("Reading gas particle properties. \n")}
+    gas_part = data.frame("ID" = numeric(Npart[1]),
+                          "x" = numeric(Npart[1]), "y" = numeric(Npart[1]), "z" = numeric(Npart[1]),
+                          "vx" = numeric(Npart[1]), "vy" = numeric(Npart[1]), "vz" = numeric(Npart[1]),
+                          "Mass" = numeric(Npart[1]))
+    gas_pos = array(NA, dim=c(3, Npart[1]))
+    gas_vel = array(NA, dim=c(3, Npart[1]))
+
+    gas_part$ID = hdf5r::readDataSet(data[["PartType0/ParticleIDs"]]) # reading particle IDs
+
+    # reading in Masses
+    if (length(mass_excpt)!=0 & 1 %in% mass_excpt){
+      gas_part$Mass = Massarr[1]
+    } else {
+      if (eagle){gas_part$Mass = hdf5r::readDataSet(data[["PartType0/Mass"]])} else {
+        gas_part$Mass = hdf5r::readDataSet(data[["PartType0/Masses"]])
+      }
+    }
+
+    # reading in particle positions
+    gas_pos = hdf5r::readDataSet(data[["PartType0/Coordinates"]])
+
+    # reading vx, vy, vz velocities (called "Velocity" in EAGLE snapshots and "Velocities" Gadget HDF5 files)
+    if (eagle){
+      gas_vel= hdf5r::readDataSet(data[["PartType0/Velocity"]])
+      } else {
+      gas_vel = hdf5r::readDataSet(data[["PartType0/Velocities"]])
+      }
+
+    # coordinate transform from co-moving to physical coordinates
+    if (eagle){
+      a_coor = hdf5r::h5attr(data[["PartType0/Coordinates"]], "aexp-scale-exponent")
+      h_coor = hdf5r::h5attr(data[["PartType0/Coordinates"]], "h-scale-exponent")
+      a_velo = hdf5r::h5attr(data[["PartType0/Velocity"]], "aexp-scale-exponent")
+      h_velo = hdf5r::h5attr(data[["PartType0/Velocity"]], "h-scale-exponent")
+      a_mass = hdf5r::h5attr(data[["PartType0/Mass"]], "aexp-scale-exponent")
+      h_mass = hdf5r::h5attr(data[["PartType0/Mass"]], "h-scale-exponent")
+
+      gas_pos = gas_pos * Time^(a_coor) * HubbleParam^(h_coor) * 1e3
+      gas_vel = gas_vel * Time^(a_velo) * HubbleParam^(h_velo)
+      gas_part$Mass = gas_part$Mass * Time^(a_mass) * HubbleParam^(h_mass)
+    }
+
+    # sort gas coord & vel into x, y, ..., vz
+    gas_part$x = gas_pos[1,]; gas_part$vx = gas_vel[1,]
+    gas_part$y = gas_pos[2,]; gas_part$vy = gas_vel[2,]
+    gas_part$z = gas_pos[3,]; gas_part$vz = gas_vel[3,]
+
+  } else {gas_part = NULL} # if no gas in sim, return gas_part = NULL
 
   hdf5r::h5close(data)
 
-  if(verbose){cat("Done reading HDF5 snapshot file. \n")}
-  if(eagle){return(list(part=part, head=head, ssp=ssp))}else{return(list(part=part, head=head))}
-
+  if (verbose){cat("Done reading HDF5 snapshot file. \n")}
+  if (eagle){
+    return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
+    } else {
+    return(list(star_part=star_part, gas_part=gas_part, head=head))}
 }
 
 # Function for computing the stellar age from the formation time in parallel
@@ -195,6 +262,194 @@
     output = lapply(a, cosdist)
   }
   return(output)
+}
+
+# Function to centre all galaxy particles based on stellar particle positions
+.centre_galaxy = function(galaxy_data){
+  stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
+  galaxy_data$star_part = stellar_data$part_data
+  if (!is.null(galaxy_data$gas_part)){ # if gas is present, centering these particles based on stellar medians
+    gas_data = galaxy_data$gas_part
+    gas_data$x = gas_data$x - stellar_data$xcen
+    gas_data$y = gas_data$y - stellar_data$ycen
+    gas_data$z = gas_data$z - stellar_data$zcen
+    gas_data$vx = gas_data$vx - stellar_data$vxcen
+    gas_data$vy = gas_data$vy - stellar_data$vycen
+    gas_data$vz = gas_data$vz - stellar_data$vzcen
+    galaxy_data$gas_part = gas_data
+  }
+  return(galaxy_data)
+}
+
+# Functions for computing vector properties
+.vector_mag = function(v){
+  # Returns the magnitude of vector, v
+  return(sqrt(sum(v^2)))
+}
+
+.vector_angle = function(v1,v2){
+  # Returns the angle between vectors v1 and v2 in radians
+  return(acos((v1%*%v2) / (.vector_mag(v1) * .vector_mag(v2))))
+}
+
+.vector_unit = function(v){
+  # Returns a unit vector along the direction of vector v
+  return(v/.vector_mag(v))
+}
+
+# Functions for rotating galaxies
+.rot_mat_ang = function(v, angle){
+  # Function for generating a rotation matrix that will rotate vector v by some angle
+  x = v[1]; y = v[2]; z = v[3]
+  co = cos(angle); si = sin(angle)
+
+  R = rbind(c(co+(x*x*(1.-co)), (x*y*(1.-co))-(z*si), (x*z*(1.-co))+(y*si)),
+            c((x*y*(1.-co))+(z*si), co+(y*y*(1.-co)), (y*z*(1.-co))-(x*si)),
+            c((z*x*(1.-co))-(y*si), (z*y*(1.-co))+(x*si), co+(z*z*(1.-co))))
+
+  return(R)
+}
+
+.rot_mat_vec = function(v1, v2){
+  # Function for generation a rotation matrix that rotates vector v1 to match vector v2
+  u1 = .vector_unit(v1); u2 = .vector_unit(v2)
+  angle = -1 * .vector_angle(u1, u2)
+  v = pracma::cross(u2, u1) / .vector_mag(pracma::cross(u2, u1))
+
+  return(.rot_mat_ang(v, angle))
+}
+
+# Functions for measuring 3D shape
+.new_half_mass_data = function(galaxy_data, p, q){
+  # function for getting all particles within the half mass radius (ordered by ellipsoid radii)
+  x = galaxy_data$x; y = galaxy_data$y; z = galaxy_data$z
+  half_mass = sum(galaxy_data$Mass) / 2
+
+  ellip_radius = sqrt((x*x) + ((y/p)*(y/p)) + ((z/q)*(z/q)))
+
+  int_order = order(ellip_radius) # get the indicies of the radii in order (low to high)
+  ordered_galaxy_data = galaxy_data[int_order,]
+  cum_mass  = cumsum(ordered_galaxy_data$Mass) # cumulative sum of mass given this order
+  half_mass_ind = which(abs(cum_mass - half_mass) == min(abs(cum_mass - half_mass))) # at what radius does this half-mass now occur?
+
+  return(ordered_galaxy_data[1:(half_mass_ind-1),])
+}
+
+.ellipsoid_tensor = function(galaxy_data, p, q){
+  # Computing the weighted ellipsoid tensor
+  x = galaxy_data$x; y = galaxy_data$y; z = galaxy_data$z
+
+  ellip_radius = sqrt((x*x) + ((y/p)*(y/p)) + ((z/q)*(z/q)))
+
+  M = array(data = NA, dim = c(3,3))
+
+  M[1,1] = sum((galaxy_data$Mass * x * x) / ellip_radius)
+  M[1,2] = sum((galaxy_data$Mass * x * y) / ellip_radius)
+  M[1,3] = sum((galaxy_data$Mass * x * z) / ellip_radius)
+  M[2,1] = M[1,2]
+  M[2,2] = sum((galaxy_data$Mass * y * y) / ellip_radius)
+  M[2,3] = sum((galaxy_data$Mass * y * z) / ellip_radius)
+  M[3,1] = M[1,3]
+  M[3,2] = M[2,3]
+  M[3,3] = sum((galaxy_data$Mass * z * z) / ellip_radius)
+
+  return(M)
+}
+
+.ellipsoid_ratios_p_q = function(galaxy_data, p, q){
+  # Function for calculating the p & q values from the ellipsoid tensor
+  M = .ellipsoid_tensor(galaxy_data, p, q)
+  eig = eigen(M)
+  p = sqrt(eig$values[2]/eig$values[1])
+  q = sqrt(eig$values[3]/eig$values[1])
+  yax = eig$vectors[,2]
+  zax = eig$vectors[,3]
+
+  return(list("eigenvalues"= eig$values, "p" = p, "q" = q, "y_axis" = yax, "z_axis" = zax))
+}
+
+# Function to iteratively find the shape and align at the half-mass stellar radius
+.measure_pqj = function(galaxy_data, abort_count=50){
+  # Set up - we begin by assuming a sphere
+  a = 1; b = 1; c = 1
+  p = b/a; q = c/a
+  aborted = 0; flag = 0
+  cnt = 1
+  temp_p = numeric(); temp_q = numeric()
+
+  # Select all particles within initial half-mass (spherical) of stellar
+  hm_galaxy_data = .new_half_mass_data(galaxy_data$star_part, p, q)
+
+  while (flag == 0){
+    fit_ellip = .ellipsoid_ratios_p_q(hm_galaxy_data, p, q)
+    temp_p[cnt] = fit_ellip$p # recording the axis ratios at this iteration
+    temp_q[cnt] = fit_ellip$q
+
+    # Check if current value is close to (or equal to) the last 10
+    # iterations. If so return current p and q. The reason is that
+    # sometimes the algorithm will end up jumping back and forth
+    # between two similar values
+    if (cnt > 10){
+      last_10p = abs(temp_p[(cnt-9):cnt] - fit_ellip$p)
+      last_10q = abs(temp_q[(cnt-9):cnt] - fit_ellip$q)
+      if (all(last_10p < 0.01) & all(last_10q < 0.01)){
+        flag = 1
+      }
+    }
+
+    # Abort if iteration limit is reached, output current p and q.
+    # The default abort count is 50, usually it doesn't take too long
+    # to converge. Sometimes it just doesn't converge... rare, but I threw these out
+    if (cnt > abort_count){
+      aborted = 1
+      flag = 1
+    }
+
+    # Check if current z-axis is in the same direction as
+    # the unit vector (0,0,1). If not, rotate such that it is
+    if (all.equal(.vector_unit(fit_ellip$z_axis), c(0,0,1)) != TRUE){
+      Rz = .rot_mat_vec(fit_ellip$z_axis, c(0,0,1)) # Compute first the rotation to z
+      v21 = as.numeric(Rz %*% fit_ellip$y_axis) # Then the next required rotation for new angle
+      Ry = .rot_mat_vec(v21, c(0,1,0)) # to the y axis too
+
+      new_star_coor_1 =  Rz %*% rbind(galaxy_data$star_part$x, galaxy_data$star_part$y, galaxy_data$star_part$z)
+      new_star_vel_1  =  Rz %*% rbind(galaxy_data$star_part$vx, galaxy_data$star_part$vy, galaxy_data$star_part$vz)
+
+      new_star_coor_2 = Ry %*% new_star_coor_1
+      new_star_vel_2  = Ry %*% new_star_vel_1
+
+      galaxy_data$star_part$x = new_star_coor_2[1,]; galaxy_data$star_part$y = new_star_coor_2[2,];
+      galaxy_data$star_part$z = new_star_coor_2[3,]
+      galaxy_data$star_part$vx = new_star_vel_2[1,]; galaxy_data$star_part$vy = new_star_vel_2[2,];
+      galaxy_data$star_part$vz = new_star_vel_2[3,]
+
+      if (!is.null(galaxy_data$gas_part)){ # if gas is present, aligning this based on the stellar coordinates
+        new_gas_coor_1 =  Rz %*% rbind(galaxy_data$gas_part$x, galaxy_data$gas_part$y, galaxy_data$gas_part$z)
+        new_gas_vel_1  =  Rz %*% rbind(galaxy_data$gas_part$vx, galaxy_data$gas_part$vy, galaxy_data$gas_part$vz)
+        new_gas_coor_2 = Ry %*% new_gas_coor_1
+        new_gas_vel_2  = Ry %*% new_gas_vel_1
+        galaxy_data$gas_part$x = new_gas_coor_2[1,]; galaxy_data$gas_part$y = new_gas_coor_2[2,];
+        galaxy_data$gas_part$z = new_gas_coor_2[3,]
+        galaxy_data$gas_part$vx = new_gas_vel_2[1,]; galaxy_data$gas_part$vy = new_gas_vel_2[2,];
+        galaxy_data$gas_part$vz = new_gas_vel_2[3,]
+      }
+
+    }
+
+    hm_galaxy_data = .new_half_mass_data(galaxy_data$star_part, fit_ellip$p, fit_ellip$q)
+    p = fit_ellip$p
+    q = fit_ellip$q
+    cnt = cnt + 1
+  }
+
+  return(list("galaxy_data" = galaxy_data, "p" = mean(tail(temp_p, n=6)), "q" = mean(tail(temp_q, n=6))))
+
+}
+
+# Function to align full galaxy based on the stellar particles
+.align_galaxy = function(galaxy_data){
+  data = .measure_pqj(galaxy_data)
+  return(data$galaxy_data)
 }
 
 # Function to calculate spectral weights
@@ -263,66 +518,66 @@
 }
 
 # Function to flip galaxy if Jz is upside-down
-.flip = function(galaxy_data){
+# .flip = function(galaxy_data){
+#
+#   rot_mat = matrix(c(1,0,0,0,-1,0,0,0,-1), nrow = 3, ncol=3)
+#
+#   new_coor =  rot_mat %*% rbind(galaxy_data$part$x, galaxy_data$part$y, galaxy_data$part$z)
+#   new_vel =  rot_mat %*% rbind(galaxy_data$part$vx, galaxy_data$part$vy, galaxy_data$part$vz)
+#
+#   galaxy_data$part$x = new_coor[1,]; galaxy_data$part$y = new_coor[2,]; galaxy_data$part$z = new_coor[3,];
+#   galaxy_data$part$vx = new_vel[1,]; galaxy_data$part$vy = new_vel[2,]; galaxy_data$part$vz = new_vel[3,];
+#
+#   return(galaxy_data)
+# }
 
-  rot_mat = matrix(c(1,0,0,0,-1,0,0,0,-1), nrow = 3, ncol=3)
-
-  new_coor =  rot_mat %*% rbind(galaxy_data$part$x, galaxy_data$part$y, galaxy_data$part$z)
-  new_vel =  rot_mat %*% rbind(galaxy_data$part$vx, galaxy_data$part$vy, galaxy_data$part$vz)
-
-  galaxy_data$part$x = new_coor[1,]; galaxy_data$part$y = new_coor[2,]; galaxy_data$part$z = new_coor[3,];
-  galaxy_data$part$vx = new_vel[1,]; galaxy_data$part$vy = new_vel[2,]; galaxy_data$part$vz = new_vel[3,];
-
-  return(galaxy_data)
-}
-
-# Function to align galaxy
-.align = function(galaxy_data){
-
-  Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
-
-  # To align the galaxy edge-on, align the J vector of inner 10kpc of disk with
-  # the z axis. Inner 10kc of disk is chosen using preferentially gas, then stars,
-  # then disk particles (in the case that the former does not exist in the sim).
-  no_angmom = galaxy_data$head$Npart[1] # number of gas particles for computing angmom
-  angmom_ids = c(1, no_angmom) # ids of gas particles
-  if (no_angmom == 0){
-    no_angmom = galaxy_data$head$Npart[5] # number of stellar particles
-    angmom_ids = c(Npart_sum[4]+1, Npart_sum[5]) # ids of star particles
-    if (no_angmom == 0){
-      no_angmom = galaxy_data$head$Npart[3] # number of disk particles
-      angmom_ids = c(Npart_sum[2]+1,Npart_sum[3]) # ids of disk particles
-    }
-  }
-  # pulling out the disk from which to compute J
-  r = r_galaxy(galaxy_data$part[angmom_ids[1]:angmom_ids[2],]) # compute radial coordinates
-  J = angmom_galaxy(galaxy_data$part[angmom_ids[1]:angmom_ids[2],][r < 0.33*max(r),]) # compute J
-  J_norm = matrix(J/(sqrt(J[1]^2 + J[2]^2 + J[3]^2)), nrow=1, ncol=3)
-
-  v = c(J_norm[2], -J_norm[1], 0) # unit vector normal to J and z-axis, about which we want to rotate
-  c = J_norm[3] # giving cos(angle)
-  s = sqrt(v[1]^2 + v[2]^2) # giving sin(angle)
-
-  if (J_norm[3] == -1){
-    galaxy_data = .flip(galaxy_data)
-    return(galaxy_data)
-  }
-  if (J_norm[3] == 1){
-    return(galaxy_data)
-  }
-
-  v_x = matrix(data = c(0, v[3], -v[2], -v[3], 0, v[1], v[2], -v[1], 0), nrow = 3, ncol = 3) # skew-symmetric cross product
-  I = matrix(data = c(1, 0, 0, 0, 1, 0, 0, 0, 1), nrow = 3, ncol = 3) # identity matrix
-  rot_mat = I + v_x + (1/(1+c))*(v_x %*% v_x) # rotation matrix via Rodrigues Rotation Formula: wikipedia.org/wiki/Rodrigues'_rotation_formula
-
-  new_coor =  rot_mat %*% rbind(galaxy_data$part$x, galaxy_data$part$y, galaxy_data$part$z)
-  new_vel =  rot_mat %*% rbind(galaxy_data$part$vx, galaxy_data$part$vy, galaxy_data$part$vz)
-
-  galaxy_data$part$x = new_coor[1,]; galaxy_data$part$y = new_coor[2,]; galaxy_data$part$z = new_coor[3,];
-  galaxy_data$part$vx = new_vel[1,]; galaxy_data$part$vy = new_vel[2,]; galaxy_data$part$vz = new_vel[3,];
-
-  return(galaxy_data)
-}
+# Function to align galaxy to J
+# .align = function(galaxy_data){
+#
+#   Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
+#
+#   # To align the galaxy edge-on, align the J vector of inner 10kpc of disk with
+#   # the z axis. Inner 10kc of disk is chosen using preferentially gas, then stars,
+#   # then disk particles (in the case that the former does not exist in the sim).
+#   no_angmom = galaxy_data$head$Npart[1] # number of gas particles for computing angmom
+#   angmom_ids = c(1, no_angmom) # ids of gas particles
+#   if (no_angmom == 0){
+#     no_angmom = galaxy_data$head$Npart[5] # number of stellar particles
+#     angmom_ids = c(Npart_sum[4]+1, Npart_sum[5]) # ids of star particles
+#     if (no_angmom == 0){
+#       no_angmom = galaxy_data$head$Npart[3] # number of disk particles
+#       angmom_ids = c(Npart_sum[2]+1,Npart_sum[3]) # ids of disk particles
+#     }
+#   }
+#   # pulling out the disk from which to compute J
+#   r = r_galaxy(galaxy_data$part[angmom_ids[1]:angmom_ids[2],]) # compute radial coordinates
+#   J = angmom_galaxy(galaxy_data$part[angmom_ids[1]:angmom_ids[2],][r < 0.33*max(r),]) # compute J
+#   J_norm = matrix(J/(sqrt(J[1]^2 + J[2]^2 + J[3]^2)), nrow=1, ncol=3)
+#
+#   v = c(J_norm[2], -J_norm[1], 0) # unit vector normal to J and z-axis, about which we want to rotate
+#   c = J_norm[3] # giving cos(angle)
+#   s = sqrt(v[1]^2 + v[2]^2) # giving sin(angle)
+#
+#   if (J_norm[3] == -1){
+#     galaxy_data = .flip(galaxy_data)
+#     return(galaxy_data)
+#   }
+#   if (J_norm[3] == 1){
+#     return(galaxy_data)
+#   }
+#
+#   v_x = matrix(data = c(0, v[3], -v[2], -v[3], 0, v[1], v[2], -v[1], 0), nrow = 3, ncol = 3) # skew-symmetric cross product
+#   I = matrix(data = c(1, 0, 0, 0, 1, 0, 0, 0, 1), nrow = 3, ncol = 3) # identity matrix
+#   rot_mat = I + v_x + (1/(1+c))*(v_x %*% v_x) # rotation matrix via Rodrigues Rotation Formula: wikipedia.org/wiki/Rodrigues'_rotation_formula
+#
+#   new_coor =  rot_mat %*% rbind(galaxy_data$part$x, galaxy_data$part$y, galaxy_data$part$z)
+#   new_vel =  rot_mat %*% rbind(galaxy_data$part$vx, galaxy_data$part$vy, galaxy_data$part$vz)
+#
+#   galaxy_data$part$x = new_coor[1,]; galaxy_data$part$y = new_coor[2,]; galaxy_data$part$z = new_coor[3,];
+#   galaxy_data$part$vx = new_vel[1,]; galaxy_data$part$vy = new_vel[2,]; galaxy_data$part$vz = new_vel[3,];
+#
+#   return(galaxy_data)
+# }
 
 .circular_ap=function(sbin){
   ap_region = matrix(data = NA, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
@@ -381,3 +636,4 @@
   noise = stats::rpois(length(luminosity), lambda = noise_level)
   noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
 }
+
