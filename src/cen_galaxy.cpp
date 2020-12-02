@@ -10,7 +10,9 @@ using namespace Rcpp;
 //'
 //' @param part_data A data.frame describing the particles ID, positions,
 //'  velocities and masses.
-//' @return The input data.frame with positions and velocities centered.
+//' @return A list containing the input data.frame with positions and velocities
+//'  centered, as well as the median coordiantes and velocities of the original
+//'  distribution
 //' @examples
 //'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
 //'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
@@ -54,6 +56,10 @@ Rcpp::List cen_galaxy(Rcpp::DataFrame part_data) {
                             Rcpp::Named("vz")        = vz,
                             Rcpp::Named("Mass")      = Mass);
 
-  return(df);
+  List ret; ret["part_data"] = df;
+  ret["xcen"] = xcen; ret["ycen"] = ycen; ret["zcen"] = zcen;
+  ret["vxcen"] = vxcen; ret["vycen"] = vycen; ret["vzcen"] = vzcen;
+
+  return(ret);
 
 }
