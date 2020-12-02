@@ -27,7 +27,9 @@ angmom_galaxy <- function(part_data) {
 #'
 #' @param part_data A data.frame describing the particles ID, positions,
 #'  velocities and masses.
-#' @return The input data.frame with positions and velocities centered.
+#' @return A list containing the input data.frame with positions and velocities
+#'  centered, as well as the median coordiantes and velocities of the original
+#'  distribution
 #' @examples
 #'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
 #'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),

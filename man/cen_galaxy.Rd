@@ -11,7 +11,9 @@ cen_galaxy(part_data)
 velocities and masses.}
 }
 \value{
-The input data.frame with positions and velocities centered.
+A list containing the input data.frame with positions and velocities
+ centered, as well as the median coordiantes and velocities of the original
+ distribution
 }
 \description{
 The purpose of this function is to centre the galaxy such that the origin of the

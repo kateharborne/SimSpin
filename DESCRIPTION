@@ -17,6 +17,7 @@ Imports:
     FITSio,
     fst,
     hdf5r,
+    magicaxis (>= 2.2.0),
     ProSpect (>= 1.0.7),
     ProFit,
     Rcpp,
@@ -28,5 +29,6 @@ RoxygenNote: 7.1.1
 Suggests: 
     testthat
 Remotes:
+    asgr/magicaxis,
     asgr/ProSpect,
     ICRAR/ProFit
