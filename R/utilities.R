@@ -539,20 +539,27 @@
     return(part_spec)
   }
 
-  if (cores > 1) {
-    cl = snow::makeCluster(cores)
-    doSNOW::registerDoSNOW(cl)
-    i = integer()
-    part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "foreach")) %dopar% {
-      f(Metallicity[i], Age[i])
-    }
-    closeAllConnections()
-    output = part_spec
+  if (length(Age) == 1){
+    spectra = f(Metallicity, Age)
+    return(spectra)
+  } else {
+
+    if (cores > 1) {
+      cl = snow::makeCluster(cores)
+      doSNOW::registerDoSNOW(cl)
+      i = integer()
+      part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "foreach")) %dopar% {
+        f(Metallicity[i], Age[i])
+      }
+      closeAllConnections()
+      output = part_spec
     } else {
-    part_spec = mapply(f, Metallicity, Age)
-    output = lapply(seq_len(ncol(part_spec)), function(i) part_spec[,i])
+      part_spec = mapply(f, Metallicity, Age)
+      output = lapply(seq_len(ncol(part_spec)), function(i) part_spec[,i])
+    }
+    return(output)
+
   }
-  return(output)
 }
 
 # Function to flip galaxy if Jz is upside-down
