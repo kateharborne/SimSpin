@@ -68,9 +68,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
 
-  galaxy_data$part = cen_galaxy(galaxy_data$part) # centering the galaxy
+  galaxy_data = .centre_galaxy(galaxy_data) # centering the galaxy based on stellar particles
 
-  galaxy_data = .align(galaxy_data) # align angular momentum vector with z-axis
+  galaxy_data = .align_galaxy(galaxy_data) # align 3D shape of galaxy
 
   if(!"ssp" %in% names(galaxy_data)){ # if the SSP field does not come from the snapshot file, must be working with N-body
 
@@ -92,28 +92,38 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       galaxy_data$ssp$Age = bulge_age
       galaxy_data$ssp$Metallicity = bulge_Z
     }
-
   }
 
-  n_stars = length(galaxy_data$ssp$Age) # number of "stellar" particles
-  id_stars = seq(Npart_sum[2]+1, Npart_sum[5]) # ids of "stellar" particles
-  simspin_file = matrix(data=NA, nrow=(9+8), ncol=n_stars) # nrow = 9 (template, id, 3 positions, 3 velocities, initial mass) + 8 (4 weights for spectra, 4 template ids)
-  simspin_file[1,1] = paste(temp_name)
-  simspin_file[2,] = seq(1, n_stars)
-  simspin_file[3,] = galaxy_data$part$x[id_stars]
-  simspin_file[4,] = galaxy_data$part$y[id_stars]
-  simspin_file[5,] = galaxy_data$part$z[id_stars]
-  simspin_file[6,] = galaxy_data$part$vx[id_stars]
-  simspin_file[7,] = galaxy_data$part$vy[id_stars]
-  simspin_file[8,] = galaxy_data$part$vz[id_stars]
-  simspin_file[9,] = galaxy_data$ssp$Initial_Mass
-  simspin_file[10:17,] = .spectra_weights(Metallicity = galaxy_data$ssp$Metallicity,
-                                         Age = galaxy_data$ssp$Age,
-                                         Template = temp)
+  # If a particle has a metallicity of 0, remove from sample?
+  Z0_int = which(galaxy_data$ssp$Metallicity == 0)
+  galaxy_data$star_part = galaxy_data$star_part[-c(Z0_int),]
+  galaxy_data$ssp       = galaxy_data$ssp[-c(Z0_int),]
 
-  fst::write_fst(as.data.frame(simspin_file), path = output, compress = 100)
+  # now binning stellar particles based on their A/Z position
+  AZ_bins = magicaxis::magbin(galaxy_data$ssp$Age, galaxy_data$ssp$Metallicity,
+                              log = "xy", step=c(0.02,0.1), shape="hex", dustlim=0,
+                              plot = FALSE)
 
-  message("SimSpin file written to: ", output, "\n")
+  # unique A/Z bins give the number of unique spectra required
+  bin_id = unique(AZ_bins$groups)
+
+  # A and Z of required SEDs
+  metallicity = 10^(AZ_bins$bins$y)[bin_id]
+  ages = 10^(AZ_bins$bins$x)[bin_id]
+
+  for (i in 1:length(galaxy_data$star_part$x)){
+    galaxy_data$star_part$sed_id[i] = which(bin_id == AZ_bins$groups[i])
+  }
+  galaxy_data$star_part$Initial_Mass = galaxy_data$ssp$Initial_Mass
+
+  sed  = .spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = cores) # returns a list
+
+  simspin_file = list("star_part" = galaxy_data$star_part,
+                      "spectra"   = sed)
+
+  saveRDS(simspin_file, file = output)
+
+  return(message("SimSpin file written to: ", output, "\n"))
 }
 
 
