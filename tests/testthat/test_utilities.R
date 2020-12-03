@@ -76,3 +76,11 @@ test_that("Galaxy alignment is aligning the gas correctly", {
   expect_equal(J_ang_init, J_ang_end)
 
 })
+
+test_that("SED is returned as a list when 1 or multiple cores are used", {
+  ages = sample(seq(3e7, 1.4e10, length.out = 100), 100)/1e9
+  metallicity = sample(seq(1e-4, 4e-2, length.out = 100), 100)
+
+  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = ProSpect::BC03lr, cores = 1), "list")
+  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = ProSpect::BC03lr, cores = 2), "list")
+})
