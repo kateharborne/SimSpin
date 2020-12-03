@@ -163,8 +163,8 @@
   }
 
   if (eagle){ # reading the details from EAGLE files for simple stellar population
-    ssp = list("Initial_Mass"=numeric(length=stellar_sum), "Age"=numeric(length=stellar_sum),
-               "Metallicity"=numeric(length=stellar_sum))
+    ssp = data.frame("Initial_Mass"=numeric(length=stellar_sum), "Age"=numeric(length=stellar_sum),
+                     "Metallicity"=numeric(length=stellar_sum))
     ssp$Initial_Mass = hdf5r::readDataSet(data[["PartType4/InitialMass"]])
     Stellar_Formation_Time = hdf5r::readDataSet(data[["PartType4/StellarFormationTime"]])
     ssp$Age = as.numeric(.SFTtoAge(a = Stellar_Formation_Time, cores = cores))
@@ -181,6 +181,7 @@
     star_pos = star_pos * Time^(a_coor) * HubbleParam^(h_coor) * 1e3
     star_vel = star_vel * Time^(a_velo) * HubbleParam^(h_velo)
     star_part$Mass = star_part$Mass * Time^(a_mass) * HubbleParam^(h_mass)
+    ssp$Initial_Mass = ssp$Initial_Mass * Time^(a_mass) * HubbleParam^(h_mass)
   }
 
   # sort stellar coord & vel into x, y, ..., vz
@@ -453,36 +454,73 @@
 }
 
 # Function to calculate spectral weights
-.spectra_weights = function(Metallicity, Age, Template){
-  temp_metals = as.numeric(Template[[1]])
-  temp_ages   = as.numeric(Template[[2]])
-  sw = function(metallicity, age){
-    Z = as.numeric(ProSpect::interp_quick(metallicity, temp_metals, log = TRUE))
-    A = as.numeric(ProSpect::interp_quick(age * 1e9, temp_ages, log = TRUE))
-    return(c(Z, A))
-    }
-  weights = mapply(sw, Metallicity, Age)
-  return(weights)
-}
+# .spectra_weights = function(Metallicity, Age, Template){
+#   temp_metals = as.numeric(Template[[1]])
+#   temp_ages   = as.numeric(Template[[2]])
+#   sw = function(metallicity, age){
+#     Z = as.numeric(ProSpect::interp_quick(metallicity, temp_metals, log = TRUE))
+#     A = as.numeric(ProSpect::interp_quick(age * 1e9, temp_ages, log = TRUE))
+#     return(c(Z, A))
+#     }
+#   weights = mapply(sw, Metallicity, Age)
+#   return(weights)
+# }
 
 # Function to generate spectra from spectral weights
-.compute_spectra = function(Weights, Mass, Template){
-  cs = function(w, mass){
-    spectra = ((Template$Zspec[[w[2]]][w[6],] * w[4]*w[8]) +
-               (Template$Zspec[[w[2]]][w[5],] * w[4]*w[7]) +
-               (Template$Zspec[[w[1]]][w[6],] * w[3]*w[8]) +
-               (Template$Zspec[[w[1]]][w[5],] * w[3]*w[7])) * 1e10 * mass
-  return(spectra)
-  }
+# .compute_spectra = function(Weights, Mass, Template){
+#   cs = function(w, mass){
+#     spectra = ((Template$Zspec[[w[2]]][w[6],] * w[4]*w[8]) +
+#                (Template$Zspec[[w[2]]][w[5],] * w[4]*w[7]) +
+#                (Template$Zspec[[w[1]]][w[6],] * w[3]*w[8]) +
+#                (Template$Zspec[[w[1]]][w[5],] * w[3]*w[7])) * 1e10 * mass
+#   return(spectra)
+#   }
+#
+#   intrinsic_spectra = matrix(unlist(mapply(cs, Weights, Mass)), nrow=length(Mass), byrow=T)
+#
+#   return(intrinsic_spectra)
+# }
 
-  intrinsic_spectra = matrix(unlist(mapply(cs, Weights, Mass)), nrow=length(Mass), byrow=T)
+# Function to generate mass weighted spectra
+# .part_spec = function(Metallicity, Age, Mass, Template, cores){
+#   f = function(metallicity, age, mass) {
+#     Z = as.numeric(ProSpect::interp_quick(metallicity, Template$Z, log = TRUE))
+#     A = as.numeric(ProSpect::interp_quick(age * 1e9, Template$Age, log = TRUE))
+#
+#     weights = data.frame("hihi" = Z[4] * A[4],   # ID_lo = 1, ID_hi = 2, wt_lo = 3, wt_hi = 4
+#                          "hilo" = Z[4] * A[3],
+#                          "lohi" = Z[3] * A[4],
+#                          "lolo" = Z[3] * A[3])
+#
+#     part_spec = array(data = NA, dim = c(1, length(Template$Wave)))
+#
+#     part_spec = ((Template$Zspec[[Z[2]]][A[2],] * weights$hihi) +
+#                    (Template$Zspec[[Z[2]]][A[1],] * weights$hilo) +
+#                    (Template$Zspec[[Z[1]]][A[2],] * weights$lohi) +
+#                    (Template$Zspec[[Z[1]]][A[1],] * weights$lolo)) * mass * 1e10
+#
+#     return(part_spec)
+#   }
+#   if (cores > 1) {
+#     cl = snow::makeCluster(cores)
+#     doSNOW::registerDoSNOW(cl)
+#     i = integer()
+#     part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "foreach")) %dopar% {
+#       f(Metallicity[i], Age[i], Mass[i])
+#     }
+#     closeAllConnections()
+#   }
+#   else {
+#     part_spec = mapply(f, Metallicity, Age, Mass)
+#   }
+#   output = matrix(unlist(part_spec, use.names=FALSE), ncol = length(Metallicity), byrow = FALSE)
+#
+#   return(output)
+# }
 
-  return(intrinsic_spectra)
-}
-
-# Function to generate spectra
-.part_spec = function(Metallicity, Age, Mass, Template, cores){
-  f = function(metallicity, age, mass) {
+# Function to generate spectra (w/o mass weighting)
+.spectra = function(Metallicity, Age, Template, cores){
+  f = function(metallicity, age) {
     Z = as.numeric(ProSpect::interp_quick(metallicity, Template$Z, log = TRUE))
     A = as.numeric(ProSpect::interp_quick(age * 1e9, Template$Age, log = TRUE))
 
@@ -494,26 +532,26 @@
     part_spec = array(data = NA, dim = c(1, length(Template$Wave)))
 
     part_spec = ((Template$Zspec[[Z[2]]][A[2],] * weights$hihi) +
-                   (Template$Zspec[[Z[2]]][A[1],] * weights$hilo) +
-                   (Template$Zspec[[Z[1]]][A[2],] * weights$lohi) +
-                   (Template$Zspec[[Z[1]]][A[1],] * weights$lolo)) * mass * 1e10
+                 (Template$Zspec[[Z[2]]][A[1],] * weights$hilo) +
+                 (Template$Zspec[[Z[1]]][A[2],] * weights$lohi) +
+                 (Template$Zspec[[Z[1]]][A[1],] * weights$lolo))
 
     return(part_spec)
   }
+
   if (cores > 1) {
     cl = snow::makeCluster(cores)
     doSNOW::registerDoSNOW(cl)
     i = integer()
     part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "foreach")) %dopar% {
-      f(Metallicity[i], Age[i], Mass[i])
+      f(Metallicity[i], Age[i])
     }
     closeAllConnections()
+    output = part_spec
+    } else {
+    part_spec = mapply(f, Metallicity, Age)
+    output = lapply(seq_len(ncol(part_spec)), function(i) part_spec[,i])
   }
-  else {
-    part_spec = mapply(f, Metallicity, Age, Mass)
-  }
-  output = matrix(unlist(part_spec, use.names=FALSE), ncol = length(Metallicity), byrow = FALSE)
-
   return(output)
 }
 
