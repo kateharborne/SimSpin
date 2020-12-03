@@ -45,7 +45,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   temp_name = stringr::str_to_upper(template)
 
   if(missing(output)){
-    output = paste(sub('\\..*', '', filename), "_", temp_name, ".fst", sep="")
+    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="")
   }
 
   if(file.exists(output) & !overwrite){
@@ -78,7 +78,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     n_stars = n_disk + n_bulge # total number of "stars"
     galaxy_data$ssp = data.frame("Initial_Mass"=numeric(n_stars), "Age"=numeric(n_stars),
                                  "Metallicity"=numeric(n_stars))
-    galaxy_data$ssp$Initial_Mass = galaxy_data$part$Mass[Npart_sum[2]+1:Npart_sum[4]]/2 # assuming the initial mass is half of the current mass
+    galaxy_data$ssp$Initial_Mass = galaxy_data$star_part$Mass[Npart_sum[2]+1:Npart_sum[4]]/2 # assuming the initial mass is half of the current mass
 
     if (n_disk > 0 & n_bulge > 0){ # assigning ages and metallities to disk and bulge particles (if present in snap)
       galaxy_data$ssp$Age[1:n_disk] = disk_age
@@ -96,13 +96,21 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   # If a particle has a metallicity of 0, remove from sample?
   Z0_int = which(galaxy_data$ssp$Metallicity == 0)
-  galaxy_data$star_part = galaxy_data$star_part[-c(Z0_int),]
-  galaxy_data$ssp       = galaxy_data$ssp[-c(Z0_int),]
+  if (length(Z0_int)!=0){ # remove if there are any Z = 0
+    galaxy_data$star_part = galaxy_data$star_part[-c(Z0_int),]
+    galaxy_data$ssp       = galaxy_data$ssp[-c(Z0_int),]
+  }
 
   # now binning stellar particles based on their A/Z position
-  AZ_bins = magicaxis::magbin(galaxy_data$ssp$Age, galaxy_data$ssp$Metallicity,
-                              log = "xy", step=c(0.02,0.1), shape="hex", dustlim=0,
-                              plot = FALSE)
+  if (length(unique(galaxy_data$ssp$Age)) > 1 | length(unique(galaxy_data$ssp$Metallicity)) > 1){
+    AZ_bins = magicaxis::magbin(galaxy_data$ssp$Age, galaxy_data$ssp$Metallicity,
+                                log = "xy", step=c(0.02,0.1), shape="hex", dustlim=0,
+                                plot = FALSE)
+  } else { # in the case that you only have one type of N-body particle (disk or bulge)
+    AZ_bins = list("bins" = data.frame("x" = log10(unique(galaxy_data$ssp$Age)),
+                                       "y" = log10(unique(galaxy_data$ssp$Metallicity))),
+                   "groups" = rep(1, length(galaxy_data$star_part$x)))
+  }
 
   # unique A/Z bins give the number of unique spectra required
   bin_id = unique(AZ_bins$groups)
@@ -110,6 +118,10 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   # A and Z of required SEDs
   metallicity = 10^(AZ_bins$bins$y)[bin_id]
   ages = 10^(AZ_bins$bins$x)[bin_id]
+
+  # adding info to stellar_particle data
+  galaxy_data$star_part$sed_id = numeric(length(galaxy_data$star_part$x))
+  galaxy_data$star_part$Initial_Mass = numeric(length(galaxy_data$star_part$x))
 
   for (i in 1:length(galaxy_data$star_part$x)){
     galaxy_data$star_part$sed_id[i] = which(bin_id == AZ_bins$groups[i])
