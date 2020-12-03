@@ -540,7 +540,7 @@
   }
 
   if (length(Age) == 1){
-    spectra = f(Metallicity, Age)
+    spectra = list(f(Metallicity, Age))
     return(spectra)
   } else {
 

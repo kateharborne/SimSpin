@@ -5,47 +5,36 @@
 library(testthat)
 context("Testing build_datacube function.\n")
 
-ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
-temp_loc = tempdir()
-
-test_that("simspin file can be made", {
-  skip_on_travis()
-  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep="")))
-})
+ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
+ss_hdf5   = system.file("extdata", "SimSpin_example_HDF5_spectra.Rdata", package = "SimSpin")
+ss_eagle  = system.file("extdata", "SimSpin_example_EAGLE_spectra.Rdata", package = "SimSpin")
 
 # Testing that build_datacube works
-test_that("Initial run of build_datacube function #1.", {
+test_that("Gadget files can be built.", {
   skip_on_travis()
-  expect_length(build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""),
+  expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 2)
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
+})
+
+test_that("HDF5 files can be built.", {
+  skip_on_travis()
+  expect_length(build_datacube(simspin_file = ss_hdf5,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
+})
+
+test_that("EAGLE files can be built.", {
+  skip_on_travis()
+  expect_length(build_datacube(simspin_file = ss_eagle,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
 })
 
 # Testing that build_datacube will give warning if the spectra given is low res
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {
-  skip_on_travis()
-  expect_warning(build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""), telescope = telescope(type="SAMI"),
+  expect_warning(build_datacube(simspin_file = ss_gadget, telescope = telescope(type="SAMI"),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45)))
-})
-
-unlink(paste(temp_loc, "spectra.fst", sep=""))
-
-# Testing that the spectral_weights functions work as expected
-test_that("spectra are weighted by mass correctly", {
-  weights = list(V5389 = c(7, 8, 0.5117805, 0.4882195, 39, 40, 0.6736590, 0.3263410),
-                 V5464 = c(6, 7, 0.09855354,  0.90144646, 40, 41, 0.79954516, 0.20045484))
-  mass = c(0.0001274539, 0.0001326889)
-  spectra = matrix(data=NA, nrow=2, ncol=53689)
-  Template = ProSpect::EMILES
-  for (i in 1:2){
-    w = weights[[i]]; m = mass[i]
-    spectra[i,] = ((Template$Zspec[[w[2]]][w[6],] * w[4]*w[8]) +
-                   (Template$Zspec[[w[2]]][w[5],] * w[4]*w[7]) +
-                   (Template$Zspec[[w[1]]][w[6],] * w[3]*w[8]) +
-                   (Template$Zspec[[w[1]]][w[5],] * w[3]*w[7])) * 1e10 * m
-
-  }
-  expect_equal(.compute_spectra(weights, mass, Template), spectra, tolerance = 1e-6)
 })
 
 # Testing that the velocity shift functions work as expected
@@ -64,4 +53,30 @@ test_that("velocity shift for wavelengths work correctly", {
 
   expect_equal(wave_shift, wave_shift_comp)
 
+})
+
+# Test that the spectra pulled for each particle are correct
+test_that("Repeated spectra are included in intrinsic spectra", {
+  simspin_data = readRDS(ss_eagle)
+
+  galaxy_data = obs_galaxy(part_data = simspin_data$star_part, inc_rad = 0.7853982) # projecting the galaxy to given inclination
+  sbin_seq = c(-7.502401, -7.002241, -6.502080, -6.001920, -5.501760, -5.001600,
+               -4.501440, -4.001280, -3.501120, -3.000960, -2.500800, -2.000640,
+               -1.500480, -1.000320, -0.500160,  0.000000,  0.500160,  1.000320,
+               1.500480, 2.000640, 2.500800, 3.000960, 3.501120, 4.001280, 4.501440,
+               5.001600, 5.501760, 6.001920, 6.502080, 7.002241, 7.502401)
+  galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=sbin_seq, labels=F) +
+    (30 * cut(galaxy_data$z_obs, breaks=sbin_seq, labels=F)) - (30) # assigning particles to positions in cube
+
+  i = 411
+
+  particle_IDs = which(galaxy_data$pixel_pos == i)
+  galaxy_sample = galaxy_data[particle_IDs,]
+
+  intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = length(particle_IDs), byrow = T)
+  spectra = intrinsic_spectra * (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+
+  expect_true(all(intrinsic_spectra[1,] == simspin_data$spectra[[5]]))
+  expect_equal((intrinsic_spectra[1,] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[1,])
+  expect_equal((intrinsic_spectra[2,] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[2,])
 })
