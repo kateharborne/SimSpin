@@ -31,6 +31,9 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad) {
   Rcpp::NumericVector vx        = part_data["vx"];
   Rcpp::NumericVector vy        = part_data["vy"];
   Rcpp::NumericVector vz        = part_data["vz"];
+  Rcpp::NumericVector Mass         = part_data["Mass"];
+  Rcpp::NumericVector sed_id       = part_data["sed_id"];
+  Rcpp::NumericVector Initial_Mass = part_data["Initial_Mass"];
 
   int n = x.size();
 
@@ -51,6 +54,9 @@ Rcpp::List obs_galaxy(Rcpp::DataFrame part_data, double inc_rad) {
                             Rcpp::Named("vx")        = vx,
                             Rcpp::Named("vy")        = vy,
                             Rcpp::Named("vz")        = vz,
+                            Rcpp::Named("Mass")         = Mass,
+                            Rcpp::Named("sed_id")       = sed_id,
+                            Rcpp::Named("Initial_Mass") = Initial_Mass,
                             Rcpp::Named("r")         = r,
                             Rcpp::Named("z_obs")     = z_obs,
                             Rcpp::Named("y_obs")     = y_obs,

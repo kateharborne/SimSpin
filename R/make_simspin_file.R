@@ -131,7 +131,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   sed  = .spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = cores) # returns a list
 
   simspin_file = list("star_part" = galaxy_data$star_part,
-                      "spectra"   = sed)
+                      "spectra"   = sed,
+                      "wave"      = temp$Wave)
 
   saveRDS(simspin_file, file = output)
 
