@@ -667,7 +667,7 @@
 .lsf_convolution = function(observation, luminosity, lsf_sigma){
 
   scaled_sigma = lsf_sigma / observation$wave_res # scaling the size of the gaussian to match the pixel dimensions
-  kernel = dnorm(seq(-scaled_sigma*5,scaled_sigma*5,length.out = 25), mean = 0, sd = scaled_sigma)
+  kernel = stats::dnorm(seq(-scaled_sigma*5,scaled_sigma*5,length.out = 25), mean = 0, sd = scaled_sigma)
   lsf_gauss = kernel/sum(kernel)
   lum = stats::convolve(luminosity, lsf_gauss, type="open")
   end = (length(luminosity) + length(lsf_gauss) - 1) - 12

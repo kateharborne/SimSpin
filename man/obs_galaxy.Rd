@@ -23,9 +23,10 @@ taking mock IFU observations. It accepts particle information output from the
 user supplied inclination.
 }
 \examples{
-  data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-  galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
-
-  output = obs_galaxy(part_data = galaxy_data,
-                      inc_rad   = 0)
+  galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+                           "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+                           "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+                           "vz"=stats::rnorm(100), "Mass" = 1:100,
+                           "sed_id" = 1:100, "Initial_Mass" = 1:100)
+  observed_data = obs_galaxy(galaxy_data, inc_rad = 1.047)
 }
