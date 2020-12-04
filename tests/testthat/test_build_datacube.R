@@ -11,21 +11,18 @@ ss_eagle  = system.file("extdata", "SimSpin_example_EAGLE_spectra.Rdata", packag
 
 # Testing that build_datacube works
 test_that("Gadget files can be built.", {
-  skip_on_travis()
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
 })
 
 test_that("HDF5 files can be built.", {
-  skip_on_travis()
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
 })
 
 test_that("EAGLE files can be built.", {
-  skip_on_travis()
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)

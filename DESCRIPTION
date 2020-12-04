@@ -18,6 +18,7 @@ Imports:
     fst,
     hdf5r,
     magicaxis (>= 2.2.0),
+    pracma,
     ProSpect (>= 1.0.7),
     ProFit,
     Rcpp,

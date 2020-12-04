@@ -25,6 +25,7 @@ simulation data when taking mock IFU observations.
   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
-                           "vz"=stats::rnorm(100))
+                           "vz"=stats::rnorm(100), "Mass" = 1:100,
+                           "sed_id" = 1:100, "Initial_Mass" = 1:100)
   observed_data = obs_galaxy(galaxy_data, inc_rad = 1.047)
 }
