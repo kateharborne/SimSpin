@@ -85,13 +85,29 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       galaxy_data$ssp$Age[(n_disk+1):n_stars] = bulge_age
       galaxy_data$ssp$Metallicity[1:n_disk] = disk_Z
       galaxy_data$ssp$Metallicity[(n_disk+1):n_stars] = bulge_Z
+      AZ_bins = data.frame("ages" = c(disk_age, bulge_age),
+                           "metallicities" = c(disk_Z, bulge_Z),
+                           "id" = c(1,2),
+                           "sed_id" = c(1,2))
+      az_pos = c(rep(1, n_disk), rep(2, n_bulge))
     } else if (n_disk > 0 & n_bulge == 0){
       galaxy_data$ssp$Age = disk_age
       galaxy_data$ssp$Metallicity = disk_Z
+      AZ_bins = data.frame("ages" = disk_age,
+                           "metallicities" = disk_Z,
+                           "id" = 1,
+                           "sed_id" = 1)
+      az_pos = rep(1, n_disk)
     } else if (n_disk == 0 & n_bulge > 0){
       galaxy_data$ssp$Age = bulge_age
       galaxy_data$ssp$Metallicity = bulge_Z
+      AZ_bins = data.frame("ages" = bulge_age,
+                           "metallicities" = bulge_Z,
+                           "id" = 1,
+                           "sed_id" = 1)
+      az_pos = rep(1, n_bulge)
     }
+
   }
 
   # If a particle has a metallicity of 0, remove from sample?
@@ -102,33 +118,30 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
   # now binning stellar particles based on their A/Z position
-  if (length(unique(galaxy_data$ssp$Age)) > 1 | length(unique(galaxy_data$ssp$Metallicity)) > 1){
-    AZ_bins = magicaxis::magbin(galaxy_data$ssp$Age, galaxy_data$ssp$Metallicity,
-                                log = "xy", step=c(0.02,0.1), shape="hex", dustlim=0,
-                                plot = FALSE)
-  } else { # in the case that you only have one type of N-body particle (disk or bulge)
-    AZ_bins = list("bins" = data.frame("x" = log10(unique(galaxy_data$ssp$Age)),
-                                       "y" = log10(unique(galaxy_data$ssp$Metallicity))),
-                   "groups" = rep(1, length(galaxy_data$star_part$x)))
+  if (length(unique(galaxy_data$ssp$Age)) > 2){ # if not an N-body simulation
+    age_grid = 10^(seq(log10(min(galaxy_data$ssp$Age))-0.02, log10(max(galaxy_data$ssp$Age))+0.02, by = 0.02))
+    Z_grid   = 10^(seq(log10(min(galaxy_data$ssp$Metallicity))-0.1, log10(max(galaxy_data$ssp$Metallicity))+0.1, by = 0.1))
+
+    age_cen  = 10^(seq(log10(min(galaxy_data$ssp$Age))-0.01, log10(max(galaxy_data$ssp$Age))+0.01, by = 0.02))
+    Z_cen    = 10^(seq(log10(min(galaxy_data$ssp$Metallicity))-0.05, log10(max(galaxy_data$ssp$Metallicity))+0.05, by = 0.1))
+
+    AZ       = data.frame("ages" = rep(age_cen, length = length(age_cen)*length(Z_cen)),
+                          "metallicities" = rep(Z_cen, each = length(age_cen)),
+                          "id" = seq(1, length(age_cen)*length(Z_cen)))
+
+    az_pos = cut(galaxy_data$ssp$Age, breaks = age_grid, labels = F) +
+      (length(age_cen) * cut(galaxy_data$ssp$Metallicity, breaks = Z_grid, labels = F)) - length(age_cen)
+
+    AZ_bins = AZ[sort(unique(az_pos)),]
+    AZ_bins$sed_id = seq(1, length(AZ_bins$id))
+
   }
-
-  # unique A/Z bins give the number of unique spectra required
-  bin_id = unique(AZ_bins$groups)
-
-  # A and Z of required SEDs
-  metallicity = 10^(AZ_bins$bins$y)[bin_id]
-  ages = 10^(AZ_bins$bins$x)[bin_id]
 
   # adding info to stellar_particle data
-  galaxy_data$star_part$sed_id = numeric(length(galaxy_data$star_part$x))
-  galaxy_data$star_part$Initial_Mass = numeric(length(galaxy_data$star_part$x))
-
-  for (i in 1:length(galaxy_data$star_part$x)){
-    galaxy_data$star_part$sed_id[i] = which(bin_id == AZ_bins$groups[i])
-  }
+  galaxy_data$star_part$sed_id = AZ_bins$sed_id[match(az_pos,AZ_bins$id)]
   galaxy_data$star_part$Initial_Mass = galaxy_data$ssp$Initial_Mass
 
-  sed  = .spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = cores) # returns a list
+  sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
 
   simspin_file = list("star_part" = galaxy_data$star_part,
                       "spectra"   = sed,
