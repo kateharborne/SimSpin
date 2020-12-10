@@ -2,6 +2,9 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Replacing function angmom_galaxy (as this is used in tests).
 #' Computing the angular momentum of the particles.
 #'
 #' The purpose of this function is to compute the angular momentum vector.
@@ -10,8 +13,11 @@
 #' angular momentum vector, J.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> Updating documentation in R files.
+=======
+>>>>>>> Replacing function angmom_galaxy (as this is used in tests).
 #' @return The numeric vector describing the magnitudes of each component of
 #' the angular momentum.
 #' @examples
@@ -21,18 +27,24 @@
 #'                            "vz"=stats::rnorm(100), "Mass"=rep(1,100))
 #'   J = angmom_galaxy(galaxy_data)
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #'
 >>>>>>> Updating new example files and DESCRIPTION for travis.
 =======
 >>>>>>> Updating documentation in R files.
+=======
+>>>>>>> Replacing function angmom_galaxy (as this is used in tests).
 #' @export
 angmom_galaxy <- function(part_data) {
     .Call('_SimSpin_angmom_galaxy', PACKAGE = 'SimSpin', part_data)
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> Updates to package control to match changes to remove magicaxis and fst dependencies.
+=======
+>>>>>>> Replacing function angmom_galaxy (as this is used in tests).
 #' Centering the galaxy.
 #'
 #' The purpose of this function is to centre the galaxy such that the origin of the
