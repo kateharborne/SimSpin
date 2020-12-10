@@ -108,7 +108,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (write_fits){
     if (verbose){cat("Writing FITS... \n")}
     if (missing(output_location)){
-      out_file_name = stringr::str_remove(simspin_file, ".fst")
+      out_file_name = stringr::str_remove(simspin_file, ".Rdata")
       output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
                               observation$psf_fwhm,"fwhm.FITS", sep="")
     }
