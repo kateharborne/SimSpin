@@ -13,7 +13,7 @@ temp_loc = tempdir()
 
 # Test that they the function runs successfully without error
 test_that("Initial run of each simulation type - Gadget.", {
-  expect_null(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test", sep="")))
+  expect_null(make_simspin_file(ss_gadget, template = "BC03hr", output = paste(temp_loc, "gadget_test", sep="")))
 })
 
 test_that("Initial run of each simulation type - HDF5", {
@@ -44,7 +44,7 @@ test_that("Error when template is unsupported", {
 
 # Test that the function will overwrite if overwrite = T
 test_that("Test that old files can be overwritten", {
-  expect_null(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test", sep=""),
+  expect_null(make_simspin_file(ss_gadget, template = "EMILES", output = paste(temp_loc, "gadget_test", sep=""),
                                  overwrite = T))
 })
 

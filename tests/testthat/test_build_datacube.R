@@ -9,11 +9,14 @@ ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", packa
 ss_hdf5   = system.file("extdata", "SimSpin_example_HDF5_spectra.Rdata", package = "SimSpin")
 ss_eagle  = system.file("extdata", "SimSpin_example_EAGLE_spectra.Rdata", package = "SimSpin")
 
+temp_loc = tempdir()
+
 # Testing that build_datacube works
 test_that("Gadget files can be built.", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               verbose = T), 4)
 })
 
 test_that("HDF5 files can be built.", {
@@ -27,6 +30,21 @@ test_that("EAGLE files can be built.", {
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
 })
+
+# Testing that build_datacube works to write to FITS file
+
+test_that("Data cubes can be written to file", {
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), 4)
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               write_fits = T), 4)
+})
+
+unlink(c(paste(temp_loc, "cube.FITS", sep=""), paste(stringr::str_remove(ss_gadget, ".Rdata"), "_inc45deg_seeing2fwhm.FITS", sep="")))
 
 # Testing that build_datacube will give warning if the spectra given is low res
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {

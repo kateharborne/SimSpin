@@ -88,3 +88,6 @@ test_that("SED is returned as a list when 1 or multiple cores are used", {
 test_that("SED is returned as a list when only one age and metallicity are given", {
   expect_type(.spectra(Metallicity = 1e-4, Age = 5, Template = ProSpect::BC03lr, cores = 1), "list")
 })
+
+
+
