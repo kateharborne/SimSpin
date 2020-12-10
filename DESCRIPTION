@@ -15,9 +15,7 @@ Imports:
     data.table,
     doSNOW,
     FITSio,
-    fst,
     hdf5r,
-    magicaxis (>= 2.2.0),
     pracma,
     ProSpect (>= 1.0.7),
     ProFit,
@@ -30,6 +28,5 @@ RoxygenNote: 7.1.1
 Suggests: 
     testthat
 Remotes:
-    asgr/magicaxis,
     asgr/ProSpect,
     ICRAR/ProFit
