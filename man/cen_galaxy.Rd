@@ -20,8 +20,9 @@ The purpose of this function is to centre the galaxy such that the origin of the
 system lies at (0,0,0).
 }
 \examples{
-  data = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-  galaxy_data = rbind(data$PartType2$Part, data$PartType3$Part)
-
-  output = cen_galaxy(part_data = galaxy_data)
+  galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+                           "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+                           "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+                           "vz"=stats::rnorm(100), "Mass"=rep(1,100))
+  centered_galaxy = cen_galaxy(galaxy_data)
 }

@@ -14,7 +14,7 @@
 Package: \tab SimSpin\cr
 Type: \tab Package\cr
 Version: \tab 2.0.0\cr
-Date: \tab 2020-10-28\cr
+Date: \tab 2020-12-14\cr
 License: \tab LGPL-3\cr
 Depends: \tab R (>= 3.0), Rcpp\cr
 Suggests: \tab testthat\cr

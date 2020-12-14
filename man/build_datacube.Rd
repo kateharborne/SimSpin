@@ -2,73 +2,46 @@
 % Please edit documentation in R/build_datacube.R
 \name{build_datacube}
 \alias{build_datacube}
-\title{Constructing kinematic data cubes.}
+\title{A function for making a mock spectral cube}
 \usage{
 build_datacube(
-  simdata,
-  r200 = 200,
-  z,
-  fov,
-  ap_shape,
-  central_wvl,
-  lsf_fwhm,
-  pixel_sscale,
-  pixel_vscale,
-  inc_deg,
-  filter = "g",
-  blur,
-  align = FALSE,
-  multi_thread = TRUE
+  simspin_file,
+  telescope,
+  observing_strategy,
+  verbose = F,
+  write_fits = F,
+  output_location
 )
 }
 \arguments{
-\item{simdata}{The simulation information data.frame output by \code{\link{sim_data}}.}
+\item{simspin_file}{The path to the location of the SimSpin .fst file.}
 
-\item{r200}{The virial radius specified in the simulation, kpc.}
+\item{telescope}{An object of the telescope class describing the
+specifications of the observing telescope (i.e. field of view, spatial
+resolution, wavelength resolution, etc.).}
 
-\item{z}{The galaxy redshift.}
+\item{observing_strategy}{An object of the observing_strategy class that
+describes the properties of the observed simulation (i.e. redshift,
+inclination, seeing conditions).}
 
-\item{fov}{The field of view of the IFU, diameter in arcseconds.}
+\item{verbose}{Default is \code{FALSE}. If you would like the code to give
+updates about its progress, change this parameter to \code{TRUE}.}
 
-\item{ap_shape}{The shape of the field of view, with options "circular", "square" or "hexagonal".}
+\item{write_fits}{Default is \code{FALSE}. If you would like the code to
+output a FITS file, change this parameter to \code{TRUE}.}
 
-\item{central_wvl}{The central filter wavelength used for the observation, given in angstroms.}
-
-\item{lsf_fwhm}{The line spread function full-width half-max, given in angstroms.}
-
-\item{pixel_sscale}{The corresponding spatial pixel scale associated with a given telescope
-output in arcseconds.}
-
-\item{pixel_vscale}{The corresponding velocity pixel scale associated with a given telescope
-filter output in angstroms.}
-
-\item{inc_deg}{The inclination at which to observe the galaxy in degrees.}
-
-\item{filter}{If Age/Metallicity is supplied, the filter within which the SED is generated.
-Options include "r" and "g"  for SDSS-r and SDSS-g bands respectively.}
-
-\item{blur}{\emph{Optional} Specified to apply observational seeing effects to the cube. A list
-of the form \code{list("psf" = "Moffat", "fwhm" = 0.5)}. \code{"psf"} specifies the shape of the
-PSF chosen and may be either \code{"Moffat"} or \code{"Gaussian"}. \code{"fwhm"} is a numeric
-specifying the full-width half-maximum of the PSF given in units of arcseconds.}
-
-\item{align}{Boolean indicating whether or not to align the semi-major axis with the x-axis.}
-
-\item{multi_thread}{A boolean specifying whether you would like to multi-thread the process.}
+\item{output_location}{Optional parameter that describes the path to the FITS
+file output if \code{write_fits = TRUE}. If \code{write_fits = TRUE} and no
+\code{output_location} is specified, the FITS file will be written to the
+same directory as the input \code{simspin_file}.}
 }
 \value{
-A list containing:
-\item{\code{$datacube}}{A 3D array corresponding to the kinematic data cube.}
-\item{\code{$xbin_labels}}{Bin labels for the x-spatial dimension.}
-\item{\code{$zbin_labels}}{Bin labels for the z-spatial dimension.}
-\item{\code{$vbin_labels}}{Bin labels for the velocity dimension.}
+Returns an .fits file that contains a the generated spectral cube and
+relevant header describing the mock observation.
 }
 \description{
-The purpose of this basic function is to use the \code{SimSpin} package sub-functions to
-construct an IFU kinematic data cube. This function will call each required sub-function
-(\code{\link{obs_data_prep}}, \code{\link{flux_grid}}, \code{\link{ifu_cube}},
-\code{\link{blur_cube}}) and produce a 3D array corresponding to the kinematic data cube
-for that mock observation.
+The purpose of this function is to generate a mock spectral IFU data cube from
+a SimSpin file, as generated using the \code{make_simspin_file()} function.
 }
 \examples{
 \dontrun{
