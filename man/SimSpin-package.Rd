@@ -13,8 +13,8 @@
 \tabular{ll}{
 Package: \tab SimSpin\cr
 Type: \tab Package\cr
-Version: \tab 1.1.2\cr
-Date: \tab 2020-11-20\cr
+Version: \tab 1.1.3\cr
+Date: \tab 2020-12-14\cr
 License: \tab LGPL-3\cr
 Depends: \tab R (>= 3.0), Rcpp, snapshot, magicaxis, celestial, ProFit, fields, RColorBrewer\cr
 Suggests: \tab knitr, rmarkdown \cr
