@@ -1,2 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+^\.travis\.yml$
+>>>>>>> Updating examples so thatthey don't depend on the .fst file (that has been removed from inst data because it's too big!).
+=======
+^\.travis\.yml$
+>>>>>>> fdc0e2ccefc9a947c31341bcb1969a355cb9b5c1

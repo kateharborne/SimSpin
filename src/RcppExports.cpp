@@ -39,36 +39,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// r_galaxy
-Rcpp::NumericVector r_galaxy(Rcpp::DataFrame part_data);
-RcppExport SEXP _SimSpin_r_galaxy(SEXP part_dataSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type part_data(part_dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(r_galaxy(part_data));
-    return rcpp_result_gen;
-END_RCPP
-}
-// sim_galaxy
-Rcpp::List sim_galaxy(Rcpp::DataFrame part_data, bool centre);
-RcppExport SEXP _SimSpin_sim_galaxy(SEXP part_dataSEXP, SEXP centreSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type part_data(part_dataSEXP);
-    Rcpp::traits::input_parameter< bool >::type centre(centreSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_galaxy(part_data, centre));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SimSpin_angmom_galaxy", (DL_FUNC) &_SimSpin_angmom_galaxy, 1},
     {"_SimSpin_cen_galaxy", (DL_FUNC) &_SimSpin_cen_galaxy, 1},
     {"_SimSpin_obs_galaxy", (DL_FUNC) &_SimSpin_obs_galaxy, 2},
-    {"_SimSpin_r_galaxy", (DL_FUNC) &_SimSpin_r_galaxy, 1},
-    {"_SimSpin_sim_galaxy", (DL_FUNC) &_SimSpin_sim_galaxy, 2},
     {NULL, NULL, 0}
 };
 

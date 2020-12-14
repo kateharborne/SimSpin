@@ -13,11 +13,11 @@
 \tabular{ll}{
 Package: \tab SimSpin\cr
 Type: \tab Package\cr
-Version: \tab 1.1.3\cr
+Version: \tab 2.0.0\cr
 Date: \tab 2020-12-14\cr
 License: \tab LGPL-3\cr
-Depends: \tab R (>= 3.0), Rcpp, snapshot, magicaxis, celestial, ProFit, fields, RColorBrewer\cr
-Suggests: \tab knitr, rmarkdown \cr
+Depends: \tab R (>= 3.0), Rcpp\cr
+Suggests: \tab testthat\cr
 }
 }
 \author{
@@ -26,19 +26,14 @@ Maintainer: \packageMaintainer{SimSpin}
 }
 
 \examples{
-galaxy_file = sim_data(system.file("extdata", 'SimSpin_example.hdf5', package="SimSpin"))
-
-S0_lambda = find_kinematics(simdata      = galaxy_file,
-                            z            = 0.05,
-                            fov          = 15,
-                            ap_shape     = "circular",
-                            central_wvl  = 4800,
-                            lsf_fwhm     = 2.65,
-                            pixel_sscale = 0.5,
-                            pixel_vscale = 1.04,
-                            inc_deg      = 70,
-                            threshold    = 25,
-                            measure_type = list(type="fit", fac=1),
-                            multi_thread = FALSE)
+\dontrun{
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+temp_loc = tempdir()
+make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
+cube = build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""),
+                     telescope = telescope(type="SAMI"),
+                     observing_strategy = observing_strategy())
+unlink(paste(temp_loc, "spectra.fst", sep=""))
+}
 }
 \keyword{data}

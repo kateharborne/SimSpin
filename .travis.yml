@@ -1,0 +1,52 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+# Travis CI configuration file
+
+language: r
+cache: packages
+dist: xenial
+services: [xvfb]
+
+# Build matrix - testing on at least one Linux and one MacOS
+matrix:
+  include:
+    - os: linux
+      r: release
+    - os: osx
+      osx_image: xcode11
+
+r_packages:
+  - covr
+  - testthat
+  - rmarkdown
+
+warnings_are_errors: false
+
+before_install:
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then sudo apt-get install libhdf5-dev; fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then Rscript -e "install.packages('pracma', type = 'source')"; fi
+
+# Additional packages that are not fetched from CRAN
+# Care must be taken to specify the packages in their dependency order
+
+bioc_packages: EBImage
+r_github_packages:
+  - asgr/celestial
+  - asgr/ProSpect
+  - ICRAR/ProFit
+  - asgr/magicaxis
+
+addons:
+  apt:
+    update: true
+    packages:
+       - libhdf5-dev
+       - libfftw3-dev
+       - libnlopt-dev
+       - devscripts
+
+brew_packages:
+  - fftw
+  - hdf5
+
+after_success:
+  - Rscript -e 'library(covr); codecov()'
