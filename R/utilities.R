@@ -185,9 +185,15 @@
   }
 
   # sort stellar coord & vel into x, y, ..., vz
-  star_part$x = star_pos[1,]; star_part$vx = star_vel[1,]
-  star_part$y = star_pos[2,]; star_part$vy = star_vel[2,]
-  star_part$z = star_pos[3,]; star_part$vz = star_vel[3,]
+  if (stellar_sum > 1){
+    star_part$x = star_pos[1,]; star_part$vx = star_vel[1,]
+    star_part$y = star_pos[2,]; star_part$vy = star_vel[2,]
+    star_part$z = star_pos[3,]; star_part$vz = star_vel[3,]
+  } else {
+    star_part$x = star_pos[1]; star_part$vx = star_vel[1]
+    star_part$y = star_pos[2]; star_part$vy = star_vel[2]
+    star_part$z = star_pos[3]; star_part$vz = star_vel[3]
+  }
 
   if (Npart[1] > 0){ # If gas is present in the simulation
     if(verbose){cat("Reading gas particle properties. \n")}
@@ -234,9 +240,15 @@
     }
 
     # sort gas coord & vel into x, y, ..., vz
-    gas_part$x = gas_pos[1,]; gas_part$vx = gas_vel[1,]
-    gas_part$y = gas_pos[2,]; gas_part$vy = gas_vel[2,]
-    gas_part$z = gas_pos[3,]; gas_part$vz = gas_vel[3,]
+    if (Npart[1] > 1){
+      gas_part$x = gas_pos[1,]; gas_part$vx = gas_vel[1,]
+      gas_part$y = gas_pos[2,]; gas_part$vy = gas_vel[2,]
+      gas_part$z = gas_pos[3,]; gas_part$vz = gas_vel[3,]
+    } else {
+      gas_part$x = gas_pos[1]; gas_part$vx = gas_vel[1]
+      gas_part$y = gas_pos[2]; gas_part$vy = gas_vel[2]
+      gas_part$z = gas_pos[3]; gas_part$vz = gas_vel[3]
+    }
 
   } else {gas_part = NULL} # if no gas in sim, return gas_part = NULL
 
