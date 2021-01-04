@@ -38,7 +38,6 @@ blur_datacube = function(cube){
     blur_cube[,,spatial_plane] = ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel) * aperture_region
   }
 
-  return(list("spectral_cube" = blur_cube,
-              "observation"   = observation))
+  return(blur_cube)
 
 }

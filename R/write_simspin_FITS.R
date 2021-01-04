@@ -35,7 +35,7 @@
 
 write_simspin_FITS = function(output_file, simspin_cube, observation){
 
-  crpixn = dim(simspin_cube$spectral_cube)%/%2
+  crpixn = dim(simspin_cube)%/%2
   crvaln = c(observation$sbin_seq[crpixn[1]]/observation$ang_size/3600,
              observation$sbin_seq[crpixn[2]]/observation$ang_size/3600,
              observation$wave_seq[crpixn[3]])
@@ -45,10 +45,10 @@ write_simspin_FITS = function(output_file, simspin_cube, observation){
   ctypen = c("RA---TAN", "DEC--TAN", "AWAV")
   cunitn = c("deg", "deg", "Angstrom")
   axDat  = data.frame("crpix" = crpixn, "crval" = crvaln, "cdelt" = cdeltn,
-                      "len" = dim(simspin_cube$spectral_cube), "ctype" = ctypen,
+                      "len" = dim(simspin_cube), "ctype" = ctypen,
                       "cunit" = cunitn)
 
-  FITSio::writeFITSim(X = simspin_cube$spectral_cube, file = output_file, crpixn = crpixn,
+  FITSio::writeFITSim(X = simspin_cube, file = output_file, crpixn = crpixn,
                       crvaln = crvaln, cdeltn = cdeltn, ctypen = ctypen,
                       cunitn = cunitn, axDat = axDat)
 

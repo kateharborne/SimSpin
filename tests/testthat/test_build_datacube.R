@@ -95,3 +95,25 @@ test_that("Repeated spectra are included in intrinsic spectra", {
   expect_equal((intrinsic_spectra[1,] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[1,])
   expect_equal((intrinsic_spectra[2,] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[2,])
 })
+
+# Test that the output of blurred and un-blurred format is the same
+test_that("Format of blurring output is the same as unblurred output", {
+
+  unblurred = build_datacube(simspin_file = ss_hdf5,
+                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                          observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = F))
+
+  blurred = build_datacube(simspin_file = ss_hdf5,
+                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                           observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T))
+
+  expect_equal(typeof(blurred$spectral_cube), "double")
+  expect_equal(typeof(blurred$observation), "list")
+  expect_equal(typeof(blurred$velocity_image), "double")
+  expect_equal(typeof(blurred$dispersion_image), "double")
+  expect_equal(typeof(unblurred$spectral_cube), "double")
+  expect_equal(typeof(unblurred$observation), "list")
+  expect_equal(typeof(unblurred$velocity_image), "double")
+  expect_equal(typeof(unblurred$dispersion_image), "double")
+
+})
