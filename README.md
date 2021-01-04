@@ -1,7 +1,7 @@
 # SimSpin
 <!-- badges: start -->
-[![Build Status](https://travis-ci.org/kateharborne/SimSpin.svg?branch=dev)](https://travis-ci.org/kateharborne/SimSpin)
-[![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/dev/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
+[![Build Status](https://travis-ci.org/kateharborne/SimSpin.svg?branch=master)](https://travis-ci.org/kateharborne/SimSpin)
+[![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
 <!-- badges: end -->
 
 SimSpin - A package for the kinematic analysis of galaxy simulations
