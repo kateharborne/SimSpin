@@ -4,11 +4,21 @@
 [![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
 <!-- badges: end -->
 
-SimSpin - A package for the kinematic analysis of galaxy simulations
+SimSpin v2.0.0 - A package for producing mock observations of particle simulations
 
-The purpose of the Simspin R-package is to take a galaxy simulation and measure an the kinematics of that model as if it had been observed using an IFU. A kinematic data cube can be produced using the functions in this package; from this cube, "observables" can be measured. Specifically, the observable spin parameter, &#955;<sub>r</sub>. This package, once installed, is fully documented and tested.
+The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument. A mock spectral data cube can be produced using the functions in this package. This is a simple process comprised of three steps:
 
-A second version of this code written in Julia is also available at [SimSpin.jl](https://github.com/kateharborne/SimSpin.jl) developed by [Gerry Gralton](https://github.com/gerrygralton).
+  1. Read in your particle data and produce the relevant spectra using the `make_simspin_file` function.
+  1. Setup the observation by defining your `telescope` and `observing_strategy`.
+  1. Build your data cube using the `build_datacube`.
+
+From this cube, "observables" can be measured using observational pipelines. Specifically, the observed line-of-sight velocities and dispersions. This package, once installed, is fully documented and tested.
+
+Another implementation of this code (SimSpin v1.1.3) written in Julia is also available at [SimSpin.jl](https://github.com/kateharborne/SimSpin.jl) developed by [Gerry Gralton](https://github.com/gerrygralton). 
+
+A further python implementation of SimSpin v2.0.0 is also in development at [PySimSpin](https://github.com/kateharborne/PySimSpin).
+
+## Package installation
 
 To install directly into R:
 ```
@@ -16,62 +26,31 @@ To install directly into R:
 > library(devtools)
 > install_github("kateharborne/SimSpin")
 ```
-Simulation data needs to be laid out in HDF5 format for processing with SimSpin. If using a Gadget binary or HDF5 simulation output, see [create_SimSpinFile](https://github.com/kateharborne/create_SimSpinFile) for automatic generation of SimSpin compatible files.  If you would rather generate the SimSpin file independently, the expected format is outlined below. This SimSpin file can then be read into SimSpin using the function:
+Else, please `fork` a copy of this repository for your own development using the `code` button to the upper right. 
+
+## Package examples
+
+The following lines will take you from a particle simulation of a galaxy, an example of which is included in this package, through to the production of a mock-IFS data cube. 
 
 ```
-galaxy_data = SimSpin::sim_data(filename = SimSpin_example.hdf5)
+ss_file = make_simspin_file(filename = system.file("extdata","SimSpin_example_Gadget",
+                                                    package = "SimSpin"),
+                            write_to_file = FALSE) # generate a spectra file
+SAMI = telescope(type="SAMI")                      # initialise a telescope
+strategy = observing_strategy(z = 0.05)            # initialise obsering conditions
+
+cube = build_datacube(simspin_file = ss_file,      # build data cube
+                      telescope = SAMI,
+                      observing_strategy = strategy)
+                            
 ```
+For a longer example of how each function can be used, please take a look at the documentation for the package. Short examples for each function are provided in each function's documentation, as well as an explanation of each of the possible input variables. 
 
-This function produces a list that can be accessed by each of the basic SimSpin analysis functions listed below. While it is possible to use each function in the R-package in order and examine the output at each stage, there are three basic analysis functions designed to give the data in a user friendly format. We suggest first using these functions:
+From within R, you can display the package documentation by typing `?SimSpin` and select "Index" at the bottom of the page to view all available functions. Alternatively, type `?` followed by the function name to see function specific documentation. 
 
-1. sim_analysis() - This function is designed to output the kinematic properties of the galaxy model to be observed. This provides the comparison to the kinematic observables produced in the following functions. 
+Longer examples are published [here](https://rpubs.com/kateharborne) and demonstrate a walk-through the basic code operation for SimSpin v2.0.0 (and v1.1.3).
 
-2. build_datacube() - This function produces the kinematic data cube prior to kinematic analysis. This allows the user to take the cubes to use in some other form of analysis without having to calculate &#955;<sub>r</sub>.
-
-3. find_kinematics() - This function produces a kinematic data cube and calculates the observed spin parameter, ellipticity, inclination and the corresponding flux, line-of-sight velocity and line-of-sight velocity dispersion images. 
-
-By varying the effects of observational seeing, the measurement radius, projected inclination and distance, and the telescope parameters within the find_lambda() function, we can begin to understand how inherent limitations of observing galaxies can effect the measurement of &#955;<sub>r</sub> by comparing to the true spin parameter than is measured in the sim_analysis() function.
-
-For more detailed examples of using each of the analysis functions above, please see the SimSpin vignettes published on [Rpubs](http://rpubs.com/kateharborne). This [web app](http://simspin.icrar.org) can also be used to explore the N-body analysis capabilities of SimSpin. 
-
-## SimSpin format
-
-Here we outline the expected file format accepted by SimSpin.  If you would like to generate this file automatically, a short Python function has been written that uses the [pynbody](https://github.com/pynbody/pynbody) package to read in various simulation data types and generate a SimSpin compatible HDF5 file. See [create_SimSpinFile](https://github.com/kateharborne/create_SimSpinFile).
-
-If you would rather generate the SimSpin file independently, the expected file format is outlined below.
-
-```
-> SimSpin_example.hdf5
-
->> /PartType0           # Each particle type included in the simulation has its own group.
->>> /PartType0/Mass     # Each group then has a series of data sets assocaited,
->>> /PartType0/vx       #   including the position, velocity and Mass of each particle. 
->>> /PartType0/vy
->>> /PartType0/vz
->>> /PartType0/x
->>> /PartType0/y
->>> /PartType0/z
-
->> /PartType1 
->>> ...
-```
-We use the same PartType definition as Gadget: PartTypeX where 0 - gas, 1 - dark matter, 2 - disc, 3 - bulge, 4 - stars. For PartType0-3, each PartType group contains the same data sets as above. If the simulation contains stars, the Initial Mass, Stellar Formation Time and Metallicity information for each particle is also included:
-
-```
-> SimSpin_example.hdf5
->> /PartType4
->>> /PartType4/Mass
->>> /PartType4/vx        
->>> /PartType4/vy
->>> /PartType4/vz
->>> /PartType4/x
->>> /PartType4/y
->>> /PartType4/z
->>> /PartType4/InitialMass
->>> /PartType4/StellarFormationTime
->>> /PartType4/Metallicity
-```
-If the file is set up in this way, the simulation data can easily be read into the SimSpin package. 
+If you have any further questions or requests for features in the code, report an issue or drop an email to katherine.harborne@uwa.edu.au.
 
 ### Citation
 If you use this code in any of your own published research, please make sure to include the following citation in your bibliography:
@@ -80,5 +59,4 @@ K.E. Harborne, C.Power and A.S.G. Robotham, (2020), ["SIMSPIN - Constructing moc
 
 K.E. Harborne, (2019), ["SimSpin: Kinematic analysis of galaxy simulations"](https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract), Astrophysics Source Code Library, record ascl:1903.006
 
-### References
-A. Pontzen, R Roskar, G. Stinson and R. Woods, (2013), ["pynbody: N-Body/SPH analysis for python"](https://ui.adsabs.harvard.edu/abs/2013ascl.soft05002P/abstract),  Astrophysics Source Code Library, record ascl:1305.002
+
