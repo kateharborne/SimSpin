@@ -7,7 +7,8 @@
 #'The purpose of this function is to generate a mock spectral IFU data cube from
 #' a SimSpin file, as generated using the \code{make_simspin_file()} function.
 #'
-#'@param simspin_file The path to the location of the SimSpin .fst file.
+#'@param simspin_file The path to the location of the SimSpin .Rdata file OR
+#' output list from \code{make_simspin_file()}.
 #'@param telescope An object of the telescope class describing the
 #' specifications of the observing telescope (i.e. field of view, spatial
 #' resolution, wavelength resolution, etc.).
@@ -25,17 +26,12 @@
 #'@return Returns an .fits file that contains a the generated spectral cube and
 #' relevant header describing the mock observation.
 #'@examples
-#'\dontrun{
-#'ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
-#'temp_loc = tempdir()
-#'make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
-#'cube = build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""),
+#'ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
+#'                         package = "SimSpin")
+#'cube = build_datacube(simspin_file = ss_gadget,
 #'                      telescope = telescope(type="SAMI"),
 #'                      observing_strategy = observing_strategy())
-#'unlink(paste(temp_loc, "spectra.fst", sep=""))
-#'}
 #'
-
 
 build_datacube = function(simspin_file, telescope, observing_strategy,
                           verbose = F, write_fits = F, output_location){
@@ -43,7 +39,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (verbose){cat("Computing observation parameters... \n")}
   observation = observation(telescope = telescope, observing_strategy = observing_strategy)
 
-  simspin_data = readRDS(simspin_file)
+  if (typeof(simspin_file) == "character"){ # if provided with path to file
+    simspin_data = readRDS(simspin_file)
+  }
+  if (typeof(simspin_file) == "list"){ # if provided with output list
+    simspin_data = simspin_file
+  }
 
   galaxy_data = obs_galaxy(part_data = simspin_data$star_part, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
 
@@ -57,10 +58,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
   lsf_fwhm   = (observation$z * observation$lsf_fwhm) + observation$lsf_fwhm # adjusting the LSF for the resolution at z
 
-  spec_res_sigma_sq = lsf_fwhm^2 - (wavelength[2]-wavelength[1])^2
+  spec_res_sigma_sq = lsf_fwhm^2 - (min(diff(wavelength)))^2
   if (spec_res_sigma_sq < 0){
     warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
-    cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", diff(wavelength)[1], " A. \n")
+    cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", min(diff(wavelength)), " A. \n")
     cat("No LSF will be applied in this case.\n")
     LSF_conv = FALSE
   } else {
