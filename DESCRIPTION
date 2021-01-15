@@ -14,11 +14,14 @@ Imports:
     celestial,
     data.table,
     doSNOW,
+    fields,
     FITSio,
     hdf5r,
+    magicaxis,
     pracma,
     ProSpect (>= 1.0.7),
     ProFit,
+    RColorBrewer,
     Rcpp,
     stringr,
     snow,
@@ -26,7 +29,10 @@ Imports:
     utils
 RoxygenNote: 7.1.1
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 Remotes:
     asgr/ProSpect,
     ICRAR/ProFit
+VignetteBuilder: knitr
