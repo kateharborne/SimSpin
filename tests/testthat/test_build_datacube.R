@@ -5,9 +5,12 @@
 library(testthat)
 context("Testing build_datacube function.\n")
 
-ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
-ss_hdf5   = system.file("extdata", "SimSpin_example_HDF5_spectra.Rdata", package = "SimSpin")
-ss_eagle  = system.file("extdata", "SimSpin_example_EAGLE_spectra.Rdata", package = "SimSpin")
+ss_pd_hdf5  = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
+ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+
+ss_gadget   = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
+ss_hdf5     = make_simspin_file(ss_pd_hdf5, write_to_file = FALSE)
+ss_eagle    = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
 
 temp_loc = tempdir()
 
@@ -32,7 +35,6 @@ test_that("EAGLE files can be built.", {
 })
 
 # Testing that build_datacube works to write to FITS file
-
 test_that("Data cubes can be written to file", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -48,7 +50,7 @@ unlink(c(paste(temp_loc, "cube.FITS", sep=""), paste(stringr::str_remove(ss_gadg
 
 # Testing that build_datacube will give warning if the spectra given is low res
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {
-  expect_warning(build_datacube(simspin_file = ss_gadget, telescope = telescope(type="SAMI"),
+  expect_warning(build_datacube(simspin_file = ss_gadget, telescope = telescope(type="IFU", lsf_fwhm = 0.9),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45)))
 })
 
@@ -72,7 +74,7 @@ test_that("velocity shift for wavelengths work correctly", {
 
 # Test that the spectra pulled for each particle are correct
 test_that("Repeated spectra are included in intrinsic spectra", {
-  simspin_data = readRDS(ss_eagle)
+  simspin_data = ss_eagle
 
   galaxy_data = obs_galaxy(part_data = simspin_data$star_part, inc_rad = 0.7853982) # projecting the galaxy to given inclination
   sbin_seq = c(-7.502401, -7.002241, -6.502080, -6.001920, -5.501760, -5.001600,
@@ -91,7 +93,7 @@ test_that("Repeated spectra are included in intrinsic spectra", {
   intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = length(particle_IDs), byrow = T)
   spectra = intrinsic_spectra * (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-  expect_true(all(intrinsic_spectra[1,] == simspin_data$spectra[[5]]))
+  expect_true(all(intrinsic_spectra[1,] == simspin_data$spectra[[289]]))
   expect_equal((intrinsic_spectra[1,] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[1,])
   expect_equal((intrinsic_spectra[2,] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[2,])
 })

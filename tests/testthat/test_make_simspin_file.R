@@ -37,6 +37,12 @@ test_that("Error when output file already exists and overwrite = F - EAGLE",{
   expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep="")))
 })
 
+# Test that function can output to environment
+test_that("Function works to output List to environment", {
+  ss_file = make_simspin_file(ss_gadget, write_to_file = FALSE)
+  expect_true("ss_file" %in% ls())
+})
+
 # Test that the function fails when the template provided is unsupported
 test_that("Error when template is unsupported", {
   expect_error(make_simspin_file(ss_eagle, template = "abcd"))

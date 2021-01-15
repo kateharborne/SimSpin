@@ -12,6 +12,7 @@ make_simspin_file(
   disk_Z = 0.024,
   bulge_Z = 0.001,
   template = "BC03lr",
+  write_to_file = TRUE,
   output,
   overwrite = F,
   verbose = F
@@ -35,9 +36,13 @@ include "BC03lr" (GALEXEV low resolution, Bruzual & Charlot 2003), "BC03hr"
 (GALEXEV high resolution, Bruzual & Charlot 2003) or "EMILES" (Vazdekis et
 al, 2016).}
 
+\item{write_to_file}{Boolean to specify whether the list produced should be
+written to a ".Rdata" file or output to the environment. Default is TRUE, so
+that files can be re-observed without having the generate spectra each time.}
+
 \item{output}{The path at which the output file is written. If not provided,
 file will be written at the location of the input filename with the addition
-of "_spectra.fst".}
+of "_spectra.Rdata".}
 
 \item{overwrite}{If true, and the file already exists at the output location,
 a new file will be written over the old one.}
@@ -45,8 +50,9 @@ a new file will be written over the old one.}
 \item{verbose}{Boolean to switch on code progress updates.}
 }
 \value{
-Returns an .fst file that contains a matrix of particle positions,
-velocities, and spectra.
+Returns an .Rdata file that contains a list of particle positions,
+velocities, and spectra (or a list containing the same information to the
+environment without writing to file, when `write_to_file = F`).
 }
 \description{
 The purpose of this function is to construct a SimSpin file containing the
@@ -56,13 +62,12 @@ generated will be with respect to the Stellar Formation Time/Age, Metallicity
 and Initial Mass of each stellar particle. If the system is an N-body model,
 stellar particles are assumed to have an age and metallicity as provided to
 the function as \code{disk_age}, \code{bulge_age}, \code{disk_Z} and
-\code{bulge_Z}. Returned is an .fst file in a SimSpin readable format.
+\code{bulge_Z}. Returned is an .Rdata file in a SimSpin readable format.
 }
 \examples{
-\dontrun{
-make_simspin_file(filename = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
-                                         package = "SimSpin"),
-                 output=tempfile())
-}
+ss_file = make_simspin_file(filename = system.file("extdata",
+                                                  "SimSpin_example_Gadget",
+                                                   package = "SimSpin"),
+                           write_to_file = FALSE)
 
 }

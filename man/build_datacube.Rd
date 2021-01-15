@@ -14,7 +14,8 @@ build_datacube(
 )
 }
 \arguments{
-\item{simspin_file}{The path to the location of the SimSpin .fst file.}
+\item{simspin_file}{The path to the location of the SimSpin .Rdata file OR
+output list from \code{make_simspin_file()}.}
 
 \item{telescope}{An object of the telescope class describing the
 specifications of the observing telescope (i.e. field of view, spatial
@@ -44,14 +45,10 @@ The purpose of this function is to generate a mock spectral IFU data cube from
 a SimSpin file, as generated using the \code{make_simspin_file()} function.
 }
 \examples{
-\dontrun{
-ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
-temp_loc = tempdir()
-make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
-cube = build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""),
+ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
+                        package = "SimSpin")
+cube = build_datacube(simspin_file = ss_gadget,
                      telescope = telescope(type="SAMI"),
                      observing_strategy = observing_strategy())
-unlink(paste(temp_loc, "spectra.fst", sep=""))
-}
 
 }
