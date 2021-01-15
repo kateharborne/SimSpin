@@ -10,7 +10,7 @@
 #' and Initial Mass of each stellar particle. If the system is an N-body model,
 #' stellar particles are assumed to have an age and metallicity as provided to
 #' the function as \code{disk_age}, \code{bulge_age}, \code{disk_Z} and
-#' \code{bulge_Z}. Returned is an .fst file in a SimSpin readable format.
+#' \code{bulge_Z}. Returned is an .Rdata file in a SimSpin readable format.
 #'
 #'@param filename The path to the snapshot file.
 #'@param cores The number of cores across which to multi-thread the problem.
@@ -22,35 +22,39 @@
 #' include "BC03lr" (GALEXEV low resolution, Bruzual & Charlot 2003), "BC03hr"
 #' (GALEXEV high resolution, Bruzual & Charlot 2003) or "EMILES" (Vazdekis et
 #' al, 2016).
+#'@param write_to_file Boolean to specify whether the list produced should be
+#' written to a ".Rdata" file or output to the environment. Default is TRUE, so
+#' that files can be re-observed without having the generate spectra each time.
 #'@param output The path at which the output file is written. If not provided,
 #' file will be written at the location of the input filename with the addition
-#' of "_spectra.fst".
+#' of "_spectra.Rdata".
 #'@param overwrite If true, and the file already exists at the output location,
 #' a new file will be written over the old one.
 #'@param verbose Boolean to switch on code progress updates.
-#'@return Returns an .fst file that contains a matrix of particle positions,
-#' velocities, and spectra.
+#'@return Returns an .Rdata file that contains a list of particle positions,
+#' velocities, and spectra (or a list containing the same information to the
+#' environment without writing to file, when `write_to_file = F`).
 #'@examples
-#'\dontrun{
-#'make_simspin_file(filename = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
-#'                                          package = "SimSpin"),
-#'                  output=tempfile())
-#'}
+#'ss_file = make_simspin_file(filename = system.file("extdata",
+#'                                                   "SimSpin_example_Gadget",
+#'                                                    package = "SimSpin"),
+#'                            write_to_file = FALSE)
 #'
 
 make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              disk_Z=0.024, bulge_Z=0.001, template="BC03lr",
-                             output, overwrite = F, verbose = F){
+                             write_to_file=TRUE, output, overwrite = F, verbose = F){
 
   temp_name = stringr::str_to_upper(template)
 
-  if(missing(output)){
+  if (write_to_file){
+    if (missing(output)){
     output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="")
-  }
-
-  if(file.exists(output) & !overwrite){
-    stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
+    }
+    if (file.exists(output) & !overwrite){
+      stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
                "If you wish to overwrite this file, please specify 'overwrite=T'. \n"))
+    }
   }
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
@@ -147,9 +151,13 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                       "spectra"   = sed,
                       "wave"      = temp$Wave)
 
-  saveRDS(simspin_file, file = output)
+  if (write_to_file){
+    saveRDS(simspin_file, file = output)
+    return(message("SimSpin file written to: ", output, "\n"))
+  } else {
+    return(simspin_file)
+  }
 
-  return(message("SimSpin file written to: ", output, "\n"))
 }
 
 
