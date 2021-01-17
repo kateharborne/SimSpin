@@ -74,7 +74,7 @@ test_that("velocity shift for wavelengths work correctly", {
 
 # Test that the spectra pulled for each particle are correct
 test_that("Repeated spectra are included in intrinsic spectra", {
-  simspin_data = ss_eagle
+  simspin_data = readRDS(ss_gadget)
 
   galaxy_data = obs_galaxy(part_data = simspin_data$star_part, inc_rad = 0.7853982) # projecting the galaxy to given inclination
   sbin_seq = c(-7.502401, -7.002241, -6.502080, -6.001920, -5.501760, -5.001600,
@@ -93,7 +93,7 @@ test_that("Repeated spectra are included in intrinsic spectra", {
   intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = length(particle_IDs), byrow = T)
   spectra = intrinsic_spectra * (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-  expect_true(all(intrinsic_spectra[1,] == simspin_data$spectra[[289]]))
+  expect_true(all(intrinsic_spectra[3,] == simspin_data$spectra[[2]]))
   expect_equal((intrinsic_spectra[1,] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[1,])
   expect_equal((intrinsic_spectra[2,] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[2,])
 })
