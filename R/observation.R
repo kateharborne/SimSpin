@@ -48,7 +48,7 @@ observation = function(telescope, observing_strategy){
       } else {psf_dim = 25} # dimensions of the PSF kernel
 
     if (observing_strategy$psf == "Gaussian"){
-      psf_k = ProFit::profitMakeGaussianPSF(fwhm = fwhm_scaled, dim = c(psf_dim,psf_dim)) # the psf kernel
+      psf_k = .gaussian_kernel(m = psf_dim, n = psf_dim, sigma = fwhm_scaled/(2*sqrt(2*log(2)))) # the psf kernel
     }
     if (observing_strategy$psf == "Moffat"){
       psf_k = ProFit::profitCubaMoffat(fwhm = fwhm_scaled, mag = 1, con = 5, dim = c(psf_dim,psf_dim))

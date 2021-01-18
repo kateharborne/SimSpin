@@ -694,3 +694,10 @@
   noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
 }
 
+# Function to generate a Gaussian kernel
+.gaussian_kernel = function(m, n, sigma){
+  dim = pracma::meshgrid(-((m-1)/2):((m-1)/2), -((n-1)/2):((n-1)/2))
+  hg = exp(-(dim$X^2 + dim$Y^2)/(2*sigma^2))
+  kernel = hg / sum(hg)
+  return(kernel)
+}
