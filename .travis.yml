@@ -23,7 +23,13 @@ warnings_are_errors: false
 
 before_install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then sudo apt-get install libhdf5-dev; fi
-  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then Rscript -e "install.packages('pracma', type = 'source')"; fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      Rscript -e "install.packages('pracma', type = 'source')";
+      sudo tlmgr update --self;
+      sudo tlmgr update --all;
+      sudo tlmgr install index;
+    fi
+
 
 # Additional packages that are not fetched from CRAN
 # Care must be taken to specify the packages in their dependency order
