@@ -10,7 +10,11 @@
 #'@param z Numeric describing the redshift to which the observed galaxy is
 #' projected. Default is 0.1.
 #'@param inc_deg Numeric describing the projected inclination of the observed
-#' galaxy - 0 deg places the galaxy face-on, 90 deg is edge-on. Default is 70.
+#' galaxy relative to the z-axis - 0 deg places the galaxy face-on, 90 deg is
+#' edge-on aligned with the horizontal axis. Default is 70.
+#'@param twist_deg Numeric describing the viewer's orientation relative to the
+#' x-axis - 0 deg places the galaxy face-on, 90 deg places the galaxy edge-on
+#' aligned with the vertical axis. Default is 0.
 #'@param blur Boolean describing whether seeing conditions should be applied.
 #' Default is FALSE.
 #'@param fwhm If \code{blur = TRUE}, a numeric that describes the full-width
@@ -24,7 +28,7 @@
 #'@examples
 #'conditions = observing_strategy()
 #'
-observing_strategy = function(z = 0.1, inc_deg = 70, blur = F, fwhm=2, psf="Gaussian"){
+observing_strategy = function(z = 0.1, inc_deg = 70, blur = F, fwhm=2, psf="Gaussian", twist_deg=0){
 
 
   if(blur){
@@ -33,23 +37,26 @@ observing_strategy = function(z = 0.1, inc_deg = 70, blur = F, fwhm=2, psf="Gaus
     }
 
     if(stringr::str_to_upper(psf) == "GAUSSIAN"){
-      output = list(z       = z,
-                    inc_deg = inc_deg,
-                    blur    = T,
-                    fwhm    = fwhm,
-                    psf     = "Gaussian")
+      output = list(z         = z,
+                    inc_deg   = inc_deg,
+                    twist_deg = twist_deg,
+                    blur      = T,
+                    fwhm      = fwhm,
+                    psf       = "Gaussian")
     }
     if(stringr::str_to_upper(psf) == "MOFFAT"){
-      output = list(z       = z,
-                    inc_deg = inc_deg,
-                    blur    = T,
-                    fwhm    = fwhm,
-                    psf     = "Moffat")
+      output = list(z         = z,
+                    inc_deg   = inc_deg,
+                    twist_deg = twist_deg,
+                    blur      = T,
+                    fwhm      = fwhm,
+                    psf       = "Moffat")
     }
   } else {
-    output = list(z       = z,
-                  inc_deg = inc_deg,
-                  blur    = F)
+    output = list(z         = z,
+                  inc_deg   = inc_deg,
+                  twist_deg = twist_deg,
+                  blur      = F)
   }
 
   return(output)

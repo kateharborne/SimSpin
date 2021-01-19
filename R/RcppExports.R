@@ -64,3 +64,25 @@ obs_galaxy <- function(part_data, inc_rad) {
     .Call('_SimSpin_obs_galaxy', PACKAGE = 'SimSpin', part_data, inc_rad)
 }
 
+#' Twisting the galaxy relative to the observer.
+#'
+#' The purpose of this function is to re-orient the galaxy and rotate the
+#' observer around the z-axis.
+#'
+#' @param part_data A data.frame describing the particles ID, positions, and
+#'  velocities.
+#' @param twist_rad The observed inclination angle in radians.
+#' @return Returns the original data frame containing the original particle
+#'  information but in the new orientation.
+#' @examples
+#'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
+#'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
+#'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
+#'                            "vz"=stats::rnorm(100), "Mass" = 1:100,
+#'                            "sed_id" = 1:100, "Initial_Mass" = 1:100)
+#'   observed_data = twist_galaxy(galaxy_data, twist_rad = 1.047)
+#' @export
+twist_galaxy <- function(part_data, twist_rad) {
+    .Call('_SimSpin_twist_galaxy', PACKAGE = 'SimSpin', part_data, twist_rad)
+}
+

@@ -46,7 +46,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     simspin_data = simspin_file
   }
 
-  galaxy_data = obs_galaxy(part_data = simspin_data$star_part, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+  twisted_data = twist_galaxy(simspin_data$star_part, twist_rad = observation$twist_rad)
+
+  galaxy_data = obs_galaxy(part_data = twisted_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
 
   if (verbose){cat("Assigning particles to spaxels... \n")}
   galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +

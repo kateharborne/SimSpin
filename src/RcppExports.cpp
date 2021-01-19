@@ -39,11 +39,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// twist_galaxy
+Rcpp::List twist_galaxy(Rcpp::DataFrame part_data, double twist_rad);
+RcppExport SEXP _SimSpin_twist_galaxy(SEXP part_dataSEXP, SEXP twist_radSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type part_data(part_dataSEXP);
+    Rcpp::traits::input_parameter< double >::type twist_rad(twist_radSEXP);
+    rcpp_result_gen = Rcpp::wrap(twist_galaxy(part_data, twist_rad));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SimSpin_angmom_galaxy", (DL_FUNC) &_SimSpin_angmom_galaxy, 1},
     {"_SimSpin_cen_galaxy", (DL_FUNC) &_SimSpin_cen_galaxy, 1},
     {"_SimSpin_obs_galaxy", (DL_FUNC) &_SimSpin_obs_galaxy, 2},
+    {"_SimSpin_twist_galaxy", (DL_FUNC) &_SimSpin_twist_galaxy, 2},
     {NULL, NULL, 0}
 };
 
