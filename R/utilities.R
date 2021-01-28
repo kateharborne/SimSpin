@@ -537,7 +537,6 @@
 }
 
 .interpolate_spectra = function(shifted_wave, spectra, wave_seq){ # function for interpolating the spectra onto a new grid
-
   shifted_spectra = vector(mode = "list", length = dim(shifted_wave)[1])
   for(j in 1:dim(shifted_wave)[1]){
     shifted_spectra[[j]] = stats::approx(x = shifted_wave[j,], y = spectra[j,], xout = wave_seq, rule=1)[2]
@@ -546,6 +545,37 @@
   spaxel_spectra = colSums(output)
 
   return(spaxel_spectra)
+}
+
+.sum_velocities = function(galaxy_sample, observation, cores){
+  vel_diff = function(lum, vy_obs){diff((lum * pnorm(observation$vbin_edges, mean = vy_obs, sd = observation$vbin_error)))}
+
+  if (cores > 1){
+    cl = snow::makeCluster(cores)
+    doSNOW::registerDoSNOW(cl)
+    i = integer()
+    bins_list = foreach(i = 1:length(galaxy_sample$luminosity)) %dopar% { vel_diff(lum = galaxy_sample$luminosity[i], vy_obs = galaxy_sample$vy_obs[i]) }
+    closeAllConnections()
+    bins = matrix(unlist(bins_list, use.names=FALSE), nrow = observation$vbin)
+  } else {
+    bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy_obs)
+  }
+
+  return(rowSums(bins))
+
+}
+
+.particles_to_pixels = function(galaxy_data, occupied, cores){
+  if (cores > 1){
+    cl = snow::makeCluster(cores)
+    doSNOW::registerDoSNOW(cl)
+    x = integer()
+    particle_IDs = foreach(x = occupied) %dopar% { which(galaxy_data$pixel_pos == x) }
+    closeAllConnections()
+  } else {
+    particle_IDs = lapply(occupied, function(x) which(galaxy_data$pixel_pos == x))
+  }
+ return(particle_IDs)
 }
 
 # Function to apply LSF to spectra
