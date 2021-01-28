@@ -8,41 +8,41 @@ context("Testing observation description functions.\n")
 # Testing that the telescope() function works with each of the possible default
 #  "types".
 test_that("Initial run of telescope() function with default types - SAMI.", {
-  expect_length(telescope(type="SAMI"), 9)
+  expect_length(telescope(type="SAMI"), 11)
   })
 
 test_that("Initial run of telescope() function with default types - MaNGA", {
-  expect_length(telescope(type="MaNGA"), 9)
+  expect_length(telescope(type="MaNGA"), 11)
 })
 
 test_that("Initial run of telescope() function with default types - Hector", {
-  expect_length(telescope(type="Hector"), 9)
+  expect_length(telescope(type="Hector"), 11)
 })
 
 test_that("Initial run of telescope() function with default types - CALIFA", {
-  expect_length(telescope(type="CALIFA"), 9)
+  expect_length(telescope(type="CALIFA"), 11)
 })
 
 test_that("Initial run of telescope() function with default types - IFU", {
-  expect_length(telescope(type="IFU"), 9)
+  expect_length(telescope(type="IFU"), 11)
 })
 
 # Testing case sensitivity of "type" parameter.
 test_that("Checking case sensitivity #1", {
-  expect_length(telescope(type="SAMI"), 9)
+  expect_length(telescope(type="SAMI"), 11)
 })
 
 test_that("Checking case sensitivity #2", {
-  expect_length(telescope(type="sami"), 9)
+  expect_length(telescope(type="sami"), 11)
 })
 
 test_that("Checking case sensitivity #3", {
-  expect_length(telescope(type="Sami"), 9)
+  expect_length(telescope(type="Sami"), 11)
 })
 
 test_that("Checking case sensitivity #4", {
-  expect_length(telescope(type="SaMi"), 9)
-  expect_length(telescope(type="sAmI"), 9)
+  expect_length(telescope(type="SaMi"), 11)
+  expect_length(telescope(type="sAmI"), 11)
 })
 
 
@@ -54,6 +54,10 @@ test_that("telescope() issues error when incompatible parameters are given #1.",
 
 test_that("telescope() issues error when incompatible parameters are given #2.", {
   expect_error(telescope(aperture_shape = "octogon"))
+})
+
+test_that("telescope() issues error when incompatible parameters are given #3.", {
+  expect_error(telescope(method = "flat"))
 })
 
 # Testing that the observing_strategy() function works with each of the possible
@@ -73,27 +77,27 @@ test_that("observing_strategy() issues error when incompatible parameters are gi
 
 # Testing that you can generate an observation with each of the telescope types
 test_that("Initial run of observation() function with default types #1.", {
-  expect_length(observation(telescope(type="SAMI"), observing_strategy = observing_strategy()), 24)
+  expect_length(observation(telescope(type="SAMI"), observing_strategy = observing_strategy()), 28)
 })
 
 test_that("Initial run of observation() function with default types #2.", {
-  expect_length(observation(telescope(type="MaNGA"), observing_strategy = observing_strategy()), 24)
+  expect_length(observation(telescope(type="MaNGA"), observing_strategy = observing_strategy()), 28)
 })
 
 test_that("Initial run of observation() function with default types #3.", {
-  expect_length(observation(telescope(type="Hector"), observing_strategy = observing_strategy()), 24)
+  expect_length(observation(telescope(type="Hector"), observing_strategy = observing_strategy()), 28)
 })
 
 test_that("Initial run of observation() function with default types #4.", {
-  expect_length(observation(telescope(type="CALIFA"), observing_strategy = observing_strategy()), 24)
+  expect_length(observation(telescope(type="CALIFA"), observing_strategy = observing_strategy()), 28)
 })
 
 test_that("Initial run of observation() function with default types #5 - w/o blur.", {
-  expect_length(observation(telescope(type="IFU"), observing_strategy = observing_strategy()), 24)
+  expect_length(observation(telescope(type="IFU"), observing_strategy = observing_strategy()), 28)
 })
 
 test_that("Initial run of observation() function with default types #6 w/ blur.", {
-  expect_length(observation(telescope(type="IFU"), observing_strategy = observing_strategy(blur=T)), 24)
+  expect_length(observation(telescope(type="IFU"), observing_strategy = observing_strategy(blur=T)), 28)
 })
 
 # Testing that the psf produced is symmetrical

@@ -14,24 +14,44 @@ ss_eagle    = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
 
 temp_loc = tempdir()
 
-# Testing that build_datacube works
+# Testing that build_datacube works in spectral mode
 test_that("Gadget files can be built.", {
   expect_length(build_datacube(simspin_file = ss_gadget,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               telescope = telescope(type="IFU", method = "spectral", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               verbose = T), 4)
+                               verbose = T), 5)
 })
 
 test_that("HDF5 files can be built.", {
   expect_length(build_datacube(simspin_file = ss_hdf5,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
+                               telescope = telescope(type="IFU", method = "spectral", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 5)
 })
 
 test_that("EAGLE files can be built.", {
   expect_length(build_datacube(simspin_file = ss_eagle,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 4)
+                               telescope = telescope(type="IFU", method = "spectral", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 5)
+})
+
+# Testing that build_datacube works in velocity mode
+test_that("Gadget files can be built.", {
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               verbose = T), 5)
+})
+
+test_that("HDF5 files can be built.", {
+  expect_length(build_datacube(simspin_file = ss_hdf5,
+                               telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 5)
+})
+
+test_that("EAGLE files can be built.", {
+  expect_length(build_datacube(simspin_file = ss_eagle,
+                               telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 5)
 })
 
 # Testing that build_datacube works to write to FITS file
@@ -39,11 +59,17 @@ test_that("Data cubes can be written to file", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), 4)
+                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), 5)
+
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", method="velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), 5)
+
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T), 4)
+                               write_fits = T), 5)
 })
 
 unlink(c(paste(temp_loc, "cube.FITS", sep=""), paste(stringr::str_remove(ss_gadget, ".Rdata"), "_inc45deg_seeing2fwhm.FITS", sep="")))
