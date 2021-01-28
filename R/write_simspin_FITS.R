@@ -35,23 +35,50 @@
 
 write_simspin_FITS = function(output_file, simspin_cube, observation){
 
-  crpixn = dim(simspin_cube)%/%2
-  crvaln = c(observation$sbin_seq[crpixn[1]]/observation$ang_size/3600,
-             observation$sbin_seq[crpixn[2]]/observation$ang_size/3600,
-             observation$wave_seq[crpixn[3]])
-  cdeltn = c(observation$sbin_size/observation$ang_size/3600,
-             observation$sbin_size/observation$ang_size/3600,
-             observation$wave_res)
-  ctypen = c("RA---TAN", "DEC--TAN", "AWAV")
-  cunitn = c("deg", "deg", "Angstrom")
-  axDat  = data.frame("crpix" = crpixn, "crval" = crvaln, "cdelt" = cdeltn,
-                      "len" = dim(simspin_cube), "ctype" = ctypen,
-                      "cunit" = cunitn)
+  if (observation$method == "spectral"){
 
-  FITSio::writeFITSim(X = simspin_cube, file = output_file, crpixn = crpixn,
-                      crvaln = crvaln, cdeltn = cdeltn, ctypen = ctypen,
-                      cunitn = cunitn, axDat = axDat)
+    crpixn = dim(simspin_cube)%/%2
+    crvaln = c(observation$sbin_seq[crpixn[1]]/observation$ang_size/3600,
+               observation$sbin_seq[crpixn[2]]/observation$ang_size/3600,
+               observation$wave_seq[crpixn[3]])
+    cdeltn = c(observation$sbin_size/observation$ang_size/3600,
+               observation$sbin_size/observation$ang_size/3600,
+               observation$wave_res)
+    ctypen = c("RA---TAN", "DEC--TAN", "AWAV")
+    cunitn = c("deg", "deg", "Angstrom")
+    axDat  = data.frame("crpix" = crpixn, "crval" = crvaln, "cdelt" = cdeltn,
+                        "len" = dim(simspin_cube), "ctype" = ctypen,
+                        "cunit" = cunitn)
 
-  message("FITS file written to: ", output_file)
+    FITSio::writeFITSim(X = simspin_cube, file = output_file, crpixn = crpixn,
+                        crvaln = crvaln, cdeltn = cdeltn, ctypen = ctypen,
+                        cunitn = cunitn, axDat = axDat)
+
+    message("FITS file written to: ", output_file)
+
+  }
+
+  if (observation$method == "velocity"){
+
+    crpixn = dim(simspin_cube)%/%2
+    crvaln = c(observation$sbin_seq[crpixn[1]]/observation$ang_size/3600,
+               observation$sbin_seq[crpixn[2]]/observation$ang_size/3600,
+               observation$vbin_seq[crpixn[3]])
+    cdeltn = c(observation$sbin_size/observation$ang_size/3600,
+               observation$sbin_size/observation$ang_size/3600,
+               observation$vbin_size)
+    ctypen = c("RA---TAN", "DEC--TAN", "VELO")
+    cunitn = c("deg", "deg", "kms-1")
+    axDat  = data.frame("crpix" = crpixn, "crval" = crvaln, "cdelt" = cdeltn,
+                        "len" = dim(simspin_cube), "ctype" = ctypen,
+                        "cunit" = cunitn)
+
+    FITSio::writeFITSim(X = simspin_cube, file = output_file, crpixn = crpixn,
+                        crvaln = crvaln, cdeltn = cdeltn, ctypen = ctypen,
+                        cunitn = cunitn, axDat = axDat)
+
+    message("FITS file written to: ", output_file)
+
+  }
 
 }

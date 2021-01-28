@@ -27,6 +27,8 @@ observation = function(telescope, observing_strategy){
                       (telescope$sbin * sbin_size) / 2, by=sbin_size) # spatial bin break positions
   wave_seq      = seq(telescope$wave_range[1], telescope$wave_range[2], by = telescope$wave_res) # wavelength bin break positions
   pixel_index   = seq(1,telescope$sbin*telescope$sbin, by=1)
+  vbin_size     = (telescope$wave_res / telescope$wave_centre) * (3e8/1e3) # km/s per velocity bin
+  vbin_error    = ((telescope$lsf_fwhm / telescope$wave_centre) * (3e8/1e3)) / (2 * sqrt(2 * log(2))) # velocity uncertainty standard deviation
 
   if (telescope$aperture_shape == "circular"){
     aperture_region = .circular_ap(telescope$sbin)
@@ -71,6 +73,7 @@ observation = function(telescope, observing_strategy){
                 twist_rad       = observing_strategy$twist_deg * (pi/180),
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
+                method          = telescope$method,
                 pixel_region    = aperture_region * pixel_index,
                 psf_fwhm        = psf_fwhm,
                 psf_kernel      = psf_k,
@@ -80,9 +83,12 @@ observation = function(telescope, observing_strategy){
                 spatial_res     = telescope$spatial_res,
                 signal_to_noise = telescope$signal_to_noise,
                 wave_bin        = length(wave_seq),
+                wave_centre     = telescope$wave_centre,
                 wave_res        = telescope$wave_res,
                 wave_seq        = wave_seq,
                 wave_edges      = wave_edges,
+                vbin_size       = vbin_size,
+                vbin_error      = vbin_error,
                 z               = observing_strategy$z)
 
   return(output)

@@ -2,10 +2,11 @@
 # Date: 26/10/2020
 # Title: build_datacube - a function for generating a data cube from the observation
 #
-#'A function for making a mock spectral cube
+#'A function for making a mock spectral/velocity data cube
 #'
-#'The purpose of this function is to generate a mock spectral IFU data cube from
+#'The purpose of this function is to generate a mock IFU data cube from
 #' a SimSpin file, as generated using the \code{make_simspin_file()} function.
+#' The data cube produced can be either a spectral cube or a velocity cube.
 #'
 #'@param simspin_file The path to the location of the SimSpin .Rdata file OR
 #' output list from \code{make_simspin_file()}.
@@ -23,6 +24,8 @@
 #' file output if \code{write_fits = TRUE}. If \code{write_fits = TRUE} and no
 #' \code{output_location} is specified, the FITS file will be written to the
 #' same directory as the input \code{simspin_file}.
+#'@param cores Float describing the number of cores to run the interpolation
+#' and velocity gridding on. Default is 1.
 #'@return Returns an .fits file that contains a the generated spectral cube and
 #' relevant header describing the mock observation.
 #'@examples
@@ -34,7 +37,8 @@
 #'
 
 build_datacube = function(simspin_file, telescope, observing_strategy,
-                          verbose = F, write_fits = F, output_location){
+                          verbose = F, write_fits = F, output_location,
+                          cores=1){
 
   if (verbose){cat("Computing observation parameters... \n")}
   observation = observation(telescope = telescope, observing_strategy = observing_strategy)
@@ -56,73 +60,164 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$pixel_region[!is.na(observation$pixel_region)],] # trimming particles that lie outside the aperture of the telescope
 
-  original_wave  = simspin_data$wave # read original wavelengths
-  wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
-  lsf_fwhm   = (observation$z * observation$lsf_fwhm) + observation$lsf_fwhm # adjusting the LSF for the resolution at z
+  if (observation$method == "spectral"){
 
-  spec_res_sigma_sq = lsf_fwhm^2 - (min(diff(wavelength)))^2
-  if (spec_res_sigma_sq < 0){
-    warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
-    cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", min(diff(wavelength)), " A. \n")
-    cat("No LSF will be applied in this case.\n")
-    LSF_conv = FALSE
-  } else {
-    LSF_conv = TRUE
-    lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2))))
-  }
+    original_wave  = simspin_data$wave # read original wavelengths
+    wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
+    lsf_fwhm   = (observation$z * observation$lsf_fwhm) + observation$lsf_fwhm # adjusting the LSF for the resolution at z
 
-  spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
-  vel_los = array(data = NA, dim = observation$sbin^2)
-  dis_los = array(data = NA, dim = observation$sbin^2)
-
-  if (verbose){cat("Generating spectra per spaxel... \n")}
-  for (i in sort(unique(galaxy_data$pixel_pos))){ # computing the spectra at each occupied spatial pixel position
-     particle_IDs = which(galaxy_data$pixel_pos == i)
-     galaxy_sample = galaxy_data[particle_IDs,]
-     intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = length(particle_IDs), byrow = T) * (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
-     velocity_los = galaxy_sample$vy_obs # the LOS velocities of each particle
-     vel_los[i] = mean(velocity_los)
-     dis_los[i] = sd(velocity_los)
-     wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
-     wave_shift = ((velocity_los / .speed_of_light) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
-     luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq)
-     if (LSF_conv){
-       luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=lsf_sigma)
-     }
-     if (!is.na(observation$signal_to_noise) | observation$signal_to_noise == 0){
-       luminosity = .add_noise(luminosity, observation$signal_to_noise)
-     }
-     spectra[i,] = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) # flux in units erg/s/cm^2/Ang
-     if (verbose){cat(i, "... ", sep = "")}
-  }
-
-  cube = array(data = spectra, dim = c(observation$sbin, observation$sbin, observation$wave_bin))
-  vel_image = array(data = vel_los, dim = c(observation$sbin, observation$sbin))
-  dis_image = array(data = dis_los, dim = c(observation$sbin, observation$sbin))
-
-  if (observation$psf_fwhm > 0){
-    if (verbose){cat("Convolving cube with PSF... \n")    }
-    cube = blur_datacube(cube = list("spectral_cube" = cube,
-                                     "observation" = observation)) # apply psf convolution to each cube plane
-  }
-
-  if (verbose){cat("Done! \n")}
-
-  if (write_fits){
-    if (verbose){cat("Writing FITS... \n")}
-    if (missing(output_location)){
-      out_file_name = stringr::str_remove(simspin_file, ".Rdata")
-      output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
-                              observation$psf_fwhm,"fwhm.FITS", sep="")
+    spec_res_sigma_sq = lsf_fwhm^2 - (min(diff(wavelength)))^2
+    if (spec_res_sigma_sq < 0){
+      warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
+      cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", min(diff(wavelength)), " A. \n")
+      cat("No LSF will be applied in this case.\n")
+      LSF_conv = FALSE
+    } else {
+      LSF_conv = TRUE
+      lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2))))
     }
 
-    write_simspin_FITS(output_file = output_location, simspin_cube = cube, observation = observation)
+    spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
+    vel_los = array(data = NA, dim = observation$sbin^2)
+    dis_los = array(data = NA, dim = observation$sbin^2)
+    lum_map = array(data = NA, dim = observation$sbin^2)
+
+    if (verbose){cat("Generating spectra per spaxel... \n")}
+    for (i in sort(unique(galaxy_data$pixel_pos))){ # computing the spectra at each occupied spatial pixel position
+      particle_IDs = which(galaxy_data$pixel_pos == i)
+      galaxy_sample = galaxy_data[particle_IDs,]
+      intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = length(particle_IDs), byrow = T) * (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+      velocity_los = galaxy_sample$vy_obs # the LOS velocities of each particle
+      vel_los[i] = mean(velocity_los)
+      dis_los[i] = sd(velocity_los)
+      wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+      wave_shift = ((velocity_los / .speed_of_light) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
+      luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq)
+      if (LSF_conv){
+        luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=lsf_sigma)
+      }
+      if (!is.na(observation$signal_to_noise) | observation$signal_to_noise == 0){
+        luminosity = .add_noise(luminosity, observation$signal_to_noise)
+      }
+      spectra[i,] = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) # flux in units erg/s/cm^2/Ang
+      lum_map[i] = ProSpect::photom_lum(observation$wave_seq, luminosity, filters = ProSpect::filt_r_SDSS, z = observation$z, ref="Planck")
+      if (verbose){cat(i, "... ", sep = "")}
+    }
+
+    cube = array(data = spectra, dim = c(observation$sbin, observation$sbin, observation$wave_bin))
+    vel_image = array(data = vel_los, dim = c(observation$sbin, observation$sbin))
+    dis_image = array(data = dis_los, dim = c(observation$sbin, observation$sbin))
+    lum_image = array(data = lum_map, dim = c(observation$sbin, observation$sbin))
+
+    if (observation$psf_fwhm > 0){
+      if (verbose){cat("Convolving cube with PSF... \n")    }
+      cube = blur_datacube(cube = list("spectral_cube" = cube,
+                                       "observation" = observation)) # apply psf convolution to each cube plane
+    }
+
+    if (verbose){cat("Done! \n")}
+
+    if (write_fits){
+      if (verbose){cat("Writing FITS... \n")}
+      if (missing(output_location)){
+        out_file_name = stringr::str_remove(simspin_file, ".Rdata")
+        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
+                                observation$psf_fwhm,"fwhm.FITS", sep="")
+      }
+
+      write_simspin_FITS(output_file = output_location, simspin_cube = cube, observation = observation)
+    }
+
+    output = list("spectral_cube"    = cube,
+                  "observation"      = observation,
+                  "velocity_image"   = vel_image,
+                  "dispersion_image" = dis_image,
+                  "r-band_image"     = lum_image)
+
   }
 
-  output = list("spectral_cube"    = cube,
-                "observation"      = observation,
-                "velocity_image"   = vel_image,
-                "dispersion_image" = dis_image)
+  if (observation$method == "velocity"){
+
+    observation$vbin = ceiling((max(abs(galaxy_data$vy_obs))*2) / observation$vbin_size) # the number of velocity bins in the cube
+    if (observation$vbin <= 2){observation$vbin = 3}
+
+    observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
+    observation$vbin_seq   = observation$vbin_edges[1:observation$vbin] + diff(observation$vbin_edges)/2
+
+    vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
+    vel_los  = array(data = NA, dim = observation$sbin^2)
+    dis_los  = array(data = NA, dim = observation$sbin^2)
+    lum_map  = array(data = NA, dim = observation$sbin^2)
+
+    if (verbose){cat("Sorting spaxels... \n")}
+    occupied = sort(unique(galaxy_data$pixel_pos))
+    particle_IDs = .particles_to_pixels(galaxy_data, occupied, cores = cores)
+
+    # Trim spectra to filter width
+    #filter = ProSpect::filt_r_SDSS
+    #filter_width = range(filter$wave)
+    #filtered_wave = c(min(which(abs(simspin_data$wave - filter_width[1]) == min(abs(simspin_data$wave - filter_width[1])))),
+    #                  max(which(abs(simspin_data$wave - filter_width[2]) == min(abs(simspin_data$wave - filter_width[2])))))
+
+    if (verbose){cat("Generating velocity distributions per spaxel... \n")}
+    for (i in 1:length(particle_IDs)){
+      galaxy_sample = galaxy_data[particle_IDs[[i]],]
+
+      if (dim(galaxy_sample)[1] > 50){
+        galaxy_sample$luminosity = galaxy_sample$Mass * 1e10 #apply(intrinsic_spectra, 2, ProSpect::photom_lum, wave=simspin_data$wave,
+        #outtype = "Jansky", filters = ProSpect::filt_r_SDSS, z = observation$z,
+        #ref="Planck", LumDist_Mpc = observation$lum_dist)
+
+        vel_los[occupied[i]] = mean(galaxy_sample$vy_obs)
+        dis_los[occupied[i]] = sd(galaxy_sample$vy_obs)
+        lum_map[occupied[i]] = sum(galaxy_sample$luminosity)
+        vel_spec[occupied[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation, cores = 1)
+      } else {
+        galaxy_sample$luminosity = galaxy_sample$Mass * 1e10 #apply(intrinsic_spectra, 2, ProSpect::photom_lum, wave=simspin_data$wave,
+        #outtype = "Jansky", filters = ProSpect::filt_r_SDSS, z = observation$z,
+        #ref="Planck", LumDist_Mpc = observation$lum_dist)
+
+        vel_los[occupied[i]] = mean(galaxy_sample$vy_obs)
+        dis_los[occupied[i]] = sd(galaxy_sample$vy_obs)
+        lum_map[occupied[i]] = sum(galaxy_sample$luminosity)
+        vel_spec[occupied[i],] = 0
+      }
+        # adding the "gaussians" of each particle to the velocity bins
+
+      if (verbose){cat(occupied[i], "... ", sep = "")}
+    }
+
+    cube = array(data = vel_spec, dim = c(observation$sbin, observation$sbin, observation$vbin))
+    vel_image = array(data = vel_los, dim = c(observation$sbin, observation$sbin))
+    dis_image = array(data = dis_los, dim = c(observation$sbin, observation$sbin))
+    lum_image = array(data = lum_map, dim = c(observation$sbin, observation$sbin))
+
+    if (observation$psf_fwhm > 0){
+      if (verbose){cat("Convolving cube with PSF... \n")    }
+      cube = blur_datacube(cube = list("spectral_cube" = cube,
+                                       "observation" = observation)) # apply psf convolution to each cube plane
+    }
+
+    if (verbose){cat("Done! \n")}
+
+    if (write_fits){
+      if (verbose){cat("Writing FITS... \n")}
+      if (missing(output_location)){
+        out_file_name = stringr::str_remove(simspin_file, ".Rdata")
+        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
+                                observation$psf_fwhm,"fwhm.FITS", sep="")
+      }
+
+      write_simspin_FITS(output_file = output_location, simspin_cube = cube, observation = observation)
+    }
+
+    output = list("velocity_cube"    = cube,
+                  "observation"      = observation,
+                  "velocity_image"   = vel_image,
+                  "dispersion_image" = dis_image,
+                  "r-band_image"     = lum_image)
+
+  }
 
   return(output)
 }
