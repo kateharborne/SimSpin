@@ -12,7 +12,7 @@ importFrom(hdf5r, "h5attr", "list.attributes", "h5file", "list.groups", "readDat
 importFrom(magicaxis, "magplot", "magimage")
 importFrom(pracma, "cross")
 importFrom(ProFit, "profitMakeGaussianPSF", "profitBruteConv", "profitCubaMoffat")
-importFrom(ProSpect, "interp_quick")
+importFrom(ProSpect, "interp_quick", "photom_lum")
 importFrom(RColorBrewer, "brewer.pal")
 importFrom(snow, "makeCluster")
 importFrom(stats, "approx", "rnorm", "pnorm", "dnorm", "sd")
