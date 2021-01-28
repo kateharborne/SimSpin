@@ -74,6 +74,7 @@ observation = function(telescope, observing_strategy){
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
                 method          = telescope$method,
+                particle_limit  = observing_strategy$particle_limit,
                 pixel_region    = aperture_region * pixel_index,
                 psf_fwhm        = psf_fwhm,
                 psf_kernel      = psf_k,

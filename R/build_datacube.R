@@ -163,7 +163,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     for (i in 1:length(particle_IDs)){
       galaxy_sample = galaxy_data[particle_IDs[[i]],]
 
-      if (dim(galaxy_sample)[1] > 50){
+      if (dim(galaxy_sample)[1] > observation$particle_limit){
         galaxy_sample$luminosity = galaxy_sample$Mass * 1e10 #apply(intrinsic_spectra, 2, ProSpect::photom_lum, wave=simspin_data$wave,
         #outtype = "Jansky", filters = ProSpect::filt_r_SDSS, z = observation$z,
         #ref="Planck", LumDist_Mpc = observation$lum_dist)

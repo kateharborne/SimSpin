@@ -15,6 +15,8 @@
 #'@param twist_deg Numeric describing the viewer's orientation relative to the
 #' x-axis - 0 deg places the galaxy face-on, 90 deg places the galaxy edge-on
 #' aligned with the vertical axis. Default is 0.
+#'@param particle_limit Numeric describing the number of particles that must be
+#' present along the line of sight for the spaxel to be occupied.
 #'@param blur Boolean describing whether seeing conditions should be applied.
 #' Default is FALSE.
 #'@param fwhm If \code{blur = TRUE}, a numeric that describes the full-width
@@ -28,7 +30,7 @@
 #'@examples
 #'conditions = observing_strategy()
 #'
-observing_strategy = function(z = 0.1, inc_deg = 70, blur = F, fwhm=2, psf="Gaussian", twist_deg=0){
+observing_strategy = function(z = 0.1, inc_deg = 70, twist_deg = 0, particle_limit = 50, blur = F, fwhm=2, psf="Gaussian"){
 
 
   if(blur){
@@ -40,6 +42,7 @@ observing_strategy = function(z = 0.1, inc_deg = 70, blur = F, fwhm=2, psf="Gaus
       output = list(z         = z,
                     inc_deg   = inc_deg,
                     twist_deg = twist_deg,
+                    particle_limit = particle_limit,
                     blur      = T,
                     fwhm      = fwhm,
                     psf       = "Gaussian")
@@ -48,6 +51,7 @@ observing_strategy = function(z = 0.1, inc_deg = 70, blur = F, fwhm=2, psf="Gaus
       output = list(z         = z,
                     inc_deg   = inc_deg,
                     twist_deg = twist_deg,
+                    particle_limit = particle_limit,
                     blur      = T,
                     fwhm      = fwhm,
                     psf       = "Moffat")
@@ -56,6 +60,7 @@ observing_strategy = function(z = 0.1, inc_deg = 70, blur = F, fwhm=2, psf="Gaus
     output = list(z         = z,
                   inc_deg   = inc_deg,
                   twist_deg = twist_deg,
+                  particle_limit = particle_limit,
                   blur      = F)
   }
 
