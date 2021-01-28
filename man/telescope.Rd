@@ -6,9 +6,11 @@
 \usage{
 telescope(
   type = "IFU",
+  method = "spectral",
   fov = 15,
   aperture_shape = "circular",
   wave_range = c(3700, 5700),
+  wave_centre,
   spatial_res = 0.5,
   wave_res = 1.04,
   lsf_fwhm = 2.65,
@@ -21,6 +23,9 @@ Current pre-loaded types include "SAMI", "MaNGA", "CALIFA", and "Hector".
 Input is NOT case sensitive. If you wish to specify different observing
 properties below, set \code{type = "IFU"} to define your own telescope.}
 
+\item{method}{String to describe whether cubes output are "spectral" or
+"velocity" (as in SimSpin v1) along the z-axis. Default is "spectral".}
+
 \item{fov}{Numeric describing the field of view of the instrument in arcsec.}
 
 \item{aperture_shape}{String to describe the shape of the IFU aperture.
@@ -28,6 +33,10 @@ Options include "circular", "hexagonal" or "square".}
 
 \item{wave_range}{Numeric vector of length 2 describing the wave range of the
 IFU (i.e. \code{c(wave_min, wave_max)}.}
+
+\item{wave_centre}{Numeric describing the central wavelength of the
+spectrograph used in the observation. If unsupplied, default is the exact
+centre of the provided `wave_range` parameter.}
 
 \item{spatial_res}{Numeric describing the size of spatial pixels in arcsec.}
 

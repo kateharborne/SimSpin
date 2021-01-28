@@ -2,7 +2,7 @@
 % Please edit documentation in R/build_datacube.R
 \name{build_datacube}
 \alias{build_datacube}
-\title{A function for making a mock spectral cube}
+\title{A function for making a mock spectral/velocity data cube}
 \usage{
 build_datacube(
   simspin_file,
@@ -41,8 +41,9 @@ Returns an .fits file that contains a the generated spectral cube and
 relevant header describing the mock observation.
 }
 \description{
-The purpose of this function is to generate a mock spectral IFU data cube from
+The purpose of this function is to generate a mock IFU data cube from
 a SimSpin file, as generated using the \code{make_simspin_file()} function.
+The data cube produced can be either a spectral cube or a velocity cube.
 }
 \examples{
 ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
