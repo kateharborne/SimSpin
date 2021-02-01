@@ -67,6 +67,7 @@ observation = function(telescope, observing_strategy){
                 aperture_shape  = telescope$aperture_shape,
                 aperture_size   = aperture_size,
                 fov             = telescope$fov,
+                filter          = telescope$filter,
                 inc_deg         = observing_strategy$inc_deg,
                 inc_rad         = observing_strategy$inc_deg * (pi/180),
                 twist_deg       = observing_strategy$twist_deg,
