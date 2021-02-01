@@ -235,19 +235,20 @@ Other `type` predefined include `MaNGA`, `CALIFA` and `Hector`. This input is NO
 We then need to decide how our object is projected and placed on the sky. This is done using the `observing_strategy` class.
 
 ```{r}
-strategy_one = observing_strategy(z       = 0.03, # redshift distance at which the galaxy is placed
-                                  inc_deg = 75,   # projected inclination on the sky (0 - face-on, 90 - edge-on)
-                                  blur    = F)    # whether seeing conditions are included
+strategy_one = observing_strategy(z              = 0.03, # redshift distance at which the galaxy is placed
+                                  inc_deg        = 75,   # projected inclination on the sky (0 - face-on, 90 - edge-on)
+                                  blur           = F)    # whether seeing conditions are included
 ```
 
 We can also add observational blurring due to the seeing conditions in which the observation is made.
 
 ```{r}
-strategy_two = observing_strategy(z       = 0.03, # redshift distance at which the galaxy is placed
-                                  inc_deg = 75,   # projected inclination on the sky (0 - face-on, 90 - edge-on)
-                                  blur    = T,    # whether seeing conditions are included
-                                  fwhm    = 2,    # the full-width-half-max of the blurring kernel in arcsec
-                                  psf     = "Gaussian") # the shape of the blurring kernel
+strategy_two = observing_strategy(z              = 0.03, # redshift distance at which the galaxy is placed
+                                  inc_deg        = 75,   # projected inclination on the sky (0 - face-on, 90 - edge-on)
+                                  twist_deg      = 180,  # angle of observation (longitude)
+                                  blur           = T,    # whether seeing conditions are included
+                                  fwhm           = 2,    # the full-width-half-max of the blurring kernel in arcsec
+                                  psf      = "Gaussian") # the shape of the blurring kernel
 ```
 
 This provides an observing strategy object that describes the observational properties of your model.  
