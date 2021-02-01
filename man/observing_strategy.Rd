@@ -7,10 +7,11 @@
 observing_strategy(
   z = 0.1,
   inc_deg = 70,
+  twist_deg = 0,
+  particle_limit = 50,
   blur = F,
   fwhm = 2,
-  psf = "Gaussian",
-  twist_deg = 0
+  psf = "Gaussian"
 )
 }
 \arguments{
@@ -21,6 +22,13 @@ projected. Default is 0.1.}
 galaxy relative to the z-axis - 0 deg places the galaxy face-on, 90 deg is
 edge-on aligned with the horizontal axis. Default is 70.}
 
+\item{twist_deg}{Numeric describing the viewer's orientation relative to the
+x-axis - 0 deg places the galaxy face-on, 90 deg places the galaxy edge-on
+aligned with the vertical axis. Default is 0.}
+
+\item{particle_limit}{Numeric describing the number of particles that must be
+present along the line of sight for the spaxel to be occupied.}
+
 \item{blur}{Boolean describing whether seeing conditions should be applied.
 Default is FALSE.}
 
@@ -30,10 +38,6 @@ given in arcsec.}
 
 \item{psf}{A string to describe the shape of the PSF. Options include
 "Gaussian" or "Moffat". Input is NOT case sensitive.}
-
-\item{twist_deg}{Numeric describing the viewer's orientation relative to the
-x-axis - 0 deg places the galaxy face-on, 90 deg places the galaxy edge-on
-aligned with the vertical axis. Default is 0.}
 }
 \value{
 Returns an object of class "observing_strategy" that describes the

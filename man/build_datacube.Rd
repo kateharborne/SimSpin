@@ -10,7 +10,8 @@ build_datacube(
   observing_strategy,
   verbose = F,
   write_fits = F,
-  output_location
+  output_location,
+  cores = 1
 )
 }
 \arguments{
@@ -35,6 +36,9 @@ output a FITS file, change this parameter to \code{TRUE}.}
 file output if \code{write_fits = TRUE}. If \code{write_fits = TRUE} and no
 \code{output_location} is specified, the FITS file will be written to the
 same directory as the input \code{simspin_file}.}
+
+\item{cores}{Float describing the number of cores to run the interpolation
+and velocity gridding on. Default is 1.}
 }
 \value{
 Returns an .fits file that contains a the generated spectral cube and

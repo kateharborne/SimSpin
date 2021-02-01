@@ -11,8 +11,9 @@ telescope(
   aperture_shape = "circular",
   wave_range = c(3700, 5700),
   wave_centre,
-  spatial_res = 0.5,
   wave_res = 1.04,
+  spatial_res = 0.5,
+  filter = "r",
   lsf_fwhm = 2.65,
   signal_to_noise = 10
 )
@@ -38,9 +39,12 @@ IFU (i.e. \code{c(wave_min, wave_max)}.}
 spectrograph used in the observation. If unsupplied, default is the exact
 centre of the provided `wave_range` parameter.}
 
+\item{wave_res}{Numeric describing the wavelength resolution in angstrom.}
+
 \item{spatial_res}{Numeric describing the size of spatial pixels in arcsec.}
 
-\item{wave_res}{Numeric describing the wavelength resolution in angstrom.}
+\item{filter}{String describing the relevent filter through which luminosities
+of individual particles are calculated.}
 
 \item{lsf_fwhm}{Numeric describing the full-width half-maximum of the Gaussian
 line spread function.}
