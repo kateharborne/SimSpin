@@ -13,7 +13,7 @@ Depends: R (>= 3.0), foreach
 Imports:
     celestial,
     data.table,
-    doSNOW,
+    doParallel,
     fields,
     FITSio,
     hdf5r,

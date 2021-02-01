@@ -265,8 +265,7 @@
 .SFTtoAge = function(a, cores=1){
   cosdist = function(x) { return (celestial::cosdistTravelTime((1 / x) - 1)); }
   if (cores > 1) {
-    cl = snow::makeCluster(cores)
-    doSNOW::registerDoSNOW(cl)
+    doParallel::registerDoParallel(cores = cores)
     i = integer()
     output = foreach(i = 1:length(a), .packages = "celestial") %dopar% { cosdist(a[i]) }
     closeAllConnections()
@@ -492,8 +491,7 @@
   } else {
 
     if (cores > 1) {
-      cl = snow::makeCluster(cores)
-      doSNOW::registerDoSNOW(cl)
+      doParallel::registerDoParallel(cores = cores)
       i = integer()
       part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "foreach")) %dopar% {
         f(Metallicity[i], Age[i])
@@ -550,25 +548,25 @@
 .sum_velocities = function(galaxy_sample, observation, cores){
   vel_diff = function(lum, vy_obs){diff((lum * pnorm(observation$vbin_edges, mean = vy_obs, sd = observation$vbin_error)))}
 
-  if (cores > 1){
-    cl = snow::makeCluster(cores)
-    doSNOW::registerDoSNOW(cl)
-    i = integer()
-    bins_list = foreach(i = 1:length(galaxy_sample$luminosity)) %dopar% { vel_diff(lum = galaxy_sample$luminosity[i], vy_obs = galaxy_sample$vy_obs[i]) }
-    closeAllConnections()
-    bins = matrix(unlist(bins_list, use.names=FALSE), nrow = observation$vbin)
-  } else {
-    bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy_obs)
-  }
+#  if (cores > 1){
+#    cl = snow::makeCluster(cores)
+#    doSNOW::registerDoSNOW(cl)
+#    i = integer()
+#    bins_list = foreach(i = 1:length(galaxy_sample$luminosity)) %dopar% { vel_diff(lum = galaxy_sample$luminosity[i], vy_obs = galaxy_sample$vy_obs[i]) }
+#    closeAllConnections()
+#    bins = matrix(unlist(bins_list, use.names=FALSE), nrow = observation$vbin)
+#  } else {
+  bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy_obs)
+#  }
 
   return(rowSums(bins))
 
 }
 
+# Function for generating a list of spaxels with encolse particle ids.
 .particles_to_pixels = function(galaxy_data, occupied, cores){
   if (cores > 1){
-    cl = snow::makeCluster(cores)
-    doSNOW::registerDoSNOW(cl)
+    doParallel::registerDoParallel(cores = cores)
     x = integer()
     particle_IDs = foreach(x = occupied) %dopar% { which(galaxy_data$pixel_pos == x) }
     closeAllConnections()
