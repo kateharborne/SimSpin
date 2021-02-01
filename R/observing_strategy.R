@@ -30,7 +30,7 @@
 #'@examples
 #'conditions = observing_strategy()
 #'
-observing_strategy = function(z = 0.1, inc_deg = 70, twist_deg = 0, particle_limit = 50, blur = F, fwhm=2, psf="Gaussian"){
+observing_strategy = function(z = 0.1, inc_deg = 70, twist_deg = 0, particle_limit = 1, blur = F, fwhm=2, psf="Gaussian"){
 
 
   if(blur){
@@ -39,29 +39,29 @@ observing_strategy = function(z = 0.1, inc_deg = 70, twist_deg = 0, particle_lim
     }
 
     if(stringr::str_to_upper(psf) == "GAUSSIAN"){
-      output = list(z         = z,
-                    inc_deg   = inc_deg,
-                    twist_deg = twist_deg,
+      output = list(z              = z,
+                    inc_deg        = inc_deg,
+                    twist_deg      = twist_deg,
                     particle_limit = particle_limit,
-                    blur      = T,
-                    fwhm      = fwhm,
-                    psf       = "Gaussian")
+                    blur           = T,
+                    fwhm           = fwhm,
+                    psf            = "Gaussian")
     }
     if(stringr::str_to_upper(psf) == "MOFFAT"){
-      output = list(z         = z,
-                    inc_deg   = inc_deg,
-                    twist_deg = twist_deg,
+      output = list(z              = z,
+                    inc_deg        = inc_deg,
+                    twist_deg      = twist_deg,
                     particle_limit = particle_limit,
-                    blur      = T,
-                    fwhm      = fwhm,
-                    psf       = "Moffat")
+                    blur           = T,
+                    fwhm           = fwhm,
+                    psf            = "Moffat")
     }
   } else {
-    output = list(z         = z,
-                  inc_deg   = inc_deg,
-                  twist_deg = twist_deg,
+    output = list(z              = z,
+                  inc_deg        = inc_deg,
+                  twist_deg      = twist_deg,
                   particle_limit = particle_limit,
-                  blur      = F)
+                  blur           = F)
   }
 
   return(output)
