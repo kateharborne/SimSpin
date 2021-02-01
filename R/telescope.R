@@ -25,8 +25,10 @@
 #'@param wave_centre Numeric describing the central wavelength of the
 #' spectrograph used in the observation. If unsupplied, default is the exact
 #' centre of the provided `wave_range` parameter.
-#'@param spatial_res Numeric describing the size of spatial pixels in arcsec.
 #'@param wave_res Numeric describing the wavelength resolution in angstrom.
+#'@param spatial_res Numeric describing the size of spatial pixels in arcsec.
+#'@param filter String describing the relevent filter through which luminosities
+#' of individual particles are calculated.
 #'@param lsf_fwhm Numeric describing the full-width half-maximum of the Gaussian
 #' line spread function.
 #'@param signal_to_noise Numeric describing the minimum signal-to-noise ratio per
@@ -39,7 +41,7 @@
 #'
 
 telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circular", wave_range=c(3700,5700),
-                     wave_centre, spatial_res=0.5, wave_res=1.04, lsf_fwhm=2.65, signal_to_noise = 10){
+                     wave_centre, wave_res=1.04, spatial_res=0.5, filter="r", lsf_fwhm=2.65, signal_to_noise = 10){
 
   if (length(wave_range)!=2){
     stop("Error: length(wave_range) should be 2. \n Please specify wave_range = c(wave_min, wave_max) and try again.")
@@ -68,6 +70,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4800,
                   spatial_res     = 0.5,
+                  filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.65,
                   signal_to_noise = 10,
@@ -82,6 +85,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = 0.5,
+                  filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.8,
                   signal_to_noise = 10,
@@ -96,6 +100,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = 0.05,
+                  filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.6,
                   lsf_fwhm        = 1.3,
                   signal_to_noise = 10,
@@ -111,6 +116,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = 1,
+                  filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 2,
                   lsf_fwhm        = 5.65,
                   signal_to_noise = 10,
@@ -119,14 +125,30 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
   }
 
   if(stringr::str_to_upper(type)  == "IFU"){
+
+    if (stringr::str_to_lower(filter) == "r"){
+      filter = ProSpect::filt_r_SDSS
+    } else if (stringr::str_to_lower(filter) == "u"){
+      filter = ProSpect::filt_u_SDSS
+    } else if (stringr::str_to_lower(filter) == "g"){
+      filter = ProSpect::filt_g_SDSS
+    } else if (stringr::str_to_lower(filter) == "i"){
+      filter = ProSpect::filt_i_SDSS
+    } else if (stringr::str_to_lower(filter) == "z"){
+      filter = ProSpect::filt_z_SDSS
+    } else {
+      stop("Error: Invalid filter. \n Please specify filter = 'r', 'u' or 'g', 'i' or 'z' and try again.")
+    }
+
     output = list(type            = "IFU",
                   fov             = fov,
                   method          = method,
                   aperture_shape  = stringr::str_to_lower(aperture_shape),
                   wave_range      = wave_range,
                   wave_centre     = wave_centre,
-                  spatial_res     = spatial_res,
                   wave_res        = wave_res,
+                  spatial_res     = spatial_res,
+                  filter          = filter,
                   lsf_fwhm        = lsf_fwhm,
                   signal_to_noise = signal_to_noise,
                   sbin            = floor(fov / spatial_res))
