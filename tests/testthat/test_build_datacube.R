@@ -145,3 +145,22 @@ test_that("Format of blurring output is the same as unblurred output", {
   expect_equal(typeof(unblurred$dispersion_image), "double")
 
 })
+
+# Testing the twisting and inclination changes make sense
+test_that("Twisting and inclination work as expected", {
+  SAMI = telescope(type="SAMI")
+  strategy = SimSpin::observing_strategy(z = 0.05, inc_deg = 90, twist_deg = 0) # viewing from the front
+  observation = observation(SAMI, strategy)
+  twisted_data = twist_galaxy(ss_eagle$star_part, twist_rad = observation$twist_rad)
+  galaxy_data = obs_galaxy(part_data = twisted_data, inc_rad = observation$inc_rad)
+  front = galaxy_data$vy_obs
+
+  strategy = SimSpin::observing_strategy(z = 0.05, inc_deg = 90, twist_deg = 180) # viewing from the back
+  observation = SimSpin::observation(SAMI, strategy)
+  twisted_data = twist_galaxy(ss_eagle$star_part, twist_rad = observation$twist_rad)
+  galaxy_data = obs_galaxy(part_data = twisted_data, inc_rad = observation$inc_rad)
+  back = galaxy_data$vy_obs
+
+  expect_equal(front, -1*(back)) # velocities should be equal but opposite signs
+})
+
