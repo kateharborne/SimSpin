@@ -7,6 +7,12 @@
 .mpc_to_cm      = 3.08568e+24
 .speed_of_light = 299792.458
 
+# A function for combining multiple results from a parallel loop
+.comb <- function(x, ...) {
+  lapply(seq_along(x),
+         function(i) c(x[[i]], lapply(list(...), function(y) y[[i]])))
+}
+
 # Function for reading in Gadget binary files
 .read_gadget = function(f, verbose = FALSE){
   data = file(f, "rb") # open file for reading in binary mode
@@ -545,35 +551,14 @@
   return(spaxel_spectra)
 }
 
-.sum_velocities = function(galaxy_sample, observation, cores){
-  vel_diff = function(lum, vy_obs){diff((lum * pnorm(observation$vbin_edges, mean = vy_obs, sd = observation$vbin_error)))}
+.sum_velocities = function(galaxy_sample, observation){
+  vel_diff = function(lum, vy_obs){diff((lum * pnorm(observation$vbin_edges, mean = vy_obs,
+                                                     sd = observation$vbin_error)))}
 
-#  if (cores > 1){
-#    cl = snow::makeCluster(cores)
-#    doSNOW::registerDoSNOW(cl)
-#    i = integer()
-#    bins_list = foreach(i = 1:length(galaxy_sample$luminosity)) %dopar% { vel_diff(lum = galaxy_sample$luminosity[i], vy_obs = galaxy_sample$vy_obs[i]) }
-#    closeAllConnections()
-#    bins = matrix(unlist(bins_list, use.names=FALSE), nrow = observation$vbin)
-#  } else {
   bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy_obs)
-#  }
 
   return(rowSums(bins))
 
-}
-
-# Function for generating a list of spaxels with encolse particle ids.
-.particles_to_pixels = function(galaxy_data, occupied, cores){
-  if (cores > 1){
-    doParallel::registerDoParallel(cores = cores)
-    x = integer()
-    particle_IDs = foreach(x = occupied) %dopar% { which(galaxy_data$pixel_pos == x) }
-    closeAllConnections()
-  } else {
-    particle_IDs = lapply(occupied, function(x) which(galaxy_data$pixel_pos == x))
-  }
- return(particle_IDs)
 }
 
 # Function to apply LSF to spectra
@@ -601,4 +586,234 @@
   hg = exp(-(dim$X^2 + dim$Y^2)/(2*sigma^2))
   kernel = hg / sum(hg)
   return(kernel)
+}
+
+# Functions for computing spaxel properties
+# spectral mode -
+.spectral_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose){
+
+  spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
+  vel_los = array(data = NA, dim = observation$sbin^2)
+  dis_los = array(data = NA, dim = observation$sbin^2)
+  lum_map = array(data = NA, dim = observation$sbin^2)
+
+  for (i in 1:(dim(part_in_spaxel)[1])){ # computing the spectra at each occupied spatial pixel position
+
+    num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
+
+    # if number is greater than the particle limit
+    if (num_part > observation$particle_limit){
+      galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+      intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
+        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+
+      # pulling wavelengths and using doppler formula to compute the shift in
+      #   wavelengths caused by LOS velocity
+      wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
+      wave_shift = ((galaxy_sample$vy_obs / .speed_of_light) * wave) + wave
+
+      # interpolate each shifted wavelength to telescope grid of wavelengths
+      #   and sum to one spectra
+      luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra,
+                                        wave_seq = observation$wave_seq)
+
+      if (LSF_conv){ # should the spectra be degraded for telescope LSF?
+        luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=lsf_sigma)
+      }
+
+      if (!is.na(observation$signal_to_noise)){ # should we add noise?
+        luminosity = .add_noise(luminosity, observation$signal_to_noise)
+      }
+
+      # transform luminosity into flux detected at telescope
+      #    flux in units erg/s/cm^2/Ang
+      spectra[part_in_spaxel$spaxel_ID[i],] = (luminosity*.lsol_to_erg) /
+                                                  (4 * pi * (observation$lum_dist*.mpc_to_cm)^2)
+      lum_map[part_in_spaxel$spaxel_ID[i]] = ProSpect::bandpass(wave = observation$wave_seq,
+                                                                flux = spectra[part_in_spaxel$spaxel_ID[i],],
+                                                                filter = observation$filter, flux_in = "wave",
+                                                                flux_out = "wave")
+      vel_los[part_in_spaxel$spaxel_ID[i]] = mean(galaxy_sample$vy_obs)
+      dis_los[part_in_spaxel$spaxel_ID[i]] = sd(galaxy_sample$vy_obs)
+
+    } else { # if insufficient particles in spaxel
+      spectra[part_in_spaxel$spaxel_ID[i],] = NA
+      lum_map[part_in_spaxel$spaxel_ID[i]] = NA
+      vel_los[part_in_spaxel$spaxel_ID[i]] = NA
+      dis_los[part_in_spaxel$spaxel_ID[i]] = NA
+    }
+    if (verbose){cat(i, "... ", sep = "")}
+  }
+  return(list(spectra, lum_map, vel_los, dis_los))
+}
+
+.spectral_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
+
+  spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
+  vel_los = array(data = NA, dim = observation$sbin^2)
+  dis_los = array(data = NA, dim = observation$sbin^2)
+  lum_map = array(data = NA, dim = observation$sbin^2)
+
+  doParallel::registerDoParallel(cores)
+
+  i = integer()
+  output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
+                   .init=list(list(), list(), list(), list())) %dopar% {
+
+                     num_part = length(part_in_spaxel$val[[i]])
+                     # if the number of particles in the spaxel is greater than the particle limit
+                     if (num_part > observation$particle_limit){
+                       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+                       intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
+                                                  nrow = num_part, byrow = T) *
+                                                  (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+
+                       # pulling wavelengths and using doppler formula to compute the shift in
+                       #   wavelengths caused by LOS velocity
+                       wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
+                       wave_shift = ((galaxy_sample$vy_obs / .speed_of_light) * wave) + wave
+
+                       # interpolate each shifted wavelength to telescope grid of wavelengths
+                       #   and sum to one spectra
+                       luminosity = .interpolate_spectra(shifted_wave = wave_shift,
+                                                         spectra = intrinsic_spectra,
+                                                         wave_seq = observation$wave_seq)
+
+                       if (LSF_conv){ # should the spectra be degraded for telescope LSF?
+                         luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
+                                                       lsf_sigma=lsf_sigma)
+                       }
+                       if (!is.na(observation$signal_to_noise)){ # should we add noise?
+                         luminosity = .add_noise(luminosity, observation$signal_to_noise)
+                       }
+
+                       # transform luminosity into flux detected at telescope
+                       #    flux in units erg/s/cm^2/Ang
+                       spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2)
+                       lum_map = ProSpect::bandpass(wave = observation$wave_seq,
+                                                    flux = spectra,
+                                                    filter = observation$filter,
+                                                    flux_in = "wave", flux_out = "wave")
+                       vel_los = mean(galaxy_sample$vy_obs)
+                       dis_los= sd(galaxy_sample$vy_obs)
+                     } else { # if insufficient particles in spaxel
+                       spectra = NA
+                       lum_map = NA
+                       vel_los = NA
+                       dis_los = NA
+                     }
+                     result = list(spectra, lum_map, vel_los, dis_los)
+                     return(result)
+                     closeAllConnections()
+                   }
+
+  spectra[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$wave_bin, byrow = T)
+  lum_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
+
+  return(list(spectra, lum_map, vel_los, dis_los))
+}
+
+
+# velocity mode -
+.velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose){
+
+  vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
+  vel_los  = array(data = NA, dim = observation$sbin^2)
+  dis_los  = array(data = NA, dim = observation$sbin^2)
+  lum_map  = array(data = NA, dim = observation$sbin^2)
+
+  for (i in 1:(dim(part_in_spaxel)[1])){
+
+    num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
+
+    # if number is greater than the particle limit
+    if (num_part > observation$particle_limit){
+      galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+      intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
+        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+
+      # transform luminosity into flux detected at telescope
+      #    flux in units erg/s/cm^2/Ang
+      spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2)
+
+      # computing the r-band luminosity per particle from spectra
+      galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
+                                       wave = simspin_data$wave,
+                                       filter = observation$filter, flux_in = "wave", flux_out = "wave")
+
+      # adding the "gaussians" of each particle to the velocity bins
+      vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
+      lum_map[part_in_spaxel$spaxel_ID[i]] = sum(galaxy_sample$luminosity)
+      vel_los[part_in_spaxel$spaxel_ID[i]] = mean(galaxy_sample$vy_obs)
+      dis_los[part_in_spaxel$spaxel_ID[i]] = sd(galaxy_sample$vy_obs)
+
+
+    } else { # if insufficient particles in spaxel
+      vel_spec[part_in_spaxel$spaxel_ID[i],] = NA
+      lum_map[part_in_spaxel$spaxel_ID[i]] = NA
+      vel_los[part_in_spaxel$spaxel_ID[i]] = NA
+      dis_los[part_in_spaxel$spaxel_ID[i]] = NA
+    }
+    if (verbose){cat(i, "... ", sep = "")}
+
+  }
+
+  return(list(vel_spec, lum_map, vel_los, dis_los))
+}
+
+.velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
+
+  vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
+  vel_los  = array(data = NA, dim = observation$sbin^2)
+  dis_los  = array(data = NA, dim = observation$sbin^2)
+  lum_map  = array(data = NA, dim = observation$sbin^2)
+
+  doParallel::registerDoParallel(cores)
+
+  i = integer()
+  output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
+                   .init=list(list(), list(), list(), list())) %dopar% {
+
+                     num_part = length(part_in_spaxel$val[[i]])
+                     # if the number of particles in the spaxel is greater than the particle limit
+                     if (num_part > observation$particle_limit){
+                       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+                       intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
+                                                  nrow = num_part, byrow = T) *
+                         (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+                       # transform luminosity into flux detected at telescope
+                       #    flux in units erg/s/cm^2/Ang
+                       spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2)
+
+                       # computing the r-band luminosity per particle from spectra
+                       galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
+                                                        wave = simspin_data$wave,
+                                                        filter = observation$filter, flux_in = "wave", flux_out = "wave")
+
+                       # adding the "gaussians" of each particle to the velocity bins
+                       vel_spec = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
+                       lum_map = sum(galaxy_sample$luminosity)
+                       vel_los = mean(galaxy_sample$vy_obs)
+                       dis_los = sd(galaxy_sample$vy_obs)
+
+                     } else { # if insufficient particles in spaxel
+                       vel_spec = NA
+                       lum_map = NA
+                       vel_los = NA
+                       dis_los = NA
+                     }
+                     result = list(vel_spec, lum_map, vel_los, dis_los)
+                     return(result)
+                     closeAllConnections()
+                   }
+
+  vel_spec[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
+  lum_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
+
+  return(list(vel_spec, lum_map, vel_los, dis_los))
+
 }
