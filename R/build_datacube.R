@@ -82,19 +82,19 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
       cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", min(diff(wavelength)), " A. \n")
       cat("No LSF will be applied in this case.\n")
-      LSF_conv = FALSE
+      observation$LSF_conv = FALSE
     } else {
-      LSF_conv = TRUE
-      lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2))))
+      observation$LSF_conv = TRUE
+      observation$lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2))))
     }
 
     if (verbose){cat("Generating spectra per spaxel... \n")}
 
     if (cores == 1){
-      output = .spectral_spaxels(part_in_spaxel, observation, galaxy_data, simspin_data, verbose)
+      output = .spectral_spaxels(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose)
     }
     if (cores > 1){
-      output = .spectral_spaxels_mc(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores)
+      output = .spectral_spaxels_mc(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose, cores)
     }
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$wave_bin))

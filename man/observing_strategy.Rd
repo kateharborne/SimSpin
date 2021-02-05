@@ -8,7 +8,7 @@ observing_strategy(
   z = 0.1,
   inc_deg = 70,
   twist_deg = 0,
-  particle_limit = 50,
+  particle_limit = 1,
   blur = F,
   fwhm = 2,
   psf = "Gaussian"

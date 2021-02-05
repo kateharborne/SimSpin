@@ -590,7 +590,7 @@
 
 # Functions for computing spaxel properties
 # spectral mode -
-.spectral_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose){
+.spectral_spaxels = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose){
 
   spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
   vel_los = array(data = NA, dim = observation$sbin^2)
@@ -617,8 +617,8 @@
       luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra,
                                         wave_seq = observation$wave_seq)
 
-      if (LSF_conv){ # should the spectra be degraded for telescope LSF?
-        luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=lsf_sigma)
+      if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
+        luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=observation$lsf_sigma)
       }
 
       if (!is.na(observation$signal_to_noise)){ # should we add noise?
@@ -647,7 +647,7 @@
   return(list(spectra, lum_map, vel_los, dis_los))
 }
 
-.spectral_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
+.spectral_spaxels_mc = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose, cores){
 
   spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
   vel_los = array(data = NA, dim = observation$sbin^2)
