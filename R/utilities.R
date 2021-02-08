@@ -628,7 +628,7 @@
       # transform luminosity into flux detected at telescope
       #    flux in units erg/s/cm^2/Ang
       spectra[part_in_spaxel$spaxel_ID[i],] = (luminosity*.lsol_to_erg) /
-                                                  (4 * pi * (observation$lum_dist*.mpc_to_cm)^2)
+                                                  (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
       lum_map[part_in_spaxel$spaxel_ID[i]] = ProSpect::bandpass(wave = observation$wave_seq,
                                                                 flux = spectra[part_in_spaxel$spaxel_ID[i],],
                                                                 filter = observation$filter, flux_in = "wave",
@@ -689,7 +689,7 @@
 
                        # transform luminosity into flux detected at telescope
                        #    flux in units erg/s/cm^2/Ang
-                       spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2)
+                       spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
                        lum_map = ProSpect::bandpass(wave = observation$wave_seq,
                                                     flux = spectra,
                                                     filter = observation$filter,
@@ -736,7 +736,7 @@
 
       # transform luminosity into flux detected at telescope
       #    flux in units erg/s/cm^2/Ang
-      spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2)
+      spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
 
       # computing the r-band luminosity per particle from spectra
       galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
@@ -785,7 +785,7 @@
                          (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
                        # transform luminosity into flux detected at telescope
                        #    flux in units erg/s/cm^2/Ang
-                       spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2)
+                       spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
 
                        # computing the r-band luminosity per particle from spectra
                        galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
