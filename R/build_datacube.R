@@ -66,10 +66,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   if (verbose){cat("Sorting spaxels... \n")}
 
+  particle_ID = NULL # initiallising varible to avoid CRAN error in checks
+
   galaxy_data_table = data.table::data.table("particle_ID" = seq(1, length(galaxy_data$ID)), "spaxel_ID"=galaxy_data$pixel_pos)
 
   # which particles sit in each spaxel?
-  part_in_spaxel = galaxy_data_table[, .(val=list(particle_ID)), by = spaxel_ID]
+  part_in_spaxel = galaxy_data_table[, list(val=list(particle_ID)), by = "spaxel_ID"]
 
   if (observation$method == "spectral"){
 

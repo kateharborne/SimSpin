@@ -679,9 +679,9 @@
                                                          spectra = intrinsic_spectra,
                                                          wave_seq = observation$wave_seq)
 
-                       if (LSF_conv){ # should the spectra be degraded for telescope LSF?
+                       if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
                          luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
-                                                       lsf_sigma=lsf_sigma)
+                                                       lsf_sigma=observation$lsf_sigma)
                        }
                        if (!is.na(observation$signal_to_noise)){ # should we add noise?
                          luminosity = .add_noise(luminosity, observation$signal_to_noise)
