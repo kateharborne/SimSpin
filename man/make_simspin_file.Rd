@@ -14,8 +14,7 @@ make_simspin_file(
   template = "BC03lr",
   write_to_file = TRUE,
   output,
-  overwrite = F,
-  verbose = F
+  overwrite = F
 )
 }
 \arguments{
@@ -46,8 +45,6 @@ of "_spectra.Rdata".}
 
 \item{overwrite}{If true, and the file already exists at the output location,
 a new file will be written over the old one.}
-
-\item{verbose}{Boolean to switch on code progress updates.}
 }
 \value{
 Returns an .Rdata file that contains a list of particle positions,

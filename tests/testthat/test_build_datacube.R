@@ -34,6 +34,13 @@ test_that("EAGLE files can be built.", {
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 5)
 })
 
+test_that("EAGLE files can be built in parallel.", {
+  expect_length(build_datacube(simspin_file = ss_eagle,
+                               telescope = telescope(type="IFU", method = "spectral", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               cores = 2), 5)
+})
+
 # Testing that build_datacube works in velocity mode
 test_that("Gadget files can be built.", {
   expect_length(build_datacube(simspin_file = ss_gadget,
@@ -54,25 +61,32 @@ test_that("EAGLE files can be built.", {
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 5)
 })
 
+test_that("EAGLE files can be built in parallel.", {
+  expect_length(build_datacube(simspin_file = ss_eagle,
+                               telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               cores = 2), 5)
+})
+
 # Testing that build_datacube works to write to FITS file
 test_that("Data cubes can be written to file", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), 5)
+                               write_fits = T), 5)
 
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", method="velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), 5)
+                               write_fits = T, output_location = paste0(temp_loc, "velocity_cube.FITS")), 5)
 
-  expect_length(build_datacube(simspin_file = ss_gadget,
+  expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T), 5)
+                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), 5)
 })
 
-unlink(c(paste(temp_loc, "cube.FITS", sep=""), paste(stringr::str_remove(ss_gadget, ".Rdata"), "_inc45deg_seeing2fwhm.FITS", sep="")))
+unlink(c(paste(temp_loc, "cube.FITS", sep=""), paste(temp_loc, "velocity_cube.FITS", sep=""), paste(stringr::str_remove(ss_gadget, ".Rdata"), "_inc45deg_seeing2fwhm.FITS", sep="")))
 
 # Testing that build_datacube will give warning if the spectra given is low res
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {
@@ -164,3 +178,18 @@ test_that("Twisting and inclination work as expected", {
   expect_equal(front, -1*(back)) # velocities should be equal but opposite signs
 })
 
+# Test the observations get dimmer with distance added
+test_that("Observations get dimmer with increasing redshift", {
+  cube_near = build_datacube(simspin_file = ss_gadget,
+                             telescope = telescope(type="IFU", method = "spectral", signal_to_noise = NA),
+                             observing_strategy = observing_strategy(z = 0.01, inc_deg = 45, blur = F),
+                             verbose = F)
+
+  cube_far  = build_datacube(simspin_file = ss_gadget,
+                             telescope = telescope(type="IFU", method = "spectral", signal_to_noise = NA),
+                             observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = F),
+                             verbose = F)
+
+  expect_true(sum(cube_near$flux_image, na.rm=T) > sum(cube_far$flux_image, na.rm=T))
+
+})

@@ -30,7 +30,6 @@
 #' of "_spectra.Rdata".
 #'@param overwrite If true, and the file already exists at the output location,
 #' a new file will be written over the old one.
-#'@param verbose Boolean to switch on code progress updates.
 #'@return Returns an .Rdata file that contains a list of particle positions,
 #' velocities, and spectra (or a list containing the same information to the
 #' environment without writing to file, when `write_to_file = F`).
@@ -43,7 +42,7 @@
 
 make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              disk_Z=0.024, bulge_Z=0.001, template="BC03lr",
-                             write_to_file=TRUE, output, overwrite = F, verbose = F){
+                             write_to_file=TRUE, output, overwrite = F){
 
   temp_name = stringr::str_to_upper(template)
 
@@ -67,8 +66,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     stop("Error: template specified is unavailable. \n Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'")
   }
 
-  galaxy_data = tryCatch(expr = {.read_gadget(filename, verbose)},
-                         error = function(e){.read_hdf5(filename, cores, verbose)})
+  galaxy_data = tryCatch(expr = {.read_gadget(filename)},
+                         error = function(e){.read_hdf5(filename, cores)})
 
   Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
 

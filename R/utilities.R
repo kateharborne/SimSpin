@@ -14,12 +14,11 @@
 }
 
 # Function for reading in Gadget binary files
-.read_gadget = function(f, verbose = FALSE){
+.read_gadget = function(f){
   data = file(f, "rb") # open file for reading in binary mode
 
   block         = readBin(data, "integer", n=1) #block size field, giving the length of the header
   if(block!=256){close(data); stop("Not a binary file. Trying HDF5 reader...")}
-  if(verbose){cat("Reading in header.\n")}
   Npart         = readBin(data, "integer", n=6) # number of particles of each type in this file
   Massarr       = readBin(data, "numeric", n=6, size=8) # mass of each particle type. set to 0 for present particles means read mass in mass block.
   Time          = readBin(data, "numeric", n=1, size=8) # time of output, or expansion factor for cosmological simulations
@@ -42,25 +41,21 @@
 
   # Reading in the positions block
   block         = readBin(data, "integer", n=1)
-  if(verbose){cat("Reading in positions for", block/4/3, "particles. \n")}
   pos           = readBin(data, "numeric", n=block/4, size=4)
   block         = readBin(data, "integer", n=1)
 
   # Reading in the velocities block
   block         = readBin(data, "integer", n=1)
-  if(verbose){cat("Reading in velocities for", block/4/3, "particles. \n")}
   vel           = readBin(data, "numeric", n=block/4, size=4)
   block         = readBin(data, "integer", n=1)
 
   # Reading in the ID's block
   block         = readBin(data, "integer", n=1)
-  if(verbose){cat("Reading in IDs for", block/4, "particles. \n")}
   id            = readBin(data, "integer", n=block/4, size=4)
   block         = readBin(data, "integer", n=1)
 
   # Reading in the mass block
   block         = readBin(data, "integer", n=1)
-  if(verbose){cat("Reading in masses for", block/4, "particles. \n")}
   masses        = readBin(data, "numeric", n=block/4, size=4)
   block         = readBin(data, "integer", n=1)
 
@@ -77,32 +72,26 @@
               "Time" = Time, "Redshift" = Redshift, # relevent simulation data
               "Nall" = Nall) # number of particles in the original file
 
-  if(verbose){cat("Done reading Gadget snapshot file. \n")}
 
   Npart_sum = cumsum(Npart) # cumulative number of each particle type
 
-  if(verbose){cat("Writing stellar particles... \n")}
   star_part = part[(Npart_sum[2]+1):Npart_sum[5],]
 
   if (Npart[1] > 0){
-    if(verbose){cat("Writing gas particles... \n")}
     gas_part = part[1:Npart_sum[1],]
   } else {gas_part = NULL}
 
-  if(verbose){cat("Done! \n")}
   return(list(star_part = star_part, gas_part = gas_part, head = head))
 
 }
 
 # Function for reading in Gadget HDF5 files and EAGLE HDF5 files
-.read_hdf5   = function(f, cores=1, verbose = FALSE){
+.read_hdf5   = function(f, cores=1){
 
   data = hdf5r::h5file(f, mode="r")
 
   if(length(hdf5r::list.attributes(data[["Header"]])) > 17){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
-  if(verbose & eagle){cat("EAGLE input snapshot detected.\n")}
 
-  if(verbose){cat("Reading in header.\n")}
   Npart         = hdf5r::h5attr(data[["Header"]], "NumPart_ThisFile")
   Massarr       = hdf5r::h5attr(data[["Header"]], "MassTable")
   Time          = hdf5r::h5attr(data[["Header"]], "Time")
@@ -132,8 +121,6 @@
 
   star_pos = array(NA, dim=c(3, stellar_sum))
   star_vel = array(NA, dim=c(3, stellar_sum))
-
-  if(verbose){cat("Reading stellar particle properties. \n")}
 
   for (i in 1:length(present_stars)){
 
@@ -202,7 +189,6 @@
   }
 
   if (Npart[1] > 0){ # If gas is present in the simulation
-    if(verbose){cat("Reading gas particle properties. \n")}
     gas_part = data.frame("ID" = numeric(Npart[1]),
                           "x" = numeric(Npart[1]), "y" = numeric(Npart[1]), "z" = numeric(Npart[1]),
                           "vx" = numeric(Npart[1]), "vy" = numeric(Npart[1]), "vz" = numeric(Npart[1]),
@@ -260,7 +246,6 @@
 
   hdf5r::h5close(data)
 
-  if (verbose){cat("Done reading HDF5 snapshot file. \n")}
   if (eagle){
     return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
     } else {
@@ -637,7 +622,7 @@
       dis_los[part_in_spaxel$spaxel_ID[i]] = sd(galaxy_sample$vy_obs)
 
     } else { # if insufficient particles in spaxel
-      spectra[part_in_spaxel$spaxel_ID[i],] = NA
+      spectra[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$wave_bin)
       lum_map[part_in_spaxel$spaxel_ID[i]] = NA
       vel_los[part_in_spaxel$spaxel_ID[i]] = NA
       dis_los[part_in_spaxel$spaxel_ID[i]] = NA
@@ -697,7 +682,7 @@
                        vel_los = mean(galaxy_sample$vy_obs)
                        dis_los= sd(galaxy_sample$vy_obs)
                      } else { # if insufficient particles in spaxel
-                       spectra = NA
+                       spectra = rep(NA, observation$wave_bin)
                        lum_map = NA
                        vel_los = NA
                        dis_los = NA
@@ -751,7 +736,7 @@
 
 
     } else { # if insufficient particles in spaxel
-      vel_spec[part_in_spaxel$spaxel_ID[i],] = NA
+      vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
       lum_map[part_in_spaxel$spaxel_ID[i]] = NA
       vel_los[part_in_spaxel$spaxel_ID[i]] = NA
       dis_los[part_in_spaxel$spaxel_ID[i]] = NA
@@ -799,7 +784,7 @@
                        dis_los = sd(galaxy_sample$vy_obs)
 
                      } else { # if insufficient particles in spaxel
-                       vel_spec = NA
+                       vel_spec = rep(NA, observation$vbin)
                        lum_map = NA
                        vel_los = NA
                        dis_los = NA

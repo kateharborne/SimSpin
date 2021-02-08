@@ -109,3 +109,20 @@ test_that("The PSF shape produced is symmetrical - Gaussian", {
   expect_true(isSymmetric(observation(telescope(type="SAMI"), observing_strategy = observing_strategy(blur=T))$psf_kernel))
   expect_true(isSymmetric(observation(telescope(type="SAMI"), observing_strategy = observing_strategy(blur=T, psf="Moffat"))$psf_kernel))
 })
+
+# Testing uncovered features
+test_that("Aperture shape = 'square' works", {
+  expect_length(telescope(type="IFU", aperture_shape = "square"), 12)
+  expect_length(observation(telescope(type="IFU", aperture_shape = "square"), observing_strategy = observing_strategy()), 30)
+})
+
+test_that("Check even field-of-view leads to psf scaled", {
+  expect_length(telescope(type="IFU", fov = 10), 12)
+  expect_length(observation(telescope(type="IFU", fov = 10), observing_strategy = observing_strategy(blur=T))$psf_kernel, 19*19)
+})
+
+test_that("Initial run of telescope() function with non-default types - check fov leads to psf scaled", {
+  expect_length(telescope(type="IFU", fov = 11.5), 12)
+  expect_length(observation(telescope(type="IFU", fov = 11.5), observing_strategy = observing_strategy(blur=T))$psf_kernel, 23*23)
+
+})

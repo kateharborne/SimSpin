@@ -54,5 +54,10 @@ test_that("Test that old files can be overwritten", {
                                  overwrite = T))
 })
 
+test_that("Test that function works on multiple cores", {
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "gadget_test", sep=""),
+                                overwrite = T, cores = 2))
+})
+
 unlink(c(paste(temp_loc, "gadget_test", sep=""), paste(temp_loc, "hdf5_test", sep=""),
          paste(temp_loc, "eagle_test", sep="")))
