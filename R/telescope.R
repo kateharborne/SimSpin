@@ -12,9 +12,9 @@
 #' required properties explicitly.
 #'
 #'@param type String that describes the type of telescope you wish to create.
-#' Current pre-loaded types include "SAMI", "MaNGA", "CALIFA", and "Hector".
-#' Input is NOT case sensitive. If you wish to specify different observing
-#' properties below, set \code{type = "IFU"} to define your own telescope.
+#' Current pre-loaded types include "SAMI", "MaNGA", "CALIFA", "MUSE" and
+#' "Hector". Input is NOT case sensitive. If you wish to specify different
+#' observing properties below, set \code{type = "IFU"} to define your own.
 #'@param method String to describe whether cubes output are "spectral" or
 #' "velocity" (as in SimSpin v1) along the z-axis. Default is "spectral".
 #'@param fov Numeric describing the field of view of the instrument in arcsec.
@@ -90,6 +90,22 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   lsf_fwhm        = 2.8,
                   signal_to_noise = 10,
                   sbin            = floor(22 / 0.25))
+  }
+
+  if(stringr::str_to_upper(type)  == "MUSE"){
+    output = list(type            = "MUSE",
+                  method          = method,
+                  fov             = 30,
+                  aperture_shape  = "square",
+                  wave_range      = c(4650,9300),
+                  wave_centre     = 6975,
+                  spatial_res     = 0.2,
+                  filter          = ProSpect::filt_r_SDSS,
+                  wave_res        = 1.25,
+                  lsf_fwhm        = 2.63,
+                  signal_to_noise = 10,
+                  sbin            = floor(30 / 0.05))
+
   }
 
   if(stringr::str_to_upper(type)  == "HECTOR"){

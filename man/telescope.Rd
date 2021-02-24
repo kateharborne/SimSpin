@@ -20,9 +20,9 @@ telescope(
 }
 \arguments{
 \item{type}{String that describes the type of telescope you wish to create.
-Current pre-loaded types include "SAMI", "MaNGA", "CALIFA", and "Hector".
-Input is NOT case sensitive. If you wish to specify different observing
-properties below, set \code{type = "IFU"} to define your own telescope.}
+Current pre-loaded types include "SAMI", "MaNGA", "CALIFA", "MUSE" and
+"Hector". Input is NOT case sensitive. If you wish to specify different
+observing properties below, set \code{type = "IFU"} to define your own.}
 
 \item{method}{String to describe whether cubes output are "spectral" or
 "velocity" (as in SimSpin v1) along the z-axis. Default is "spectral".}
