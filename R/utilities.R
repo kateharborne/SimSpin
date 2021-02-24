@@ -192,7 +192,8 @@
     gas_part = data.frame("ID" = numeric(Npart[1]),
                           "x" = numeric(Npart[1]), "y" = numeric(Npart[1]), "z" = numeric(Npart[1]),
                           "vx" = numeric(Npart[1]), "vy" = numeric(Npart[1]), "vz" = numeric(Npart[1]),
-                          "Mass" = numeric(Npart[1]))
+                          "Mass" = numeric(Npart[1]), "Z" = numeric(Npart[1]), "Density" = numeric(Npart[1]),
+                          "Temp" = numeric(Npart[1]), "SFR" = numeric(Npart[1]))
     gas_pos = array(NA, dim=c(3, Npart[1]))
     gas_vel = array(NA, dim=c(3, Npart[1]))
 
@@ -217,6 +218,15 @@
       gas_vel = hdf5r::readDataSet(data[["PartType0/Velocities"]])
       }
 
+    # reading other gas properties:
+    if (eagle){
+      gas_part$Metallicity = hdf5r::readDataSet(data[["PartType0/SmoothedMetallicity"]])
+      gas_part$Density     = hdf5r::readDataSet(data[["PartType0/Density"]])
+      gas_part$Temp        = hdf5r::readDataSet(data[["PartType0/Temperature"]])
+      gas_part$SFR         = hdf5r::readDataSet(data[["PartType0/StarFormationRate"]])
+      gas_part$OEOS        = hdf5r::readDataSet(data[["PartType0/OnEquationOfState"]])
+    }
+
     # coordinate transform from co-moving to physical coordinates
     if (eagle){
       a_coor = hdf5r::h5attr(data[["PartType0/Coordinates"]], "aexp-scale-exponent")
@@ -225,10 +235,14 @@
       h_velo = hdf5r::h5attr(data[["PartType0/Velocity"]], "h-scale-exponent")
       a_mass = hdf5r::h5attr(data[["PartType0/Mass"]], "aexp-scale-exponent")
       h_mass = hdf5r::h5attr(data[["PartType0/Mass"]], "h-scale-exponent")
+      a_dens = hdf5r::h5attr(data[["PartType0/Density"]], "aexp-scale-exponent")
+      h_dens = hdf5r::h5attr(data[["PartType0/Density"]], "h-scale-exponent")
+      c_dens = hdf5r::h5attr(data[["PartType0/Density"]], "CGSConversionFactor")
 
       gas_pos = gas_pos * Time^(a_coor) * HubbleParam^(h_coor) * 1e3
       gas_vel = gas_vel * Time^(a_velo) * HubbleParam^(h_velo)
       gas_part$Mass = gas_part$Mass * Time^(a_mass) * HubbleParam^(h_mass)
+      gas_part$Density = gas_part$Density * Time^(a_dens) * HubbleParam^(h_dens) * c_dens * 1e3 #kg m-3
     }
 
     # sort gas coord & vel into x, y, ..., vz
