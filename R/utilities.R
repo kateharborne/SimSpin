@@ -282,18 +282,49 @@
 }
 
 # Function to centre all galaxy particles based on stellar particle positions
-.centre_galaxy = function(galaxy_data){
-  stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
-  galaxy_data$star_part = stellar_data$part_data
-  if (!is.null(galaxy_data$gas_part)){ # if gas is present, centering these particles based on stellar medians
+.centre_galaxy = function(galaxy_data, centre){
+  if (!missing(centre)){ # if an external centre is provided, use this to centre positions
+    stellar_data = galaxy_data$star_part
     gas_data = galaxy_data$gas_part
-    gas_data$x = gas_data$x - stellar_data$xcen
-    gas_data$y = gas_data$y - stellar_data$ycen
-    gas_data$z = gas_data$z - stellar_data$zcen
-    gas_data$vx = gas_data$vx - stellar_data$vxcen
-    gas_data$vy = gas_data$vy - stellar_data$vycen
-    gas_data$vz = gas_data$vz - stellar_data$vzcen
+
+    stellar_data$x = stellar_data$x - centre[1]
+    stellar_data$y = stellar_data$y - centre[2]
+    stellar_data$z = stellar_data$z - centre[3]
+    star_r2 = stellar_data$x^2 + stellar_data$y^2 + stellar_data$z^2
+    star_vcen = c(median(stellar_data$vx[star_r2 < 10]), # using the median velocities within
+                  median(stellar_data$vy[star_r2 < 10]), #  10kpc of the galaxy centre to define
+                  median(stellar_data$vz[star_r2 < 10])) #  the central velocity
+    stellar_data$vx = stellar_data$vx - star_vcen[1]
+    stellar_data$vy = stellar_data$vy - star_vcen[2]
+    stellar_data$vz = stellar_data$vz - star_vcen[3]
+
+    gas_data$x = gas_data$x - centre[1]
+    gas_data$y = gas_data$y - centre[2]
+    gas_data$z = gas_data$z - centre[3]
+    gas_r2 = gas_data$x^2 + gas_data$y^2 + gas_data$z^2
+    gas_vcen = c(median(gas_data$vx[star_r2 < 10]),
+                 median(gas_data$vy[star_r2 < 10]),
+                 median(gas_data$vz[star_r2 < 10]))
+    gas_data$vx = gas_data$vx - gas_vcen[1]
+    gas_data$vy = gas_data$vy - gas_vcen[2]
+    gas_data$vz = gas_data$vz - gas_vcen[3]
+
+    galaxy_data$star_part = stellar_data
     galaxy_data$gas_part = gas_data
+
+  } else {
+    stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
+    galaxy_data$star_part = stellar_data$part_data
+    if (!is.null(galaxy_data$gas_part)){ # if gas is present, centering these particles based on stellar medians
+      gas_data = galaxy_data$gas_part
+      gas_data$x = gas_data$x - stellar_data$xcen
+      gas_data$y = gas_data$y - stellar_data$ycen
+      gas_data$z = gas_data$z - stellar_data$zcen
+      gas_data$vx = gas_data$vx - median(gas_data$vx)
+      gas_data$vy = gas_data$vy - median(gas_data$vy)
+      gas_data$vz = gas_data$vz - median(gas_data$vz)
+      galaxy_data$gas_part = gas_data
+    }
   }
   return(galaxy_data)
 }
@@ -337,11 +368,12 @@
 }
 
 # Functions for measuring 3D shape
-.new_half_mass_data = function(galaxy_data, p, q){
+.new_half_mass_data = function(galaxy_data, p, q, half_mass){
   # function for getting all particles within the half mass radius (ordered by ellipsoid radii)
   x = galaxy_data$x; y = galaxy_data$y; z = galaxy_data$z
-  half_mass = sum(galaxy_data$Mass) / 2
-
+  if (is.na(half_mass)){
+    half_mass = sum(galaxy_data$Mass) / 2
+  }
   ellip_radius = sqrt((x*x) + ((y/p)*(y/p)) + ((z/q)*(z/q)))
 
   int_order = order(ellip_radius) # get the indicies of the radii in order (low to high)
@@ -386,7 +418,7 @@
 }
 
 # Function to iteratively find the shape and align at the half-mass stellar radius
-.measure_pqj = function(galaxy_data, abort_count=50){
+.measure_pqj = function(galaxy_data, half_mass, abort_count=50){
   # Set up - we begin by assuming a sphere
   a = 1; b = 1; c = 1
   p = b/a; q = c/a
@@ -395,7 +427,7 @@
   temp_p = numeric(); temp_q = numeric()
 
   # Select all particles within initial half-mass (spherical) of stellar
-  hm_galaxy_data = .new_half_mass_data(galaxy_data$star_part, p, q)
+  hm_galaxy_data = .new_half_mass_data(galaxy_data$star_part, p, q, half_mass)
 
   while (flag == 0){
     fit_ellip = .ellipsoid_ratios_p_q(hm_galaxy_data, p, q)
@@ -453,7 +485,7 @@
 
     }
 
-    hm_galaxy_data = .new_half_mass_data(galaxy_data$star_part, fit_ellip$p, fit_ellip$q)
+    hm_galaxy_data = .new_half_mass_data(galaxy_data$star_part, fit_ellip$p, fit_ellip$q, half_mass)
     p = fit_ellip$p
     q = fit_ellip$q
     cnt = cnt + 1
@@ -464,8 +496,8 @@
 }
 
 # Function to align full galaxy based on the stellar particles
-.align_galaxy = function(galaxy_data){
-  data = .measure_pqj(galaxy_data)
+.align_galaxy = function(galaxy_data, half_mass){
+  data = .measure_pqj(galaxy_data, half_mass)
   return(data$galaxy_data)
 }
 

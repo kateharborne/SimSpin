@@ -42,7 +42,8 @@
 
 make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              disk_Z=0.024, bulge_Z=0.001, template="BC03lr",
-                             write_to_file=TRUE, output, overwrite = F){
+                             write_to_file=TRUE, output, overwrite = F,
+                             centre=NA, half_mass=NA){
 
   temp_name = stringr::str_to_upper(template)
 
@@ -71,9 +72,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
 
-  galaxy_data = .centre_galaxy(galaxy_data) # centering the galaxy based on stellar particles
+  galaxy_data = .centre_galaxy(galaxy_data, centre) # centering the galaxy based on stellar particles
 
-  galaxy_data = .align_galaxy(galaxy_data) # align 3D shape of galaxy
+  galaxy_data = .align_galaxy(galaxy_data, half_mass) # align 3D shape of galaxy
 
   if(!"ssp" %in% names(galaxy_data)){ # if the SSP field does not come from the snapshot file, must be working with N-body
 
