@@ -63,80 +63,90 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
   }
 
   if(stringr::str_to_upper(type)  == "SAMI"){
+    fov = 15
+    spatial_res = 0.5
     output = list(type            = "SAMI",
                   method          = method,
-                  fov             = 15,
+                  fov             = fov,
                   aperture_shape  = "circular",
                   wave_range      = c(3700,5700),
                   wave_centre     = 4800,
-                  spatial_res     = 0.5,
+                  spatial_res     = spatial_res,
                   filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.65,
                   signal_to_noise = 10,
-                  sbin            = floor(15 / 0.5))
+                  sbin            =  floor(fov/spatial_res))
   }
 
   if(stringr::str_to_upper(type)  == "MANGA"){
+    fov = fov
+    spatial_res = 0.5
     output = list(type            = "MaNGA",
                   method          = method,
-                  fov             = 22,
+                  fov             = fov,
                   aperture_shape  = "hexagonal",
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
-                  spatial_res     = 0.5,
+                  spatial_res     = spatial_res,
                   filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.8,
                   signal_to_noise = 10,
-                  sbin            = floor(22 / 0.25))
+                  sbin            =  floor(fov/spatial_res))
   }
 
   if(stringr::str_to_upper(type)  == "MUSE"){
+    fov = fov
+    spatial_res = 0.2
     output = list(type            = "MUSE",
                   method          = method,
-                  fov             = 30,
+                  fov             = fov,
                   aperture_shape  = "square",
                   wave_range      = c(4650,9300),
                   wave_centre     = 6975,
-                  spatial_res     = 0.2,
+                  spatial_res     = spatial_res,
                   filter          = ProSpect::filt_r_SDSS,
                   wave_res        = 1.25,
                   lsf_fwhm        = 2.63,
                   signal_to_noise = 10,
-                  sbin            = floor(30 / 0.05))
+                  sbin            = floor(fov/spatial_res))
 
   }
 
   if(stringr::str_to_upper(type)  == "HECTOR"){
+    fov = 30
+    spatial_res = 0.1
     output = list(type            = "Hector",
                   method          = method,
-                  fov             = 30,
+                  fov             = fov,
                   aperture_shape  = "hexagonal",
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
-                  spatial_res     = 0.05,
+                  spatial_res     = spatial_res,
                   filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.6,
                   lsf_fwhm        = 1.3,
                   signal_to_noise = 10,
-                  sbin            = floor(30 / 0.05))
+                  sbin            =  floor(fov/spatial_res))
 
   }
 
   if(stringr::str_to_upper(type)  == "CALIFA"){
+    fov = 30
+    spatial_res = 0.8
     output = list(type            = "CALIFA",
                   method          = method,
-                  fov             = 30,
+                  fov             = fov,
                   aperture_shape  = "hexagonal",
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
-                  spatial_res     = 1,
+                  spatial_res     = spatial_res,
                   filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 2,
                   lsf_fwhm        = 5.65,
                   signal_to_noise = 10,
-                  sbin            = floor(30 / 1))
+                  sbin            = floor(fov/spatial_res))
 
   }
 
