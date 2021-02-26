@@ -7,6 +7,16 @@
 .mpc_to_cm      = 3.08568e+24
 .speed_of_light = 299792.458
 
+# Functions for computing weighted means
+.meanwt = function(x,wt){
+  return(sum(x*wt, na.rm=T)/sum(wt,na.rm=T))
+} # weighted mean
+
+.varwt = function(x, wt, xcen){
+  if (missing(xcen)){xcen = .meanwt(x,wt)}
+  return(sum(wt*(x - xcen)^2, na.rm=T)/sum(wt, na.rm=T))
+} # weighted variance
+
 # A function for combining multiple results from a parallel loop
 .comb <- function(x, ...) {
   lapply(seq_along(x),
@@ -283,7 +293,7 @@
 
 # Function to centre all galaxy particles based on stellar particle positions
 .centre_galaxy = function(galaxy_data, centre){
-  if (!missing(centre)){ # if an external centre is provided, use this to centre positions
+  if (!is.na(centre)){ # if an external centre is provided, use this to centre positions
     stellar_data = galaxy_data$star_part
     gas_data = galaxy_data$gas_part
 
@@ -301,13 +311,9 @@
     gas_data$x = gas_data$x - centre[1]
     gas_data$y = gas_data$y - centre[2]
     gas_data$z = gas_data$z - centre[3]
-    gas_r2 = gas_data$x^2 + gas_data$y^2 + gas_data$z^2
-    gas_vcen = c(median(gas_data$vx[star_r2 < 10]),
-                 median(gas_data$vy[star_r2 < 10]),
-                 median(gas_data$vz[star_r2 < 10]))
-    gas_data$vx = gas_data$vx - gas_vcen[1]
-    gas_data$vy = gas_data$vy - gas_vcen[2]
-    gas_data$vz = gas_data$vz - gas_vcen[3]
+    gas_data$vx = gas_data$vx - star_vcen[1]
+    gas_data$vy = gas_data$vy - star_vcen[2]
+    gas_data$vz = gas_data$vz - star_vcen[3]
 
     galaxy_data$star_part = stellar_data
     galaxy_data$gas_part = gas_data
@@ -586,7 +592,17 @@
   vel_diff = function(lum, vy_obs){diff((lum * pnorm(observation$vbin_edges, mean = vy_obs,
                                                      sd = observation$vbin_error)))}
 
-  bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy_obs)
+  bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy)
+
+  return(rowSums(bins))
+
+}
+
+.sum_gas_velocities = function(galaxy_sample, observation){
+  vel_diff = function(mass, vy_obs){diff((mass * pnorm(observation$vbin_edges, mean = vy_obs,
+                                                     sd = observation$vbin_error)))}
+
+  bins = mapply(vel_diff, galaxy_sample$Mass, galaxy_sample$vy)
 
   return(rowSums(bins))
 
@@ -747,13 +763,15 @@
 }
 
 
-# velocity mode -
+# stellar velocity mode -
 .velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose){
 
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = NA, dim = observation$sbin^2)
   dis_los  = array(data = NA, dim = observation$sbin^2)
   lum_map  = array(data = NA, dim = observation$sbin^2)
+  age_map  = array(data = NA, dim = observation$sbin^2)
+  met_map  = array(data = NA, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
@@ -777,21 +795,25 @@
       # adding the "gaussians" of each particle to the velocity bins
       vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
       lum_map[part_in_spaxel$spaxel_ID[i]] = sum(galaxy_sample$luminosity)
-      vel_los[part_in_spaxel$spaxel_ID[i]] = mean(galaxy_sample$vy_obs)
-      dis_los[part_in_spaxel$spaxel_ID[i]] = sd(galaxy_sample$vy_obs)
-
+      vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
+      dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
+      age_map[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
+      met_map[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
 
     } else { # if insufficient particles in spaxel
       vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
       lum_map[part_in_spaxel$spaxel_ID[i]] = NA
       vel_los[part_in_spaxel$spaxel_ID[i]] = NA
       dis_los[part_in_spaxel$spaxel_ID[i]] = NA
+      age_map[part_in_spaxel$spaxel_ID[i]] = NA
+      met_map[part_in_spaxel$spaxel_ID[i]] = NA
+
     }
     if (verbose){cat(i, "... ", sep = "")}
 
   }
 
-  return(list(vel_spec, lum_map, vel_los, dis_los))
+  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map))
 }
 
 .velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
@@ -800,12 +822,14 @@
   vel_los  = array(data = NA, dim = observation$sbin^2)
   dis_los  = array(data = NA, dim = observation$sbin^2)
   lum_map  = array(data = NA, dim = observation$sbin^2)
+  age_map  = array(data = NA, dim = observation$sbin^2)
+  met_map  = array(data = NA, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
@@ -826,16 +850,20 @@
                        # adding the "gaussians" of each particle to the velocity bins
                        vel_spec = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
                        lum_map = sum(galaxy_sample$luminosity)
-                       vel_los = mean(galaxy_sample$vy_obs)
-                       dis_los = sd(galaxy_sample$vy_obs)
+                       vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
+                       dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
+                       age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
+                       met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
 
                      } else { # if insufficient particles in spaxel
                        vel_spec = rep(NA, observation$vbin)
                        lum_map = NA
                        vel_los = NA
                        dis_los = NA
+                       age_map = NA
+                       met_map = NA
                      }
-                     result = list(vel_spec, lum_map, vel_los, dis_los)
+                     result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -844,7 +872,90 @@
   lum_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
   vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
   dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
+  age_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
+  met_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
 
-  return(list(vel_spec, lum_map, vel_los, dis_los))
+  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map))
+
+}
+
+# gas velocity mode -
+.gas_velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose){
+
+  vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
+  vel_los  = array(data = NA, dim = observation$sbin^2)
+  dis_los  = array(data = NA, dim = observation$sbin^2)
+  mass_map  = array(data = NA, dim = observation$sbin^2)
+
+  for (i in 1:(dim(part_in_spaxel)[1])){
+
+    num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
+
+    # if number is greater than the particle limit
+    if (num_part > observation$particle_limit){
+      galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+
+      # adding the "gaussians" of each particle to the velocity bins
+      vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
+      mass_map[part_in_spaxel$spaxel_ID[i]] = sum(galaxy_sample$Mass)
+      vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+      dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+
+    } else { # if insufficient particles in spaxel
+      vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
+      mass_map[part_in_spaxel$spaxel_ID[i]] = NA
+      vel_los[part_in_spaxel$spaxel_ID[i]] = NA
+      dis_los[part_in_spaxel$spaxel_ID[i]] = NA
+
+    }
+    if (verbose){cat(i, "... ", sep = "")}
+
+  }
+
+  return(list(vel_spec, mass_map, vel_los, dis_los))
+}
+
+.gas_velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
+
+  vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
+  vel_los  = array(data = NA, dim = observation$sbin^2)
+  dis_los  = array(data = NA, dim = observation$sbin^2)
+  mass_map  = array(data = NA, dim = observation$sbin^2)
+
+  doParallel::registerDoParallel(cores)
+
+  i = integer()
+  output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
+                   .init=list(list(), list(), list(), list())) %dopar% {
+
+                     num_part = length(part_in_spaxel$val[[i]])
+                     # if the number of particles in the spaxel is greater than the particle limit
+                     if (num_part > observation$particle_limit){
+                       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+
+                       # adding the "gaussians" of each particle to the velocity bins
+                       vel_spec = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
+                       mass_map = sum(galaxy_sample$Mass)
+                       vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+                       dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+
+                     } else { # if insufficient particles in spaxel
+                       vel_spec = rep(NA, observation$vbin)
+                       mass_map = NA
+                       vel_los = NA
+                       dis_los = NA
+
+                     }
+                     result = list(vel_spec, mass_map, vel_los, dis_los)
+                     return(result)
+                     closeAllConnections()
+                   }
+
+  vel_spec[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
+  mass_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
+
+  return(list(vel_spec, mass_map, vel_los, dis_los))
 
 }
