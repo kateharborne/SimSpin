@@ -14,7 +14,9 @@ make_simspin_file(
   template = "BC03lr",
   write_to_file = TRUE,
   output,
-  overwrite = F
+  overwrite = F,
+  centre = NA,
+  half_mass = NA
 )
 }
 \arguments{
@@ -45,6 +47,16 @@ of "_spectra.Rdata".}
 
 \item{overwrite}{If true, and the file already exists at the output location,
 a new file will be written over the old one.}
+
+\item{centre}{If simulation file contains all particles cutout from a box
+(rather than just particles from a single galaxy), you can specify the point
+around which the view should be centred. Numeric length = 3. Default is NA,
+in which case the system is centred around the median position.}
+
+\item{half_mass}{If simulation file contains all particles cutout from a box
+(rather than just particles from a single galaxy), you can the half-mass
+value at which the alignment function is run. Numeric length = 1. Default is
+NA, in which case half the total mass of the suplied simulation data is used.}
 }
 \value{
 Returns an .Rdata file that contains a list of particle positions,

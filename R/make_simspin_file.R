@@ -30,6 +30,14 @@
 #' of "_spectra.Rdata".
 #'@param overwrite If true, and the file already exists at the output location,
 #' a new file will be written over the old one.
+#'@param centre If simulation file contains all particles cutout from a box
+#' (rather than just particles from a single galaxy), you can specify the point
+#' around which the view should be centred. Numeric length = 3. Default is NA,
+#' in which case the system is centred around the median position.
+#'@param half_mass If simulation file contains all particles cutout from a box
+#' (rather than just particles from a single galaxy), you can the half-mass
+#' value at which the alignment function is run. Numeric length = 1. Default is
+#' NA, in which case half the total mass of the suplied simulation data is used.
 #'@return Returns an .Rdata file that contains a list of particle positions,
 #' velocities, and spectra (or a list containing the same information to the
 #' environment without writing to file, when `write_to_file = F`).

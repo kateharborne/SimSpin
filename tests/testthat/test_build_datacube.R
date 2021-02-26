@@ -46,26 +46,26 @@ test_that("Gadget files can be built.", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               verbose = T), 5)
+                               verbose = T), 7)
 })
 
 test_that("HDF5 files can be built.", {
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 5)
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 7)
 })
 
 test_that("EAGLE files can be built.", {
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 5)
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 7)
 })
 
 test_that("EAGLE files can be built in parallel.", {
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               cores = 2), 5)
+                               cores = 2), 7)
 })
 
 # Testing that build_datacube works to write to FITS file
@@ -78,7 +78,7 @@ test_that("Data cubes can be written to file", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", method="velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "velocity_cube.FITS")), 5)
+                               write_fits = T, output_location = paste0(temp_loc, "velocity_cube.FITS")), 7)
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -115,15 +115,19 @@ test_that("velocity shift for wavelengths work correctly", {
 # Test that the spectra pulled for each particle are correct
 test_that("Repeated spectra are included in intrinsic spectra", {
   simspin_data = readRDS(ss_gadget)
+  galaxy_data = simspin_data$star_part
 
-  galaxy_data = obs_galaxy(part_data = simspin_data$star_part, inc_rad = 0.7853982) # projecting the galaxy to given inclination
+  obs_data = obs_galaxy(part_data = galaxy_data, inc_rad = 0.7853982) # projecting the galaxy to given inclination
+  galaxy_data$x = obs_data$x;   galaxy_data$y = obs_data$y;   galaxy_data$z = obs_data$z
+  galaxy_data$vx = obs_data$vx; galaxy_data$vy = obs_data$vy; galaxy_data$vz = obs_data$vz
+
   sbin_seq = c(-7.502401, -7.002241, -6.502080, -6.001920, -5.501760, -5.001600,
                -4.501440, -4.001280, -3.501120, -3.000960, -2.500800, -2.000640,
                -1.500480, -1.000320, -0.500160,  0.000000,  0.500160,  1.000320,
                1.500480, 2.000640, 2.500800, 3.000960, 3.501120, 4.001280, 4.501440,
                5.001600, 5.501760, 6.001920, 6.502080, 7.002241, 7.502401)
   galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=sbin_seq, labels=F) +
-    (30 * cut(galaxy_data$z_obs, breaks=sbin_seq, labels=F)) - (30) # assigning particles to positions in cube
+    (30 * cut(galaxy_data$z, breaks=sbin_seq, labels=F)) - (30) # assigning particles to positions in cube
 
   i = 411
 
@@ -167,13 +171,13 @@ test_that("Twisting and inclination work as expected", {
   observation = observation(SAMI, strategy)
   twisted_data = twist_galaxy(ss_eagle$star_part, twist_rad = observation$twist_rad)
   galaxy_data = obs_galaxy(part_data = twisted_data, inc_rad = observation$inc_rad)
-  front = galaxy_data$vy_obs
+  front = galaxy_data$vy
 
   strategy = SimSpin::observing_strategy(z = 0.05, inc_deg = 90, twist_deg = 180) # viewing from the back
   observation = SimSpin::observation(SAMI, strategy)
   twisted_data = twist_galaxy(ss_eagle$star_part, twist_rad = observation$twist_rad)
   galaxy_data = obs_galaxy(part_data = twisted_data, inc_rad = observation$inc_rad)
-  back = galaxy_data$vy_obs
+  back = galaxy_data$vy
 
   expect_equal(front, -1*(back)) # velocities should be equal but opposite signs
 })

@@ -7,7 +7,7 @@
 obs_galaxy(part_data, inc_rad)
 }
 \arguments{
-\item{part_data}{A data.frame describing the particles ID, positions, and
+\item{part_data}{A data.frame describing the particle positions and
 velocities.}
 
 \item{inc_rad}{The observed inclination angle in radians.}
@@ -22,10 +22,8 @@ The purpose of this function is to produce the observable features of
 simulation data when taking mock IFU observations.
 }
 \examples{
-  galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
-                           "y"=stats::rnorm(100), "z"=stats::rnorm(100),
-                           "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
-                           "vz"=stats::rnorm(100), "Mass" = 1:100,
-                           "sed_id" = 1:100, "Initial_Mass" = 1:100)
+  galaxy_data = data.frame("x"=stats::rnorm(100), "y"=stats::rnorm(100),
+                           "z"=stats::rnorm(100), "vx"=stats::rnorm(100),
+                           "vy"=stats::rnorm(100), "vz"=stats::rnorm(100))
   observed_data = obs_galaxy(galaxy_data, inc_rad = 1.047)
 }

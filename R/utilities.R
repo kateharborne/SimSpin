@@ -292,7 +292,7 @@
 }
 
 # Function to centre all galaxy particles based on stellar particle positions
-.centre_galaxy = function(galaxy_data, centre){
+.centre_galaxy = function(galaxy_data, centre=NA){
   if (!is.na(centre)){ # if an external centre is provided, use this to centre positions
     stellar_data = galaxy_data$star_part
     gas_data = galaxy_data$gas_part
@@ -326,9 +326,9 @@
       gas_data$x = gas_data$x - stellar_data$xcen
       gas_data$y = gas_data$y - stellar_data$ycen
       gas_data$z = gas_data$z - stellar_data$zcen
-      gas_data$vx = gas_data$vx - median(gas_data$vx)
-      gas_data$vy = gas_data$vy - median(gas_data$vy)
-      gas_data$vz = gas_data$vz - median(gas_data$vz)
+      gas_data$vx = gas_data$vx - stellar_data$vxcen
+      gas_data$vy = gas_data$vy - stellar_data$vycen
+      gas_data$vz = gas_data$vz - stellar_data$vzcen
       galaxy_data$gas_part = gas_data
     }
   }
@@ -502,7 +502,7 @@
 }
 
 # Function to align full galaxy based on the stellar particles
-.align_galaxy = function(galaxy_data, half_mass){
+.align_galaxy = function(galaxy_data, half_mass=NA){
   data = .measure_pqj(galaxy_data, half_mass)
   return(data$galaxy_data)
 }
@@ -589,7 +589,7 @@
 }
 
 .sum_velocities = function(galaxy_sample, observation){
-  vel_diff = function(lum, vy_obs){diff((lum * pnorm(observation$vbin_edges, mean = vy_obs,
+  vel_diff = function(lum, vy){diff((lum * pnorm(observation$vbin_edges, mean = vy,
                                                      sd = observation$vbin_error)))}
 
   bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy)
@@ -599,7 +599,7 @@
 }
 
 .sum_gas_velocities = function(galaxy_sample, observation){
-  vel_diff = function(mass, vy_obs){diff((mass * pnorm(observation$vbin_edges, mean = vy_obs,
+  vel_diff = function(mass, vy){diff((mass * pnorm(observation$vbin_edges, mean = vy,
                                                      sd = observation$vbin_error)))}
 
   bins = mapply(vel_diff, galaxy_sample$Mass, galaxy_sample$vy)
@@ -657,7 +657,7 @@
       # pulling wavelengths and using doppler formula to compute the shift in
       #   wavelengths caused by LOS velocity
       wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
-      wave_shift = ((galaxy_sample$vy_obs / .speed_of_light) * wave) + wave
+      wave_shift = ((galaxy_sample$vy / .speed_of_light) * wave) + wave
 
       # interpolate each shifted wavelength to telescope grid of wavelengths
       #   and sum to one spectra
@@ -680,8 +680,8 @@
                                                                 flux = spectra[part_in_spaxel$spaxel_ID[i],],
                                                                 filter = observation$filter, flux_in = "wave",
                                                                 flux_out = "wave")
-      vel_los[part_in_spaxel$spaxel_ID[i]] = mean(galaxy_sample$vy_obs)
-      dis_los[part_in_spaxel$spaxel_ID[i]] = sd(galaxy_sample$vy_obs)
+      vel_los[part_in_spaxel$spaxel_ID[i]] = mean(galaxy_sample$vy)
+      dis_los[part_in_spaxel$spaxel_ID[i]] = sd(galaxy_sample$vy)
 
     } else { # if insufficient particles in spaxel
       spectra[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$wave_bin)
@@ -718,7 +718,7 @@
                        # pulling wavelengths and using doppler formula to compute the shift in
                        #   wavelengths caused by LOS velocity
                        wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
-                       wave_shift = ((galaxy_sample$vy_obs / .speed_of_light) * wave) + wave
+                       wave_shift = ((galaxy_sample$vy / .speed_of_light) * wave) + wave
 
                        # interpolate each shifted wavelength to telescope grid of wavelengths
                        #   and sum to one spectra
@@ -741,8 +741,8 @@
                                                     flux = spectra,
                                                     filter = observation$filter,
                                                     flux_in = "wave", flux_out = "wave")
-                       vel_los = mean(galaxy_sample$vy_obs)
-                       dis_los= sd(galaxy_sample$vy_obs)
+                       vel_los = mean(galaxy_sample$vy)
+                       dis_los= sd(galaxy_sample$vy)
                      } else { # if insufficient particles in spaxel
                        spectra = rep(NA, observation$wave_bin)
                        lum_map = NA
