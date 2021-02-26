@@ -46,18 +46,16 @@ cen_galaxy <- function(part_data) {
 #' The purpose of this function is to produce the observable features of
 #' simulation data when taking mock IFU observations.
 #'
-#' @param part_data A data.frame describing the particles ID, positions, and
+#' @param part_data A data.frame describing the particle positions and
 #'  velocities.
 #' @param inc_rad The observed inclination angle in radians.
 #' @return Returns a data frame containing the original particle information plus the observed
 #'  z-position (\code{$z_obs}), observed radial position (\code{$r_obs}) and the observed line of
 #'  sight velocity (\code{$vy_obs}) at the given inclination.
 #' @examples
-#'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
-#'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
-#'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
-#'                            "vz"=stats::rnorm(100), "Mass" = 1:100,
-#'                            "sed_id" = 1:100, "Initial_Mass" = 1:100)
+#'   galaxy_data = data.frame("x"=stats::rnorm(100), "y"=stats::rnorm(100),
+#'                            "z"=stats::rnorm(100), "vx"=stats::rnorm(100),
+#'                            "vy"=stats::rnorm(100), "vz"=stats::rnorm(100))
 #'   observed_data = obs_galaxy(galaxy_data, inc_rad = 1.047)
 #' @export
 obs_galaxy <- function(part_data, inc_rad) {
@@ -69,17 +67,15 @@ obs_galaxy <- function(part_data, inc_rad) {
 #' The purpose of this function is to re-orient the galaxy and rotate the
 #' observer around the z-axis.
 #'
-#' @param part_data A data.frame describing the particles ID, positions, and
+#' @param part_data A data.frame describing the particles positions and
 #'  velocities.
 #' @param twist_rad The observed inclination angle in radians.
 #' @return Returns the original data frame containing the original particle
 #'  information but in the new orientation.
 #' @examples
-#'   galaxy_data = data.frame("ID"=1:100, "x"=stats::rnorm(100),
-#'                            "y"=stats::rnorm(100), "z"=stats::rnorm(100),
-#'                            "vx"=stats::rnorm(100), "vy"=stats::rnorm(100),
-#'                            "vz"=stats::rnorm(100), "Mass" = 1:100,
-#'                            "sed_id" = 1:100, "Initial_Mass" = 1:100)
+#'   galaxy_data = data.frame("x"=stats::rnorm(100), "y"=stats::rnorm(100),
+#'                            "z"=stats::rnorm(100), "vx"=stats::rnorm(100),
+#'                            "vy"=stats::rnorm(100), "vz"=stats::rnorm(100))
 #'   observed_data = twist_galaxy(galaxy_data, twist_rad = 1.047)
 #' @export
 twist_galaxy <- function(part_data, twist_rad) {

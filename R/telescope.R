@@ -55,7 +55,8 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
     stop("Error: Invalid aperture_shape. \n Please specify aperture_shape = 'circular', 'hexagonal' or 'square' and try again.")
   }
   if (stringr::str_to_lower(method) != "spectral" &
-      stringr::str_to_lower(method) != "velocity"){
+      stringr::str_to_lower(method) != "velocity" &
+      stringr::str_to_lower(method) != "gas"){
     stop("Error: Invalid method. \n Please specify method = 'spectral' or 'velocity' and try again.")
   }
   if (missing(wave_centre)){
