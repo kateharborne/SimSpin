@@ -104,7 +104,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   method          = method,
                   fov             = fov,
                   aperture_shape  = "square",
-                  wave_range      = c(4650,9300),
+                  wave_range      = c(4700.15,9351.4),
                   wave_centre     = 6975,
                   spatial_res     = spatial_res,
                   filter          = ProSpect::filt_r_SDSS,
