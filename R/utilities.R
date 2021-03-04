@@ -234,7 +234,8 @@
       gas_part$Density     = hdf5r::readDataSet(data[["PartType0/Density"]])
       gas_part$Temp        = hdf5r::readDataSet(data[["PartType0/Temperature"]])
       gas_part$SFR         = hdf5r::readDataSet(data[["PartType0/StarFormationRate"]])
-      gas_part$OEOS        = hdf5r::readDataSet(data[["PartType0/OnEquationOfState"]])
+      gas_part$Oxygen      = hdf5r::readDataSet(data[["PartType0/SmoothedElementAbundance/Oxygen"]])
+      gas_part$Hydrogen    = hdf5r::readDataSet(data[["PartType0/SmoothedElementAbundance/Hydrogen"]])
     }
 
     # coordinate transform from co-moving to physical coordinates
