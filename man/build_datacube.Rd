@@ -11,6 +11,8 @@ build_datacube(
   verbose = F,
   write_fits = F,
   output_location,
+  telescope_name = "SimSpin",
+  observer_name = "Anonymous",
   cores = 1
 )
 }
@@ -36,6 +38,12 @@ output a FITS file, change this parameter to \code{TRUE}.}
 file output if \code{write_fits = TRUE}. If \code{write_fits = TRUE} and no
 \code{output_location} is specified, the FITS file will be written to the
 same directory as the input \code{simspin_file}.}
+
+\item{telescope_name}{Optional string used in \code{write_simspin_FITS} to
+describe the name of the telescope used for observation in FITS header.}
+
+\item{observer_name}{Optional string used in \code{write_simspin_FITS} to
+describe the name of the person who ran the observation in FITS header.}
 
 \item{cores}{Float describing the number of cores to run the interpolation
 and velocity gridding on. Default is 1.}
