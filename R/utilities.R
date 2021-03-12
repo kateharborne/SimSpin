@@ -100,7 +100,8 @@
 
   data = hdf5r::h5file(f, mode="r")
 
-  if(length(hdf5r::list.attributes(data[["Header"]])) > 17){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
+  if(length(hdf5r::list.attributes(data[["Header"]])) == 27){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
+  if(length(hdf5r::list.attributes(data[["Header"]])) == 23){magneticum = T}else{magneticum=F}
 
   Npart         = hdf5r::h5attr(data[["Header"]], "NumPart_ThisFile")
   Massarr       = hdf5r::h5attr(data[["Header"]], "MassTable")
@@ -144,7 +145,7 @@
     star_pos[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Coordinates", sep="")]])
 
     # reading vx, vy, vz velocities (called "Velocity" in EAGLE snapshots and "Velocities" Gadget HDF5 files)
-    if (eagle){
+    if (eagle | magneticum){
       star_vel[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Velocity", sep="")]])
       } else {
       star_vel[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Velocities", sep="")]])
@@ -157,7 +158,7 @@
     if (length(mass_excpt)!=0 & present_stars[i] %in% mass_excpt){ # if masses have been specified in header, use these
       star_part$Mass[i_start:i_end] = Massarr[present_stars[i]]
     } else { # else, read masses from PartType ("Mass" in EAGLE snapshots and "Masses" in Gadget HDF5 files)
-      if (eagle){
+      if (eagle | magneticum){
         star_part$Mass[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Mass", sep="")]])
         } else {
         star_part$Mass[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Masses", sep="")]])
@@ -165,13 +166,17 @@
     }
   }
 
-  if (eagle){ # reading the details from EAGLE files for simple stellar population
+  if (eagle | magneticum){ # reading the details from EAGLE files for simple stellar population
     ssp = data.frame("Initial_Mass"=numeric(length=stellar_sum), "Age"=numeric(length=stellar_sum),
                      "Metallicity"=numeric(length=stellar_sum))
     ssp$Initial_Mass = hdf5r::readDataSet(data[["PartType4/InitialMass"]])
     Stellar_Formation_Time = hdf5r::readDataSet(data[["PartType4/StellarFormationTime"]])
     ssp$Age = as.numeric(.SFTtoAge(a = Stellar_Formation_Time, cores = cores))
-    ssp$Metallicity = hdf5r::readDataSet(data[["PartType4/SmoothedMetallicity"]])
+    if (eagle){
+      ssp$Metallicity = hdf5r::readDataSet(data[["PartType4/SmoothedMetallicity"]])
+    } else {
+      ssp$Metallicity = hdf5r::readDataSet(data[["PartType4/Metallicity"]])
+    }
 
     # coordinate transform from co-moving to physical coordinates
     a_coor = hdf5r::h5attr(data[["PartType4/Coordinates"]], "aexp-scale-exponent")
@@ -294,7 +299,7 @@
 
 # Function to centre all galaxy particles based on stellar particle positions
 .centre_galaxy = function(galaxy_data, centre=NA){
-  if (!is.na(centre)){ # if an external centre is provided, use this to centre positions
+  if (!is.na(centre[1])){ # if an external centre is provided, use this to centre positions
     stellar_data = galaxy_data$star_part
     gas_data = galaxy_data$gas_part
 
@@ -886,7 +891,9 @@
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = NA, dim = observation$sbin^2)
   dis_los  = array(data = NA, dim = observation$sbin^2)
-  mass_map  = array(data = NA, dim = observation$sbin^2)
+  mass_map = array(data = NA, dim = observation$sbin^2)
+  Z_map    = array(data = NA, dim = observation$sbin^2)
+  OH_map   = array(data = NA, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
@@ -898,22 +905,25 @@
 
       # adding the "gaussians" of each particle to the velocity bins
       vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
-      mass_map[part_in_spaxel$spaxel_ID[i]] = sum(galaxy_sample$Mass)
-      vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-      dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+      mass_map[part_in_spaxel$spaxel_ID[i]]  = sum(galaxy_sample$Mass)
+      vel_los[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+      dis_los[part_in_spaxel$spaxel_ID[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+      Z_map[part_in_spaxel$spaxel_ID[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
+      OH_map[part_in_spaxel$spaxel_ID[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
     } else { # if insufficient particles in spaxel
       vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
-      mass_map[part_in_spaxel$spaxel_ID[i]] = NA
-      vel_los[part_in_spaxel$spaxel_ID[i]] = NA
-      dis_los[part_in_spaxel$spaxel_ID[i]] = NA
-
+      mass_map[part_in_spaxel$spaxel_ID[i]]  = NA
+      vel_los[part_in_spaxel$spaxel_ID[i]]   = NA
+      dis_los[part_in_spaxel$spaxel_ID[i]]   = NA
+      Z_map[part_in_spaxel$spaxel_ID[i]]     = NA
+      OH_map[part_in_spaxel$spaxel_ID[i]]    = NA
     }
     if (verbose){cat(i, "... ", sep = "")}
 
   }
 
-  return(list(vel_spec, mass_map, vel_los, dis_los))
+  return(list(vel_spec, mass_map, vel_los, dis_los, Z_map, OH_map))
 }
 
 .gas_velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
@@ -922,12 +932,14 @@
   vel_los  = array(data = NA, dim = observation$sbin^2)
   dis_los  = array(data = NA, dim = observation$sbin^2)
   mass_map  = array(data = NA, dim = observation$sbin^2)
+  Z_map    = array(data = NA, dim = observation$sbin^2)
+  OH_map   = array(data = NA, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
@@ -937,17 +949,21 @@
                        # adding the "gaussians" of each particle to the velocity bins
                        vel_spec = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
                        mass_map = sum(galaxy_sample$Mass)
-                       vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-                       dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+                       vel_los  = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+                       dis_los  = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+                       Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
+                       OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
+
 
                      } else { # if insufficient particles in spaxel
                        vel_spec = rep(NA, observation$vbin)
                        mass_map = NA
-                       vel_los = NA
-                       dis_los = NA
-
+                       vel_los  = NA
+                       dis_los  = NA
+                       Z_map    = NA
+                       OH_map   = NA
                      }
-                     result = list(vel_spec, mass_map, vel_los, dis_los)
+                     result = list(vel_spec, mass_map, vel_los, dis_los, Z_map, OH_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -956,7 +972,9 @@
   mass_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
   vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
   dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
+  Z_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
+  OH_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
 
-  return(list(vel_spec, mass_map, vel_los, dis_los))
+  return(list(vel_spec, mass_map, vel_los, dis_los, Z_map, OH_map))
 
 }
