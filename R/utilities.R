@@ -293,7 +293,7 @@
 
 # Function to centre all galaxy particles based on stellar particle positions
 .centre_galaxy = function(galaxy_data, centre=NA){
-  if (!is.na(centre)){ # if an external centre is provided, use this to centre positions
+  if (!is.na(centre[1])){ # if an external centre is provided, use this to centre positions
     stellar_data = galaxy_data$star_part
     gas_data = galaxy_data$gas_part
 
