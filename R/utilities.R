@@ -764,7 +764,7 @@
 
 
 # stellar velocity mode -
-.velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose){
+.velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, mass_flag){
 
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = NA, dim = observation$sbin^2)
@@ -780,17 +780,25 @@
     # if number is greater than the particle limit
     if (num_part > observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
-      intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
-        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-      # transform luminosity into flux detected at telescope
-      #    flux in units erg/s/cm^2/Ang
-      spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+      if (mass_flag){
 
-      # computing the r-band luminosity per particle from spectra
-      galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
-                                       wave = simspin_data$wave,
-                                       filter = observation$filter, flux_in = "wave", flux_out = "wave")
+        galaxy_sample$luminosity = galaxy_sample$Mass # replace luminosity weighting with a mass weight
+
+      } else {
+        intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
+          (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+
+        # transform luminosity into flux detected at telescope
+        #    flux in units erg/s/cm^2/Ang
+        spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+
+        # computing the r-band luminosity per particle from spectra
+        galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
+                                         wave = simspin_data$wave,
+                                         filter = observation$filter, flux_in = "wave", flux_out = "wave")
+      }
+
 
       # adding the "gaussians" of each particle to the velocity bins
       vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
@@ -816,7 +824,7 @@
   return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map))
 }
 
-.velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
+.velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores, mass_flag){
 
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = NA, dim = observation$sbin^2)
@@ -835,17 +843,24 @@
                      # if the number of particles in the spaxel is greater than the particle limit
                      if (num_part > observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
-                       intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
+
+                       if (mass_flag){
+
+                         galaxy_sample$luminosity = galaxy_sample$Mass
+
+                       } else {
+                         intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
                                                   nrow = num_part, byrow = T) *
                          (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
-                       # transform luminosity into flux detected at telescope
-                       #    flux in units erg/s/cm^2/Ang
-                       spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+                         # transform luminosity into flux detected at telescope
+                         #    flux in units erg/s/cm^2/Ang
+                         spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
 
-                       # computing the r-band luminosity per particle from spectra
-                       galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
-                                                        wave = simspin_data$wave,
-                                                        filter = observation$filter, flux_in = "wave", flux_out = "wave")
+                         # computing the r-band luminosity per particle from spectra
+                         galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
+                                                          wave = simspin_data$wave,
+                                                          filter = observation$filter, flux_in = "wave", flux_out = "wave")
+                         }
 
                        # adding the "gaussians" of each particle to the velocity bins
                        vel_spec = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)

@@ -26,6 +26,8 @@
 #' same directory as the input \code{simspin_file}.
 #'@param cores Float describing the number of cores to run the interpolation
 #' and velocity gridding on. Default is 1.
+#'@param mass_flag Boolean flag that, when set to TRUE, will compute properties
+#' using a mass weighting rather than a luminosity weighting. Default is FALSE.
 #'@return Returns an .fits file that contains a the generated spectral cube and
 #' relevant header describing the mock observation.
 #'@examples
@@ -38,7 +40,7 @@
 
 build_datacube = function(simspin_file, telescope, observing_strategy,
                           verbose = F, write_fits = F, output_location,
-                          cores=1){
+                          cores=1, mass_flag = F){
 
   if (verbose){cat("Computing observation parameters... \n")}
   observation = observation(telescope = telescope, observing_strategy = observing_strategy)
@@ -150,10 +152,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (verbose){cat("Generating stellar velocity distributions per spaxel... \n")}
     if (cores == 1){
-      output = .velocity_spaxels(part_in_spaxel, observation, galaxy_data, simspin_data, verbose)
+      output = .velocity_spaxels(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, mass_flag)
     }
     if (cores > 1){
-      output = .velocity_spaxels_mc(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores)
+      output = .velocity_spaxels_mc(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores, mass_flag)
     }
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
