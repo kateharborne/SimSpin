@@ -11,7 +11,8 @@ build_datacube(
   verbose = F,
   write_fits = F,
   output_location,
-  cores = 1
+  cores = 1,
+  mass_flag = F
 )
 }
 \arguments{
@@ -39,6 +40,9 @@ same directory as the input \code{simspin_file}.}
 
 \item{cores}{Float describing the number of cores to run the interpolation
 and velocity gridding on. Default is 1.}
+
+\item{mass_flag}{Boolean flag that, when set to TRUE, will compute properties
+using a mass weighting rather than a luminosity weighting. Default is FALSE.}
 }
 \value{
 Returns an .fits file that contains a the generated spectral cube and
