@@ -58,6 +58,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   }
   if (typeof(simspin_file) == "list"){ # if provided with output list
     simspin_data = simspin_file
+    simspin_file = as.character(simspin_file)
   }
 
   if (observation$method == "spectral" | observation$method == "velocity"){
@@ -139,8 +140,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     if (write_fits){
       if (verbose){cat("Writing FITS... \n")}
       if (missing(output_location)){
-        tryCatch(out_file_name = {stringr::str_remove(simspin_file, ".Rdata")},
-                 error = function(e){"./"})
+        out_file_name = character(1)
+        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
+                                 error = function(e){"./"})
         output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
                                 observation$psf_fwhm,"fwhm_spectral.FITS", sep="")
       }
@@ -196,8 +198,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     if (write_fits){
       if (verbose){cat("Writing FITS... \n")}
       if (missing(output_location)){
-        tryCatch(out_file_name = {stringr::str_remove(simspin_file, ".Rdata")},
-                 error = function(e){"./"})
+        out_file_name = character(1)
+        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
+                                 error = function(e){"./"})
         output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
                                 observation$psf_fwhm,"fwhm_images.FITS", sep="")
       }
@@ -253,8 +256,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     if (write_fits){
       if (verbose){cat("Writing FITS... \n")}
       if (missing(output_location)){
-        tryCatch(out_file_name = {stringr::str_remove(simspin_file, ".Rdata")},
-                 error = function(e){"./"})
+        out_file_name = character(1)
+        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
+                                 error = function(e){"./"})
         output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
                                 observation$psf_fwhm,"fwhm_images.FITS", sep="")
       }
