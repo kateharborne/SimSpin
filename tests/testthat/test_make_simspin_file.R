@@ -8,6 +8,7 @@ context("Testing make_simspin_file function.\n")
 ss_gadget = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
 ss_hdf5 = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
 ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+ss_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
 
 temp_loc = tempdir()
 
@@ -27,8 +28,15 @@ test_that("Initial run of each simulation type - HDF5", {
 test_that("Initial run of each simulation type - EAGLE", {
   expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep="")))
   expect_length(readRDS(paste(temp_loc, "eagle_test", sep="")), 4)
-  expect_true(length(readRDS(paste(temp_loc, "eagle_test", sep=""))$gas_part) == 14)
+  expect_true(length(readRDS(paste(temp_loc, "eagle_test", sep=""))$gas_part) == 16)
 })
+
+test_that("Initial run of each simulation type - Magneticum", {
+  expect_null(make_simspin_file(ss_magneticum, output = paste(temp_loc, "magneticum_test", sep="")))
+  expect_length(readRDS(paste(temp_loc, "magneticum_test", sep="")), 4)
+  expect_true(length(readRDS(paste(temp_loc, "magneticum_test", sep=""))$gas_part) == 16)
+})
+
 
 # Test that the function fails when the file already exists
 test_that("Error when output file already exists and overwrite = F - Gadget",{
@@ -41,6 +49,10 @@ test_that("Error when output file already exists and overwrite = F - HDF5",{
 
 test_that("Error when output file already exists and overwrite = F - EAGLE",{
   expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep="")))
+})
+
+test_that("Error when output file already exists and overwrite = F - Magneticum",{
+  expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "magneticum_test", sep="")))
 })
 
 # Test that function can output to environment
