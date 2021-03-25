@@ -11,6 +11,7 @@ build_datacube(
   verbose = F,
   write_fits = F,
   output_location,
+  object_name = "GalaxyID_unknown",
   telescope_name = "SimSpin",
   observer_name = "Anonymous",
   cores = 1
@@ -38,6 +39,9 @@ output a FITS file, change this parameter to \code{TRUE}.}
 file output if \code{write_fits = TRUE}. If \code{write_fits = TRUE} and no
 \code{output_location} is specified, the FITS file will be written to the
 same directory as the input \code{simspin_file}.}
+
+\item{object_name}{Optional string used in \code{write_simspin_FITS} to
+describe the name of the object observed in FITS header.}
 
 \item{telescope_name}{Optional string used in \code{write_simspin_FITS} to
 describe the name of the telescope used for observation in FITS header.}
