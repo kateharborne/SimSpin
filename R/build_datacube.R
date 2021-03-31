@@ -63,8 +63,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   if (observation$method == "spectral" | observation$method == "velocity"){
     galaxy_data = simspin_data$star_part
-  } else {
+  } else if (observation$method == "sf gas"){
     galaxy_data = simspin_data$gas_part[simspin_data$gas_part$SFR > 0,]
+  } else {
+    galaxy_data = simspin_data$gas_part
   }
 
   # Twisting galaxy about the z-axis to look from an angle
@@ -234,8 +236,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     mass_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin))
     vel_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin))
     dis_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin))
-    met_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
-    OH_image  = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
+    SFR_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
+    met_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
+    OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -250,6 +253,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                   "velocity_image"   = vel_image,
                   "dispersion_image" = dis_image,
                   "mass_image"       = mass_image,
+                  "SFR_image"        = SFR_image,
                   "metallicity_image"= met_image,
                   "OH_image"         = OH_image)
 

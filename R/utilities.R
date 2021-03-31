@@ -1061,6 +1061,7 @@
   vel_los  = array(data = NA, dim = observation$sbin^2)
   dis_los  = array(data = NA, dim = observation$sbin^2)
   mass_map = array(data = NA, dim = observation$sbin^2)
+  SFR_map  = array(data = NA, dim = observation$sbin^2)
   Z_map    = array(data = NA, dim = observation$sbin^2)
   OH_map   = array(data = NA, dim = observation$sbin^2)
 
@@ -1077,6 +1078,7 @@
       mass_map[part_in_spaxel$spaxel_ID[i]]  = sum(galaxy_sample$Mass)
       vel_los[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
       dis_los[part_in_spaxel$spaxel_ID[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+      SFR_map[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
       Z_map[part_in_spaxel$spaxel_ID[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
       OH_map[part_in_spaxel$spaxel_ID[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
@@ -1085,6 +1087,7 @@
       mass_map[part_in_spaxel$spaxel_ID[i]]  = NA
       vel_los[part_in_spaxel$spaxel_ID[i]]   = NA
       dis_los[part_in_spaxel$spaxel_ID[i]]   = NA
+      SFR_map[part_in_spaxel$spaxel_ID[i]]   = NA
       Z_map[part_in_spaxel$spaxel_ID[i]]     = NA
       OH_map[part_in_spaxel$spaxel_ID[i]]    = NA
     }
@@ -1092,7 +1095,7 @@
 
   }
 
-  return(list(vel_spec, mass_map, vel_los, dis_los, Z_map, OH_map))
+  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
 }
 
 .gas_velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
@@ -1101,6 +1104,7 @@
   vel_los  = array(data = NA, dim = observation$sbin^2)
   dis_los  = array(data = NA, dim = observation$sbin^2)
   mass_map  = array(data = NA, dim = observation$sbin^2)
+  SFR_map  = array(data = NA, dim = observation$sbin^2)
   Z_map    = array(data = NA, dim = observation$sbin^2)
   OH_map   = array(data = NA, dim = observation$sbin^2)
 
@@ -1108,7 +1112,7 @@
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
@@ -1120,6 +1124,7 @@
                        mass_map = sum(galaxy_sample$Mass)
                        vel_los  = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                        dis_los  = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+                       SFR_map  = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
                        Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
                        OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
@@ -1129,10 +1134,11 @@
                        mass_map = NA
                        vel_los  = NA
                        dis_los  = NA
+                       SFR_map  = NA
                        Z_map    = NA
                        OH_map   = NA
                      }
-                     result = list(vel_spec, mass_map, vel_los, dis_los, Z_map, OH_map)
+                     result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -1141,9 +1147,10 @@
   mass_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
   vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
   dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
-  Z_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
-  OH_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
+  SFR_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
+  Z_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
+  OH_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[7]]))
 
-  return(list(vel_spec, mass_map, vel_los, dis_los, Z_map, OH_map))
+  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
 
 }
