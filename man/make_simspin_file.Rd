@@ -16,7 +16,8 @@ make_simspin_file(
   output,
   overwrite = F,
   centre = NA,
-  half_mass = NA
+  half_mass = NA,
+  sph_spawn_n = 1
 )
 }
 \arguments{
@@ -57,6 +58,13 @@ in which case the system is centred around the median position.}
 (rather than just particles from a single galaxy), you can the half-mass
 value at which the alignment function is run. Numeric length = 1. Default is
 NA, in which case half the total mass of the suplied simulation data is used.}
+
+\item{sph_spawn_n}{Numeric describing the number of gas particles with which
+to sample the SPH smoothing length. Default is 1, which will not spawn
+additional gas particles. Increasing this value increases the number of
+particles used to model the gas distribution. This value may need to be
+tested for convergence depending on the resolution of the grid used to image
+the gas properties at the `build_datacube()` stage.}
 }
 \value{
 Returns an .Rdata file that contains a list of particle positions,
