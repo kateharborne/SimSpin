@@ -84,7 +84,7 @@
 
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
               "Time" = Time, "Redshift" = Redshift, # relevent simulation data
-              "Nall" = Nall) # number of particles in the original file
+              "Nall" = Nall, "Type"="nbody") # number of particles in the original file
 
 
   Npart_sum = cumsum(Npart) # cumulative number of each particle type
@@ -253,7 +253,7 @@
   Npart = head$NumPart_ThisFile
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
               "Time" = head$Time, "Redshift" = head$Redshift, # relevent simulation data
-              "Nall" = head$NumPart_Total) # number of particles in the original file
+              "Nall" = head$NumPart_Total, "Type"="nbody") # number of particles in the original file
 
   return(list(star_part=star_part, gas_part=gas_part, head=head))
 
@@ -331,6 +331,7 @@
 
   } else {star_part=NULL; ssp=NULL}
 
+  head$Type = "EAGLE"
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
@@ -406,6 +407,8 @@
     remove(stars); remove(PT4_attr)
 
   } else {star_part=NULL; ssp=NULL}
+
+  head$Type = "Magneticum"
 
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
@@ -640,6 +643,43 @@
 .align_galaxy = function(galaxy_data, half_mass=NA){
   data = .measure_pqj(galaxy_data, half_mass)
   return(data$galaxy_data)
+}
+
+# Functions for smoothing SPH kernels
+.wendland_c2 = function(r){
+  return((21/(2*pi))*((1-r)^4)*((4*r) + 1))
+}
+
+.wendland_c6 = function(r){
+  return((1365/(64*pi))*((1-r)^8)*(1 + (8*r) + (25*r^2) + (32*r^3)))
+}
+
+.generate_uniform_sphere = function(number_of_points, kernel="WC2"){
+
+  # Function for generating random coordinates that
+  # uniformly sample the volume of a sphere and computing their corresponding
+  # weights
+
+  xyz = cbind(rnorm(number_of_points), rnorm(number_of_points), rnorm(number_of_points))
+  r = runif(number_of_points, min = 0, max = 1)^(1/3)
+
+  den = sqrt((xyz[,1]^2) + (xyz[,2]^2) + (xyz[,3]^2))
+  xyz_norm = (r*xyz)/den
+
+  sph = sphereplot::car2sph(xyz_norm)
+  if (kernel == "WC2"){
+    weights = .wendland_c2(sph[,3])
+    sph_kernel = data.frame("long" = sph[,1], "lat" = sph[,2],
+                            "r/h" = sph[,3], "weight" = weights/sum(weights))
+  }
+  if (kernel == "WC6"){
+    weights = .wendland_c6(sph[,3])
+    sph_kernel = data.frame("long" = sph[,1], "lat" = sph[,2],
+                            "r/h" = sph[,3], "weight" = weights/sum(weights))
+
+  }
+
+  return(sph_kernel)
 }
 
 # Function to generate spectra (w/o mass weighting)
