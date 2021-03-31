@@ -58,7 +58,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   }
   if (typeof(simspin_file) == "list"){ # if provided with output list
     simspin_data = simspin_file
-    simspin_file = as.character(simspin_file)
+    simspin_file = paste0("./", object_name)
   }
 
   if (observation$method == "spectral" | observation$method == "velocity"){
