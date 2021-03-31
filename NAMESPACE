@@ -14,6 +14,7 @@ importFrom(ProFit, "profitMakeGaussianPSF", "profitBruteConv", "profitCubaMoffat
 importFrom(ProSpect, "interp_quick", "photom_lum")
 importFrom(Rfits, "Rfits_write_header", "Rfits_write_cube", "Rfits_write_image")
 importFrom(RColorBrewer, "brewer.pal")
-importFrom(stats, "approx", "rnorm", "pnorm", "dnorm", "sd", "median")
+importFrom(sphereplot, "car2sph", "sph2car")
+importFrom(stats, "approx", "rnorm", "pnorm", "dnorm", "runif", "sd", "median", "setNames")
 importFrom(stringr, "str_to_upper", "str_to_lower", "str_remove", "str_split")
 importFrom(utils, "tail")

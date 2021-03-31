@@ -166,7 +166,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles beacuse we are working with SPH models
 
     gas_part_names = names(galaxy_data$gas_part)
-    new_gas_part = setNames(data.frame(matrix(ncol = length(gas_part_names), nrow = (sph_spawn_n*galaxy_data$head$NumPart_Total[1]))),
+    new_gas_part = stats::setNames(data.frame(matrix(ncol = length(gas_part_names),
+                                                     nrow = (sph_spawn_n*galaxy_data$head$NumPart_Total[1]))),
                             gas_part_names) # generate a new DF containing original gas_part names
 
     new_gas_part$vx = rep(galaxy_data$gas_part$vx, each=sph_spawn_n)

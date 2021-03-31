@@ -660,8 +660,8 @@
   # uniformly sample the volume of a sphere and computing their corresponding
   # weights
 
-  xyz = cbind(rnorm(number_of_points), rnorm(number_of_points), rnorm(number_of_points))
-  r = runif(number_of_points, min = 0, max = 1)^(1/3)
+  xyz = cbind(stats::rnorm(number_of_points), stats::rnorm(number_of_points), stats::rnorm(number_of_points))
+  r = stats::runif(number_of_points, min = 0, max = 1)^(1/3)
 
   den = sqrt((xyz[,1]^2) + (xyz[,2]^2) + (xyz[,3]^2))
   xyz_norm = (r*xyz)/den
