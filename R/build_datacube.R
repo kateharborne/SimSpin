@@ -65,8 +65,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     galaxy_data = simspin_data$star_part
   } else if (observation$method == "sf gas"){
     galaxy_data = simspin_data$gas_part[simspin_data$gas_part$SFR > 0,]
-  } else {
+  } else if (observation$method == "gas"){
     galaxy_data = simspin_data$gas_part
+  } else {
+    stop("Error: Invalid method. \n Please specify observation$method = 'spectral', 'velocity', 'sf gas', or 'gas' and try again.")
   }
 
   # Twisting galaxy about the z-axis to look from an angle
