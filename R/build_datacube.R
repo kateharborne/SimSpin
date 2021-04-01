@@ -218,7 +218,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   }
 
-  if (observation$method == "gas"){
+  if (observation$method == "gas" | observation$method == "sf gas"){
 
     observation$vbin = ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
     if (observation$vbin <= 2){observation$vbin = 3}
