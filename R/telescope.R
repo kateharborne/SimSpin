@@ -78,7 +78,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.65,
-                  signal_to_noise = 10,
+                  signal_to_noise = signal_to_noise,
                   sbin            =  floor(fov/spatial_res))
   }
 
@@ -94,7 +94,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.8,
-                  signal_to_noise = 10,
+                  signal_to_noise = signal_to_noise,
                   sbin            =  floor(fov/spatial_res))
   }
 
@@ -110,7 +110,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   filter          = ProSpect::filt_r_SDSS,
                   wave_res        = 1.25,
                   lsf_fwhm        = 2.63,
-                  signal_to_noise = 10,
+                  signal_to_noise = signal_to_noise,
                   sbin            = floor(fov/spatial_res))
 
   }
@@ -128,7 +128,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 1.6,
                   lsf_fwhm        = 1.3,
-                  signal_to_noise = 10,
+                  signal_to_noise = signal_to_noise,
                   sbin            =  floor(fov/spatial_res))
 
   }
@@ -146,7 +146,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   filter          = ProSpect::filt_g_SDSS,
                   wave_res        = 2,
                   lsf_fwhm        = 5.65,
-                  signal_to_noise = 10,
+                  signal_to_noise = signal_to_noise,
                   sbin            = floor(fov/spatial_res))
 
   }
