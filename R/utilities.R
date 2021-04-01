@@ -824,7 +824,7 @@
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
 
     # if number is greater than the particle limit
-    if (num_part > observation$particle_limit){
+    if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
       intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
         (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
@@ -884,7 +884,7 @@
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part > observation$particle_limit){
+                     if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
                        intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
                                                   nrow = num_part, byrow = T) *
@@ -953,7 +953,7 @@
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
 
     # if number is greater than the particle limit
-    if (num_part > observation$particle_limit){
+    if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
       intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
         (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
@@ -1008,7 +1008,7 @@
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part > observation$particle_limit){
+                     if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
                        intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
                                                   nrow = num_part, byrow = T) *
@@ -1070,7 +1070,7 @@
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
 
     # if number is greater than the particle limit
-    if (num_part > observation$particle_limit){
+    if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
       # adding the "gaussians" of each particle to the velocity bins
@@ -1116,7 +1116,7 @@
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part > observation$particle_limit){
+                     if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
                        # adding the "gaussians" of each particle to the velocity bins
