@@ -81,6 +81,10 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     stop("Error: template specified is unavailable. \n Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'")
   }
 
+  if (sph_spawn_n%%1!=0){
+    stop("Error: sph_spawn_n must be a whole number. \n Please specify an integer value for sph_spawn_n.")
+  }
+
   galaxy_data = tryCatch(expr = {.read_gadget(filename)},
                          error = function(e){.read_hdf5(filename, cores)})
 
