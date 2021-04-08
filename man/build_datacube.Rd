@@ -14,7 +14,8 @@ build_datacube(
   object_name = "GalaxyID_unknown",
   telescope_name = "SimSpin",
   observer_name = "Anonymous",
-  cores = 1
+  cores = 1,
+  mass_flag = F
 )
 }
 \arguments{
@@ -51,6 +52,9 @@ describe the name of the person who ran the observation in FITS header.}
 
 \item{cores}{Float describing the number of cores to run the interpolation
 and velocity gridding on. Default is 1.}
+
+\item{mass_flag}{Boolean flag that, when set to TRUE, will compute properties
+using a mass weighting rather than a luminosity weighting. Default is FALSE.}
 }
 \value{
 Returns an .fits file that contains a the generated spectral cube and

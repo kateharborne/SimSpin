@@ -197,3 +197,39 @@ test_that("Observations get dimmer with increasing redshift", {
   expect_true(sum(cube_near$flux_image, na.rm=T) > sum(cube_far$flux_image, na.rm=T))
 
 })
+
+# Test that velocity cubes can be built in mass mode
+test_that("EAGLE cubes can be built with mass weighting rather than luminosity", {
+  expect_length(build_datacube(simspin_file = ss_eagle,
+                               telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               mass_flag = T), 7)
+  expect_length(build_datacube(simspin_file = ss_eagle,
+                               telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                               mass_flag = T, cores=2), 7)
+
+  expect_true(all(build_datacube(simspin_file = ss_eagle,
+                                 telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                 observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                                 mass_flag = T)$flux_image ==
+                  build_datacube(simspin_file = ss_eagle,
+                                 telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                 observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
+                                 mass_flag = T, cores=2)$flux_image, na.rm=T))
+
+})
+
+test_that("Mass/flux images are different for the same observing conditions.", {
+  expect_true(all((build_datacube(simspin_file = ss_eagle,
+                                  telescope = telescope(type="IFU", method = "velocity",
+                                                        lsf_fwhm = 3.6, signal_to_noise = NA),
+                                  observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = F),
+                                  mass_flag = T)$flux_image) !=
+                    (build_datacube(simspin_file = ss_eagle,
+                                    telescope = telescope(type="IFU", method = "velocity",
+                                                          lsf_fwhm = 3.6, signal_to_noise = NA),
+                                    observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = F),
+                                    mass_flag = F)$flux_image), na.rm =T))
+
+})
