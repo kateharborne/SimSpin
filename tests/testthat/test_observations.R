@@ -15,6 +15,10 @@ test_that("Initial run of telescope() function with default types - MaNGA", {
   expect_length(telescope(type="MaNGA"), 12)
 })
 
+test_that("Initial run of telescope() function with default types - MaNGA", {
+  expect_length(telescope(type="MUSE"), 12)
+})
+
 test_that("Initial run of telescope() function with default types - Hector", {
   expect_length(telescope(type="Hector"), 12)
 })
@@ -45,6 +49,27 @@ test_that("Checking case sensitivity #4", {
   expect_length(telescope(type="sAmI"), 12)
 })
 
+# Testing that the telescope() function works with each of the possible default
+#  "filters".
+test_that("Initial run of telescope() function with default filters - r", {
+  expect_length(telescope(type="IFU", filter = "r"), 12)
+})
+
+test_that("Initial run of telescope() function with default filters - u", {
+  expect_length(telescope(type="IFU", filter = "u"), 12)
+})
+
+test_that("Initial run of telescope() function with default filters - g", {
+  expect_length(telescope(type="IFU", filter = "g"), 12)
+})
+
+test_that("Initial run of telescope() function with default filters - i", {
+  expect_length(telescope(type="IFU", filter = "i"), 12)
+})
+
+test_that("Initial run of telescope() function with default filters - z", {
+  expect_length(telescope(type="IFU", filter = "z"), 12)
+})
 
 # Testing that an error triggers when you give it a range in the wrong format,
 #  or an unsupported aperture shape.
@@ -62,6 +87,10 @@ test_that("telescope() issues error when incompatible parameters are given #3.",
 
 test_that("telescope() issues error when incompatible parameters are given #4.", {
   expect_error(telescope(filter = "p"))
+})
+
+test_that("telescope() fixes the inordered wave-range.", {
+  expect_equal(telescope(wave_range = c(5700,3700))$wave_range, c(3700,5700))
 })
 
 # Testing that the observing_strategy() function works with each of the possible

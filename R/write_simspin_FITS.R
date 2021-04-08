@@ -238,7 +238,7 @@ write_simspin_FITS = function(output_file, simspin_data, object_name,
 
   }
 
-  if (observation$method == "gas"){
+  if (observation$method == "gas" | observation$method == "sf gas"){
 
     data_keyvalues$CTYPE3 = "GAS_VELO"
     data_keyvalues$CUNIT3 = "km/s"

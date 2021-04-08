@@ -26,7 +26,7 @@ test_that("Initial run of each simulation type - HDF5", {
 })
 
 test_that("Initial run of each simulation type - EAGLE", {
-  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep="")))
+  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep=""), centre = c(0.01,0.02,0.01), half_mass = 1483809589))
   expect_length(readRDS(paste(temp_loc, "eagle_test", sep="")), 4)
   expect_true(length(readRDS(paste(temp_loc, "eagle_test", sep=""))$gas_part) == 16)
 })
@@ -135,12 +135,17 @@ test_that("Values are successfully associated with variables", {
 
 })
 
-# Testing the sph_spawn functionality
+# Testing the sph_spawn functionality ----
 test_that("Test that sph_spawn functionality works", {
   expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
   expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
                                 overwrite = T, cores = 2, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "magneticum_test", sep=""),
+                                overwrite = T, cores = 1, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "magneticum_test", sep=""),
+                                overwrite = T, cores = 2, sph_spawn_n = 10))
+
 })
 
 test_that("Test that sph_spawn errors when N is not an integer", {
@@ -148,9 +153,17 @@ test_that("Test that sph_spawn errors when N is not an integer", {
                                 overwrite = T, cores = 1, sph_spawn_n = 10.2))
 })
 
-test_that("Test that sph_spawn functionality works on multiple cores", {
+test_that("Test that sph_spawn functionality works on multiple cores - EAGLE", {
   gas_data_c1 = make_simspin_file(ss_eagle, template = "EMILES", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
   gas_data_c2 = make_simspin_file(ss_eagle, template = "EMILES", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
+  expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
+  expect_length(gas_data_c1$gas_part$ID, 1000) # sph_spawn_n = 10, original file contains 100 gas particles
+  expect_length(gas_data_c2$gas_part$ID, 1000)
+})
+
+test_that("Test that sph_spawn functionality works on multiple cores - Magneticum", {
+  gas_data_c1 = make_simspin_file(ss_magneticum, template = "EMILES", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
+  gas_data_c2 = make_simspin_file(ss_magneticum, template = "EMILES", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
   expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
   expect_length(gas_data_c1$gas_part$ID, 1000) # sph_spawn_n = 10, original file contains 100 gas particles
   expect_length(gas_data_c2$gas_part$ID, 1000)
