@@ -81,27 +81,27 @@ test_that("observing_strategy() issues error when incompatible parameters are gi
 
 # Testing that you can generate an observation with each of the telescope types
 test_that("Initial run of observation() function with default types #1.", {
-  expect_length(observation(telescope(type="SAMI"), observing_strategy = observing_strategy()), 30)
+  expect_length(observation(telescope(type="SAMI"), observing_strategy = observing_strategy()), 31)
 })
 
 test_that("Initial run of observation() function with default types #2.", {
-  expect_length(observation(telescope(type="MaNGA"), observing_strategy = observing_strategy()), 30)
+  expect_length(observation(telescope(type="MaNGA"), observing_strategy = observing_strategy()), 31)
 })
 
 test_that("Initial run of observation() function with default types #3.", {
-  expect_length(observation(telescope(type="Hector"), observing_strategy = observing_strategy()), 30)
+  expect_length(observation(telescope(type="Hector"), observing_strategy = observing_strategy()), 31)
 })
 
 test_that("Initial run of observation() function with default types #4.", {
-  expect_length(observation(telescope(type="CALIFA"), observing_strategy = observing_strategy()), 30)
+  expect_length(observation(telescope(type="CALIFA"), observing_strategy = observing_strategy()), 31)
 })
 
 test_that("Initial run of observation() function with default types #5 - w/o blur.", {
-  expect_length(observation(telescope(type="IFU"), observing_strategy = observing_strategy()), 30)
+  expect_length(observation(telescope(type="IFU"), observing_strategy = observing_strategy()), 31)
 })
 
 test_that("Initial run of observation() function with default types #6 w/ blur.", {
-  expect_length(observation(telescope(type="IFU"), observing_strategy = observing_strategy(blur=T)), 30)
+  expect_length(observation(telescope(type="IFU"), observing_strategy = observing_strategy(blur=T)), 31)
 })
 
 # Testing that the psf produced is symmetrical
@@ -113,7 +113,7 @@ test_that("The PSF shape produced is symmetrical - Gaussian", {
 # Testing uncovered features
 test_that("Aperture shape = 'square' works", {
   expect_length(telescope(type="IFU", aperture_shape = "square"), 12)
-  expect_length(observation(telescope(type="IFU", aperture_shape = "square"), observing_strategy = observing_strategy()), 30)
+  expect_length(observation(telescope(type="IFU", aperture_shape = "square"), observing_strategy = observing_strategy()), 31)
 })
 
 test_that("Check even field-of-view leads to psf scaled", {

@@ -38,6 +38,12 @@
 #' (rather than just particles from a single galaxy), you can the half-mass
 #' value at which the alignment function is run. Numeric length = 1. Default is
 #' NA, in which case half the total mass of the suplied simulation data is used.
+#'@param sph_spawn_n Numeric describing the number of gas particles with which
+#' to sample the SPH smoothing length. Default is 1, which will not spawn
+#' additional gas particles. Increasing this value increases the number of
+#' particles used to model the gas distribution. This value may need to be
+#' tested for convergence depending on the resolution of the grid used to image
+#' the gas properties at the `build_datacube()` stage.
 #'@return Returns an .Rdata file that contains a list of particle positions,
 #' velocities, and spectra (or a list containing the same information to the
 #' environment without writing to file, when `write_to_file = F`).
@@ -51,7 +57,7 @@
 make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              disk_Z=0.024, bulge_Z=0.001, template="BC03lr",
                              write_to_file=TRUE, output, overwrite = F,
-                             centre=NA, half_mass=NA){
+                             centre=NA, half_mass=NA, sph_spawn_n=1){
 
   temp_name = stringr::str_to_upper(template)
 
@@ -72,7 +78,13 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   } else if (temp_name == "EMILES"){
     temp = ProSpect::EMILES
   } else {
-    stop("Error: template specified is unavailable. \n Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'")
+    stop(cat("Error: template specified is unavailable.", "\n",
+             "Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'"))
+  }
+
+  if (sph_spawn_n%%1!=0){
+    stop(cat("Error: sph_spawn_n must be a whole number.", "\n",
+             "Please specify an integer value for sph_spawn_n."))
   }
 
   galaxy_data = tryCatch(expr = {.read_gadget(filename)},
@@ -156,6 +168,42 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   galaxy_data$star_part$Initial_Mass = galaxy_data$ssp$Initial_Mass
 
   sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
+
+  if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles beacuse we are working with SPH models
+
+    gas_part_names = names(galaxy_data$gas_part)
+    new_gas_part = stats::setNames(data.frame(matrix(ncol = length(gas_part_names),
+                                                     nrow = (sph_spawn_n*galaxy_data$head$NumPart_Total[1]))),
+                            gas_part_names) # generate a new DF containing original gas_part names
+
+    new_gas_part$vx = rep(galaxy_data$gas_part$vx, each=sph_spawn_n)
+    new_gas_part$vy = rep(galaxy_data$gas_part$vy, each=sph_spawn_n)
+    new_gas_part$vz = rep(galaxy_data$gas_part$vz, each=sph_spawn_n)
+    new_gas_part$SFR = rep(galaxy_data$gas_part$SFR, each=sph_spawn_n)
+    new_gas_part$Density = rep(galaxy_data$gas_part$Density, each=sph_spawn_n)
+    new_gas_part$Temperature = rep(galaxy_data$gas_part$Temperature, each=sph_spawn_n)
+    new_gas_part$SmoothingLength = 0
+    new_gas_part$Metallicity = rep(galaxy_data$gas_part$Metallicity, each=sph_spawn_n)
+    new_gas_part$Carbon = rep(galaxy_data$gas_part$Carbon, each=sph_spawn_n)
+    new_gas_part$Hydrogen = rep(galaxy_data$gas_part$Hydrogen, each=sph_spawn_n)
+    new_gas_part$Oxygen = rep(galaxy_data$gas_part$Oxygen, each=sph_spawn_n)
+
+    kernel = character(1) # choosing the kernel relevent for the
+    if (galaxy_data$head$Type == "EAGLE"){
+      kernel = "WC2"
+    } else if (galaxy_data$head$Type == "Magneticum"){
+      kernel = "WC6"
+    } else {
+      kernel = "WC2"
+    }
+
+    if (cores > 1){
+      galaxy_data$gas_part  = .sph_spawn_mc(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel, cores)
+    } else {
+      galaxy_data$gas_part  = .sph_spawn(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel)
+    }
+
+  }
 
   simspin_file = list("star_part" = galaxy_data$star_part,
                       "gas_part"  = galaxy_data$gas_part,

@@ -6,6 +6,10 @@
 .lsol_to_erg    = 3.828e33
 .mpc_to_cm      = 3.08568e+24
 .speed_of_light = 299792.458
+.cm_to_kpc = 3.08568e-21
+.cms_to_kms = 1e-5
+.g_to_msol = 5.02785e-34
+.gcm3_to_msolkpc3 = 1.477e+31
 
 # Functions for computing weighted means
 .meanwt = function(x,wt){
@@ -80,7 +84,7 @@
 
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
               "Time" = Time, "Redshift" = Redshift, # relevent simulation data
-              "Nall" = Nall) # number of particles in the original file
+              "Nall" = Nall, "Type"="nbody") # number of particles in the original file
 
 
   Npart_sum = cumsum(Npart) # cumulative number of each particle type
@@ -95,185 +99,319 @@
 
 }
 
-# Function for reading in Gadget HDF5 files and EAGLE HDF5 files
+# Functions for reading in HDF5 files
 .read_hdf5   = function(f, cores=1){
 
   data = hdf5r::h5file(f, mode="r")
 
-  if(length(hdf5r::list.attributes(data[["Header"]])) > 17){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
+  # Read in all attributes listed in the header
+  header_attr = hdf5r::list.attributes(data[["Header"]])
 
-  Npart         = hdf5r::h5attr(data[["Header"]], "NumPart_ThisFile")
-  Massarr       = hdf5r::h5attr(data[["Header"]], "MassTable")
-  Time          = hdf5r::h5attr(data[["Header"]], "Time")
-  Redshift      = hdf5r::h5attr(data[["Header"]], "Redshift")
-  Nall          = hdf5r::h5attr(data[["Header"]], "NumPart_Total")
-  HubbleParam   = hdf5r::h5attr(data[["Header"]], "HubbleParam")
+  if(length(header_attr) < 23){gadget2 = T}else{gadget2=F}
+  if(length(header_attr) == 27){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
+  if(length(header_attr) == 23){magneticum = T}else{magneticum=F}
 
-  n_stellar      = c(0,0,Npart[3],Npart[4],Npart[5],0) # sum of all "stellar" particles in the file
+  # Create a list to store each variable
+  head = vector("list", length(header_attr))
+  names(head) = header_attr
 
-  # First considering the stellar properties. If Bulge and Disk particles are present,
-  # we need to make sure that are ordered correctly in the output so that they can
-  # be assigned the correct SEDs.
-  present_stars  = which(Npart > 0)[which(Npart > 0) %in% c(3,4,5)] # which stellar groups are present in the file?
-
-  stellar_sum    = sum(n_stellar)
-  Npart_sum      = cumsum(n_stellar) # particle indices of each type
-  mass_excpt     = which(Massarr > 0) # are any masses listed in the header?
-
-  star_part = data.frame("ID" = numeric(stellar_sum),
-                         "x" = numeric(stellar_sum), "y" = numeric(stellar_sum), "z" = numeric(stellar_sum),
-                         "vx" = numeric(stellar_sum), "vy" = numeric(stellar_sum), "vz" = numeric(stellar_sum),
-                         "Mass" = numeric(stellar_sum))
-
-  head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and star particles
-              "Time" = Time, "Redshift" = Redshift, # relevent simulation data
-              "Nall" = Nall)  # number of particles in the original file
-
-  star_pos = array(NA, dim=c(3, stellar_sum))
-  star_vel = array(NA, dim=c(3, stellar_sum))
-
-  for (i in 1:length(present_stars)){
-
-    if (i == 1){
-      i_start = 1; i_end = Npart_sum[present_stars[i]]
-    } else {
-      i_start = Npart_sum[present_stars[i-1]]+1; i_end = Npart_sum[present_stars[i]]
-    } # computing the indices of the particles of each present PartType
-
-    # reading x, y, z coordinates
-    star_pos[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Coordinates", sep="")]])
-
-    # reading vx, vy, vz velocities (called "Velocity" in EAGLE snapshots and "Velocities" Gadget HDF5 files)
-    if (eagle){
-      star_vel[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Velocity", sep="")]])
-      } else {
-      star_vel[,i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Velocities", sep="")]])
-      }
-
-    # reading particle IDs
-    star_part$ID[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/ParticleIDs", sep="")]])
-
-    # reading masses
-    if (length(mass_excpt)!=0 & present_stars[i] %in% mass_excpt){ # if masses have been specified in header, use these
-      star_part$Mass[i_start:i_end] = Massarr[present_stars[i]]
-    } else { # else, read masses from PartType ("Mass" in EAGLE snapshots and "Masses" in Gadget HDF5 files)
-      if (eagle){
-        star_part$Mass[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Mass", sep="")]])
-        } else {
-        star_part$Mass[i_start:i_end] = hdf5r::readDataSet(data[[paste("PartType", present_stars[i]-1, "/Masses", sep="")]])
-      }
-    }
+  # Read in each variable and store in list
+  for (i in 1:length(header_attr)){
+    head[[i]] = hdf5r::h5attr(data[["Header"]], paste0(header_attr[i]))
   }
 
-  if (eagle){ # reading the details from EAGLE files for simple stellar population
-    ssp = data.frame("Initial_Mass"=numeric(length=stellar_sum), "Age"=numeric(length=stellar_sum),
-                     "Metallicity"=numeric(length=stellar_sum))
-    ssp$Initial_Mass = hdf5r::readDataSet(data[["PartType4/InitialMass"]])
-    Stellar_Formation_Time = hdf5r::readDataSet(data[["PartType4/StellarFormationTime"]])
-    ssp$Age = as.numeric(.SFTtoAge(a = Stellar_Formation_Time, cores = cores))
-    ssp$Metallicity = hdf5r::readDataSet(data[["PartType4/SmoothedMetallicity"]])
-
-    # coordinate transform from co-moving to physical coordinates
-    a_coor = hdf5r::h5attr(data[["PartType4/Coordinates"]], "aexp-scale-exponent")
-    h_coor = hdf5r::h5attr(data[["PartType4/Coordinates"]], "h-scale-exponent")
-    a_velo = hdf5r::h5attr(data[["PartType4/Velocity"]], "aexp-scale-exponent")
-    h_velo = hdf5r::h5attr(data[["PartType4/Velocity"]], "h-scale-exponent")
-    a_mass = hdf5r::h5attr(data[["PartType4/Mass"]], "aexp-scale-exponent")
-    h_mass = hdf5r::h5attr(data[["PartType4/Mass"]], "h-scale-exponent")
-
-    star_pos = star_pos * Time^(a_coor) * HubbleParam^(h_coor) * 1e3
-    star_vel = star_vel * Time^(a_velo) * HubbleParam^(h_velo)
-    star_part$Mass = star_part$Mass * Time^(a_mass) * HubbleParam^(h_mass)
-    ssp$Initial_Mass = ssp$Initial_Mass * Time^(a_mass) * HubbleParam^(h_mass)
-  }
-
-  # sort stellar coord & vel into x, y, ..., vz
-  if (stellar_sum > 1){
-    star_part$x = star_pos[1,]; star_part$vx = star_vel[1,]
-    star_part$y = star_pos[2,]; star_part$vy = star_vel[2,]
-    star_part$z = star_pos[3,]; star_part$vz = star_vel[3,]
-  } else {
-    star_part$x = star_pos[1]; star_part$vx = star_vel[1]
-    star_part$y = star_pos[2]; star_part$vy = star_vel[2]
-    star_part$z = star_pos[3]; star_part$vz = star_vel[3]
-  }
-
-  if (Npart[1] > 0){ # If gas is present in the simulation
-    gas_part = data.frame("ID" = numeric(Npart[1]),
-                          "x" = numeric(Npart[1]), "y" = numeric(Npart[1]), "z" = numeric(Npart[1]),
-                          "vx" = numeric(Npart[1]), "vy" = numeric(Npart[1]), "vz" = numeric(Npart[1]),
-                          "Mass" = numeric(Npart[1]), "Z" = numeric(Npart[1]), "Density" = numeric(Npart[1]),
-                          "Temp" = numeric(Npart[1]), "SFR" = numeric(Npart[1]))
-    gas_pos = array(NA, dim=c(3, Npart[1]))
-    gas_vel = array(NA, dim=c(3, Npart[1]))
-
-    gas_part$ID = hdf5r::readDataSet(data[["PartType0/ParticleIDs"]]) # reading particle IDs
-
-    # reading in Masses
-    if (length(mass_excpt)!=0 & 1 %in% mass_excpt){
-      gas_part$Mass = Massarr[1]
-    } else {
-      if (eagle){gas_part$Mass = hdf5r::readDataSet(data[["PartType0/Mass"]])} else {
-        gas_part$Mass = hdf5r::readDataSet(data[["PartType0/Masses"]])
-      }
-    }
-
-    # reading in particle positions
-    gas_pos = hdf5r::readDataSet(data[["PartType0/Coordinates"]])
-
-    # reading vx, vy, vz velocities (called "Velocity" in EAGLE snapshots and "Velocities" Gadget HDF5 files)
-    if (eagle){
-      gas_vel= hdf5r::readDataSet(data[["PartType0/Velocity"]])
-      } else {
-      gas_vel = hdf5r::readDataSet(data[["PartType0/Velocities"]])
-      }
-
-    # reading other gas properties:
-    if (eagle){
-      gas_part$Metallicity = hdf5r::readDataSet(data[["PartType0/SmoothedMetallicity"]])
-      gas_part$Density     = hdf5r::readDataSet(data[["PartType0/Density"]])
-      gas_part$Temp        = hdf5r::readDataSet(data[["PartType0/Temperature"]])
-      gas_part$SFR         = hdf5r::readDataSet(data[["PartType0/StarFormationRate"]])
-      gas_part$OEOS        = hdf5r::readDataSet(data[["PartType0/OnEquationOfState"]])
-    }
-
-    # coordinate transform from co-moving to physical coordinates
-    if (eagle){
-      a_coor = hdf5r::h5attr(data[["PartType0/Coordinates"]], "aexp-scale-exponent")
-      h_coor = hdf5r::h5attr(data[["PartType0/Coordinates"]], "h-scale-exponent")
-      a_velo = hdf5r::h5attr(data[["PartType0/Velocity"]], "aexp-scale-exponent")
-      h_velo = hdf5r::h5attr(data[["PartType0/Velocity"]], "h-scale-exponent")
-      a_mass = hdf5r::h5attr(data[["PartType0/Mass"]], "aexp-scale-exponent")
-      h_mass = hdf5r::h5attr(data[["PartType0/Mass"]], "h-scale-exponent")
-      a_dens = hdf5r::h5attr(data[["PartType0/Density"]], "aexp-scale-exponent")
-      h_dens = hdf5r::h5attr(data[["PartType0/Density"]], "h-scale-exponent")
-      c_dens = hdf5r::h5attr(data[["PartType0/Density"]], "CGSConversionFactor")
-
-      gas_pos = gas_pos * Time^(a_coor) * HubbleParam^(h_coor) * 1e3
-      gas_vel = gas_vel * Time^(a_velo) * HubbleParam^(h_velo)
-      gas_part$Mass = gas_part$Mass * Time^(a_mass) * HubbleParam^(h_mass)
-      gas_part$Density = gas_part$Density * Time^(a_dens) * HubbleParam^(h_dens) * c_dens * 1e3 #kg m-3
-    }
-
-    # sort gas coord & vel into x, y, ..., vz
-    if (Npart[1] > 1){
-      gas_part$x = gas_pos[1,]; gas_part$vx = gas_vel[1,]
-      gas_part$y = gas_pos[2,]; gas_part$vy = gas_vel[2,]
-      gas_part$z = gas_pos[3,]; gas_part$vz = gas_vel[3,]
-    } else {
-      gas_part$x = gas_pos[1]; gas_part$vx = gas_vel[1]
-      gas_part$y = gas_pos[2]; gas_part$vy = gas_vel[2]
-      gas_part$z = gas_pos[3]; gas_part$vz = gas_vel[3]
-    }
-
-  } else {gas_part = NULL} # if no gas in sim, return gas_part = NULL
+  # Read particle data differently depending on the simulation being read in...
+  if (gadget2){output = .gadget2_read_hdf5(data, head)}
+  if (eagle){output = .eagle_read_hdf5(data, head, cores)}
+  if (magneticum){output = .magneticum_read_hdf5(data, head, cores)}
 
   hdf5r::h5close(data)
 
-  if (eagle){
-    return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
-    } else {
-    return(list(star_part=star_part, gas_part=gas_part, head=head))}
+  return(output)
+}
+
+.gadget2_read_hdf5 = function(data, head){
+
+  groups = hdf5r::list.groups(data) # What particle data is present?
+  groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
+
+  if ("PartType0" %in% groups){ # If gas particles are present in the file
+
+    PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+    n_gas_prop = length(PT0_attr)
+    gas = vector("list", n_gas_prop)
+    names(gas) = PT0_attr
+
+    for (i in 1:n_gas_prop){
+      gas[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]])
+    }
+
+    gas_part = data.frame("ID" = gas$ParticleIDs,
+                          "x"  = gas$Coordinates[1,],# Coordinates in kpc
+                          "y"  = gas$Coordinates[2,],
+                          "z"  = gas$Coordinates[3,],
+                          "vx"  = gas$Velocity[1,], # Velocities in km/s
+                          "vy"  = gas$Velocity[2,],
+                          "vz"  = gas$Velocity[3,],
+                          "SFR" = gas$StarFormationRate,
+                          "Density" = gas$Density, # Density in Msol/kpc^3
+                          "Temperature" = gas$Temperature,
+                          "Mass" = gas$Mass, # Mass in solar masses
+                          "SmoothingLength" = gas$SmoothingLength) # Smoothing length in kpc
+
+    remove(gas); remove(PT0_attr)
+
+  } else {gas_part=NULL}
+
+  if ("PartType2" %in% groups & "PartType3" %in% groups){ # If both bulge and disk stars are present
+
+    PT2_attr = hdf5r::list.datasets(data[["PartType2"]])
+    n_star_prop = length(PT2_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT2_attr
+
+    for (i in 1:n_star_prop){
+        stars[[i]] = hdf5r::readDataSet(data[[paste0("PartType2/",PT2_attr[i])]])
+    }
+
+    disk_part = data.frame("ID" = stars$ParticleIDs,
+                           "x"  = stars$Coordinates[1,], # Coordinates in kpc
+                           "y"  = stars$Coordinates[2,],
+                           "z"  = stars$Coordinates[3,],
+                           "vx"  = stars$Velocities[1,], # Velocities in km/s
+                           "vy"  = stars$Velocities[2,],
+                           "vz"  = stars$Velocities[3,],
+                           "Mass" = stars$Masses) # Mass in solar masses
+
+    remove(stars); remove(PT2_attr)
+
+    PT3_attr = hdf5r::list.datasets(data[["PartType3"]])
+    n_star_prop = length(PT3_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT3_attr
+
+    for (i in 1:n_star_prop){
+      stars[[i]] = hdf5r::readDataSet(data[[paste0("PartType3/",PT3_attr[i])]])
+    }
+
+    star_part = data.frame("ID" = c(disk_part$ID, stars$ParticleIDs),
+                           "x"  = c(disk_part$x, stars$Coordinates[1,]), # Coordinates in kpc
+                           "y"  = c(disk_part$y, stars$Coordinates[2,]),
+                           "z"  = c(disk_part$z, stars$Coordinates[3,]),
+                           "vx"  = c(disk_part$vx, stars$Velocities[1,]), # Velocities in km/s
+                           "vy"  = c(disk_part$vy, stars$Velocities[2,]),
+                           "vz"  = c(disk_part$vz, stars$Velocities[3,]),
+                           "Mass" = c(disk_part$Mass, stars$Masses)) # Mass in solar masses
+
+    remove(stars); remove(PT3_attr); remove(disk_part)
+
+  } else if ("PartType2" %in% groups){
+    PT2_attr = hdf5r::list.datasets(data[["PartType2"]])
+    n_star_prop = length(PT2_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT2_attr
+
+    for (i in 1:n_star_prop){
+      stars[[i]] = hdf5r::readDataSet(data[[paste0("PartType2/",PT2_attr[i])]])
+    }
+
+    star_part = data.frame("ID" = stars$ParticleIDs,
+                           "x"  = stars$Coordinates[1,], # Coordinates in kpc
+                           "y"  = stars$Coordinates[2,],
+                           "z"  = stars$Coordinates[3,],
+                           "vx"  = stars$Velocities[1,], # Velocities in km/s
+                           "vy"  = stars$Velocities[2,],
+                           "vz"  = stars$Velocities[3,],
+                           "Mass" = stars$Masses) # Mass in solar masses
+
+    remove(stars); remove(PT2_attr)
+  } else if ("PartType3" %in% groups){
+
+    PT3_attr = hdf5r::list.datasets(data[["PartType3"]])
+    n_star_prop = length(PT3_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT3_attr
+
+    for (i in 1:n_star_prop){
+      stars[[i]] = hdf5r::readDataSet(data[[paste0("PartType3/",PT3_attr[i])]])
+    }
+
+    star_part = data.frame("ID" = stars$ParticleIDs,
+                           "x"  = stars$Coordinates[1,], # Coordinates in kpc
+                           "y"  = stars$Coordinates[2,],
+                           "z"  = stars$Coordinates[3,],
+                           "vx"  = stars$Velocities[1,], # Velocities in km/s
+                           "vy"  = stars$Velocities[2,],
+                           "vz"  = stars$Velocities[3,],
+                           "Mass" = stars$Masses) # Mass in solar masses
+
+    remove(stars); remove(PT3_attr);
+
+  } else {star_part = NULL}
+
+  Npart = head$NumPart_ThisFile
+  head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
+              "Time" = head$Time, "Redshift" = head$Redshift, # relevent simulation data
+              "Nall" = head$NumPart_Total, "Type"="nbody") # number of particles in the original file
+
+  return(list(star_part=star_part, gas_part=gas_part, head=head))
+
+}
+
+.eagle_read_hdf5 = function(data, head, cores){
+
+  groups = hdf5r::list.groups(data) # What particle data is present?
+  groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
+
+  if ("PartType0" %in% groups){ # If gas particles are present in the file
+
+    PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+    n_gas_prop = length(PT0_attr)
+    gas = vector("list", n_gas_prop)
+    names(gas) = PT0_attr
+
+    for (i in 1:n_gas_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")
+      hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")
+      gas[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    gas_part = data.frame("ID" = gas$ParticleIDs,
+                          "x"  = gas$Coordinates[1,]*.cm_to_kpc, # Coordinates in kpc
+                          "y"  = gas$Coordinates[2,]*.cm_to_kpc,
+                          "z"  = gas$Coordinates[3,]*.cm_to_kpc,
+                          "vx"  = gas$Velocity[1,]*.cms_to_kms, # Velocities in km/s
+                          "vy"  = gas$Velocity[2,]*.cms_to_kms,
+                          "vz"  = gas$Velocity[3,]*.cms_to_kms,
+                          "SFR" = gas$StarFormationRate,
+                          "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
+                          "Temperature" = gas$Temperature,
+                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
+                          "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
+                          "Metallicity" = gas$SmoothedMetallicity,
+                          "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
+                          "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
+                          "Oxygen" = gas$`SmoothedElementAbundance/Oxygen`)
+
+    remove(gas); remove(PT0_attr)
+
+  } else {gas_part=NULL}
+
+  if ("PartType4" %in% groups){
+    PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+    n_star_prop = length(PT4_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT4_attr
+
+    for (i in 1:n_star_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "aexp-scale-exponent")
+      hexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h-scale-exponent")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "CGSConversionFactor")
+      stars[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    star_part = data.frame("ID" = stars$ParticleIDs,
+                           "x"  = stars$Coordinates[1,]*.cm_to_kpc, # Coordinates in kpc
+                           "y"  = stars$Coordinates[2,]*.cm_to_kpc,
+                           "z"  = stars$Coordinates[3,]*.cm_to_kpc,
+                           "vx"  = stars$Velocity[1,]*.cms_to_kms, # Velocities in km/s
+                           "vy"  = stars$Velocity[2,]*.cms_to_kms,
+                           "vz"  = stars$Velocity[3,]*.cms_to_kms,
+                           "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
+
+    ssp = data.frame("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                     "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                     "Metallicity" = stars$SmoothedMetallicity)
+
+    remove(stars); remove(PT4_attr)
+
+  } else {star_part=NULL; ssp=NULL}
+
+  head$Type = "EAGLE"
+  return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
+
+}
+
+.magneticum_read_hdf5 = function(data, head, cores){
+
+  groups = hdf5r::list.groups(data) # What particle data is present?
+  groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
+
+  if ("PartType0" %in% groups){ # If gas particles are present in the file
+
+    PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+    n_gas_prop = length(PT0_attr)
+    gas = vector("list", n_gas_prop)
+    names(gas) = PT0_attr
+
+    for (i in 1:n_gas_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")
+      hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")
+      gas[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    gas_part = data.frame("ID" = gas$ParticleIDs,
+                          "x"  = gas$Coordinates[1,]*.cm_to_kpc, # Coordinates in kpc
+                          "y"  = gas$Coordinates[2,]*.cm_to_kpc,
+                          "z"  = gas$Coordinates[3,]*.cm_to_kpc,
+                          "vx"  = gas$Velocity[1,]*.cms_to_kms, # Velocities in km/s
+                          "vy"  = gas$Velocity[2,]*.cms_to_kms,
+                          "vz"  = gas$Velocity[3,]*.cms_to_kms,
+                          "SFR" = gas$StarFormationRate,
+                          "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
+                          "Temperature" = gas$Temperature,
+                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
+                          "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
+                          "Metallicity" = (colSums(gas$Metallicity[2:11,]))/(gas$Mass),
+                          "Carbon" = gas$Metallicity[2,] / gas$Mass,
+                          "Hydrogen" = (gas$Mass - colSums(gas$Metallicity)) / gas$Mass,
+                          "Oxygen" =  gas$Metallicity[4,] / gas$Mass)
+
+    remove(gas); remove(PT0_attr)
+
+  } else {gas_part=NULL}
+
+  if ("PartType4" %in% groups){
+    PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+    n_star_prop = length(PT4_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT4_attr
+
+    for (i in 1:n_star_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "aexp-scale-exponent")
+      hexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h-scale-exponent")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "CGSConversionFactor")
+      stars[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    star_part = data.frame("ID" = stars$ParticleIDs,
+                           "x"  = stars$Coordinates[1,]*.cm_to_kpc, # Coordinates in kpc
+                           "y"  = stars$Coordinates[2,]*.cm_to_kpc,
+                           "z"  = stars$Coordinates[3,]*.cm_to_kpc,
+                           "vx"  = stars$Velocity[1,]*.cms_to_kms, # Velocities in km/s
+                           "vy"  = stars$Velocity[2,]*.cms_to_kms,
+                           "vz"  = stars$Velocity[3,]*.cms_to_kms,
+                           "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
+
+    ssp = data.frame("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                     "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                     "Metallicity" = (colSums(stars$Metallicity[2:11,]))/(stars$Mass))
+
+    remove(stars); remove(PT4_attr)
+
+  } else {star_part=NULL; ssp=NULL}
+
+  head$Type = "Magneticum"
+
+  return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
+
 }
 
 # Function for computing the stellar age from the formation time in parallel
@@ -293,7 +431,7 @@
 
 # Function to centre all galaxy particles based on stellar particle positions
 .centre_galaxy = function(galaxy_data, centre=NA){
-  if (!is.na(centre)){ # if an external centre is provided, use this to centre positions
+  if (!is.na(centre[1])){ # if an external centre is provided, use this to centre positions
     stellar_data = galaxy_data$star_part
     gas_data = galaxy_data$gas_part
 
@@ -507,6 +645,43 @@
   return(data$galaxy_data)
 }
 
+# Functions for smoothing SPH kernels
+.wendland_c2 = function(r){
+  return((21/(2*pi))*((1-r)^4)*((4*r) + 1))
+}
+
+.wendland_c6 = function(r){
+  return((1365/(64*pi))*((1-r)^8)*(1 + (8*r) + (25*r^2) + (32*r^3)))
+}
+
+.generate_uniform_sphere = function(number_of_points, kernel="WC2"){
+
+  # Function for generating random coordinates that
+  # uniformly sample the volume of a sphere and computing their corresponding
+  # weights
+
+  xyz = cbind(stats::rnorm(number_of_points), stats::rnorm(number_of_points), stats::rnorm(number_of_points))
+  r = stats::runif(number_of_points, min = 0, max = 1)^(1/3)
+
+  den = sqrt((xyz[,1]^2) + (xyz[,2]^2) + (xyz[,3]^2))
+  xyz_norm = (r*xyz)/den
+
+  sph = sphereplot::car2sph(xyz_norm)
+  if (kernel == "WC2"){
+    weights = .wendland_c2(sph[,3])
+    sph_kernel = data.frame("long" = sph[,1], "lat" = sph[,2],
+                            "r/h" = sph[,3], "weight" = weights/sum(weights))
+  }
+  if (kernel == "WC6"){
+    weights = .wendland_c6(sph[,3])
+    sph_kernel = data.frame("long" = sph[,1], "lat" = sph[,2],
+                            "r/h" = sph[,3], "weight" = weights/sum(weights))
+
+  }
+
+  return(sph_kernel)
+}
+
 # Function to generate spectra (w/o mass weighting)
 .spectra = function(Metallicity, Age, Template, cores){
   f = function(metallicity, age) {
@@ -649,7 +824,7 @@
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
 
     # if number is greater than the particle limit
-    if (num_part > observation$particle_limit){
+    if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
       intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
         (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
@@ -709,7 +884,7 @@
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part > observation$particle_limit){
+                     if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
                        intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
                                                   nrow = num_part, byrow = T) *
@@ -778,7 +953,7 @@
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
 
     # if number is greater than the particle limit
-    if (num_part > observation$particle_limit){
+    if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
       if (mass_flag){
@@ -841,7 +1016,7 @@
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part > observation$particle_limit){
+                     if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
                        if (mass_flag){
@@ -900,34 +1075,42 @@
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = NA, dim = observation$sbin^2)
   dis_los  = array(data = NA, dim = observation$sbin^2)
-  mass_map  = array(data = NA, dim = observation$sbin^2)
+  mass_map = array(data = NA, dim = observation$sbin^2)
+  SFR_map  = array(data = NA, dim = observation$sbin^2)
+  Z_map    = array(data = NA, dim = observation$sbin^2)
+  OH_map   = array(data = NA, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
 
     # if number is greater than the particle limit
-    if (num_part > observation$particle_limit){
+    if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
       # adding the "gaussians" of each particle to the velocity bins
       vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
-      mass_map[part_in_spaxel$spaxel_ID[i]] = sum(galaxy_sample$Mass)
-      vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-      dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+      mass_map[part_in_spaxel$spaxel_ID[i]]  = sum(galaxy_sample$Mass)
+      vel_los[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+      dis_los[part_in_spaxel$spaxel_ID[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+      SFR_map[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
+      Z_map[part_in_spaxel$spaxel_ID[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
+      OH_map[part_in_spaxel$spaxel_ID[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
     } else { # if insufficient particles in spaxel
       vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
-      mass_map[part_in_spaxel$spaxel_ID[i]] = NA
-      vel_los[part_in_spaxel$spaxel_ID[i]] = NA
-      dis_los[part_in_spaxel$spaxel_ID[i]] = NA
-
+      mass_map[part_in_spaxel$spaxel_ID[i]]  = NA
+      vel_los[part_in_spaxel$spaxel_ID[i]]   = NA
+      dis_los[part_in_spaxel$spaxel_ID[i]]   = NA
+      SFR_map[part_in_spaxel$spaxel_ID[i]]   = NA
+      Z_map[part_in_spaxel$spaxel_ID[i]]     = NA
+      OH_map[part_in_spaxel$spaxel_ID[i]]    = NA
     }
     if (verbose){cat(i, "... ", sep = "")}
 
   }
 
-  return(list(vel_spec, mass_map, vel_los, dis_los))
+  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
 }
 
 .gas_velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
@@ -936,32 +1119,41 @@
   vel_los  = array(data = NA, dim = observation$sbin^2)
   dis_los  = array(data = NA, dim = observation$sbin^2)
   mass_map  = array(data = NA, dim = observation$sbin^2)
+  SFR_map  = array(data = NA, dim = observation$sbin^2)
+  Z_map    = array(data = NA, dim = observation$sbin^2)
+  OH_map   = array(data = NA, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part > observation$particle_limit){
+                     if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
                        # adding the "gaussians" of each particle to the velocity bins
                        vel_spec = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
                        mass_map = sum(galaxy_sample$Mass)
-                       vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-                       dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+                       vel_los  = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+                       dis_los  = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+                       SFR_map  = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
+                       Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
+                       OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
+
 
                      } else { # if insufficient particles in spaxel
                        vel_spec = rep(NA, observation$vbin)
                        mass_map = NA
-                       vel_los = NA
-                       dis_los = NA
-
+                       vel_los  = NA
+                       dis_los  = NA
+                       SFR_map  = NA
+                       Z_map    = NA
+                       OH_map   = NA
                      }
-                     result = list(vel_spec, mass_map, vel_los, dis_los)
+                     result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -970,7 +1162,69 @@
   mass_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
   vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
   dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
+  SFR_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
+  Z_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
+  OH_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[7]]))
 
-  return(list(vel_spec, mass_map, vel_los, dis_los))
+  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
 
+}
+
+# spawn gas particles -
+.sph_spawn = function(gas_part, new_gas_part, sph_spawn_n, kernel){
+
+  no_gas = length(gas_part$ID)
+
+  for (each in 1:no_gas){
+    ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
+    part = gas_part[each,]
+
+    rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+    rand_pos$r = rand_pos$r.h * part$SmoothingLength
+    new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+
+    new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
+    new_gas_part$x[ind1:ind2] = part$x+new_xyz[,1]
+    new_gas_part$y[ind1:ind2] = part$y+new_xyz[,2]
+    new_gas_part$z[ind1:ind2] = part$z+new_xyz[,3]
+    new_gas_part$Mass[ind1:ind2] = part$Mass*rand_pos$weight
+  }
+
+  return(new_gas_part)
+}
+
+.sph_spawn_mc = function(gas_part, new_gas_part, sph_spawn_n, kernel, cores){
+
+  doParallel::registerDoParallel(cores)
+  no_gas = length(gas_part$ID)
+  ID = numeric(no_gas); x = numeric(no_gas); y = numeric(no_gas)
+  z = numeric(no_gas); Mass = numeric(no_gas) # initialising
+
+  i = integer()
+  output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
+                   .init=list(list(), list(), list(), list(), list())) %dopar% {
+
+                     part = gas_part[i,]
+
+                     rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+                     rand_pos$r = rand_pos$r.h * part$SmoothingLength
+                     new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+
+                     ID = as.numeric(paste0(part$ID, 1:sph_spawn_n))
+                     x = part$x+new_xyz[,1]
+                     y = part$y+new_xyz[,2]
+                     z = part$z+new_xyz[,3]
+                     Mass = part$Mass*rand_pos$weight
+
+                     return(list(ID, x, y, z, Mass))
+                     closeAllConnections()
+                   }
+
+  new_gas_part$ID = as.numeric(unlist(output[[1]]))
+  new_gas_part$x = as.numeric(unlist(output[[2]]))
+  new_gas_part$y = as.numeric(unlist(output[[3]]))
+  new_gas_part$z = as.numeric(unlist(output[[4]]))
+  new_gas_part$Mass = as.numeric(unlist(output[[5]]))
+
+  return(new_gas_part)
 }

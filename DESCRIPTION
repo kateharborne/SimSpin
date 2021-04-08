@@ -23,6 +23,8 @@ Imports:
     ProFit,
     RColorBrewer,
     Rcpp,
+    Rfits,
+    sphereplot,
     stringr,
     snow,
     stats,
@@ -34,5 +36,6 @@ Suggests:
     rmarkdown
 Remotes:
     asgr/ProSpect,
+    asgr/Rfits,
     ICRAR/ProFit
 VignetteBuilder: knitr
