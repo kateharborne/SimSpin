@@ -73,7 +73,7 @@ test_that("Test that old files can be overwritten", {
 })
 
 test_that("Test that function works on multiple cores", {
-  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "gadget_test", sep=""),
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
                                 overwrite = T, cores = 2))
 })
 
@@ -133,6 +133,27 @@ test_that("Values are successfully associated with variables", {
   expect_true(all(!is.na(eagle$gas_part$Metallicity)))
   expect_true(all(!is.na(eagle$gas_part$OEOS)))
 
+})
+
+# Testing the sph_spawn functionality
+test_that("Test that sph_spawn functionality works", {
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+                                overwrite = T, cores = 1, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+                                overwrite = T, cores = 2, sph_spawn_n = 10))
+})
+
+test_that("Test that sph_spawn errors when N is not an integer", {
+  expect_error(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+                                overwrite = T, cores = 1, sph_spawn_n = 10.2))
+})
+
+test_that("Test that sph_spawn functionality works on multiple cores", {
+  gas_data_c1 = make_simspin_file(ss_eagle, template = "EMILES", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
+  gas_data_c2 = make_simspin_file(ss_eagle, template = "EMILES", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
+  expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
+  expect_length(gas_data_c1$gas_part$ID, 1000) # sph_spawn_n = 10, original file contains 100 gas particles
+  expect_length(gas_data_c2$gas_part$ID, 1000)
 })
 
 unlink(c(paste(temp_loc, "gadget_test", sep=""), paste(temp_loc, "hdf5_test", sep=""),

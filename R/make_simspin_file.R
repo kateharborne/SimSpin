@@ -78,11 +78,13 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   } else if (temp_name == "EMILES"){
     temp = ProSpect::EMILES
   } else {
-    stop("Error: template specified is unavailable. \n Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'")
+    stop(cat("Error: template specified is unavailable.", "\n",
+             "Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'"))
   }
 
   if (sph_spawn_n%%1!=0){
-    stop("Error: sph_spawn_n must be a whole number. \n Please specify an integer value for sph_spawn_n.")
+    stop(cat("Error: sph_spawn_n must be a whole number.", "\n",
+             "Please specify an integer value for sph_spawn_n."))
   }
 
   galaxy_data = tryCatch(expr = {.read_gadget(filename)},
@@ -195,23 +197,11 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       kernel = "WC2"
     }
 
-    for (each in 1:length(galaxy_data$gas_part$ID)){
-
-      ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
-      part = galaxy_data$gas_part[each,]
-
-      rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
-      rand_pos$r = rand_pos$r.h * part$SmoothingLength
-      new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
-
-      new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
-      new_gas_part$x[ind1:ind2] = part$x+new_xyz[,1]
-      new_gas_part$y[ind1:ind2] = part$y+new_xyz[,2]
-      new_gas_part$z[ind1:ind2] = part$z+new_xyz[,3]
-      new_gas_part$Mass[ind1:ind2] = part$Mass*rand_pos$weight
+    if (cores > 1){
+      galaxy_data$gas_part  = .sph_spawn_mc(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel, cores)
+    } else {
+      galaxy_data$gas_part  = .sph_spawn(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel)
     }
-
-    galaxy_data$gas_part = new_gas_part
 
   }
 

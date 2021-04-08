@@ -1154,3 +1154,62 @@
   return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
 
 }
+
+# spawn gas particles -
+.sph_spawn = function(gas_part, new_gas_part, sph_spawn_n, kernel){
+
+  no_gas = length(gas_part$ID)
+
+  for (each in 1:no_gas){
+    ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
+    part = gas_part[each,]
+
+    rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+    rand_pos$r = rand_pos$r.h * part$SmoothingLength
+    new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+
+    new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
+    new_gas_part$x[ind1:ind2] = part$x+new_xyz[,1]
+    new_gas_part$y[ind1:ind2] = part$y+new_xyz[,2]
+    new_gas_part$z[ind1:ind2] = part$z+new_xyz[,3]
+    new_gas_part$Mass[ind1:ind2] = part$Mass*rand_pos$weight
+  }
+
+  return(new_gas_part)
+}
+
+.sph_spawn_mc = function(gas_part, new_gas_part, sph_spawn_n, kernel, cores){
+
+  doParallel::registerDoParallel(cores)
+  no_gas = length(gas_part$ID)
+  ID = numeric(no_gas); x = numeric(no_gas); y = numeric(no_gas)
+  z = numeric(no_gas); Mass = numeric(no_gas) # initialising
+
+  i = integer()
+  output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
+                   .init=list(list(), list(), list(), list(), list())) %dopar% {
+
+                     part = gas_part[i,]
+
+                     rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+                     rand_pos$r = rand_pos$r.h * part$SmoothingLength
+                     new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+
+                     ID = as.numeric(paste0(part$ID, 1:sph_spawn_n))
+                     x = part$x+new_xyz[,1]
+                     y = part$y+new_xyz[,2]
+                     z = part$z+new_xyz[,3]
+                     Mass = part$Mass*rand_pos$weight
+
+                     return(list(ID, x, y, z, Mass))
+                     closeAllConnections()
+                   }
+
+  new_gas_part$ID = as.numeric(unlist(output[[1]]))
+  new_gas_part$x = as.numeric(unlist(output[[2]]))
+  new_gas_part$y = as.numeric(unlist(output[[3]]))
+  new_gas_part$z = as.numeric(unlist(output[[4]]))
+  new_gas_part$Mass = as.numeric(unlist(output[[5]]))
+
+  return(new_gas_part)
+}
