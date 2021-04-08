@@ -24,6 +24,12 @@
 #' file output if \code{write_fits = TRUE}. If \code{write_fits = TRUE} and no
 #' \code{output_location} is specified, the FITS file will be written to the
 #' same directory as the input \code{simspin_file}.
+#'@param object_name Optional string used in \code{write_simspin_FITS} to
+#' describe the name of the object observed in FITS header.
+#'@param telescope_name Optional string used in \code{write_simspin_FITS} to
+#' describe the name of the telescope used for observation in FITS header.
+#'@param observer_name Optional string used in \code{write_simspin_FITS} to
+#' describe the name of the person who ran the observation in FITS header.
 #'@param cores Float describing the number of cores to run the interpolation
 #' and velocity gridding on. Default is 1.
 #'@param mass_flag Boolean flag that, when set to TRUE, will compute properties
@@ -40,6 +46,9 @@
 
 build_datacube = function(simspin_file, telescope, observing_strategy,
                           verbose = F, write_fits = F, output_location,
+                          object_name="GalaxyID_unknown",
+                          telescope_name="SimSpin",
+                          observer_name="Anonymous",
                           cores=1, mass_flag = F){
 
   if (verbose){cat("Computing observation parameters... \n")}
@@ -51,12 +60,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   }
   if (typeof(simspin_file) == "list"){ # if provided with output list
     simspin_data = simspin_file
+    simspin_file = paste0("./", object_name)
   }
 
   if (observation$method == "spectral" | observation$method == "velocity"){
     galaxy_data = simspin_data$star_part
-  } else {
+  } else if (observation$method == "sf gas"){
     galaxy_data = simspin_data$gas_part[simspin_data$gas_part$SFR > 0,]
+  } else if (observation$method == "gas"){
+    galaxy_data = simspin_data$gas_part
+  } else {
+    stop("Error: Invalid method. \n Please specify observation$method = 'spectral', 'velocity', 'sf gas', or 'gas' and try again.")
   }
 
   # Twisting galaxy about the z-axis to look from an angle
@@ -123,22 +137,28 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (verbose){cat("Done! \n")}
 
-    if (write_fits){
-      if (verbose){cat("Writing FITS... \n")}
-      if (missing(output_location)){
-        out_file_name = stringr::str_remove(simspin_file, ".Rdata")
-        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
-                                observation$psf_fwhm,"fwhm.FITS", sep="")
-      }
-
-      write_simspin_FITS(output_file = output_location, simspin_cube = cube, observation = observation)
-    }
-
     output = list("spectral_cube"    = cube,
                   "observation"      = observation,
                   "velocity_image"   = vel_image,
                   "dispersion_image" = dis_image,
                   "flux_image"       = lum_image)
+
+    if (write_fits){
+      if (verbose){cat("Writing FITS... \n")}
+      if (missing(output_location)){
+        out_file_name = character(1)
+        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
+                                 error = function(e){"./"})
+        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
+                                observation$psf_fwhm,"fwhm_spectral.FITS", sep="")
+      }
+
+      write_simspin_FITS(output_file = output_location,
+                         simspin_data = output, object_name = object_name,
+                         telescope_name = telescope_name, instrument_name = telescope$type,
+                         observer_name = observer_name,
+                         input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
+    }
 
   }
 
@@ -173,17 +193,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (verbose){cat("Done! \n")}
 
-    if (write_fits){
-      if (verbose){cat("Writing FITS... \n")}
-      if (missing(output_location)){
-        out_file_name = stringr::str_remove(simspin_file, ".Rdata")
-        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
-                                observation$psf_fwhm,"fwhm.FITS", sep="")
-      }
-
-      write_simspin_FITS(output_file = output_location, simspin_cube = cube, observation = observation)
-    }
-
     output = list("velocity_cube"    = cube,
                   "observation"      = observation,
                   "velocity_image"   = vel_image,
@@ -192,9 +201,26 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                   "age_image"        = age_image,
                   "metallicity_image"= met_image)
 
+    if (write_fits){
+      if (verbose){cat("Writing FITS... \n")}
+      if (missing(output_location)){
+        out_file_name = character(1)
+        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
+                                 error = function(e){"./"})
+        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
+                                observation$psf_fwhm,"fwhm_images.FITS", sep="")
+      }
+
+      write_simspin_FITS(output_file = output_location,
+                         simspin_data = output, object_name = object_name,
+                         telescope_name = telescope_name , instrument_name = telescope$type,
+                         observer_name = observer_name,
+                         input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
+    }
+
   }
 
-  if (observation$method == "gas"){
+  if (observation$method == "gas" | observation$method == "sf gas"){
 
     observation$vbin = ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
     if (observation$vbin <= 2){observation$vbin = 3}
@@ -214,6 +240,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     mass_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin))
     vel_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin))
     dis_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin))
+    SFR_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
+    met_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
+    OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -223,22 +252,31 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (verbose){cat("Done! \n")}
 
-    if (write_fits){
-      if (verbose){cat("Writing FITS... \n")}
-      if (missing(output_location)){
-        out_file_name = stringr::str_remove(simspin_file, ".Rdata")
-        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
-                                observation$psf_fwhm,"fwhm.FITS", sep="")
-      }
-
-      write_simspin_FITS(output_file = output_location, simspin_cube = cube, observation = observation)
-    }
-
     output = list("velocity_cube"    = cube,
                   "observation"      = observation,
                   "velocity_image"   = vel_image,
                   "dispersion_image" = dis_image,
-                  "mass_image"       = mass_image)
+                  "mass_image"       = mass_image,
+                  "SFR_image"        = SFR_image,
+                  "metallicity_image"= met_image,
+                  "OH_image"         = OH_image)
+
+    if (write_fits){
+      if (verbose){cat("Writing FITS... \n")}
+      if (missing(output_location)){
+        out_file_name = character(1)
+        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
+                                 error = function(e){"./"})
+        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
+                                observation$psf_fwhm,"fwhm_images.FITS", sep="")
+      }
+
+      write_simspin_FITS(output_file = output_location,
+                         simspin_data = output, object_name = object_name,
+                         telescope_name = telescope_name , instrument_name = telescope$type,
+                         observer_name = observer_name,
+                         input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
+    }
 
   }
 

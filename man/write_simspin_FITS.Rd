@@ -4,20 +4,40 @@
 \alias{write_simspin_FITS}
 \title{A function for making a mock spectral cube FITS file output}
 \usage{
-write_simspin_FITS(output_file, simspin_cube, observation)
+write_simspin_FITS(
+  output_file,
+  simspin_data,
+  object_name,
+  telescope_name,
+  instrument_name,
+  observer_name,
+  input_simspin_file,
+  mask = NA
+)
 }
 \arguments{
 \item{output_file}{The path to the location where the FITS file should be
 written.}
 
-\item{simspin_cube}{The spectral data cube output when \code{build_datacube()}
-is run.}
+\item{simspin_data}{The list output from \code{build_datacube()}.}
 
-\item{observation}{An object of the observation class, as generated when
-\code{build_datacube()} is run.}
+\item{object_name}{A string that described the name of the observed object.}
+
+\item{telescope_name}{A string that describes the name of the telescope used.}
+
+\item{instrument_name}{A string that describes the used instrument on that
+telescope.}
+
+\item{observer_name}{A string that describes the name of the observer.}
+
+\item{input_simspin_file}{A string describing the original SimSpin file
+(i.e. the file output from make_simspin_file).}
+
+\item{mask}{(Optional) A binary array describing the masked regions of the
+cube/images.}
 }
 \value{
-Returns an .fits file that contains a the generated spectral cube and
+Returns an .fits file that contains a the generated data and
 relevant header describing the mock observation.
 }
 \description{
@@ -28,13 +48,15 @@ the \code{build_datacube()} function to a FITS file.
 \dontrun{
 ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 temp_loc = tempdir()
-make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
-cube = build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""),
+make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.Rdata", sep=""))
+cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
                      telescope = telescope(type="SAMI"),
                      observing_strategy = observing_strategy())
 write_simspin_FITS(output_file = paste(temp_loc, "cube.fits", sep=""),
-                  simspin_cube = cube$spectral_cube,
-                  observation = cube$observation)
+                  simspin_data = cube, object_name = "SimSpin EAGLE example",
+                  telescope_name = "AAO", instrument_name = "SAMI",
+                  observer_name = "K.E.Harborne",
+                  input_simspin_file = paste(temp_loc, "spectra.Rdata", sep=""))
 unlink(paste(temp_loc, "spectra.fst", sep=""))
 unlink(paste(temp_loc, "cube.fits", sep=""))
 }

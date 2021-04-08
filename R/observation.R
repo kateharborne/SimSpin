@@ -66,6 +66,7 @@ observation = function(telescope, observing_strategy){
                 aperture_region = aperture_region,
                 aperture_shape  = telescope$aperture_shape,
                 aperture_size   = aperture_size,
+                date            = as.character(Sys.time()),
                 fov             = telescope$fov,
                 filter          = telescope$filter,
                 inc_deg         = observing_strategy$inc_deg,

@@ -8,6 +8,7 @@ context("Testing make_simspin_file function.\n")
 ss_gadget = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
 ss_hdf5 = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
 ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+ss_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
 
 temp_loc = tempdir()
 
@@ -25,10 +26,17 @@ test_that("Initial run of each simulation type - HDF5", {
 })
 
 test_that("Initial run of each simulation type - EAGLE", {
-  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep="")))
+  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep=""), centre = c(0.01,0.02,0.01), half_mass = 1483809589))
   expect_length(readRDS(paste(temp_loc, "eagle_test", sep="")), 4)
-  expect_true(length(readRDS(paste(temp_loc, "eagle_test", sep=""))$gas_part) == 14)
+  expect_true(length(readRDS(paste(temp_loc, "eagle_test", sep=""))$gas_part) == 16)
 })
+
+test_that("Initial run of each simulation type - Magneticum", {
+  expect_null(make_simspin_file(ss_magneticum, output = paste(temp_loc, "magneticum_test", sep="")))
+  expect_length(readRDS(paste(temp_loc, "magneticum_test", sep="")), 4)
+  expect_true(length(readRDS(paste(temp_loc, "magneticum_test", sep=""))$gas_part) == 16)
+})
+
 
 # Test that the function fails when the file already exists
 test_that("Error when output file already exists and overwrite = F - Gadget",{
@@ -41,6 +49,10 @@ test_that("Error when output file already exists and overwrite = F - HDF5",{
 
 test_that("Error when output file already exists and overwrite = F - EAGLE",{
   expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep="")))
+})
+
+test_that("Error when output file already exists and overwrite = F - Magneticum",{
+  expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "magneticum_test", sep="")))
 })
 
 # Test that function can output to environment
@@ -61,7 +73,7 @@ test_that("Test that old files can be overwritten", {
 })
 
 test_that("Test that function works on multiple cores", {
-  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "gadget_test", sep=""),
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
                                 overwrite = T, cores = 2))
 })
 
@@ -121,6 +133,40 @@ test_that("Values are successfully associated with variables", {
   expect_true(all(!is.na(eagle$gas_part$Metallicity)))
   expect_true(all(!is.na(eagle$gas_part$OEOS)))
 
+})
+
+# Testing the sph_spawn functionality ----
+test_that("Test that sph_spawn functionality works", {
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+                                overwrite = T, cores = 1, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+                                overwrite = T, cores = 2, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "magneticum_test", sep=""),
+                                overwrite = T, cores = 1, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "magneticum_test", sep=""),
+                                overwrite = T, cores = 2, sph_spawn_n = 10))
+
+})
+
+test_that("Test that sph_spawn errors when N is not an integer", {
+  expect_error(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+                                overwrite = T, cores = 1, sph_spawn_n = 10.2))
+})
+
+test_that("Test that sph_spawn functionality works on multiple cores - EAGLE", {
+  gas_data_c1 = make_simspin_file(ss_eagle, template = "EMILES", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
+  gas_data_c2 = make_simspin_file(ss_eagle, template = "EMILES", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
+  expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
+  expect_length(gas_data_c1$gas_part$ID, 1000) # sph_spawn_n = 10, original file contains 100 gas particles
+  expect_length(gas_data_c2$gas_part$ID, 1000)
+})
+
+test_that("Test that sph_spawn functionality works on multiple cores - Magneticum", {
+  gas_data_c1 = make_simspin_file(ss_magneticum, template = "EMILES", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
+  gas_data_c2 = make_simspin_file(ss_magneticum, template = "EMILES", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
+  expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
+  expect_length(gas_data_c1$gas_part$ID, 1000) # sph_spawn_n = 10, original file contains 100 gas particles
+  expect_length(gas_data_c2$gas_part$ID, 1000)
 })
 
 unlink(c(paste(temp_loc, "gadget_test", sep=""), paste(temp_loc, "hdf5_test", sep=""),
