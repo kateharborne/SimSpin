@@ -6,10 +6,12 @@
 .lsol_to_erg    = 3.828e33
 .mpc_to_cm      = 3.08568e+24
 .speed_of_light = 299792.458
-.cm_to_kpc = 3.08568e-21
+.cm_to_kpc = 3.24078e-22
 .cms_to_kms = 1e-5
 .g_to_msol = 5.02785e-34
 .gcm3_to_msolkpc3 = 1.477e+31
+.g_constant_cgs = 6.67430e-11
+.g_in_kpcMsolkms2 = 4.3009e-6
 
 # Functions for computing weighted means
 .meanwt = function(x,wt){
@@ -154,10 +156,10 @@
                           "vx"  = gas$Velocity[1,], # Velocities in km/s
                           "vy"  = gas$Velocity[2,],
                           "vz"  = gas$Velocity[3,],
+                          "Mass" = gas$Mass, # Mass in solar masses
                           "SFR" = gas$StarFormationRate,
                           "Density" = gas$Density, # Density in Msol/kpc^3
                           "Temperature" = gas$Temperature,
-                          "Mass" = gas$Mass, # Mass in solar masses
                           "SmoothingLength" = gas$SmoothingLength) # Smoothing length in kpc
 
     remove(gas); remove(PT0_attr)
@@ -286,10 +288,10 @@
                           "vx"  = gas$Velocity[1,]*.cms_to_kms, # Velocities in km/s
                           "vy"  = gas$Velocity[2,]*.cms_to_kms,
                           "vz"  = gas$Velocity[3,]*.cms_to_kms,
+                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
                           "SFR" = gas$StarFormationRate,
                           "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                           "Temperature" = gas$Temperature,
-                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
                           "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
                           "Metallicity" = gas$SmoothedMetallicity,
                           "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
@@ -363,10 +365,10 @@
                           "vx"  = gas$Velocity[1,]*.cms_to_kms, # Velocities in km/s
                           "vy"  = gas$Velocity[2,]*.cms_to_kms,
                           "vz"  = gas$Velocity[3,]*.cms_to_kms,
+                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
                           "SFR" = gas$StarFormationRate,
                           "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                           "Temperature" = gas$Temperature,
-                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
                           "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
                           "Metallicity" = (colSums(gas$Metallicity[2:11,]))/(gas$Mass),
                           "Carbon" = gas$Metallicity[2,] / gas$Mass,
@@ -439,9 +441,9 @@
     stellar_data$y = stellar_data$y - centre[2]
     stellar_data$z = stellar_data$z - centre[3]
     star_r2 = stellar_data$x^2 + stellar_data$y^2 + stellar_data$z^2
-    star_vcen = c(median(stellar_data$vx[star_r2 < 10]), # using the median velocities within
-                  median(stellar_data$vy[star_r2 < 10]), #  10kpc of the galaxy centre to define
-                  median(stellar_data$vz[star_r2 < 10])) #  the central velocity
+    star_vcen = c(median(stellar_data$vx[star_r2 < 100]), # using the median velocities within
+                  median(stellar_data$vy[star_r2 < 100]), #  10kpc of the galaxy centre to define
+                  median(stellar_data$vz[star_r2 < 100])) #  the central velocity
     stellar_data$vx = stellar_data$vx - star_vcen[1]
     stellar_data$vy = stellar_data$vy - star_vcen[2]
     stellar_data$vz = stellar_data$vz - star_vcen[3]
