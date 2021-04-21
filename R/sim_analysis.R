@@ -118,6 +118,8 @@ sim_analysis = function(simspin_file, type = "stars"){
   galaxy_data$v_phi = atan2(y = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2)), x = galaxy_data$vz)
 
   galaxy_data$rbin = cut(galaxy_data$r, breaks=lseq, labels=F)
+  particle_ID = NULL # initiallising varible to avoid CRAN error in checks
+
   galaxy_data_table = data.table::data.table("particle_ID" = seq(1, length(galaxy_data$x)), "rbin_ID"=galaxy_data$rbin)
 
   # which particles sit in each rbin?
