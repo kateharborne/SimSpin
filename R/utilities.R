@@ -149,13 +149,16 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]])
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
+
     gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = gas$Coordinates[1,],# Coordinates in kpc
-                          "y"  = gas$Coordinates[2,],
-                          "z"  = gas$Coordinates[3,],
-                          "vx"  = gas$Velocity[1,], # Velocities in km/s
-                          "vy"  = gas$Velocity[2,],
-                          "vz"  = gas$Velocity[3,],
+                          "x"  = if(one_p_flag){gas$Coordinates[1]}else{gas$Coordinates[1,]},# Coordinates in kpc
+                          "y"  = if(one_p_flag){gas$Coordinates[2]}else{gas$Coordinates[2,]},
+                          "z"  = if(one_p_flag){gas$Coordinates[3]}else{gas$Coordinates[3,]},
+                          "vx"  = if(one_p_flag){gas$Velocity[1]}else{gas$Velocity[1,]}, # Velocities in km/s
+                          "vy"  = if(one_p_flag){gas$Velocity[2]}else{gas$Velocity[2,]},
+                          "vz"  = if(one_p_flag){gas$Velocity[3]}else{gas$Velocity[3,]},
                           "Mass" = gas$Mass, # Mass in solar masses
                           "SFR" = gas$StarFormationRate,
                           "Density" = gas$Density, # Density in Msol/kpc^3
@@ -177,13 +180,16 @@
         stars[[i]] = hdf5r::readDataSet(data[[paste0("PartType2/",PT2_attr[i])]])
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
     disk_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = stars$Coordinates[1,], # Coordinates in kpc
-                           "y"  = stars$Coordinates[2,],
-                           "z"  = stars$Coordinates[3,],
-                           "vx"  = stars$Velocities[1,], # Velocities in km/s
-                           "vy"  = stars$Velocities[2,],
-                           "vz"  = stars$Velocities[3,],
+                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
                            "Mass" = stars$Masses) # Mass in solar masses
 
     remove(stars); remove(PT2_attr)
@@ -197,13 +203,16 @@
       stars[[i]] = hdf5r::readDataSet(data[[paste0("PartType3/",PT3_attr[i])]])
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
     star_part = data.frame("ID" = c(disk_part$ID, stars$ParticleIDs),
-                           "x"  = c(disk_part$x, stars$Coordinates[1,]), # Coordinates in kpc
-                           "y"  = c(disk_part$y, stars$Coordinates[2,]),
-                           "z"  = c(disk_part$z, stars$Coordinates[3,]),
-                           "vx"  = c(disk_part$vx, stars$Velocities[1,]), # Velocities in km/s
-                           "vy"  = c(disk_part$vy, stars$Velocities[2,]),
-                           "vz"  = c(disk_part$vz, stars$Velocities[3,]),
+                           "x"  = c(disk_part$x, if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}), # Coordinates in kpc
+                           "y"  = c(disk_part$y, if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]}),
+                           "z"  = c(disk_part$z, if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]}),
+                           "vx"  = c(disk_part$vx, if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}), # Velocities in km/s
+                           "vy"  = c(disk_part$vy, if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]}),
+                           "vz"  = c(disk_part$vz, if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]}),
                            "Mass" = c(disk_part$Mass, stars$Masses)) # Mass in solar masses
 
     remove(stars); remove(PT3_attr); remove(disk_part)
@@ -218,13 +227,16 @@
       stars[[i]] = hdf5r::readDataSet(data[[paste0("PartType2/",PT2_attr[i])]])
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
     star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = stars$Coordinates[1,], # Coordinates in kpc
-                           "y"  = stars$Coordinates[2,],
-                           "z"  = stars$Coordinates[3,],
-                           "vx"  = stars$Velocities[1,], # Velocities in km/s
-                           "vy"  = stars$Velocities[2,],
-                           "vz"  = stars$Velocities[3,],
+                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
                            "Mass" = stars$Masses) # Mass in solar masses
 
     remove(stars); remove(PT2_attr)
@@ -239,13 +251,16 @@
       stars[[i]] = hdf5r::readDataSet(data[[paste0("PartType3/",PT3_attr[i])]])
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
     star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = stars$Coordinates[1,], # Coordinates in kpc
-                           "y"  = stars$Coordinates[2,],
-                           "z"  = stars$Coordinates[3,],
-                           "vx"  = stars$Velocities[1,], # Velocities in km/s
-                           "vy"  = stars$Velocities[2,],
-                           "vz"  = stars$Velocities[3,],
+                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
                            "Mass" = stars$Masses) # Mass in solar masses
 
     remove(stars); remove(PT3_attr);
@@ -281,13 +296,16 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
+
     gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = gas$Coordinates[1,]*.cm_to_kpc, # Coordinates in kpc
-                          "y"  = gas$Coordinates[2,]*.cm_to_kpc,
-                          "z"  = gas$Coordinates[3,]*.cm_to_kpc,
-                          "vx"  = gas$Velocity[1,]*.cms_to_kms, # Velocities in km/s
-                          "vy"  = gas$Velocity[2,]*.cms_to_kms,
-                          "vz"  = gas$Velocity[3,]*.cms_to_kms,
+                          "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                          "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                          "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                          "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                          "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                          "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
                           "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
                           "SFR" = gas$StarFormationRate,
                           "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
@@ -316,13 +334,16 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
     star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = stars$Coordinates[1,]*.cm_to_kpc, # Coordinates in kpc
-                           "y"  = stars$Coordinates[2,]*.cm_to_kpc,
-                           "z"  = stars$Coordinates[3,]*.cm_to_kpc,
-                           "vx"  = stars$Velocity[1,]*.cms_to_kms, # Velocities in km/s
-                           "vy"  = stars$Velocity[2,]*.cms_to_kms,
-                           "vz"  = stars$Velocity[3,]*.cms_to_kms,
+                           "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                           "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                           "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                           "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                           "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                           "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
                            "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.frame("Initial_Mass" = stars$InitialMass*.g_to_msol,
@@ -358,13 +379,16 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
+
     gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = gas$Coordinates[1,]*.cm_to_kpc, # Coordinates in kpc
-                          "y"  = gas$Coordinates[2,]*.cm_to_kpc,
-                          "z"  = gas$Coordinates[3,]*.cm_to_kpc,
-                          "vx"  = gas$Velocity[1,]*.cms_to_kms, # Velocities in km/s
-                          "vy"  = gas$Velocity[2,]*.cms_to_kms,
-                          "vz"  = gas$Velocity[3,]*.cms_to_kms,
+                          "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                          "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                          "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                          "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                          "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                          "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
                           "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
                           "SFR" = gas$StarFormationRate,
                           "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
@@ -393,13 +417,16 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
     star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = stars$Coordinates[1,]*.cm_to_kpc, # Coordinates in kpc
-                           "y"  = stars$Coordinates[2,]*.cm_to_kpc,
-                           "z"  = stars$Coordinates[3,]*.cm_to_kpc,
-                           "vx"  = stars$Velocity[1,]*.cms_to_kms, # Velocities in km/s
-                           "vy"  = stars$Velocity[2,]*.cms_to_kms,
-                           "vz"  = stars$Velocity[3,]*.cms_to_kms,
+                           "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                           "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                           "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                           "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                           "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                           "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
                            "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.frame("Initial_Mass" = stars$InitialMass*.g_to_msol,
