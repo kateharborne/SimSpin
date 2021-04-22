@@ -12,7 +12,7 @@ matrix:
     - os: linux
       r: release
     - os: osx
-      osx_image: xcode11
+      osx_image: xcode12
 
 r_packages:
   - covr
