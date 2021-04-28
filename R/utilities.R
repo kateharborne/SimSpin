@@ -82,7 +82,7 @@
   part = data.frame("ID" = id,          # the particle data table
                     "x" = pos[extract], "y"=pos[extract+1], "z"=pos[extract+2],
                     "vx" = vel[extract], "vy" = vel[extract+1], "vz"=vel[extract+2],
-                    "Mass" = masses)
+                    "Mass" = masses*1e10)
 
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
               "Time" = Time, "Redshift" = Redshift, # relevent simulation data
@@ -159,7 +159,7 @@
                           "vx"  = if(one_p_flag){gas$Velocity[1]}else{gas$Velocity[1,]}, # Velocities in km/s
                           "vy"  = if(one_p_flag){gas$Velocity[2]}else{gas$Velocity[2,]},
                           "vz"  = if(one_p_flag){gas$Velocity[3]}else{gas$Velocity[3,]},
-                          "Mass" = gas$Mass, # Mass in solar masses
+                          "Mass" = gas$Mass*1e10, # Mass in solar masses
                           "SFR" = gas$StarFormationRate,
                           "Density" = gas$Density, # Density in Msol/kpc^3
                           "Temperature" = gas$Temperature,
@@ -190,7 +190,7 @@
                            "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
                            "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
                            "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses) # Mass in solar masses
+                           "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT2_attr)
 
@@ -213,7 +213,7 @@
                            "vx"  = c(disk_part$vx, if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}), # Velocities in km/s
                            "vy"  = c(disk_part$vy, if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]}),
                            "vz"  = c(disk_part$vz, if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]}),
-                           "Mass" = c(disk_part$Mass, stars$Masses)) # Mass in solar masses
+                           "Mass" = c(disk_part$Mass, stars$Masses*1e10)) # Mass in solar masses
 
     remove(stars); remove(PT3_attr); remove(disk_part)
 
@@ -237,7 +237,7 @@
                            "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
                            "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
                            "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses) # Mass in solar masses
+                           "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT2_attr)
   } else if ("PartType3" %in% groups){
@@ -261,7 +261,7 @@
                            "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
                            "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
                            "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses) # Mass in solar masses
+                           "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT3_attr);
 
@@ -552,7 +552,7 @@
   int_order = order(ellip_radius) # get the indicies of the radii in order (low to high)
   ordered_galaxy_data = galaxy_data[int_order,]
   cum_mass  = cumsum(ordered_galaxy_data$Mass) # cumulative sum of mass given this order
-  half_mass_ind = which(abs(cum_mass - half_mass) == min(abs(cum_mass - half_mass))) # at what radius does this half-mass now occur?
+  half_mass_ind = which(abs(cum_mass - half_mass) == min(abs(cum_mass - half_mass)))[1] # at what radius does this half-mass now occur?
 
   return(ordered_galaxy_data[1:(half_mass_ind-1),])
 }
