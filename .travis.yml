@@ -11,8 +11,8 @@ matrix:
   include:
     - os: linux
       r: release
-    - os: osx
-      osx_image: xcode12
+#    - os: osx
+#      osx_image: xcode12 # Travis is timing out for the MacOS tests
 
 r_packages:
   - covr
@@ -23,12 +23,12 @@ warnings_are_errors: false
 
 before_install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then sudo apt-get install libhdf5-dev; fi
-  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
-      Rscript -e "install.packages('pracma', type = 'source')";
-      sudo tlmgr update --self;
-      sudo tlmgr update --all;
-      sudo tlmgr install index;
-    fi
+#  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+#      Rscript -e "install.packages('pracma', type = 'source')";
+#      sudo tlmgr update --self;
+#      sudo tlmgr update --all;
+#      sudo tlmgr install index;
+#    fi
 
 
 # Additional packages that are not fetched from CRAN
@@ -51,9 +51,9 @@ addons:
        - libnlopt-dev
        - devscripts
 
-brew_packages:
-  - fftw
-  - hdf5
+#brew_packages:
+#  - fftw
+#  - hdf5
 
 after_success:
   - Rscript -e 'library(covr); codecov()'
