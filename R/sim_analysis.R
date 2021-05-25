@@ -15,6 +15,10 @@
 #' output list from \code{make_simspin_file()}.
 #'@param type String "stars" (default) or "gas" to specify which set of
 #' of particles are used in the property calculations.
+#'@param half_mass If simulation file contains all particles cutout from a box
+#' (rather than just particles from a single galaxy), you can the half-mass
+#' value at which the alignment function is run. Numeric length = 1. Default is
+#' NA, in which case half the total mass of the suplied simulation data is used.
 #'@return Returns a list that contains:
 #'\describe{
 #'   \item{Properties}{list()}
@@ -55,7 +59,7 @@
 #'props = sim_analysis(simspin_file = ss_gadget)
 #'
 
-sim_analysis = function(simspin_file, type = "stars"){
+sim_analysis = function(simspin_file, type = "stars", half_mass = NA){
 
   # Reading in SimSpin file data
   if (typeof(simspin_file) == "character"){ # if provided with path to file
@@ -78,6 +82,9 @@ sim_analysis = function(simspin_file, type = "stars"){
     }
   }
 
+  if (is.na(half_mass)){
+    half_mass = sum(galaxy_data$Mass)/2
+  }
 
 
   lseq = c(seq(0, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 501, by=50))
@@ -89,7 +96,7 @@ sim_analysis = function(simspin_file, type = "stars"){
                                            "MeanAge" = mean(galaxy_data$Age),
                                            "MeanMetallicity" = mean(galaxy_data$Metallicity),
                                            "NumberOfParticles" = length(galaxy_data$ID)),
-                       "HalfMassProperties" = list("Mass" = sum(galaxy_data$Mass)/2,
+                       "HalfMassProperties" = list("Mass" = half_mass,
                                                    "RadiusCircular" = numeric(1),
                                                    "RadiusElliptical" = numeric(1),
                                                    "Shape_p" = numeric(1),
@@ -163,8 +170,8 @@ sim_analysis = function(simspin_file, type = "stars"){
     M  = analysis_data$RadialTrends$CumulativeMass[cbin]
     analysis_data$RadialTrends$SpinParameter_Bullock[cbin] = sqrt(sum(angmom_galaxy(sample[,1:8])^2)) / (sqrt(2)*M*vc*bin_ends[cbin])
     shapes = .measure_pqj(galaxy_data = list("star_part" = galaxy_data), half_mass = M)
-    analysis_data$RadialTrends$Shape_p = shapes$p
-    analysis_data$RadialTrends$Shape_q = shapes$q
+    analysis_data$RadialTrends$Shape_p[cbin] = shapes$p
+    analysis_data$RadialTrends$Shape_q[cbin] = shapes$q
   }
 
   shapes = .measure_pqj(galaxy_data = list("star_part" = galaxy_data), half_mass = analysis_data$HalfMassProperties$Mass)

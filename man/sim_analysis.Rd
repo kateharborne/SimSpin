@@ -4,7 +4,7 @@
 \alias{sim_analysis}
 \title{A function for measuring the particle properties of the input simulation}
 \usage{
-sim_analysis(simspin_file, type = "stars")
+sim_analysis(simspin_file, type = "stars", half_mass = NA)
 }
 \arguments{
 \item{simspin_file}{The path to the location of the SimSpin .Rdata file OR
@@ -12,6 +12,11 @@ output list from \code{make_simspin_file()}.}
 
 \item{type}{String "stars" (default) or "gas" to specify which set of
 of particles are used in the property calculations.}
+
+\item{half_mass}{If simulation file contains all particles cutout from a box
+(rather than just particles from a single galaxy), you can the half-mass
+value at which the alignment function is run. Numeric length = 1. Default is
+NA, in which case half the total mass of the suplied simulation data is used.}
 }
 \value{
 Returns a list that contains:
