@@ -675,13 +675,15 @@
 }
 
 # Functions for smoothing SPH kernels
-.wendland_c2 = function(r){
+.wendland_c2 = function(r){ # SPH smoothing kernel used in EAGLE
   return((21/(2*pi))*((1-r)^4)*((4*r) + 1))
-}
+} # input a radial position, r
+# returns the corresponding kernel weight at that radius
 
-.wendland_c6 = function(r){
+.wendland_c6 = function(r){ # SPH smoothing kernel used in Magneticum
   return((1365/(64*pi))*((1-r)^8)*(1 + (8*r) + (25*r^2) + (32*r^3)))
-}
+} # input a radial position, r
+  # returns the corresponding kernel weight at that radius
 
 .generate_uniform_sphere = function(number_of_points, kernel="WC2"){
 
@@ -689,13 +691,20 @@
   # uniformly sample the volume of a sphere and computing their corresponding
   # weights
 
+  # input the number of new particles you would like to spawn ("number_of_points")
+  # returns a data.frame containing the longitude and latitude of those new
+  # points, the radial coordinate "r" as a function of the softening length "h"
+  # and the corresponding SPH kernel weight normalised so that the total of the
+  # weights sums to 1 (i.e. forcing mass conservation).
+
   xyz = cbind(stats::rnorm(number_of_points), stats::rnorm(number_of_points), stats::rnorm(number_of_points))
   r = stats::runif(number_of_points, min = 0, max = 1)^(1/3)
-
   den = sqrt((xyz[,1]^2) + (xyz[,2]^2) + (xyz[,3]^2))
   xyz_norm = (r*xyz)/den
+  # method for calculating a randomly distibution of n points uniformly
+  # across a spherical volume
 
-  sph = sphereplot::car2sph(xyz_norm)
+  sph = sphereplot::car2sph(xyz_norm) # convert to spherical coordinates
   if (kernel == "WC2"){
     weights = .wendland_c2(sph[,3])
     sph_kernel = data.frame("long" = sph[,1], "lat" = sph[,2],
@@ -1201,22 +1210,34 @@
 
 # spawn gas particles -
 .sph_spawn = function(gas_part, new_gas_part, sph_spawn_n, kernel){
+# Function for generating "n" number of gas particles (specified by
+# "sph_spawn_n") smoothed across some volume by the relevent
+# SPH kernel. This function feeds into the process at the
+# "make_simspin_file()" stage.
 
   no_gas = length(gas_part$ID)
 
-  for (each in 1:no_gas){
+  for (each in 1:no_gas){ # for each particle
     ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
     part = gas_part[each,]
+    # pull the data relevent to that particle from the original data.frame
 
     rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+    # distribute that particle randomly across the SPH kernel volume
+    # as a function of smoothing length
     rand_pos$r = rand_pos$r.h * part$SmoothingLength
+    # use the particle's specific smoothing length to scale the radial
+    # positions of the particle.
     new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+    # convert spherical coordinates back into cartesian coords
 
     new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
     new_gas_part$x[ind1:ind2] = part$x+new_xyz[,1]
     new_gas_part$y[ind1:ind2] = part$y+new_xyz[,2]
     new_gas_part$z[ind1:ind2] = part$z+new_xyz[,3]
     new_gas_part$Mass[ind1:ind2] = part$Mass*rand_pos$weight
+    # in the new data.frame of particle properties, assign their
+    # new positions and masses scaled by the kernel weight.
   }
 
   return(new_gas_part)
@@ -1224,6 +1245,7 @@
 
 .sph_spawn_mc = function(gas_part, new_gas_part, sph_spawn_n, kernel, cores){
 
+  # Parallel version of the function ".sph_spawn" above.
   doParallel::registerDoParallel(cores)
   no_gas = length(gas_part$ID)
   ID = numeric(no_gas); x = numeric(no_gas); y = numeric(no_gas)
