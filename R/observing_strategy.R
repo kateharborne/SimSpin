@@ -32,7 +32,9 @@
 #'
 observing_strategy = function(z = 0.1, inc_deg = 70, twist_deg = 0, particle_limit = 1, blur = F, fwhm=2, psf="Gaussian"){
 
-
+  if (z <= 0){
+    stop("Error: Unable to process supplied redshift, z <= 0. \n Please specify z > 0 and try again.")
+  }
   if(blur){
     if(stringr::str_to_upper(psf) != "GAUSSIAN" & stringr::str_to_upper(psf) != "MOFFAT"){
       stop("Error: Unable to generate requested PSF. \n Please specify psf = 'Gaussian' or 'Moffat'.")

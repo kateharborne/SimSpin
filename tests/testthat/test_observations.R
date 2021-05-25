@@ -103,9 +103,11 @@ test_that("Initial run of observing_strategy() function - w/ blur", {
   expect_length(observing_strategy(blur=T), 7)
 })
 
-# Testing that an error triggers if an incompatible psf shape is given.
+# Testing that an error triggers if incompatible parameters are given
 test_that("observing_strategy() issues error when incompatible parameters are given.", {
   expect_error(observing_strategy(blur = T, psf = "round"))
+  expect_error(observing_strategy(z=0))
+  expect_error(observing_strategy(z=-0.2))
 })
 
 # Testing that you can generate an observation with each of the telescope types
