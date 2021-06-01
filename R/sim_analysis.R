@@ -15,6 +15,9 @@
 #' output list from \code{make_simspin_file()}.
 #'@param type String "stars" (default) or "gas" to specify which set of
 #' of particles are used in the property calculations.
+#'@param bin_breaks Optional parameter that allows you to specify radial bin
+#'  break positions. Default will give bins spaced with varying sized bins:
+#'  `seq(0, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 501, by=50)`
 #'@param half_mass If simulation file contains all particles cutout from a box
 #' (rather than just particles from a single galaxy), you can the half-mass
 #' value at which the alignment function is run. Numeric length = 1. Default is
@@ -59,7 +62,7 @@
 #'props = sim_analysis(simspin_file = ss_gadget)
 #'
 
-sim_analysis = function(simspin_file, type = "stars", half_mass = NA){
+sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks=NA){
 
   # Reading in SimSpin file data
   if (typeof(simspin_file) == "character"){ # if provided with path to file
@@ -86,10 +89,20 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA){
     half_mass = sum(galaxy_data$Mass)/2
   }
 
+  if (is.na(bin_breaks)){
+    lseq = c(seq(0, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 501, by=50))
+    rbins = length(lseq)
+    bin_ends = c(seq(1, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 551, by=50))
+  } else {
+    if (bin_breaks[1]!=0){
+      lseq = c(0, bin_breaks)
+    } else {
+      lseq = bin_breaks
+    }
+    rbins = length(lseq)
+    bin_ends = lseq + c(diff(lseq), diff(lseq)[(rbins-1)])
+  }
 
-  lseq = c(seq(0, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 501, by=50))
-  rbins = length(lseq)
-  bin_ends = c(seq(1, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 551, by=50))
 
   analysis_data = list("Properties" = list("Type" = type,
                                            "TotalMass" = sum(galaxy_data$Mass),
@@ -136,10 +149,8 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA){
     binID = part_in_rbin$rbin_ID[bin]
     if (!is.na(binID)){
       sample = galaxy_data[part_in_rbin$val[[bin]],]
-      bin_vol = ((4/3)*pi*(bin_ends[binID])^3) - ((4/3)*pi*(lseq[binID])^3)
 
       analysis_data$RadialTrends$Mass[binID] = sum(sample$Mass)
-      analysis_data$RadialTrends$Density[binID] = sum(sample$Mass) /  bin_vol # in units Msol / kpc^3
       analysis_data$RadialTrends$Age[binID] = mean(sample$Age)
       analysis_data$RadialTrends$Metallicity[binID] = mean(sample$Metallicity)
       analysis_data$RadialTrends$RotationalVelocity[binID] = mean(sample$v_theta)
@@ -149,7 +160,6 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA){
       analysis_data$RadialTrends$NumberOfParticles[binID] = length(sample$ID)
     } else {
       analysis_data$RadialTrends$Mass[binID] = NA
-      analysis_data$RadialTrends$Density[binID] = NA
       analysis_data$RadialTrends$Age[binID] = NA
       analysis_data$RadialTrends$Metallicity[binID] = NA
       analysis_data$RadialTrends$RotationalVelocity[binID] = NA
@@ -161,7 +171,9 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA){
 
   }
 
+  bin_vol = (4/3)*pi*(bin_ends^3)
   analysis_data$RadialTrends$CumulativeMass = cumsum(analysis_data$RadialTrends$Mass)
+  analysis_data$RadialTrends$Density = analysis_data$RadialTrends$CumulativeMass / bin_vol
   analysis_data$RadialTrends$CircularVelocity = sqrt(.g_in_kpcMsolkms2 * analysis_data$RadialTrends$CumulativeMass / bin_ends)
 
   for (cbin in 1:rbins){
