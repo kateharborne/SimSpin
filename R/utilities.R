@@ -485,7 +485,7 @@
     galaxy_data$star_part = stellar_data
     galaxy_data$gas_part = gas_data
 
-  } else {
+  } else if (!is.null(galaxy_data$star_part)){
     stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
     galaxy_data$star_part = stellar_data$part_data
     if (!is.null(galaxy_data$gas_part)){ # if gas is present, centering these particles based on stellar medians
@@ -498,6 +498,9 @@
       gas_data$vz = gas_data$vz - stellar_data$vzcen
       galaxy_data$gas_part = gas_data
     }
+  } else {
+    gas_data = cen_galaxy(galaxy_data$gas_part)
+    galaxy_data$gas_part = gas_data$part_data
   }
   return(galaxy_data)
 }
@@ -670,7 +673,20 @@
 
 # Function to align full galaxy based on the stellar particles
 .align_galaxy = function(galaxy_data, half_mass=NA){
-  data = .measure_pqj(galaxy_data, half_mass)
+  if (is.null(galaxy_data$star_part)){ # if there are no stellar particles (just gas), use these
+    dummy_data = list(star_part = galaxy_data$gas_part,
+                      gas_part= galaxy_data$star_part,
+                      head = galaxy_data$head,
+                      ssp = galaxy_data$ssp)
+    dummy = .measure_pqj(dummy_data, half_mass)
+    data = list(galaxy_data = vector("list"))
+    data$galaxy_data = list(star_part = dummy$galaxy_data$gas_part,
+                            gas_part  = dummy$galaxy_data$star_part,
+                            head      = dummy$galaxy_data$head,
+                            ssp       = dummy$galaxy_data$ssp)
+  } else {
+    data = .measure_pqj(galaxy_data, half_mass)
+  }
   return(data$galaxy_data)
 }
 
