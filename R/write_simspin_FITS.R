@@ -41,6 +41,7 @@
 
 write_simspin_FITS = function(output_file, simspin_data, object_name,
                               telescope_name, instrument_name, observer_name,
+                              redshift,
                               input_simspin_file, mask=NA){
 
   observation = simspin_data$observation
@@ -63,7 +64,7 @@ write_simspin_FITS = function(output_file, simspin_data, object_name,
                           "INSTRUME"=instrument_name, "RA"=0, "DEC"=0, "EQINOX"=2000,
                           "RADECSYS"="FK5", "EXPTIME"=1320, "MJD-OBS"=58906.11,
                           "DATE-OBS"=observation$date, "UTC"=9654, "LST"=30295.18,
-                          "PI-COI"="UNKNOWN", "OBSERVER"=observer_name,
+                          "PI-COI"="UNKNOWN", "OBSERVER"=observer_name, "REDSHIFT"=observation$z,
                           "PIPEFILE"=output_name,
                           "BUNIT"="erg/s/cm**2",
                           "ARCFILE"=input_simspin_file,
@@ -88,6 +89,7 @@ write_simspin_FITS = function(output_file, simspin_data, object_name,
                             "UTC"="[s] 02:40:54.000 UTC",
                             "LST"="[s] 08:24:55.178 LST",
                             "PI-COI"="PI-COI name.", "OBSERVER"="Name of observer.",
+                            "REDSHIFT"="Observed redshift.",
                             "PIPEFILE"="Filename of data product",
                             "BUNIT"="Angstrom",
                             "ARCFILE"="Archive File Name",
