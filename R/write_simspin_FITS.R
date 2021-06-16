@@ -41,7 +41,6 @@
 
 write_simspin_FITS = function(output_file, simspin_data, object_name,
                               telescope_name, instrument_name, observer_name,
-                              redshift,
                               input_simspin_file, mask=NA){
 
   observation = simspin_data$observation

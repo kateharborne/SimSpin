@@ -11,6 +11,7 @@ write_simspin_FITS(
   telescope_name,
   instrument_name,
   observer_name,
+  redshift,
   input_simspin_file,
   mask = NA
 )
