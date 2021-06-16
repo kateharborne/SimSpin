@@ -500,7 +500,12 @@
     }
   } else {
     gas_data = cen_galaxy(galaxy_data$gas_part)
-    galaxy_data$gas_part = gas_data$part_data
+    galaxy_data$gas_part$x = gas_data$part_data$x
+    galaxy_data$gas_part$y = gas_data$part_data$y
+    galaxy_data$gas_part$z = gas_data$part_data$z
+    galaxy_data$gas_part$vx = gas_data$part_data$vx
+    galaxy_data$gas_part$vy = gas_data$part_data$vy
+    galaxy_data$gas_part$vz = gas_data$part_data$vz
   }
   return(galaxy_data)
 }
