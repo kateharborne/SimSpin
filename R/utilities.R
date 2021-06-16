@@ -1006,10 +1006,12 @@
   lum_map  = array(data = NA, dim = observation$sbin^2)
   age_map  = array(data = NA, dim = observation$sbin^2)
   met_map  = array(data = NA, dim = observation$sbin^2)
+  part_map = array(data=0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
+    part_map[part_in_spaxel$spaxel_ID[i]] = num_part
 
     # if number is greater than the particle limit
     if (num_part >= observation$particle_limit){
@@ -1055,7 +1057,7 @@
 
   }
 
-  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map))
+  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 }
 
 .velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores, mass_flag){
@@ -1066,14 +1068,16 @@
   lum_map  = array(data = NA, dim = observation$sbin^2)
   age_map  = array(data = NA, dim = observation$sbin^2)
   met_map  = array(data = NA, dim = observation$sbin^2)
+  part_map = array(data=0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = length(part_in_spaxel$val[[i]])
+                     part_map = num_part
                      # if the number of particles in the spaxel is greater than the particle limit
                      if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
@@ -1112,7 +1116,7 @@
                        age_map = NA
                        met_map = NA
                      }
-                     result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map)
+                     result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -1123,8 +1127,9 @@
   dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
   age_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
   met_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
+  part_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[7]]))
 
-  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map))
+  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 
 }
 

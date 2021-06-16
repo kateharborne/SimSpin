@@ -184,6 +184,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     dis_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin))
     age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
     met_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
+    part_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -199,7 +200,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                   "dispersion_image" = dis_image,
                   "flux_image"       = lum_image,
                   "age_image"        = age_image,
-                  "metallicity_image"= met_image)
+                  "metallicity_image"= met_image,
+                  "particle_image"   = part_image)
 
     if (write_fits){
       if (verbose){cat("Writing FITS... \n")}
