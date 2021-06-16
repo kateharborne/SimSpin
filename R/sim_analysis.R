@@ -89,7 +89,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     half_mass = sum(galaxy_data$Mass)/2
   }
 
-  if (is.na(bin_breaks)){
+  if (is.na(bin_breaks[1])){
     lseq = c(seq(0, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 501, by=50))
     rbins = length(lseq)
     bin_ends = c(seq(1, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 551, by=50))
