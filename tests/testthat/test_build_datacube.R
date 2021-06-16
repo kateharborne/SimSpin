@@ -61,39 +61,39 @@ test_that("Gadget files can be built - velocity mode.", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               verbose = T), 7)
+                               verbose = T), 8)
 })
 
 test_that("HDF5 files can be built - velocity mode.", {
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 7)
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 8)
 })
 
 test_that("EAGLE files can be built - velocity mode.", {
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 7)
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 8)
 })
 
 test_that("EAGLE files can be built in parallel - velocity mode.", {
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               cores = 2), 7)
+                               cores = 2), 8)
 })
 
 test_that("Magneticum files can be built - velocity mode.", {
   expect_length(build_datacube(simspin_file = ss_magneticum,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 7)
+                               observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), 8)
 })
 
 test_that("Magneticum files can be built in parallel - velocity mode.", {
   expect_length(build_datacube(simspin_file = ss_magneticum,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               cores = 2), 7)
+                               cores = 2), 8)
 })
 
 # Testing that build_datacube works in gas mode ----
@@ -179,7 +179,7 @@ test_that("Data cubes can be written to file", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", method="velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "velocity_cube.FITS")), 7)
+                               write_fits = T, output_location = paste0(temp_loc, "velocity_cube.FITS")), 8)
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", method="gas", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -316,11 +316,11 @@ test_that("EAGLE cubes can be built with mass weighting rather than luminosity",
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               mass_flag = T), 7)
+                               mass_flag = T), 8)
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
-                               mass_flag = T, cores=2), 7)
+                               mass_flag = T, cores=2), 8)
 
   expect_true(all(build_datacube(simspin_file = ss_eagle,
                                  telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
