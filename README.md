@@ -4,7 +4,11 @@
 [![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
 <!-- badges: end -->
 
+<<<<<<< HEAD
 ![](https://raw.githubusercontent.com/kateharborne/SimSpin.jl/master/docs/src/assets/logo.png | width=40)
+=======
+![](https://raw.githubusercontent.com/kateharborne/SimSpin.jl/master/docs/src/assets/logo.png){width=40%}
+>>>>>>> dd75cbb2f1c1487ec5b4549f71bba4a74275a071
 
 SimSpin v2.0.0 - A package for producing mock observations of particle simulations
 
