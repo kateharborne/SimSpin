@@ -184,7 +184,9 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     vc = analysis_data$RadialTrends$CircularVelocity[cbin]
     M  = analysis_data$RadialTrends$CumulativeMass[cbin]
     analysis_data$RadialTrends$SpinParameter_Bullock[cbin] = sqrt(sum(angmom_galaxy(sample[,1:8])^2)) / (sqrt(2)*M*vc*bin_ends[cbin])
-    shapes = .measure_pqj(galaxy_data = list("star_part" = galaxy_data), half_mass = M)
+    shapes = tryCatch(expr = {.measure_pqj(galaxy_data = list("star_part" = galaxy_data), half_mass = M)},
+                      error = function(e){list(p = NA, q = NA)})
+
     analysis_data$RadialTrends$Shape_p[cbin] = shapes$p
     analysis_data$RadialTrends$Shape_q[cbin] = shapes$q
   }
