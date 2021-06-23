@@ -4,6 +4,8 @@
 [![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
 <!-- badges: end -->
 
+![](https://raw.githubusercontent.com/kateharborne/SimSpin.jl/master/docs/src/assets/logo.png | width=40)
+
 SimSpin v2.0.0 - A package for producing mock observations of particle simulations
 
 The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument. A mock spectral data cube can be produced using the functions in this package. This is a simple process comprised of three steps:
