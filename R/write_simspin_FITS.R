@@ -222,7 +222,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "EXTNAME"="Image extension name")
 
     extnames = if("flux_image" %in% names(simspin_datacube$raw_images)){c("FLUX", "LOS_VEL", "LOS_DISP", "AGE", "METALS")}else{c("MASS", "LOS_VEL", "LOS_DISP", "AGE", "METALS")}
-    bunits = if("flux_image" %in% names(simspin_datacube$raw_images)){c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar")}else{c("1e10 Msol", "km/s", "km/s", "Gyr", "Z_solar")}
+    bunits = if("flux_image" %in% names(simspin_datacube$raw_images)){c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar")}else{c("Msol", "km/s", "km/s", "Gyr", "Z_solar")}
     extnum = c(3,4,5,6,7)
     image_names = if("flux_image" %in% names(simspin_datacube$raw_images)){c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image")}else{c("mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image")}
 
