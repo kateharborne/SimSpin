@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
 <!-- badges: end -->
 
-SimSpin v2.0.0 - A package for producing mock observations of particle simulations
+SimSpin v2.0.4 - A package for producing mock observations of particle simulations
 
 The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument. A mock spectral data cube can be produced using the functions in this package. This is a simple process comprised of three steps:
 
@@ -58,5 +58,3 @@ If you use this code in any of your own published research, please make sure to 
 K.E. Harborne, C.Power and A.S.G. Robotham, (2020), ["SIMSPIN - Constructing mock IFS kinematic data cubes"](https://ui.adsabs.harvard.edu/abs/2020PASA...37...16H/abstract), Publications of the Astronomical Society of Australia, Volume 37, article id. e016
 
 K.E. Harborne, (2019), ["SimSpin: Kinematic analysis of galaxy simulations"](https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract), Astrophysics Source Code Library, record ascl:1903.006
-
-
