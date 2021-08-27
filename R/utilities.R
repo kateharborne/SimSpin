@@ -914,8 +914,8 @@
                                                                 flux = spectra[part_in_spaxel$spaxel_ID[i],],
                                                                 filter = observation$filter, flux_in = "wave",
                                                                 flux_out = "wave")
-      vel_los[part_in_spaxel$spaxel_ID[i]] = mean(galaxy_sample$vy)
-      dis_los[part_in_spaxel$spaxel_ID[i]] = sd(galaxy_sample$vy)
+      vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+      dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
 
     } else { # if insufficient particles in spaxel
       spectra[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$wave_bin)
@@ -975,8 +975,8 @@
                                                     flux = spectra,
                                                     filter = observation$filter,
                                                     flux_in = "wave", flux_out = "wave")
-                       vel_los = mean(galaxy_sample$vy)
-                       dis_los= sd(galaxy_sample$vy)
+                       vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+                       dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
                      } else { # if insufficient particles in spaxel
                        spectra = rep(NA, observation$wave_bin)
                        lum_map = NA
