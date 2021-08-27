@@ -1,0 +1,17 @@
+# SimSpin v2.0.4 News
+### Authour: Kate Harborne
+### Last edit: 26/08/21
+
+Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021. 
+
+| Date     	| Summary of change                                                                                                                                                                                                                                                          	| Version 	|
+|----------	|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|
+| 26/08/21 	| Adjusting the images output from the `build_datacube()` function to have clearer labels -  images until v2.0.3 have been produced as raw particle images before convolution with a PSF,  though this was unclear. To improve, the following changes have been implemented: 	| 2.0.4   	|
+|          	| (1) `raw_images` output as a list of arrays. These images contain the raw binned particle data.  Specific images included depends on the `method` chosen in the `telescope()` function.                                                                                    	|         	|
+|          	| (2) `observed_images` output as a list of arrays. These images are produced by collapsing the  observed cube to produce kinematic maps. The observed maps from a `method="spectral"` cube  will be `NULL`, as these would be produced using pPXF.                          	|         	|
+|          	| Required changes made to `write_FITS_file()` function to deal with the new list format.                                                                                                                                                                                    	|         	|
+|          	| Tests added include:                                                                                                                                                                                                                                                       	|         	|
+|          	| (1) Expecting all output data cubes to have length = 4.                                                                                                                                                                                                                    	|         	|
+|          	| (2) Expecting all `mode="spectral"` outputs to have `raw_images` as a list, length = 3, and `observed_images = NULL`.                                                                                                                                                      	|         	|
+|          	| (3) Expecting all `mode="velocity"` outputs to have `raw_images` as a list, length = 6, and `observed_images` as a list, length = 3.                                                                                                                                       	|         	|
+|          	| (4) When `mass_flag=T`, there should be an array image in each of the lists that is called `mass_image` rather than `flux_image`.                                                                                                                                          	|         	|
