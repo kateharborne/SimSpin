@@ -274,8 +274,10 @@ This output produced by `build_datacube` is a list with 4 elements as described 
 
   : `spectral_cube` -- *3D numeric array* -- This describes your 3D spectral data cube. The axes of the cube are [spatial x spatial x wavelength] and the values within the cube are given in CGS units (erg/s/cm$^{2}$/$\unicode{x212B}$). 
   : `observation` -- *List* -- A list of 22 elements that describe the specifics calculated for that specific observation. Generally describes the details you've entered with regards to the `telescope` and `observing_strategy` objects, as well as other properties derived from this information. Includes information about the units of the cube dimensions. 
-  : `velocity_image` -- *2D numeric array* -- This is a 2D array that represents the physical, mean line-of-sight (LOS) velocity of the particles within each spaxel of your image. This is provided for comparison with the fit LOS velocity image produced through spectral analysis. 
-  : `dispersion_image` -- *2D numeric array* -- This is a 2D array that represents the physical, mean LOS velocity dispersion of the particles within each spaxel of your image. This is provided for comparison with the fit LOS velocity dispersion image produced through spectral analysis. 
+  : `raw_images` -- *List* -- A list of 2D arrays corresponding to various properties of the binned raw particle data within the observation.  WIthin this list, there is two key comparison images: 
+      : `velocity_image` -- *2D numeric array* -- This is a 2D array that represents the physical, mean line-of-sight (LOS) velocity of the particles within each spaxel of your image. This is provided for comparison with the fit LOS velocity image produced through spectral analysis. 
+      : `dispersion_image` -- *2D numeric array* -- This is a 2D array that represents the physical, mean LOS velocity dispersion of the particles within each spaxel of your image. This is provided for comparison with the fit LOS velocity dispersion image produced through spectral analysis. 
+  : `observed_images` -- *List* -- This will be `NULL` for spectral data cubes, but when used in `velocity` mode, this list will contain 2D arrays that correspond to the observed flux/mass, LOS velocity and LOS dispersion calculated using the collapsed velocity cube. 
 
 ```{r, echo=FALSE, fig.dim=c(7,5), fig.align='center'}
 
@@ -294,11 +296,11 @@ image_nan <- function(z, zlim, col, na.color='gray', ...){
 velo_map_cols = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(40))
 disp_map_cols = colorRampPalette(RColorBrewer::brewer.pal(9, "YlOrRd"))(50)
 
-vel_val = max(c(abs(min(gadget2_binary_cube$velocity_image, na.rm = T)), abs(max(gadget2_binary_cube$velocity_image, na.rm = T))))
-disp_val = c(floor(min(gadget2_binary_cube$dispersion_image, na.rm=T)/2), max(gadget2_binary_cube$dispersion_image, na.rm=T))
+vel_val = max(c(abs(min(gadget2_binary_cube$raw_images$velocity_image, na.rm = T)), abs(max(gadget2_binary_cube$raw_images$velocity_image, na.rm = T))))
+disp_val = c(floor(min(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T)/2), max(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T))
 
 par(pty="s", fig=c(0,0.5,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1)  
-image_nan(z = gadget2_binary_cube$velocity_image, zlim = c(-vel_val,vel_val), col = velo_map_cols, na.color = "white", xaxt="n",
+image_nan(z = gadget2_binary_cube$raw_images$velocity_image, zlim = c(-vel_val,vel_val), col = velo_map_cols, na.color = "white", xaxt="n",
           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
 rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
 fields::image.plot(legend.only = TRUE, zlim = c(-vel_val,vel_val), col = velo_map_cols,
@@ -306,7 +308,7 @@ fields::image.plot(legend.only = TRUE, zlim = c(-vel_val,vel_val), col = velo_ma
                    legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
 
 par(pty="s", fig=c(0.5,1,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1, new=TRUE)  
-image_nan(z = gadget2_binary_cube$dispersion_image, zlim = disp_val, col = disp_map_cols, na.color = "white", xaxt="n",
+image_nan(z = gadget2_binary_cube$raw_images$dispersion_image, zlim = disp_val, col = disp_map_cols, na.color = "white", xaxt="n",
           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
 rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
 fields::image.plot(legend.only = TRUE, zlim = c(disp_val), col = disp_map_cols,
