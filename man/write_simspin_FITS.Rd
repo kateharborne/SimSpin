@@ -6,7 +6,7 @@
 \usage{
 write_simspin_FITS(
   output_file,
-  simspin_data,
+  simspin_datacube,
   object_name,
   telescope_name,
   instrument_name,
@@ -19,7 +19,7 @@ write_simspin_FITS(
 \item{output_file}{The path to the location where the FITS file should be
 written.}
 
-\item{simspin_data}{The list output from \code{build_datacube()}.}
+\item{simspin_datacube}{The list output from \code{build_datacube()}.}
 
 \item{object_name}{A string that described the name of the observed object.}
 
@@ -53,7 +53,7 @@ cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
                      telescope = telescope(type="SAMI"),
                      observing_strategy = observing_strategy())
 write_simspin_FITS(output_file = paste(temp_loc, "cube.fits", sep=""),
-                  simspin_data = cube, object_name = "SimSpin EAGLE example",
+                  simspin_datacube = cube, object_name = "SimSpin EAGLE example",
                   telescope_name = "AAO", instrument_name = "SAMI",
                   observer_name = "K.E.Harborne",
                   input_simspin_file = paste(temp_loc, "spectra.Rdata", sep=""))

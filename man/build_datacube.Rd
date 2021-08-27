@@ -57,8 +57,23 @@ and velocity gridding on. Default is 1.}
 using a mass weighting rather than a luminosity weighting. Default is FALSE.}
 }
 \value{
-Returns an .fits file that contains a the generated spectral cube and
-relevant header describing the mock observation.
+Returns a list containing four elements:
+\enumerate{
+\item \code{spectral_cube} or \code{velocity_cube} - a 3D array containing
+either a spectral cube or a velocity cube, where the output type is
+determined by the \code{method} selected in the \code{telescope} function.
+\item \code{observation} - a list containing a summary of the details of the
+observation (i.e. the output from the function \code{observation()}).
+\item \code{raw_images} - a list of 2D arrays, where each 2D array represents
+a raw particle image gridded as for the observation details.
+\item \code{observed_images} - NULL or a list of 2D arrays (again, where the
+output type is determined by the \code{method} selected in the
+\code{telescope} function.) containing kinematic images of the collapsed
+cube. If \code{blur=T}, these images will be blurred to the specified amount.
+}
+If \code{write_fits = T}, a .fits file that contains a the generated cube and
+relevant header describing the mock observation will also be produced at the
+specified \code{output_location}.
 }
 \description{
 The purpose of this function is to generate a mock IFU data cube from
