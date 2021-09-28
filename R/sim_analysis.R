@@ -21,7 +21,7 @@
 #'@param half_mass If simulation file contains all particles cutout from a box
 #' (rather than just particles from a single galaxy), you can the half-mass
 #' value at which the alignment function is run. Numeric length = 1. Default is
-#' NA, in which case half the total mass of the suplied simulation data is used.
+#' NA, in which case half the total mass of the supplied simulation data is used.
 #'@return Returns a list that contains:
 #'\describe{
 #'   \item{Properties}{list()}
