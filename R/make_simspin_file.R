@@ -161,13 +161,15 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   }
 
-  # adding info to stellar_particle data
-  galaxy_data$star_part$sed_id       = AZ_bins$sed_id[match(az_pos,AZ_bins$id)]
-  galaxy_data$star_part$Metallicity  = galaxy_data$ssp$Metallicity
-  galaxy_data$star_part$Age          = galaxy_data$ssp$Age
-  galaxy_data$star_part$Initial_Mass = galaxy_data$ssp$Initial_Mass
+  if (!is.null(galaxy_data$ssp)){ # if there are stellar particles in the file at all
+    # adding info to stellar_particle data
+    galaxy_data$star_part$sed_id       = AZ_bins$sed_id[match(az_pos,AZ_bins$id)]
+    galaxy_data$star_part$Metallicity  = galaxy_data$ssp$Metallicity
+    galaxy_data$star_part$Age          = galaxy_data$ssp$Age
+    galaxy_data$star_part$Initial_Mass = galaxy_data$ssp$Initial_Mass
 
-  sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
+    sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
+  } else {sed = NULL}
 
   if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles beacuse we are working with SPH models
 

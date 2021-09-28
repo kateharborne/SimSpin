@@ -1,5 +1,5 @@
 # Author: Kate Harborne
-# Date: 26/10/2020
+# Date: 27/08/21
 # Title: build_datacube - a function for generating a data cube from the observation
 #
 #'A function for making a mock spectral/velocity data cube
@@ -34,8 +34,24 @@
 #' and velocity gridding on. Default is 1.
 #'@param mass_flag Boolean flag that, when set to TRUE, will compute properties
 #' using a mass weighting rather than a luminosity weighting. Default is FALSE.
-#'@return Returns an .fits file that contains a the generated spectral cube and
-#' relevant header describing the mock observation.
+#'@return Returns a list containing four elements:
+#'\enumerate{
+#' \item \code{spectral_cube} or \code{velocity_cube} - a 3D array containing
+#' either a spectral cube or a velocity cube, where the output type is
+#' determined by the \code{method} selected in the \code{telescope} function.
+#' \item \code{observation} - a list containing a summary of the details of the
+#' observation (i.e. the output from the function \code{observation()}).
+#' \item \code{raw_images} - a list of 2D arrays, where each 2D array represents
+#' a raw particle image gridded as for the observation details.
+#' \item \code{observed_images} - NULL or a list of 2D arrays (again, where the
+#' output type is determined by the \code{method} selected in the
+#' \code{telescope} function.) containing kinematic images of the collapsed
+#' cube. If \code{blur=T}, these images will be blurred to the specified amount.
+#'}
+#' If \code{write_fits = T}, a .fits file that contains a the generated cube and
+#' relevant header describing the mock observation will also be produced at the
+#' specified \code{output_location}.
+#'
 #'@examples
 #'ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
 #'                         package = "SimSpin")
@@ -125,40 +141,23 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$wave_bin))
-    lum_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin))
-    vel_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin))
-    dis_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin))
-
-    if (observation$psf_fwhm > 0){
-      if (verbose){cat("Convolving cube with PSF... \n")    }
-      cube = blur_datacube(cube = list("spectral_cube" = cube,
-                                       "observation" = observation)) # apply psf convolution to each cube plane
-    }
-
-    if (verbose){cat("Done! \n")}
+    raw_images = list(
+      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin))
+      )
 
     output = list("spectral_cube"    = cube,
                   "observation"      = observation,
-                  "velocity_image"   = vel_image,
-                  "dispersion_image" = dis_image,
-                  "flux_image"       = lum_image)
+                  "raw_images"       = raw_images,
+                  "observed_images"  = NULL)
 
-    if (write_fits){
-      if (verbose){cat("Writing FITS... \n")}
-      if (missing(output_location)){
-        out_file_name = character(1)
-        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
-                                 error = function(e){"./"})
-        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
-                                observation$psf_fwhm,"fwhm_spectral.FITS", sep="")
-      }
-
-      write_simspin_FITS(output_file = output_location,
-                         simspin_data = output, object_name = object_name,
-                         telescope_name = telescope_name, instrument_name = telescope$type,
-                         observer_name = observer_name,
-                         input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
+    if (observation$psf_fwhm > 0){
+      if (verbose){cat("Convolving cube with PSF... \n")    }
+      output = blur_datacube(output) # apply psf convolution to each cube plane
     }
+
+    if (verbose){cat("Done! \n")}
 
   }
 
@@ -179,44 +178,49 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
-    lum_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin))
-    vel_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin))
-    dis_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin))
-    age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
-    met_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
+    raw_images = list(
+      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
+      )
+
+    output = list("velocity_cube"   = cube,
+                  "observation"     = observation,
+                  "raw_images"      = raw_images,
+                  "observed_images"  = vector(mode = "list", length=3))
+
+    if (mass_flag){ # if mass flag is T, the flux image is really just a mass image
+      names(output$raw_images)[which(names(output$raw_images) == "flux_image")] = "mass_image"
+    }
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
-      cube = blur_datacube(cube = list("spectral_cube" = cube,
-                                       "observation" = observation)) # apply psf convolution to each cube plane
+      output = blur_datacube(output) # apply psf convolution to each cube plane
+    } else {
+      dims = dim(output$raw_images$velocity_image)
+
+      names(output$observed_images) = c("flux_image", "velocity_image", "dispersion_image") # default calling flux/mass as flux_image
+      output$observed_images$flux_image       = array(NA, dim = dims[c(1,2)])
+      output$observed_images$velocity_image   = array(NA, dim = dims[c(1,2)])
+      output$observed_images$dispersion_image = array(NA, dim = dims[c(1,2)])
+
+      for (c in 1:dims[1]){
+        for (d in 1:dims[2]){
+          output$observed_images$flux_image[c,d]       = sum(output$velocity_cube[c,d,])
+          output$observed_images$velocity_image[c,d]   = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+          output$observed_images$dispersion_image[c,d] = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], output$observed_images$velocity_image[c,d]))
+        }
+      }
+
+      if (mass_flag){ # if mass flag is T, renaming the flux image as mass image
+        names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
+      }
     }
 
     if (verbose){cat("Done! \n")}
-
-    output = list("velocity_cube"    = cube,
-                  "observation"      = observation,
-                  "velocity_image"   = vel_image,
-                  "dispersion_image" = dis_image,
-                  "flux_image"       = lum_image,
-                  "age_image"        = age_image,
-                  "metallicity_image"= met_image)
-
-    if (write_fits){
-      if (verbose){cat("Writing FITS... \n")}
-      if (missing(output_location)){
-        out_file_name = character(1)
-        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
-                                 error = function(e){"./"})
-        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
-                                observation$psf_fwhm,"fwhm_images.FITS", sep="")
-      }
-
-      write_simspin_FITS(output_file = output_location,
-                         simspin_data = output, object_name = object_name,
-                         telescope_name = telescope_name , instrument_name = telescope$type,
-                         observer_name = observer_name,
-                         input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
-    }
 
   }
 
@@ -237,47 +241,69 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
-    mass_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin))
-    vel_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin))
-    dis_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin))
-    SFR_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
-    met_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
-    OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
+    raw_images = list(
+      mass_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      SFR_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
+      OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
+      )
+
+    output = list("velocity_cube"   = cube,
+                  "observation"     = observation,
+                  "raw_images"      = raw_images,
+                  "observed_images" = vector(mode = "list", length=3))
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
-      cube = blur_datacube(cube = list("spectral_cube" = cube,
-                                       "observation" = observation)) # apply psf convolution to each cube plane
+      output = blur_datacube(output) # apply psf convolution to each cube plane
+    } else {
+      dims = dim(output$raw_images$velocity_image)
+
+      names(output$observed_images) = c("mass_image", "velocity_image", "dispersion_image")
+      output$observed_images$mass_image       = array(NA, dim = dims[c(1,2)])
+      output$observed_images$velocity_image   = array(NA, dim = dims[c(1,2)])
+      output$observed_images$dispersion_image = array(NA, dim = dims[c(1,2)])
+
+      for (c in 1:dims[1]){
+        for (d in 1:dims[2]){
+          output$observed_images$mass_image[c,d]       = sum(output$velocity_cube[c,d,])
+          output$observed_images$velocity_image[c,d]   = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+          output$observed_images$dispersion_image[c,d] = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], output$observed_images$velocity_image[c,d]))
+        }
+      }
     }
 
     if (verbose){cat("Done! \n")}
 
-    output = list("velocity_cube"    = cube,
-                  "observation"      = observation,
-                  "velocity_image"   = vel_image,
-                  "dispersion_image" = dis_image,
-                  "mass_image"       = mass_image,
-                  "SFR_image"        = SFR_image,
-                  "metallicity_image"= met_image,
-                  "OH_image"         = OH_image)
+  }
 
-    if (write_fits){
-      if (verbose){cat("Writing FITS... \n")}
-      if (missing(output_location)){
-        out_file_name = character(1)
-        out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
-                                 error = function(e){"./"})
-        output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
-                                observation$psf_fwhm,"fwhm_images.FITS", sep="")
-      }
+  # Trimming off extra zeros from images outside the aperture of the telescope
+  aperture_region = matrix(data = observation$aperture_region, nrow = observation$sbin, ncol = observation$sbin)
 
-      write_simspin_FITS(output_file = output_location,
-                         simspin_data = output, object_name = object_name,
-                         telescope_name = telescope_name , instrument_name = telescope$type,
-                         observer_name = observer_name,
-                         input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
+  for (raw_image in names(output$raw_images)){
+    output$raw_images[[raw_image]] = output$raw_images[[raw_image]] * aperture_region
+  }
+  for (obs_image in names(output$observed_images)){
+    output$observed_images[[obs_image]] = output$observed_images[[obs_image]] * aperture_region
+  }
+
+  if (write_fits){
+    if (verbose){cat("Writing FITS... \n")}
+    if (missing(output_location)){
+      out_file_name = character(1)
+      out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
+                               error = function(e){"./"})
+      output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
+                              observation$psf_fwhm,"fwhm_images.FITS", sep="")
     }
 
+    write_simspin_FITS(output_file = output_location,
+                       simspin_datacube = output, object_name = object_name,
+                       telescope_name = telescope_name , instrument_name = telescope$type,
+                       observer_name = observer_name,
+                       input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
   }
 
   return(output)

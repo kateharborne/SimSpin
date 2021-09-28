@@ -485,7 +485,7 @@
     galaxy_data$star_part = stellar_data
     galaxy_data$gas_part = gas_data
 
-  } else {
+  } else if (!is.null(galaxy_data$star_part)){
     stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
     galaxy_data$star_part = stellar_data$part_data
     if (!is.null(galaxy_data$gas_part)){ # if gas is present, centering these particles based on stellar medians
@@ -498,6 +498,14 @@
       gas_data$vz = gas_data$vz - stellar_data$vzcen
       galaxy_data$gas_part = gas_data
     }
+  } else {
+    gas_data = cen_galaxy(galaxy_data$gas_part)
+    galaxy_data$gas_part$x = gas_data$part_data$x
+    galaxy_data$gas_part$y = gas_data$part_data$y
+    galaxy_data$gas_part$z = gas_data$part_data$z
+    galaxy_data$gas_part$vx = gas_data$part_data$vx
+    galaxy_data$gas_part$vy = gas_data$part_data$vy
+    galaxy_data$gas_part$vz = gas_data$part_data$vz
   }
   return(galaxy_data)
 }
@@ -670,7 +678,20 @@
 
 # Function to align full galaxy based on the stellar particles
 .align_galaxy = function(galaxy_data, half_mass=NA){
-  data = .measure_pqj(galaxy_data, half_mass)
+  if (is.null(galaxy_data$star_part)){ # if there are no stellar particles (just gas), use these
+    dummy_data = list(star_part = galaxy_data$gas_part,
+                      gas_part= galaxy_data$star_part,
+                      head = galaxy_data$head,
+                      ssp = galaxy_data$ssp)
+    dummy = .measure_pqj(dummy_data, half_mass)
+    data = list(galaxy_data = vector("list"))
+    data$galaxy_data = list(star_part = dummy$galaxy_data$gas_part,
+                            gas_part  = dummy$galaxy_data$star_part,
+                            head      = dummy$galaxy_data$head,
+                            ssp       = dummy$galaxy_data$ssp)
+  } else {
+    data = .measure_pqj(galaxy_data, half_mass)
+  }
   return(data$galaxy_data)
 }
 
@@ -893,8 +914,8 @@
                                                                 flux = spectra[part_in_spaxel$spaxel_ID[i],],
                                                                 filter = observation$filter, flux_in = "wave",
                                                                 flux_out = "wave")
-      vel_los[part_in_spaxel$spaxel_ID[i]] = mean(galaxy_sample$vy)
-      dis_los[part_in_spaxel$spaxel_ID[i]] = sd(galaxy_sample$vy)
+      vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+      dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
 
     } else { # if insufficient particles in spaxel
       spectra[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$wave_bin)
@@ -954,8 +975,8 @@
                                                     flux = spectra,
                                                     filter = observation$filter,
                                                     flux_in = "wave", flux_out = "wave")
-                       vel_los = mean(galaxy_sample$vy)
-                       dis_los= sd(galaxy_sample$vy)
+                       vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+                       dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
                      } else { # if insufficient particles in spaxel
                        spectra = rep(NA, observation$wave_bin)
                        lum_map = NA
@@ -985,10 +1006,12 @@
   lum_map  = array(data = NA, dim = observation$sbin^2)
   age_map  = array(data = NA, dim = observation$sbin^2)
   met_map  = array(data = NA, dim = observation$sbin^2)
+  part_map = array(data=0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
+    part_map[part_in_spaxel$spaxel_ID[i]] = num_part
 
     # if number is greater than the particle limit
     if (num_part >= observation$particle_limit){
@@ -1034,7 +1057,7 @@
 
   }
 
-  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map))
+  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 }
 
 .velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores, mass_flag){
@@ -1045,14 +1068,16 @@
   lum_map  = array(data = NA, dim = observation$sbin^2)
   age_map  = array(data = NA, dim = observation$sbin^2)
   met_map  = array(data = NA, dim = observation$sbin^2)
+  part_map = array(data=0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = length(part_in_spaxel$val[[i]])
+                     part_map = num_part
                      # if the number of particles in the spaxel is greater than the particle limit
                      if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
@@ -1091,7 +1116,7 @@
                        age_map = NA
                        met_map = NA
                      }
-                     result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map)
+                     result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -1102,8 +1127,9 @@
   dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
   age_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
   met_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
+  part_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[7]]))
 
-  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map))
+  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 
 }
 

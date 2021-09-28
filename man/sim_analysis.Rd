@@ -4,7 +4,7 @@
 \alias{sim_analysis}
 \title{A function for measuring the particle properties of the input simulation}
 \usage{
-sim_analysis(simspin_file, type = "stars", half_mass = NA)
+sim_analysis(simspin_file, type = "stars", half_mass = NA, bin_breaks = NA)
 }
 \arguments{
 \item{simspin_file}{The path to the location of the SimSpin .Rdata file OR
@@ -17,6 +17,10 @@ of particles are used in the property calculations.}
 (rather than just particles from a single galaxy), you can the half-mass
 value at which the alignment function is run. Numeric length = 1. Default is
 NA, in which case half the total mass of the suplied simulation data is used.}
+
+\item{bin_breaks}{Optional parameter that allows you to specify radial bin
+break positions. Default will give bins spaced with varying sized bins:
+`seq(0, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 501, by=50)`}
 }
 \value{
 Returns a list that contains:
