@@ -221,12 +221,12 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = if("flux_image" %in% names(simspin_datacube$raw_images)){c("FLUX", "LOS_VEL", "LOS_DISP", "AGE", "METALS")}else{c("MASS", "LOS_VEL", "LOS_DISP", "AGE", "METALS")}
-    bunits = if("flux_image" %in% names(simspin_datacube$raw_images)){c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar")}else{c("Msol", "km/s", "km/s", "Gyr", "Z_solar")}
-    extnum = c(3,4,5,6,7)
-    image_names = if("flux_image" %in% names(simspin_datacube$raw_images)){c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image")}else{c("mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image")}
+    extnames = if("flux_image" %in% names(simspin_datacube$raw_images)){c("FLUX", "LOS_VEL", "LOS_DISP", "AGE", "METALS", "NPART")}else{c("MASS", "LOS_VEL", "LOS_DISP", "AGE", "METALS", "NPART")}
+    bunits = if("flux_image" %in% names(simspin_datacube$raw_images)){c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")}else{c("Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")}
+    extnum = c(3,4,5,6,7,8)
+    image_names = if("flux_image" %in% names(simspin_datacube$raw_images)){c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")}else{c("mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")}
 
-    for (i in 1:5){
+    for (i in 1:6){
       image_keyvalues$BUNIT = bunits[i]
       image_keyvalues$EXTNAME = extnames[i]
 
@@ -291,12 +291,12 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("MASS", "LOS_VEL", "LOS_DISP", "METALS", "OH_ABUND")
-    bunits = c("erg/s/cm**2", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12")
-    extnum = c(3,4,5,6,7)
-    image_names = c("mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image")
+    extnames = c("MASS", "LOS_VEL", "LOS_DISP", "METALS", "OH_ABUND", "NPART")
+    bunits = c("erg/s/cm**2", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Particle number")
+    extnum = c(3,4,5,6,7,8)
+    image_names = c("mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "particle_image")
 
-    for (i in 1:5){
+    for (i in 1:6){
       image_keyvalues$BUNIT = bunits[i]
       image_keyvalues$EXTNAME = extnames[i]
 
