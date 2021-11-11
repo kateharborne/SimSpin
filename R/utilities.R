@@ -877,10 +877,12 @@
   vel_los = array(data = NA, dim = observation$sbin^2)
   dis_los = array(data = NA, dim = observation$sbin^2)
   lum_map = array(data = NA, dim = observation$sbin^2)
+  part_map = array(data=0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){ # computing the spectra at each occupied spatial pixel position
 
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
+    part_map[part_in_spaxel$spaxel_ID[i]] = num_part
 
     # if number is greater than the particle limit
     if (num_part >= observation$particle_limit){
@@ -925,7 +927,7 @@
     }
     if (verbose){cat(i, "... ", sep = "")}
   }
-  return(list(spectra, lum_map, vel_los, dis_los))
+  return(list(spectra, lum_map, vel_los, dis_los, part_map))
 }
 
 .spectral_spaxels_mc = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose, cores){
@@ -934,14 +936,16 @@
   vel_los = array(data = NA, dim = observation$sbin^2)
   dis_los = array(data = NA, dim = observation$sbin^2)
   lum_map = array(data = NA, dim = observation$sbin^2)
+  part_map = array(data=0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = length(part_in_spaxel$val[[i]])
+                     part_map = num_part
                      # if the number of particles in the spaxel is greater than the particle limit
                      if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
@@ -983,7 +987,7 @@
                        vel_los = NA
                        dis_los = NA
                      }
-                     result = list(spectra, lum_map, vel_los, dis_los)
+                     result = list(spectra, lum_map, vel_los, dis_los, part_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -992,8 +996,9 @@
   lum_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
   vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
   dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
+  part_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
 
-  return(list(spectra, lum_map, vel_los, dis_los))
+  return(list(spectra, lum_map, vel_los, dis_los, part_map))
 }
 
 

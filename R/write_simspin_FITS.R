@@ -291,10 +291,10 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("MASS", "LOS_VEL", "LOS_DISP", "METALS", "OH_ABUND", "NPART")
-    bunits = c("erg/s/cm**2", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Particle number")
+    extnames = c("MASS", "LOS_VEL", "LOS_DISP", "METALS", "OH_ABUND", "SFR")
+    bunits = c("Msol", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Msol/year")
     extnum = c(3,4,5,6,7,8)
-    image_names = c("mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "particle_image")
+    image_names = c("mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "SFR_image")
 
     for (i in 1:6){
       image_keyvalues$BUNIT = bunits[i]
