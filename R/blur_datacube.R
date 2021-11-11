@@ -78,7 +78,7 @@ blur_datacube = function(datacube_output){
     }
 
     # Returning output in same format as input
-    blur_output = list("spectral_cube"    = blur_cube,
+    blur_output = list("velocity_cube"    = blur_cube,
                        "observation"      = observation,
                        "raw_images"       = datacube_output$raw_images,
                        "observed_images"  = vector(mode = "list", length=3))
