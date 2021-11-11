@@ -282,6 +282,7 @@ test_that("Data cubes can be written to file", {
 
 unlink(c(paste(temp_loc, "cube.FITS", sep=""), paste(temp_loc, "velocity_cube.FITS", sep=""),
          paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_spectral.FITS"),
+         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_images.FITS"),
          paste0(temp_loc, "sfgas_velocity_cube.FITS"), paste0(temp_loc, "gas_velocity_cube.FITS")))
 
 # Testing that build_datacube will give warning if the spectra given is low res

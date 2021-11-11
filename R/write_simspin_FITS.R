@@ -175,6 +175,54 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                             keyvalues = data_keyvalues, keycomments = data_keycomments,
                             create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
+    # Adding images to FITS file ----
+
+    image_keyvalues = list("XTENSION"="IMAGE", "BITPIX"=-64, "NAXIS"=2,
+                           "NAXIS1"=dim(simspin_cube)[1], "NAXIS2"=dim(simspin_cube)[2],
+                           "PCOUNT"=0, "GCOUNT"=1, "BUNIT"=character(1),
+                           "CRPIX1"=1,
+                           "CRVAL1"=(diff(observation$sbin_seq[1:2])/2 + observation$sbin_seq[1])/observation$ang_size/3600,
+                           "CDELT1"=-observation$sbin_size/observation$ang_size/3600,
+                           "CTYPE1"="RA---TAN", "CUNIT1"="deg",
+                           "CRPIX2"=1,
+                           "CRVAL2"=(diff(observation$sbin_seq[1:2])/2 + observation$sbin_seq[1])/observation$ang_size/3600,
+                           "CDELT2"=observation$sbin_size/observation$ang_size/3600,
+                           "CTYPE2"="DEC--TAN", "CUNIT2"="deg", "EXTNAME"=character(1))
+
+    image_keycomments = list("XTENSION"="IMAGE extension",
+                             "BITPIX"="number of bits per data pixel",
+                             "NAXIS"="number of data axes",
+                             "NAXIS1"="axis length", "NAXIS2"="axis length",
+                             "PCOUNT"="required keyword; must = 0",
+                             "GCOUNT"="required keyword; must = 1",
+                             "BUNIT"="units of image values",
+                             "CRPIX1"="Pixel coordinate of reference point",
+                             "CRVAL1"="Pixel value at reference point",
+                             "CDELT1"="Coordinate transformation matrix element",
+                             "CTYPE1"="Right ascension, gnomonic projection",
+                             "CUNIT1"="Units of coordinate increment and value",
+                             "CRPIX2"="Pixel coordinate of reference point",
+                             "CRVAL2"="Pixel value at reference point",
+                             "CDELT2"="Coordinate transformation matrix element",
+                             "CTYPE2"="Declination, gnomonic projection",
+                             "CUNIT2"="Units of coordinate increment and value",
+                             "EXTNAME"="Image extension name")
+
+    extnames = c("FLUX", "LOS_VEL", "LOS_DISP", "NPART")
+    bunits = c("erg/s/cm**2", "km/s", "km/s", "Particle number")
+    extnum = c(3,4,5,6)
+    image_names = c("flux_image", "velocity_image", "dispersion_image", "particle_image")
+
+    for (i in 1:4){
+      image_keyvalues$BUNIT = bunits[i]
+      image_keyvalues$EXTNAME = extnames[i]
+
+      Rfits::Rfits_write_image(data = simspin_datacube$raw_images[[which(names(simspin_datacube$raw_images) == image_names[i])]],
+                               filename = output_file, ext=extnum[i],
+                               keyvalues = image_keyvalues, keycomments = image_keycomments,
+                               create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
+    }
+
   }
 
   if (observation$method == "velocity"){
