@@ -22,8 +22,6 @@ From this cube, "observables" can be measured using observational pipelines. Spe
 
 Another implementation of this code (SimSpin v1.1.3) written in Julia is also available at [SimSpin.jl](https://github.com/kateharborne/SimSpin.jl) developed by [Gerry Gralton](https://github.com/gerrygralton). 
 
-A further python implementation of SimSpin v2.0.0 is also in development at [PySimSpin](https://github.com/kateharborne/PySimSpin).
-
 ## Package installation
 
 To install directly into R:
