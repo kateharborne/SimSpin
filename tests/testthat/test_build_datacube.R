@@ -18,7 +18,7 @@ temp_loc = tempdir()
 
 # Testing that build_datacube works in spectral mode ----
 built_cube_size = 4
-spectra_raw_images_size = 3
+spectra_raw_images_size = 4
 spectra_observed_images_size = NULL
 velocity_raw_images_size = 6
 velocity_observed_images_size = 3
@@ -242,6 +242,8 @@ test_that("Data cubes can be generated using mass rather than luminosity weighti
                                observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T),
                                write_fits = F, mass_flag = T)
   expect_length(eagle_mass, built_cube_size)
+  expect_true("velocity_cube" %in% names(eagle_mass))
+  expect_false("spectral_cube" %in% names(eagle_mass))
   expect_true("mass_image" %in% names(eagle_mass$raw_images))
   expect_true("mass_image" %in% names(eagle_mass$observed_images))
   expect_false("flux_image" %in% names(eagle_mass$raw_images))
@@ -280,6 +282,7 @@ test_that("Data cubes can be written to file", {
 
 unlink(c(paste(temp_loc, "cube.FITS", sep=""), paste(temp_loc, "velocity_cube.FITS", sep=""),
          paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_spectral.FITS"),
+         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_images.FITS"),
          paste0(temp_loc, "sfgas_velocity_cube.FITS"), paste0(temp_loc, "gas_velocity_cube.FITS")))
 
 # Testing that build_datacube will give warning if the spectra given is low res

@@ -16,7 +16,7 @@ of particles are used in the property calculations.}
 \item{half_mass}{If simulation file contains all particles cutout from a box
 (rather than just particles from a single galaxy), you can the half-mass
 value at which the alignment function is run. Numeric length = 1. Default is
-NA, in which case half the total mass of the suplied simulation data is used.}
+NA, in which case half the total mass of the supplied simulation data is used.}
 
 \item{bin_breaks}{Optional parameter that allows you to specify radial bin
 break positions. Default will give bins spaced with varying sized bins:
