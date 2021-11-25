@@ -2,6 +2,7 @@
 <!-- badges: start -->
 [![Build Status](https://travis-ci.org/kateharborne/SimSpin.svg?branch=master)](https://travis-ci.org/kateharborne/SimSpin)
 [![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
+<a href="https://ascl.net/1903.006"><img src="https://img.shields.io/badge/ascl-1903.006-blue.svg?colorB=262255" alt="ascl:1903.006" /></a>
 <!-- badges: end -->
 
 <img align="right" src="https://raw.githubusercontent.com/kateharborne/SimSpin.jl/master/docs/src/assets/logo.png" width="200" height="200"  style="padding-left:10px" /> 
