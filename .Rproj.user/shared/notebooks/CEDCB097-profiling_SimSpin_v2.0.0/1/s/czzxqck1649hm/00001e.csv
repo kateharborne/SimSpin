@@ -1,0 +1,4 @@
+"0","legend(""bottomright"", inset=c(0.03,0.01),"
+"0","       c(""BC03lr"", ""EMILES""),"
+"0","       col= c(""red"", ""blue""),"
+"0","       lty=c(1,1), lwd=c(2,2), bty=""n"")"

@@ -1,0 +1,21 @@
+{
+    "sortOrder": [
+        {
+            "columnIndex": 4,
+            "ascending": false
+        },
+        {
+            "columnIndex": 2,
+            "ascending": false
+        },
+        {
+            "columnIndex": 3,
+            "ascending": false
+        },
+        {
+            "columnIndex": 1,
+            "ascending": false
+        }
+    ],
+    "path": "~/repos/SimSpin"
+}

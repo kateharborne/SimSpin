@@ -1,0 +1,512 @@
+galaxy_data$part = cen_galaxy(galaxy_data$part) # centering the galaxy
+galaxy_data = .align(galaxy_data) # align angular momentum vector with z-axis
+if(!"ssp" %in% names(galaxy_data)){ # if the SSP field does not come from the snapshot file, must be working with N-body
+n_disk = galaxy_data$head$Npart[3]; n_bulge = galaxy_data$head$Npart[4] # number of disk and bulge particles
+n_stars = n_disk + n_bulge # total number of "stars"
+galaxy_data$ssp = data.frame("Initial_Mass"=numeric(n_stars), "Age"=numeric(n_stars),
+"Metallicity"=numeric(n_stars))
+galaxy_data$ssp$Initial_Mass = galaxy_data$part$Mass[Npart_sum[2]+1:Npart_sum[4]]/2 # assuming the initial mass is half of the current mass
+if (n_disk > 0 & n_bulge > 0){ # assigning ages and metallities to disk and bulge particles (if present in snap)
+galaxy_data$ssp$Age[1:n_disk] = disk_age
+galaxy_data$ssp$Age[(n_disk+1):n_stars] = bulge_age
+galaxy_data$ssp$Metallicity[1:n_disk] = disk_Z
+galaxy_data$ssp$Metallicity[(n_disk+1):n_stars] = bulge_Z
+} else if (n_disk > 0 & n_bulge == 0){
+galaxy_data$ssp$Age = disk_age
+galaxy_data$ssp$Metallicity = disk_Z
+} else if (n_disk == 0 & n_bulge > 0){
+galaxy_data$ssp$Age = bulge_age
+galaxy_data$ssp$Metallicity = bulge_Z
+}
+}
+disk_age=5
+bulge_age=10
+disk_Z=0.024
+bulge_Z=0.001
+template="BC03lr"
+if(!"ssp" %in% names(galaxy_data)){ # if the SSP field does not come from the snapshot file, must be working with N-body
+n_disk = galaxy_data$head$Npart[3]; n_bulge = galaxy_data$head$Npart[4] # number of disk and bulge particles
+n_stars = n_disk + n_bulge # total number of "stars"
+galaxy_data$ssp = data.frame("Initial_Mass"=numeric(n_stars), "Age"=numeric(n_stars),
+"Metallicity"=numeric(n_stars))
+galaxy_data$ssp$Initial_Mass = galaxy_data$part$Mass[Npart_sum[2]+1:Npart_sum[4]]/2 # assuming the initial mass is half of the current mass
+if (n_disk > 0 & n_bulge > 0){ # assigning ages and metallities to disk and bulge particles (if present in snap)
+galaxy_data$ssp$Age[1:n_disk] = disk_age
+galaxy_data$ssp$Age[(n_disk+1):n_stars] = bulge_age
+galaxy_data$ssp$Metallicity[1:n_disk] = disk_Z
+galaxy_data$ssp$Metallicity[(n_disk+1):n_stars] = bulge_Z
+} else if (n_disk > 0 & n_bulge == 0){
+galaxy_data$ssp$Age = disk_age
+galaxy_data$ssp$Metallicity = disk_Z
+} else if (n_disk == 0 & n_bulge > 0){
+galaxy_data$ssp$Age = bulge_age
+galaxy_data$ssp$Metallicity = bulge_Z
+}
+}
+if(template == "BC03lr" | template == "BC03" | template == "bc03" | template == "bc03lr"){
+temp = ProSpect::BC03lr
+} else if (template == "BC03hr" | template == "bc03hr"){
+temp = ProSpect::BC03hr
+} else if (template == "EMILES" | template == "emiles"){
+temp = ProSpect::EMILES
+}
+n_stars = length(galaxy_data$ssp$Age) # number of "stellar" particles
+wavelengths = length(temp$Wave)
+id_stars = seq(Npart_sum[2]+1, Npart_sum[5]) # ids of "stellar" particles
+simspin_file = matrix(data=NA, nrow=(7+wavelengths), ncol=n_stars+1)
+simspin_file[1,] = seq(0, n_stars)
+simspin_file[2,] = c(NA, galaxy_data$part$x[id_stars])
+simspin_file[3,] = c(NA, galaxy_data$part$y[id_stars])
+simspin_file[4,] = c(NA, galaxy_data$part$z[id_stars])
+simspin_file[5,] = c(NA, galaxy_data$part$vx[id_stars])
+simspin_file[6,] = c(NA, galaxy_data$part$vy[id_stars])
+simspin_file[7,] = c(NA, galaxy_data$part$vz[id_stars])
+simspin_file[8:(wavelengths+7),1] = temp$Wave
+simspin_file[8:(wavelengths+7),2:(n_stars+1)] = .part_spec(Metallicity = galaxy_data$ssp$Metallicity,
+Age = galaxy_data$ssp$Age,
+Mass = galaxy_data$ssp$Initial_Mass,
+Template = temp, cores = cores)
+cores=1
+simspin_file[8:(wavelengths+7),2:(n_stars+1)] = .part_spec(Metallicity = galaxy_data$ssp$Metallicity,
+Age = galaxy_data$ssp$Age,
+Mass = galaxy_data$ssp$Initial_Mass,
+Template = temp, cores = cores)
+View(simspin_file)
+ss_gadget = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
+ss_hdf5 = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+gadget_test = make_simspin_file(ss_gadget)
+library(SimSpin)
+gadget_test = make_simspin_file(ss_gadget)
+temp_loc = temp_dir()
+temp_loc = tempdir()
+# Test that they run successfully without error
+gadget_test = make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst"))
+hdf5_test   = make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst"))
+eagle_test  = make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst"))
+library(devtools)
+library(usethis)
+use_testthat()
+make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst"))
+make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst"))
+make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst"))
+testthat::test_that("Error when output file already exists and overwrite = F",{
+expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst")))
+expect_error(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst")))
+expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst")))
+})
+library(testthat)
+testthat::test_that("Error when output file already exists and overwrite = F",{
+expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst")))
+expect_error(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst")))
+expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst")))
+})
+library(SimSpin)
+library(SimSpin)
+make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst"))
+library(SimSpin)
+ss_gadget = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
+ss_hdf5 = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+temp_loc = tempdir()
+test_that("Initial run of each simulation type.", {
+make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst"))
+make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst"))
+make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst"))
+})
+expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst")))
+make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst"))
+testthat::test_that("Error when output file already exists and overwrite = F",{
+expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst")))
+expect_error(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst")))
+expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst")))
+})
+test_that("Test that old files can be overwritten", {
+make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst"), overwrite = T)
+})
+unlink(c(paste(temp_loc, "gadget_test_spectra.fst"), paste(temp_loc, "hdf5_test_spectra.fst"),
+paste(temp_loc, "eagle_test_spectra.fst")))
+devtools::test()
+devtools::test()
+test_that("Initial run of each simulation type.", {
+expect_output(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst")))
+expect_output(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst")))
+expect_output(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst")))
+})
+test_that("Test that old files can be overwritten", {
+expect_match(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst"), overwrite = T),
+"SimSpin file written to:")
+})
+unlink(c(paste(temp_loc, "gadget_test_spectra.fst"), paste(temp_loc, "hdf5_test_spectra.fst"),
+paste(temp_loc, "eagle_test_spectra.fst")))
+library(testthat)
+ss_gadget = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
+ss_hdf5 = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+temp_loc = tempdir()
+test_that("Initial run of each simulation type.", {
+expect_match(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst", sep="")),
+paste("SimSpin file written to: ", temp_loc, "gadget_test_spectra.fst", sep=""))
+expect_match(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst", sep="")),
+paste("SimSpin file written to: ", temp_loc, "hdf5_test_spectra.fst", sep=""))
+expect_match(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst", sep="")),
+paste("SimSpin file written to: ", temp_loc, "eagle_test_spectra.fst", sep=""))
+})
+paste("SimSpin file written to: ", temp_loc, "gadget_test_spectra.fst", sep="")
+test_that("Initial run of each simulation type.", {
+expect_message(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst", sep="")),
+paste("SimSpin file written to: ", temp_loc, "gadget_test_spectra.fst", sep=""))
+expect_match(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test_spectra.fst", sep="")),
+paste("SimSpin file written to: ", temp_loc, "hdf5_test_spectra.fst", sep=""))
+expect_match(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst", sep="")),
+paste("SimSpin file written to: ", temp_loc, "eagle_test_spectra.fst", sep=""))
+})
+unlink(c(paste(temp_loc, "gadget_test_spectra.fst", sep=""), paste(temp_loc, "hdf5_test_spectra.fst", sep=""),
+paste(temp_loc, "eagle_test_spectra.fst", sep="")))
+expect_message(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test_spectra.fst", sep="")),
+paste("SimSpin file written to: ", temp_loc, "gadget_test_spectra.fst", sep=""))
+expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test_spectra.fst", sep="")))
+library(SimSpin)
+devtools::test()
+fwhm_scaled     = (fwhm * obs_data$angular_size)/ obs_data$sbinsize  # the fwhm scaled to image pixel dimensions
+library(stringr)
+str_match("Gaussian", "gaussian", ignore.case =T)
+str_match("Gaussian", "gaussian")
+str_detect("Gaussian", "gaussian")
+str_to_upper("BC03lr")
+simspin_file = "/Users/00094926/Desktop/EAGLE_galaxyID44048_spectra.fst"
+telescope = telescope(type="SAMI")
+observing_strategy = observing_strategy()
+source('~/repos/SimSpin/R/observation.R')
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+source('~/repos/SimSpin/R/observation.R')
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+source('~/repos/SimSpin/R/telescope.R')
+telescope = telescope(type="SAMI")
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+source('~/repos/SimSpin/R/observation.R')
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+source('~/repos/SimSpin/R/observation.R')
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+View(observation)
+magimage(observation$aperture_region)
+galaxy_data = fst::read_fst(simspin_file, from = 1, to = 7)
+View(galaxy_data)
+View(observation$aperture_region)
+source('~/repos/SimSpin/R/observation.R')
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+row.names(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+View(galaxy_data)
+Rcpp::sourceCpp('src/obs_galaxy.cpp')
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad)
+galaxy_data = fst::read_fst(simspin_file, from = 1, to = 7)[c(-1,),] #read in position and velocity data
+galaxy_data = fst::read_fst(simspin_file, from = 1, to = 7)[,-1] #read in position and velocity data
+View(galaxy_data)
+row.names(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad)
+Rcpp::sourceCpp('src/obs_galaxy.cpp')
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad)
+library(SimSpin)
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad)
+galaxy_data = fst::read_fst(simspin_file, from = 1, to = 7)[,-1] #read in position and velocity data
+row.names(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad)
+library(SimSpin)
+library(SimSpin)
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+galaxy_data = fst::read_fst(simspin_file, from = 1, to = 7)[,-1] #read in position and velocity data
+row.names(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad)
+t(galaxy_data)
+test = t(galaxy_data)
+install.packages("data.table")
+install.packages("data.table")
+library(data.table)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+col.names(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad)
+library(SimSpin)
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad)
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (sbin^2)# assigning particles to positions in cube
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin^2)# assigning particles to positions in cube
+range(galaxy_data$pixel_pos)
+range(galaxy_data$pixel_pos, na.rm = T)
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin)# assigning particles to positions in cube
+range(galaxy_data$pixel_pos, na.rm = T)
+test = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,]
+range(observation$aperture_region)
+range(observation$aperture_region, na.rm = T)
+range(galaxy_data$pixel_pos, na.rm = T)
+range(test$pixel_pos, na.rm = T)
+test[test$pixel_pos == NA,]
+galaxy_data[galaxy_data$pixel_pos == NA]
+galaxy_data[galaxy_data$pixel_pos == NA,]
+View(galaxy_data)
+observation$sbin_seq
+View(galaxy_data)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
+galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+range(galaxy_data$pixel_pos)
+i = 12
+particle_IDs = galaxy_data$ID[galaxy_data$pixel_pos = i]
+particle_IDs = galaxy_data$ID[galaxy_data$pixel_pos == i]
+spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+particle_IDs = paste0("V", galaxy_data$ID[galaxy_data$pixel_pos == i])
+spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+View(spectra)
+spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 1)
+particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
+spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 1)
+View(spectra)
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)
+wavelength  = as.numeric(fst::read_fst(simspin_file, columns = "V1", from = 8))
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[1,]
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+range(wavelength)
+?BC03lr
+which(wavelength > telescope$wave_range[1] & wavelength < telescope$wave_range[2])
+wavelength(368)
+wavelength[368]
+velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i]
+library(SimSpin)
+spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+wave_shift = matrix(data = wavelength, nrow = length(particle_IDs))
+wave_shift = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs))
+View(wave_shift)
+rep(wavelength, length(particle_IDs))
+length(rep(wavelength, length(particle_IDs)))
+2442/2
+View(wave_shift)
+wave_shift = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs))
+View(wave_shift)
+length(particle_IDs)
+length(wavelength)
+wave_shift = matrix(data = wavelength, nrow = length(particle_IDs), ncol= length(wavelength))
+View(wave_shift)
+wave_shift = matrix(data = wavelength,  ncol= length(wavelength))
+wave_shift = matrix(data = wavelength, ncol= length(wavelength), nrow = length(particle_IDs))
+View(wave_shift)
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+wave_shift = (velocity_los / observation$c)
+wave_shift = (velocity_los / observation$c) * wavelength
+wave = wavelength
+dim(rep(wave, length(particle_IDs)))<-c(length(particle_IDs), length(wavelength))
+wave = rep(wavelength, length(particle_IDs))
+wave[1222]
+dim(wave) = c(length(particle_IDs), length(wavelength))
+View(wave)
+wave[2,1221]
+wave[1,1221]
+wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+View(wave)
+wave_shift = (velocity_los / observation$c) * wave
+View(wave_shift)
+velocity_los / observation$c
+(velocity_los / observation$c ) * 91
+(velocity_los / observation$c ) * 94
+wave_shift = ((velocity_los / observation$c) * wave) + wave
+View(wave_shift)
+spectra[1,]
+spectra[,1]
+wavelength[1,]
+wavelength
+wave_shift[,1]
+wave_shift[1,]
+test = approx(x = shifted_wave[1,], y = spectra[,1], xout = wavelength, rule=1)
+test = approx(x = wave_shift[1,], y = spectra[,1], xout = wavelength, rule=1)
+test = approx(x = wave_shift[1,], y = spectra[,1], xout = observation$wave_seq, rule=1)
+magplot(test$x, test$y, log="xy", type="l")
+magplot(test$x, test$y, log="xy", type="l")
+library("magicaxis")
+magplot(test$x, test$y, log="xy", type="l")
+magplot(test$x, test$y, log="xy", type="l", grid=T)
+magplot(test$x, test$y, log="xy", type="l", grid=T)
+lines(wave_shift, spectra)
+lines(wave_shift, spectra[,1])
+lines(wave_shift[1,], spectra[,1], col="red")
+lines(test$x, test$y)
+lines(wave_shift[2,], spectra[,2], col="red")
+dim(wave_shift)
+cores = 1
+c1 = snow::makeCluster(cores)
+doSNOW::registerDoSNOW(c1)
+shifted_spectra = foreach(i = 1:dim(shifted_wave)[1], .packages = c("pracma"))%dopar%{
+approx(x = shifted_wave[i,], y = spectra[,i], xout = wavelength, rule=1)
+}
+library(parallel)
+c1 = snow::makeCluster(cores)
+doSNOW::registerDoSNOW(c1)
+shifted_spectra = foreach(i = 1:dim(shifted_wave)[1], .packages = c("pracma"))%dopar%{
+approx(x = shifted_wave[i,], y = spectra[,i], xout = wavelength, rule=1)
+}
+library(doParallel)
+c1 = snow::makeCluster(cores)
+doSNOW::registerDoSNOW(c1)
+shifted_spectra = foreach(i = 1:dim(shifted_wave)[1], .packages = c("pracma"))%dopar%{
+approx(x = shifted_wave[i,], y = spectra[,i], xout = wavelength, rule=1)
+}
+shifted_wave = wave_shift
+wave_seq=observation$wave_seq
+c1 = snow::makeCluster(cores)
+doSNOW::registerDoSNOW(c1)
+shifted_spectra = foreach(i = 1:dim(shifted_wave)[1], .packages = c("pracma"))%dopar%{
+approx(x = shifted_wave[i,], y = spectra[,i], xout = wave_seq, rule=1)
+}
+closeAllConnections()
+test = unlist(shifted_spectra, use.names=FALSE)
+test = approx(x = shifted_wave[i,], y = spectra[,i], xout = wave_seq, rule=1)
+test = approx(x = shifted_wave[1,], y = spectra[,1], xout = wave_seq, rule=1)
+test = approx(x = shifted_wave[1,], y = spectra[,1], xout = wave_seq, rule=1)[2]
+c1 = snow::makeCluster(cores)
+doSNOW::registerDoSNOW(c1)
+shifted_spectra = foreach(i = 1:dim(shifted_wave)[1], .packages = c("pracma"))%dopar%{
+approx(x = shifted_wave[i,], y = spectra[,i], xout = wave_seq, rule=1)[2]
+}
+closeAllConnections()
+output = matrix(unlist(shifted_spectra, use.names=FALSE), nrow = dim(shifted_wave)[1], byrow = FALSE)
+View(output)
+output = matrix(unlist(shifted_spectra, use.names=FALSE), nrow = dim(shifted_wave)[1], byrow = TRUE)
+View(output)
+output = colSums(output)
+magplot(wave_seq, output, tpe=l)
+magplot(wave_seq, output, type=l, log="xy")
+magplot(wave_seq, output, type="l", log="xy")
+range(observation$aperture_region, na.rm = T)
+diff(range(observation$aperture_region, na.rm = T))
+spectra = martix(data = NA, ncol = observation$wave_bin, nrow = diff(range(observation$aperture_region, na.rm = T)))
+spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = diff(range(observation$aperture_region, na.rm = T)))
+View(spectra)
+i = 12
+k = 1
+.interpolate_spectra = function(shifted_wave, spectra, wave_seq, cores){
+c1 = snow::makeCluster(cores)
+doSNOW::registerDoSNOW(c1)
+shifted_spectra = foreach(i = 1:dim(shifted_wave)[1], .packages = c("pracma"))%dopar%{
+approx(x = shifted_wave[i,], y = spectra[,i], xout = wave_seq, rule=1)[2]
+}
+closeAllConnections()
+output = matrix(unlist(shifted_spectra, use.names=FALSE), nrow = dim(shifted_wave)[1], byrow = TRUE)
+output = colSums(output)
+return(output)
+}
+particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
+intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i]
+wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by velocity
+spectra[k,] = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq, cores = cores)
+k = k + 1
+View(spectra)
+k = 1
+for (i in range(galaxy_data$pixel_pos)){
+particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
+intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i]
+wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by velocity
+spectra[k,] = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq, cores = cores)
+k = k + 1
+}
+View(spectra)
+seq(range(galaxy_data$pixel_pos))
+range(galaxy_data$pixel_pos)
+seq(range(galaxy_data$pixel_pos), by = 1)
+range(galaxy_data$pixel_pos)
+seq(range(galaxy_data$pixel_pos)[1], range(galaxy_data$pixel_pos)[2])
+k = 1
+for (i in seq(range(galaxy_data$pixel_pos)[1], range(galaxy_data$pixel_pos)[2])){
+particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
+intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i]
+wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by velocity
+spectra[k,] = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq, cores = cores)
+k = k + 1
+}
+View(shifted_spectra)
+length(particle_IDs)
+length(galaxy_data$ID[galaxy_data$pixel_pos == i])
+View(spectra)
+spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = diff(range(observation$aperture_region, na.rm = T)))
+k = 1
+for (i in seq(range(galaxy_data$pixel_pos)[1], range(galaxy_data$pixel_pos)[2])){
+if (length(galaxy_data$ID[galaxy_data$pixel_pos == i]) > 0){
+particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
+intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i]
+wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by velocity
+spectra[k,] = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra, wave_seq = observation$wave_seq, cores = cores)
+k = k + 1
+}
+}
+View(spectra)
+observation$aperture_region
+galaxy_data$pixel_pos
+length(galaxy_data$pixel_pos)
+unique(galaxy_data$pixel_pos)
+length(unique(galaxy_data$pixel_pos))
+View(spectra)
+library(FITSio)
+test = readFITS(file = "/Volumes/Simulations/SAMI/cubes/9388000921_blue_7_Y17SAR3_P014_A3880T035.fits")
+q = test$imDat[1,1,]
+q = test$imDat[25,25,]
+q = q[!is.na(q)]
+test$header
+4724.474841231 - (1.05031753786 * 1024)
+4724.474841231 + (1.05031753786 * 1024)
+observation$wave_res
+2048 - 1940
+108/2
+spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
+spectra = matrix(data = seq(1,900), ncol = observation$wave_bin, nrow = observation$sbin^2)
+View(spectra)
+cube = array(data = spectra, dim = c(observation$sbin, observation$sbin, observation$wave_bin))
+cube[,,1]
+View(cube[,,1])
+magplot(type="n", xlim =c(min(galaxy_data$x), max(galaxy_data$x)), ylim = c(min(galaxy_data$z_obs), max(galaxy_data$z_obs)))
+magplot(x = 0, type="n", xlim =c(min(galaxy_data$x), max(galaxy_data$x)), ylim = c(min(galaxy_data$z_obs), max(galaxy_data$z_obs)), xlab="x", ylab="z")
+points(galaxy_data$x[galaxy_data$pixel_pos == 12], galaxy_data$z_obs[galaxy_data$pixel_pos == 12], pch="+")
+points(galaxy_data$x[galaxy_data$pixel_pos == 13], galaxy_data$z_obs[galaxy_data$pixel_pos == 13], pch="+", col="red")
+points(galaxy_data$x[galaxy_data$pixel_pos == 14], galaxy_data$z_obs[galaxy_data$pixel_pos == 14], pch="+", col="orange")
+message("FITS file written to: ", output_location)
+output_location = "./"
+message("FITS file written to: ", output_location)
+output_location = paste("./output_inc", observation$inc_deg, "deg_seeing", observation$psf_fwhm,".FITS", sep="")
+message("FITS file written to: ", output_location)
+simspin_file
+out_file_name = stringr::str_split(simspin_file, ".")
+out_file_name = stringr::str_split(simspin_file, ".")[[1]]
+out_file_name = stringr::str_remove(simspin_file, ".fst")
+output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing", observation$psf_fwhm,"fwhm.FITS", sep="")
+output_location
+dim(cube)/2
+dim(test$imDat)/2
+dim(cube)%/%2
+j = array(data=NA, dim = c(19,19,100))
+dim(j)%/%2
+dim(cube)/2
+dim(j)/2
+observation$sbin_seq[crpixn[1]]
+crpixn = dim(cube)%/%2
+observation$sbin_seq[crpixn[1]]
+c(observation$sbin_seq[crpixn[1]], observation$sbin_seq[crpixn[2]], observation$wave_seq[crpixn[3]])
+observation$sbin_seq[crpixn[1]]/observation$ang_size
+observation$sbin_seq[crpixn[1]]/observation$ang_size/3600
+observation$sbin_size
+observation$wave_res
+test$hdr
+library(SimSpin)
+library(SimSpin)
+cores = 6
+write_fits = T
+test = build_datacube(simspin_file = simspin_file, telescope = telescope, observing_strategy = observing_strategy, cores = 6, write_fits = T)

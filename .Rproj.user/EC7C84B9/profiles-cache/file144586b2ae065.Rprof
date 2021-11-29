@@ -1,0 +1,6 @@
+memory profiling: GC profiling: line profiling: sample.interval=10000
+:1309933:37209943:89297936:1454:"cb$setcurexpr" "cmpCall" "cmp" "cmpIndices" "cmpSubsetDispatch" "h" "tryInline" "cmpCall" "cmp" "cmpDispatch" "h" "tryInline" "cmpCall" "cmp" "cmpPrim2" "h" "tryInline" "cmpCall" "cmp" "cmpPrim2" "h" "tryInline" "cmpCall" "cmp" "h" "tryInline" "cmpCall" "cmp" "cmpPrim2" "h" "tryInline" "cmpCall" "cmp" "cmpPrim2" "h" "tryInline" "cmpCall" "cmp" "cmpPrim2" "h" "tryInline" "cmpCall" "cmp" "h" "tryInline" "cmpCall" "cmp" "cmpPrim2" "h" "tryInline" "cmpCall" "cmp" "cmpPrim2" "h" "tryInline" "cmpCall" "cmp" "cmpSymbolAssign" "h" "tryInline" "cmpCall" "cmp" "h" "tryInline" "cmpCall" "cmp" "genCode" "cmpfun" "compiler:::tryCmpfun" "profvis" 
+:1322027:37217729:92405264:1043:
+#File 1: <expr>
+:1326255:37784520:93438240:330:1#2 "<Anonymous>" "mapply" "profvis" 
+:1326331:38509326:93447424:0:1#2 "<Anonymous>" "mapply" "profvis" 

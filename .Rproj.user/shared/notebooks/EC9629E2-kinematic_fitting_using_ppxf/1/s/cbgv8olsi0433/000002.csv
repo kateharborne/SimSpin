@@ -1,0 +1,6 @@
+"0","par(options(scipen = 0), xpd=FALSE, ps=12, cex=1)  "
+"0",""
+"0","magicaxis::magplot(example_cube$observation$wave_seq,"
+"0","                   example_cube$spectral_cube[15,15,]/median(example_cube$spectral_cube[15,15,]),"
+"0","                   type=""l"", lty=1, lwd=2, col =""blue"","
+"0","                   ylab= ""Normalised Flux"", xlab = ""Wavelength, Ang"")"

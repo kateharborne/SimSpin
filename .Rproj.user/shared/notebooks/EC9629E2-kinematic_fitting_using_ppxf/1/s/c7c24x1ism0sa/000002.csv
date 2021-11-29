@@ -1,0 +1,7 @@
+"2","Error in py_call_impl(callable, dots$args, dots$keywords) : 
+  AttributeError: 'module' object has no attribute '__import__'
+
+Detailed traceback: 
+  File ""/Users/00094926/Library/R/4.0/library/reticulate/python/rpytools/loader.py"", line 13, in initialize
+    _import = builtins.__import__
+"

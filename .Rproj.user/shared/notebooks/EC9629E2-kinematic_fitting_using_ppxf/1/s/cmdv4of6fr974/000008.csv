@@ -1,0 +1,2 @@
+"0",""
+"0","par(pty=""s"", fig=c(0.5,1,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1, new=TRUE)  "

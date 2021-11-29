@@ -1,0 +1,1 @@
+"0","lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col=""red"")"

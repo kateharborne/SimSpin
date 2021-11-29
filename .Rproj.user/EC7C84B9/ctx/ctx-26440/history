@@ -1,0 +1,512 @@
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+library(SimSpin)
+toc()
+if (verbose){cat("Computing observation parameters... \n")}
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+if (verbose){cat("Assigning particles to spaxels... \n")}
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
+galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+library(SimSpin)
+if (verbose){cat("Computing observation parameters... \n")}
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+if (verbose){cat("Assigning particles to spaxels... \n")}
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
+galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+library(SimSpin)
+if (verbose){cat("Computing observation parameters... \n")}
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+if (verbose){cat("Assigning particles to spaxels... \n")}
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
+galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+library(SimSpin)
+if (verbose){cat("Computing observation parameters... \n")}
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+if (verbose){cat("Assigning particles to spaxels... \n")}
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
+galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+if (verbose){cat("Computing observation parameters... \n")}
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+if (verbose){cat("Assigning particles to spaxels... \n")}
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
+galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+source('~/repos/SimSpin/R/build_datacube.R')
+library(SimSpin)
+if (verbose){cat("Computing observation parameters... \n")}
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+if (verbose){cat("Assigning particles to spaxels... \n")}
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
+galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+closeAllConnections()
+library(SimSpin)
+if (verbose){cat("Computing observation parameters... \n")}
+observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+galaxy_data = data.table::transpose(fst::read_fst(simspin_file, from = 1, to = 7)[,-1]) #read in position and velocity data
+colnames(galaxy_data) = c("ID", "x", "y", "z", "vx", "vy", "vz")
+galaxy_data = obs_galaxy(part_data = galaxy_data, inc_rad = observation$inc_rad) # projecting the galaxy to given inclination
+if (verbose){cat("Assigning particles to spaxels... \n")}
+galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
+(observation$sbin * cut(galaxy_data$z_obs, breaks=observation$sbin_seq, labels=F)) - (observation$sbin) # assigning particles to positions in cube
+galaxy_data = galaxy_data[!is.na(galaxy_data$pixel_pos),] # removing any particles that fall outside the sbin aperture
+galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$aperture_region,] # trimming particles that lie outside the aperture of the telescope
+wavelength  = fst::read_fst(simspin_file, columns = "V1", from = 8)[,1]
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+source('~/repos/SimSpin/R/build_datacube.R')
+spectra = .compute_spectra_per_spaxel(simspin_file, galaxy_data, wavelength, observation, verbose, cores)
+shifted_spectra = foreach(i = unique(galaxy_data$pixel_pos), .packages = c("fst", "pracma", "base","SimSpin"))%dopar%{
+particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
+intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i]
+wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by velocity
+SimSpin::interpolate_spectra(shifted_wave = wave_shift, original_spectra = intrinsic_spectra, wave_seq = observation$wave_seq)
+if (verbose){cat(i, "... ")}
+}
+c1 = snow::makeCluster(cores)
+doSNOW::registerDoSNOW(c1)
+shifted_spectra = foreach(i = unique(galaxy_data$pixel_pos), .packages = c("fst", "pracma", "base","SimSpin"))%dopar%{
+particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
+intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i]
+wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by velocity
+SimSpin::interpolate_spectra(shifted_wave = wave_shift, original_spectra = intrinsic_spectra, wave_seq = observation$wave_seq)
+if (verbose){cat(i, "... ")}
+}
+i = 1:100
+i = unique(galaxy_data$pixel_pos)
+View(shifted_spectra)
+shifted_wave = wave_shift
+spectra = intrinsic_spectra
+wave_seq = observation$wave_seq
+shifted_spectra = vector(mode = "list", length = dim(shifted_wave)[1])
+for(j in 1:dim(shifted_wave)[1]){
+shifted_spectra[[j]] = approx(x = shifted_wave[j,], y = spectra[,j], xout = wave_seq, rule=1)[2]
+}
+output = matrix(unlist(shifted_spectra, use.names=FALSE), nrow = dim(shifted_wave)[1], byrow = TRUE)
+output = colSums(output)
+i = 435
+particle_IDs = paste0("V", (galaxy_data$ID[galaxy_data$pixel_pos == i] + 1)) # IDs are indexed one out from the column numbers
+intrinsic_spectra = fst::read_fst(simspin_file, columns = particle_IDs, from = 8)
+velocity_los = galaxy_data$vy_obs[galaxy_data$pixel_pos == i]
+wave = matrix(data = rep(wavelength, length(particle_IDs)), nrow = length(particle_IDs), byrow=T)
+wave_shift = ((velocity_los / observation$c) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by velocity
+shifted_wave = wave_shift
+spectra = intrinsic_spectra
+wave_seq = observation$wave_seq
+shifted_spectra = vector(mode = "list", length = dim(shifted_wave)[1])
+for(j in 1:dim(shifted_wave)[1]){
+shifted_spectra[[j]] = approx(x = shifted_wave[j,], y = spectra[,j], xout = wave_seq, rule=1)[2]
+}
+output = matrix(unlist(shifted_spectra, use.names=FALSE), nrow = dim(shifted_wave)[1], byrow = TRUE)
+output = colSums(output)
+library(SimSpin)
+verbose = T
+library(tictoc)
+tic(); test = build_datacube(simspin_file, telescope, observing_strategy, verbose, write_fits = T)
+library(SimSpin)
+toc();
+tic(); test = build_datacube(simspin_file, telescope, observing_strategy, verbose, write_fits = T); toc()
+library(magicaxis)
+magplot(test$observation$wave_seq, test$spectral_cube[15,15,], type="l")
+magplot(test$observation$wave_seq, test$spectral_cube[15,15,]/mean(test$spectral_cube[15,15,]), type="l")
+library(SimSpin)
+library(SimSpin)
+telescope(type="SAMI")
+length(telescope(type="SAMI"))
+library(testthat)
+expect_vector(telescope(type="SAMI"), ptype=list(), size = 8)
+test_that("Initial run of telescope() function with default types.", {
+expect_vector(telescope(type="SAMI"), ptype=list(), size = 8)
+expect_vector(telescope(type="MaNGA"), ptype=list(), size = 8)
+expect_vector(telescope(type="Hector"), ptype=list(), size = 8)
+expect_vector(telescope(type="CALIFA"), ptype=list(), size = 8)
+expect_vector(telescope(type="IFU"), ptype=list(), size = 8)
+})
+test_that("Initial run of telescope() function with default types.", {
+expect_vector(telescope(type="SAMI"), ptype=list(), size = 8)
+expect_vector(telescope(type="MaNGA"), ptype=list(), size = 8)
+expect_vector(telescope(type="Hector"), ptype=list(), size = 8)
+expect_vector(telescope(type="CALIFA"), ptype=list(), size = 8)
+expect_vector(telescope(type="IFU"), ptype=list(), size = 6)
+})
+telescope(wave_range = seq(3700,5700))
+expect_error(telescope(wave_range = seq(3700,5700)))
+length(observing_strategy())
+length(observing_strategy(blur=T))
+test_that("Initial run of observing strategy function", {
+expect_vector(observing_strategy(), ptype=list(), size = 3)
+expect_vector(observing_strategy(blur=T), ptype = list(), size=5)
+})
+observing_strategy(blur = T, psf = "round")
+library(SimSpin)
+observation(telescope(type="SAMI"), observing_strategy = observing_strategy())
+length(observation(telescope(type="SAMI"), observing_strategy = observing_strategy()))
+test_that("Initial run of telescope() function with default types.", {
+expect_vector(telescope(type="SAMI"), ptype=list(), size = 8)
+expect_vector(telescope(type="sami"), ptype=list(), size = 8)
+expect_vector(telescope(type="Sami"), ptype=list(), size = 8)
+expect_vector(telescope(type="SaMi"), ptype=list(), size = 8)
+expect_vector(telescope(type="sAmI"), ptype=list(), size = 8)
+})
+test_that("Initial run of telescope() function with default types.", {
+expect_vector(observation(telescope(type="SAMI"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+expect_vector(observation(telescope(type="MaNGA"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+expect_vector(observation(telescope(type="Hector"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+expect_vector(observation(telescope(type="CALIFA"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+expect_vector(observation(telescope(type="IFU"), observing_strategy = observing_strategy()), ptype=list(), size = 18)
+})
+expect_vector(observation(telescope(type="IFU"), observing_strategy = observing_strategy(blur=T)), ptype=list(), size = 18)
+expect_vector(build_datacube(simspin_file = ss_gadget, telescope = SAMI,
+observing_strategy = conditions), ptype=list(), size = 2)
+ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.fst", package = "SimSpin")
+temp_loc = tempdir()
+SAMI = telescope(type="SAMI")
+conditions = observing_strategy(z = 0.05, inc_deg = 45)
+test_that("Initial run of build_datacube function with defaults.", {
+expect_vector(build_datacube(simspin_file = ss_gadget, telescope = SAMI,
+observing_strategy = conditions), ptype=list(), size = 2)
+})
+library(testthat)
+context("Testing build_datacube function.\n")
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+temp_loc = tempdir()
+make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
+expect_vector(build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""), telescope = telescope(type="SAMI"),
+observing_strategy = observing_strategy(z = 0.05, inc_deg = 45)), ptype=list(), size = 2)
+library(SimSpin)
+R.version
+library(SimSpin)
+library(SimSpin)
+library(SimSpin)
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+temp_loc = tempdir()
+make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.fst", sep=""))
+sessionInfo()
+test_that("Initial run of build_datacube function with defaults.", {
+expect_vector(build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""), telescope = telescope(type="SAMI"),
+observing_strategy = observing_strategy(z = 0.05, inc_deg = 45)), ptype=list(), size = 2)
+expect_vector(build_datacube(simspin_file = paste(temp_loc, "spectra.fst", sep=""), telescope = telescope(type="MaNGA"),
+observing_strategy = observing_strategy(z = 0.05, inc_deg = 45, blur = T)), ptype=list(), size = 2)
+})
+unlink(paste(temp_loc, "spectra.fst", sep=""))
+sessionInfo()
+?doParallel
+?foreach
+library(SimSpin)
+remove.packages("tcltk")
+remove.packages("plotrix")
+install.packages("plotrix")
+install.packages("plotrix")
+install.packages(tltck)
+install.packages(tcltk)
+install.packages("tcltk")
+importFrom(hdf5r, "h5attr", "list.attributes", "h5file", "list.groups", "readDataSet", "h5close")
+system("ls -ld /usr/local /usr/local/lib /usr/local/lib/libtcl*")
+devtools::load_all(".")
+install.packages("ProFit")
+library(SimSpin)
+library(SimSpin)
+sessionInfo()
+library(SimSpin)
+devtools::test()
+plot(cars)
+library("SimSpin")
+eagle_file = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+output_spectra = "/Users/00094926/Desktop/EAGLE_galaxyID44048_EMILESspectra.fst"
+make_simspin_file(filename = eagle_file, cores = 4, template = "EMILES", output = output_spectra)
+BC03lr_spectra = "/Users/00094926/Desktop/EAGLE_galaxyID44048_BC03lrspectra.fst"
+make_simspin_file(filename = eagle_file, cores = 4, template = "BC03lr", output = BC03lr_spectra)
+file.size(EMILES_spectra)
+EMILES_spectra = "/Users/00094926/Desktop/EAGLE_galaxyID44048_EMILESspectra.fst"
+file.size(EMILES_spectra)
+file.size(BC03lr_spectra)
+file.size(EMILES_spectra)
+file.size(BC03lr_spectra)
+?EMILES
+file.size(EMILES_spectra)/1e9 # file size in GB - contains 53689 wavelengths per particle
+file.size(BC03lr_spectra)/1e9 # file size in GB - contains 1221 wavelengths per particle
+SAMI =  telescope(type="SAMI")
+settings = observing_strategy(z=0.05, inc_deg = 70)
+EMILES_obs = build_datacube(simspin_file = EMILES_spectra,
+telescope = SAMI,
+observing_strategy = settings,
+verbose=T, write_fits = T,
+output_location = "/Users/00094926/Desktop/EAGLE_galaxyID44048_EMILESspectra_inc70deg_seeing0fwhm.FITS")
+BC03lr_obs = build_datacube(simspin_file = BC03lr_spectra,
+telescope = SAMI,
+observing_strategy = settings,
+verbose=T, write_fits = T,
+output_location = "/Users/00094926/Desktop/EAGLE_galaxyID44048_BC03lrspectra_inc70deg_seeing0fwhm.FITS")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy", xlab=expression(paste(lambda)*", Angstroms"), ylab = "Lsol / Ang (for 1 Msol SF)")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = range(BC03lr_obs$spectral_cube))
+range(BC03lr_obs$spectral_cube)
+range(BC03lr_obs$spectral_cube, na.rm = T)
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = range(BC03lr_obs$spectral_cube, na.rm = T))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,], lwd=2, col="red")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = range(BC03lr_obs$spectral_cube, na.rm = T))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,], lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,], lwd=2, col="blue")
+range(BC03lr_obs$spectral_cube, na.rm = T)
+range(EMILES_obs$spectral_cube, na.rm = T)
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = range(EMILES_obs$spectral_cube, na.rm = T))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,], lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,], lwd=2, col="blue")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = range(EMILES_obs$spectral_cube, na.rm = T))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]), lwd=2, col="blue")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = c(0,1))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]), lwd=2, col="blue")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = c(0.001,1))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]), lwd=2, col="blue")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = c(0.1,10))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]), lwd=2, col="blue")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = c(0.1,2))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]), lwd=2, col="blue")
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*", Angstroms"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = c(0.1,2))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]), lwd=2, col="blue")
+legend("bottomright", inset=c(0.03,0.01),
+c("BC03lr", "EMILES"),
+col= c("red", "blue"),
+lty=c(1,1), lwd=c(2,2), bty="n")
+BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]
+)
+EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,])
+min(EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]))
+max(EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]))
+min(BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]))
+max(BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]))
+library(magicaxis)
+magplot(0, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*"/ Ang"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = c(0.1,2))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]), lwd=2, col="blue")
+legend("bottomright", inset=c(0.03,0.01),
+c("BC03lr", "EMILES"),
+col= c("red", "blue"),
+lty=c(1,1), lwd=c(2,2), bty="n")
+library(magicaxis)
+magplot(1, type="n", grid = T, log="xy",
+xlab=expression(paste(lambda)*"/ Ang"),
+ylab = "Lsol / Ang (for 1 Msol SF)",
+xlim = range(BC03lr_obs$observation$wave_seq),
+ylim = c(0.1,2))
+lines(BC03lr_obs$observation$wave_seq, BC03lr_obs$spectral_cube[15,15,]/max(BC03lr_obs$spectral_cube[15,15,]), lwd=2, col="red")
+lines(EMILES_obs$observation$wave_seq, EMILES_obs$spectral_cube[15,15,]/max( EMILES_obs$spectral_cube[15,15,]), lwd=2, col="blue")
+legend("bottomright", inset=c(0.03,0.01),
+c("BC03lr", "EMILES"),
+col= c("red", "blue"),
+lty=c(1,1), lwd=c(2,2), bty="n")
+?write_fst
+library(SimSpin)
+devtools::test()
+library(SimSpin)
+ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+simspin_file = "/Users/00094926/Desktop/EAGLE_galaxyID44048_EMILESspectra.fst"
+cube = build_datacube(simspin_file, telescope= telescope(tye="SAMI"), observing_strategy = observing_strategy(z=0.05))
+cube = build_datacube(simspin_file, telescope= telescope(tpye="SAMI"), observing_strategy = observing_strategy(z=0.05))
+cube = build_datacube(simspin_file, telescope= telescope(type="SAMI"), observing_strategy = observing_strategy(z=0.05))
+cube = build_datacube(simspin_file, telescope= telescope(type="SAMI"), observing_strategy = observing_strategy(z=0.05, blur=T))
+spectral_cube = cube$spectral_cube
+observation = cube$observation
+blur_cube = array(data = NA, dim = dim(spectral_cube))
+for (spatial_plane in seq(1, dim(spectral_cube)[3])){
+blur_cube[,,spatial_plane] = ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel)
+}
+view(blur_cube[,,800])
+View(blur_cube[,,800])
+seq(1, dim(spectral_cube)[3])
+spectral_cube[,,800]
+View(spectral_cube[,,800])
+View(observation$psf_kernel)
+sum(observation$psf_kernel)
+for (spatial_plane in seq(1, dim(spectral_cube)[3])){
+blur_cube[,,spatial_plane] = ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel)
+}
+View(blur_cube[,,800])
+max(blur_cube)
+max(blur_cube, na.rm = T)
+observation$psf_kernel
+spectral_cube[,,spatial_plane]
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel)
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel)
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel)
+library(ProFit)
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel)
+x = ProFit::profitBruteConv(spectral_cube[,,800], observation$psf_kernel)
+View(x)
+ProFit::profitConvolvePSF(spectral_cube[,,spatial_plane], observation$psf_kernel)
+blur_cube[,,spatial_plane] = ProFit::profitConvolvePSF(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = matrix(1,dim(spectral_cube)[1], dim(spectral_cube)[2]))
+ProFit::profitConvolvePSF(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = matrix(1,dim(spectral_cube)[1], dim(spectral_cube)[2]))
+}
+ProFit::profitConvolvePSF(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = matrix(1,dim(spectral_cube)[1], dim(spectral_cube)[2]))
+ProFit::profitConvolvePSF(spectral_cube[,,spatial_plane], observation$psf_kernel, docalcregion = T)
+ProFit::profitConvolvePSF(spectral_cube[,,spatial_plane], observation$psf_kernel, docalcregion = TRUE)
+devtools::install_github("asgr/ProFit")
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel, docalcregion = TRUE)
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel)
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = matrix(1,30,30))
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = matrix(1,nrow = 30, ncol=30))
+observation$aperture_region
+calc_region = observation$aperture_region
+cube_dims = dim(spectral_cube)
+calc_region = matrix(data = calc_region, nrow = cube_dims[1], ncol=cube_dims[2])
+View(calc_region)
+calc_region = observation$aperture_region
+calc_region[calc_region > 0] = 1; calc_region[is.na(calc_region)] = 0
+calc_region = matrix(data = calc_region, nrow = cube_dims[1], ncol=cube_dims[2])
+View(calc_region)
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = calc_region)
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = calc_region, plot = T)
+spatial_plane
+spatial_plane = 800
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = calc_region)
+magimage(observation$psf_kernel)
+model = list(
+sersic = list(
+xcen   = c(180, 60),
+ycen   = c(90, 10),
+mag = c(15, 13),
+re  = c(14, 5),
+nser  = c(3, 10),
+ang  = c(46, 80),
+axrat  = c(0.4, 0.6),
+box = c(0.5,-0.5)
+)
+)
+model.image=profitMakeModel(model=model, dim=c(200,200))$z
+magimage(model.image)
+magimage(profitBruteConv(image=model.image, psf=profitMakePointSource()))
+install.packages("magick")
+library(magick)
+image_convolve(spectral_cube[,,spatial_plane], observation$psf_kernel)
+install.packages("OpenImageR")
+library(OpenImageR)
+magimage(convolution(spectral_cube[,,spatial_plane], observation$psf_kernel))
+convolution(spectral_cube[,,spatial_plane], observation$psf_kernel)
+spectral_cube[,,spatial_plane]
+spectral_cube[is.na(spectral_cube)] = 0
+ProFit::profitBruteConv(spectral_cube[,,spatial_plane], observation$psf_kernel, calcregion = calc_region)
+spectral_cube[,,spatial_plane]
+convolution(spectral_cube[,,spatial_plane], observation$psf_kernel)
+magimage(convolution(spectral_cube[,,spatial_plane], observation$psf_kernel))
+magimage(OpenImageR::convolution(spectral_cube[,,spatial_plane], observation$psf_kernel)*calc_region)
+OpenImageR::convolution(spectral_cube[,,spatial_plane], observation$psf_kernel)*calc_region
+calc_region = observation$aperture_region
+calc_region = matrix(data = calc_region, nrow = cube_dims[1], ncol=cube_dims[2])
+OpenImageR::convolution(spectral_cube[,,spatial_plane], observation$psf_kernel)*calc_region
+magimage(OpenImageR::convolution(spectral_cube[,,spatial_plane], observation$psf_kernel)*calc_region)
+library(SimSpin)
+devtools::document()
+devtools::document()
+devtools:test()
+devtools::test()
+is.null
+psf  = NULL
+is.null(psf)
+install.packages(c('fftw', 'R2Cuba', 'RColorBrewer', 'LaplacesDemon', 'imager', 'magicaxis', 'FITSio', 'data.table'))
+install.packages('devtools')
+library(devtools)
+install_github("ICRAR/ProFit")

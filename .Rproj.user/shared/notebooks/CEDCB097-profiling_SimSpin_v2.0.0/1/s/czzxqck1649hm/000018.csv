@@ -1,0 +1,7 @@
+"0","library(magicaxis)"
+"0",""
+"0","magplot(1, type=""n"", grid = T, log=""xy"", "
+"0","        xlab=expression(paste(lambda)*""/ Ang""), "
+"0","        ylab = ""Lsol / Ang (for 1 Msol SF)"","
+"0","        xlim = range(BC03lr_obs$observation$wave_seq),"
+"0","        ylim = c(0.1,2))"
