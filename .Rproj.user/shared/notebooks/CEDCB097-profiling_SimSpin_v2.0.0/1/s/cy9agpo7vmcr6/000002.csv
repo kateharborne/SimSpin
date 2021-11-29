@@ -1,2 +1,0 @@
-"0","library(""SimSpin""); library(""tictoc"")"
-"0","eagle_file = system.file(""extdata"", ""SimSpin_example_EAGLE.hdf5"", package = ""SimSpin"")"

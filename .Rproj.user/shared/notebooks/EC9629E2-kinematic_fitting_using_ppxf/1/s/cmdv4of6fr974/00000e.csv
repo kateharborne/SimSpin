@@ -1,3 +1,0 @@
-"0","fields::image.plot(legend.only = TRUE, zlim = c(disp_val), col = disp_map_cols,"
-"0","                   horizontal = TRUE, family=""serif"", font=1,"
-"0","                   legend.lab = expression(""dispersion""[LOS] * "", km s""^{-1}))"
