@@ -1,0 +1,23 @@
+{
+    "args": [
+        "-I/Library/Developer/CommandLineTools/usr/lib/clang/12.0.5/include",
+        "-I/usr/local/gfortran/lib/gcc/x86_64-apple-darwin18/8.2.0/../../../../include/c++/8.2.0",
+        "-I/usr/local/gfortran/lib/gcc/x86_64-apple-darwin18/8.2.0/../../../../include/c++/8.2.0/x86_64-apple-darwin18",
+        "-I/usr/local/gfortran/lib/gcc/x86_64-apple-darwin18/8.2.0/../../../../include/c++/8.2.0/backward",
+        "-I/usr/local/gfortran/lib/gcc/x86_64-apple-darwin18/8.2.0/include",
+        "-I/usr/local/gfortran/lib/gcc/x86_64-apple-darwin18/8.2.0/include-fixed",
+        "-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include",
+        "-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks",
+        "-I/Users/00094926/Library/R/4.0/library/Rcpp/include",
+        "-fopenmp",
+        "-I/Library/Frameworks/R.framework/Resources/include",
+        "-DNDEBUG",
+        "-I/usr/local/gfortran/include",
+        "-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include",
+        "-fPIC",
+        "-std=c++11"
+    ],
+    "pch": "Rcpp",
+    "is_cpp": true,
+    "hash": "16123285411638168688"
+}
