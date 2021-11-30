@@ -26,9 +26,10 @@ url: "https://kateharborne.github.io/SimSpin" # the base hostname & protocol for
 github_username:  kateharborne
 
 # Build settings
-theme: jekyll-theme-minimal
+remote_theme: pages-themes/minial@v0.2.0
 plugins:
   - jekyll-feed
+  - jekyll-remote-theme
 markdown: kramdown
 
 # Exclude from processing.
