@@ -8,7 +8,7 @@ filename: index.md
 
 The purpose of the [SimSpin](https://github.com/kateharborne/SimSpin) package is to take a particle simulation of a galaxy and produce an integral field spectroscopy (IFS) observation in the format of a *data cube* - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
 
-<img align="center" src="/assets/img/SimSpin_methodology.png" width="200" height="200"  style="padding-left:10px" /> 
+<img align="center" src="assets/img/SimSpin_methodology.png" width="200" height="200"  style="padding-left:10px" /> 
 A mock data cube can be produced using the functions in this package. 
 This is a simple process comprised of four steps:
 
