@@ -1,6 +1,6 @@
 ---
 title: SimSpin
-layout: home
+layout: jekyll-theme-minimal
 filename: index.md
 ---
 
@@ -14,7 +14,7 @@ filename: index.md
 
 <p>&nbsp;</p>
 
-SimSpin v2.0.6 - A package for producing mock observations of particle simulations
+##SimSpin v2.0.6 - A package for producing mock observations of particle simulations
 
 The purpose of the `SimSpin` package is to take a particle simulation of a galaxy and to produce an integral field spectroscopy observation in the format of a *data cube* - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
 
