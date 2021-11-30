@@ -1,1 +1,10 @@
+title: SimSpin
+description: A package for producing mock observations of particle simulations.
 theme: jekyll-theme-minimal
+show_downloads: true
+logo: /assets/img/logo.png
+github:
+  repository_url: https://github.com/kateharborne/SimSpin
+  zip_url: https://github.com/kateharborne/SimSpin/archive/refs/tags/v2.0.6.zip
+  tar_url: https://github.com/kateharborne/SimSpin/archive/refs/tags/v2.0.6.tar.gz
+  owner_url: https://github.com/kateharborne

@@ -1,6 +1,6 @@
 ---
 title: SimSpin
-layout: jekyll-theme-minimal
+layout: default
 filename: index.md
 ---
 
