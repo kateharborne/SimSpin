@@ -1,3 +1,8 @@
+---
+title: SimSpin
+layout: jekyll-theme-minimal
+filename: index.md
+---
 
 <!-- badges: start -->
 [![Build Status](https://travis-ci.org/kateharborne/SimSpin.svg?branch=master)](https://travis-ci.org/kateharborne/SimSpin)
