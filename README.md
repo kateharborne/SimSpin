@@ -1,5 +1,7 @@
 # SimSpin
 <!-- badges: start -->
+<a href="https://github.com/kateharborne/SimSpin/actions"><img src="https://github.com/kateharborne/SimSpin/actions/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"/></a>
+<a href="https://codecov.io/github/kateharborne/SimSpin"><img src="https://github.com/kateharborne/SimSpin/actions/workflows/test-coverage/badge.svg" alt="codecov"/></a>
 <a href="https://ascl.net/1903.006"><img src="https://img.shields.io/badge/ascl-1903.006-blue.svg?colorB=262255" alt="ascl:1903.006" /></a>
 <!-- badges: end -->
 
