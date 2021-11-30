@@ -26,7 +26,7 @@ url: "https://kateharborne.github.io" # the base hostname & protocol for your si
 github_username:  kateharborne
 
 # Build settings
-theme: minimal
+theme: jekyll-theme-minimal
 plugins:
   - jekyll-feed
 
