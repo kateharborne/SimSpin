@@ -21,8 +21,8 @@
 title: SimSpin
 email: katherine.harborne@uwa.edu.au
 description: A package for producing mock IFS observations of particle simulations.  
-baseurl: "/SimSpin" # the subpath of your site, e.g. /blog
-url: "https://kateharborne.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://kateharborne.github.io/SimSpin" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  kateharborne
 
 # Build settings
