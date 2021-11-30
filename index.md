@@ -14,7 +14,7 @@ filename: index.md
 
 <p>&nbsp;</p>
 
-##SimSpin v2.0.6 - A package for producing mock observations of particle simulations
+### SimSpin v2.0.6 - A package for producing mock observations of particle simulations
 
 The purpose of the `SimSpin` package is to take a particle simulation of a galaxy and to produce an integral field spectroscopy observation in the format of a *data cube* - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
 
@@ -33,3 +33,5 @@ Specifically, the observed line-of-sight velocities and dispersions.
 This package, once installed, is fully documented and tested.
 
 Another implementation of this code (SimSpin v1.1.3) written in Julia is also available at [SimSpin.jl](https://github.com/kateharborne/SimSpin.jl) developed by [Gerry Gralton](https://github.com/gerrygralton). 
+
+You can see more about this code [here](https://kateharborne.github.io/SimSpin/about)
