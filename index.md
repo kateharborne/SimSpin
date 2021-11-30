@@ -4,16 +4,6 @@ layout: default
 filename: index.md
 ---
 
-<!-- badges: start -->
-[![Build Status](https://travis-ci.org/kateharborne/SimSpin.svg?branch=master)](https://travis-ci.org/kateharborne/SimSpin)
-[![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
-<a href="https://ascl.net/1903.006"><img src="https://img.shields.io/badge/ascl-1903.006-blue.svg?colorB=262255" alt="ascl:1903.006" /></a>
-<!-- badges: end -->
-
-<img align="right" src="https://raw.githubusercontent.com/kateharborne/SimSpin.jl/master/docs/src/assets/logo.png" width="200" height="200"  style="padding-left:10px" /> 
-
-<p>&nbsp;</p>
-
 ### SimSpin v2.0.6 - A package for producing mock observations of particle simulations
 
 The purpose of the `SimSpin` package is to take a particle simulation of a galaxy and to produce an integral field spectroscopy observation in the format of a *data cube* - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
