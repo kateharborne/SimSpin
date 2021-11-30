@@ -6,10 +6,10 @@ filename: installation.md
 
 Here, we explain how to install `SimSpin` on your machine, listing specific instructions for both MacOSX and Linux. 
 C library dependencies, including FFTW and HDF5, need to be installed prior to `SimSpin` as outlined for individual operating systems below.  
-If you already have the C library dependencies installed, skip ahead to [Installing SimSpin](installing-simspin) to get started.
+If you already have the C library dependencies installed, skip ahead to [Installing SimSpin](#installing-simspin) to get started.
 
 `SimSpin` is an open source R-package, registered with the Astrophysics Source Code Library, DOI: [1903.006](https://ascl.net/1903.006).
-This package build has been tested on OSX and Linux operating systems using [Travis CI](https://travis-ci.org/github/kateharborne/SimSpin) and should install simply from within R using the instructions in [Installing SimSpin](installing-simspin).
+This package build has been tested on OSX and Linux operating systems using [Travis CI](https://travis-ci.org/github/kateharborne/SimSpin) and should install simply from within R using the instructions in [Installing SimSpin](#installing-simspin).
 
 You will also (obviously) need an installation of [R](https://www.r-project.org/), which can be downloaded from your local mirror for your operating system. 
 We suggest downloading the [RStudio IDE](https://rstudio.com/) for a friendly user environment. 
