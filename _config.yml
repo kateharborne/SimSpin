@@ -26,10 +26,9 @@ url: "https://kateharborne.github.io/SimSpin" # the base hostname & protocol for
 github_username:  kateharborne
 
 # Build settings
-remote_theme: pages-themes/minimal@v0.2.0
+theme: jekyll-theme-minimal
 plugins:
   - jekyll-feed
-  - jekyll-remote-theme
 markdown: kramdown
 
 # Exclude from processing.
@@ -40,16 +39,14 @@ markdown: kramdown
 # Excluded items can be processed by explicitly listing the directories or
 # their entries' file path in the `include:` list.
 #
-# exclude:
+exclude:
 #   - .sass-cache/
 #   - .jekyll-cache/
 #   - gemfiles/
-#   - Gemfile
-#   - Gemfile.lock
+  - Gemfile
+  - Gemfile.lock
 #   - node_modules/
 #   - vendor/bundle/
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
-
-theme: jekyll-theme-minimal
