@@ -22,12 +22,13 @@ More extensive examples can be found in ...
 The main input for `SimSpin` is a galaxy simulation. 
 This may be either an isolated galaxy model (*N*-body or hydro-dynamical) or a region cut out from a cosmological simulation. 
 We define groups of particles or cells in each simulation according to the convention defined by Gadget [(Springel, 2005)](https://ui.adsabs.harvard.edu/abs/2005MNRAS.364.1105S/abstract):
-    * \code{PartType0} - gas,
-    * \code{PartType1} - dark matter, 
-    * \code{PartType2} - $N$-body disk, 
-    * \code{PartType3} - $N$-body bulge, 
-    * \code{PartType4} - stars, 
-    * \code{PartType5} - boundary/black holes. 
+
+* \code{PartType0} - gas,
+* \code{PartType1} - dark matter, 
+* \code{PartType2} - $N$-body disk, 
+* \code{PartType3} - $N$-body bulge, 
+* \code{PartType4} - stars, 
+* \code{PartType5} - boundary/black holes. 
 
 We begin by running the [`make_simspin_file`](https://kateharborne.github.io/SimSpin/docs/make_simspin_file) function. 
 This will organise the provided data into a consistent format for `SimSpin` processing and assign SEDs to stellar particles given their individual ages and metallicities. 
