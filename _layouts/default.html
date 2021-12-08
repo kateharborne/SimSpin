@@ -19,14 +19,7 @@
         <img src="{{site.logo | relative_url}}" class="center" alt="Logo" />
         {% endif %}
 
-        <p>&ensp;</p>
         <!-- <h1>{{ site.title | default: site.github.repository_name }}</h1> -->
-
-        <!-- badges: start -->
-        <a href="https://github.com/kateharborne/SimSpin/actions"><img src="https://github.com/kateharborne/SimSpin/actions/workflows/r.yml/badge.svg" alt="R-CMD-check"/></a>
-        <a href="https://app.codecov.io/gh/kateharborne/SimSpin"><img src="https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=2T1BDWZYSV" alt="codecov"/></a>
-        <a href="https://ascl.net/1903.006"><img src="https://img.shields.io/badge/ascl-1903.006-blue.svg?colorB=262255" alt="ascl:1903.006" /></a>
-        <!-- badges: end -->
 
         <!-- <p>{{ site.description | default: site.github.project_tagline }}</p> -->
 
@@ -45,6 +38,12 @@
           <li><a href="{{ site.github.ads_url }}">View On <strong>ADS</strong></a></li>
         </ul>
         {% endif %}
+
+        <!-- badges: start -->
+        <a href="https://github.com/kateharborne/SimSpin/actions"><img src="https://github.com/kateharborne/SimSpin/actions/workflows/r.yml/badge.svg" alt="R-CMD-check"/></a>
+        <a href="https://app.codecov.io/gh/kateharborne/SimSpin"><img src="https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=2T1BDWZYSV" alt="codecov"/></a>
+        <a href="https://ascl.net/1903.006"><img src="https://img.shields.io/badge/ascl-1903.006-blue.svg?colorB=262255" alt="ascl:1903.006" /></a>
+        <!-- badges: end -->
 
         <table>
           {% for nav in page.navigation %}
