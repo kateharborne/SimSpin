@@ -2,6 +2,17 @@
 title: SimSpin
 layout: default
 filename: index.md
+navigation:
+  - title: Home
+    url: /
+  - title: Installation
+    url: installation
+  - title: Basic Usage
+    url: basic_usage
+  - title: Documentation
+    url: documentation
+  - title: Examples
+    url: examples
 ---
 
 # SimSpin v2.0.6 
