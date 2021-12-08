@@ -8,14 +8,3 @@ github:
   citation_url: https://github.com/kateharborne/SimSpin/blob/master/CITATION.cff
   ads_url: https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract
   owner_url: https://github.com/kateharborne
-navigation:
-  - title: Home
-    url: /
-  - title: Installation
-    url: installation
-  - title: Basic Usage
-    url: basic_usage
-  - title: Documentation
-    url: documentation
-  - title: Examples
-    url: examples
