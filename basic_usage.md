@@ -19,10 +19,10 @@ navigation:
 Here, we take you through a simple mock observation routine using the default parameters for each function.*
 
 There are four steps to build your first `SimSpin` mock data cube: 
-    1. [making the input file](#step-1),
-    1. [defining the conditions of the observing telescope and target galaxy](#step-2),
-    1. generating the observation, 
-    1. writing the output to FITS. 
+1. [Making the input file](#step-1),
+2. [Defining the conditions of the observing telescope and target galaxy](#step-2),
+3. [Generating the observation](#step-3), 
+4. [Writing the output to FITS](#step-4). 
 
 We take you through each of these steps in the simplest form below.
 More extensive examples can be found in [Examples](https://kateharborne.github.io/SimSpin/examples).
@@ -60,8 +60,8 @@ simspin_data    = make_simspin_file(filename = simulation_data,
                                     write_to_file = FALSE) 
 ```
 
-The output of this function will be a list that can either be written to an \code{.Rdata} file or written to an environment variable within your R session. 
-In the case above, we assign the output to the environment variable \code{`simspin\_data'}. 
+The output of this function will be a list that can either be written to an {.Rdata} file or written to an environment variable within your R session. 
+In the case above, we assign the output to the environment variable {`simspin_data'}. 
 
 Despite accepting a variety of different simulation inputs, the output of the \makesimspinfile{} function will always be the same. 
 The format will be a list containing 4 elements: 
@@ -164,3 +164,125 @@ summary(strategy)
 ```
 
 With these properties specified, we have fully described the parameters necessary to construct the observation. 
+
+## Step 3
+### Generating the observation
+
+Once the particulars of the observation have been defined, we can go ahead and make the observation. 
+This means feeding our prepared parameters into the `build_datacube()` function. 
+Here, we choose not to write the output directly to file (`write_fits = F`) and output to a variable called `gadget_cube` instead. 
+
+```r
+gadget_cube = build_datacube(simspin_file       = simspin_data, 
+                             telescope          = ifu,
+                             observing_strategy = strategy,
+                             write_fits         = F)
+```
+
+The returned variable will always be a list containing 4 elements:
+
+1. the first always being the data cube,
+2. followed by the observation summary,
+3. raw simulation images and
+4. mock observation images generated from collapsing the data cube. 
+
+```r
+> typeof(gadget_cube)
+# [1] "list"
+> summary(gadget_cube)
+#                 Length  Class  Mode   
+# spectral_cube   1731600 -none- numeric
+# observation          33 -none- list   
+# raw_images            3 -none- list   
+# observed_images       0 -none- NULL   
+```
+
+**add text about the structure of each element in the list**
+
+The overall format of this output will be consistent.
+However, the names of individual elements change to reflect the variety in the requested properties specified by [`telescope`]() and [`observing_strategy`]().
+* For example,  `method = 'spectral'` will return a variable `spectral_cube` as its first element; specifying instead `method = 'velocity'` will return a `velocity_cube`.
+* Similarly, if we are working in velocity mode with `mass_flag = T`, the images within the `raw_images` and `observed_images` elements will include an array called `mass_image`, rather than `flux_image`.
+
+## Step 4
+### Writing the output to FITS
+
+Using the `write_simspin_FITS()` function, the new observation can be written to a file that can be shared or re-analysed using observational pipelines.
+`SimSpin` can write such a FITS file using the variable produced by `build_datacube()`.
+A few further descriptive details are suggested as input for users of the file later on, but the function defaults to sensible suggestions, as shown in the code below.
+
+```r
+write_simspin_FITS(simspin_datacube   = gadget_cube,        # build_datacube() output
+                   output_file        = "gadget_cube.FITS", # filename of output file
+                   input_simspin_file = simulation_data,    # filename of input sim     
+                   object_name        = "GalaxyID_unknown", # name of observed object
+                   telescope_name     = "Telescope",        # name of telescope
+                   instrument_name    = "IFU",              # name of instrument 
+                   observer_name      = "Anonymous")        # name of the observer
+```
+
+The output of running this code will be a FITS file written at the location specified by `output_file`. 
+To explore this file within your R session, we suggest using the package `Rfits`, which can be downloaded using the instructions at the link provided [here](https://github.com/asgr/Rfits).
+We use the `Rfits_info()` function to examine the structure of the file that has been written:
+
+```r
+library("Rfits")
+fits_summary = Rfits_info(filename = "gadget_cube.FITS")
+fits_summary$summary
+
+# [1] "SIMPLE  =                    T / file does conform to FITS standard"
+# [2] "XTENSION= 'IMAGE   '           / IMAGE extension"                   
+```
+
+Here, we can clearly see that the file contains six HDU: a header table and a number of images. The exact number of HDU can vary depending on the type of observation made by `build_datacube()`. In all cases, HDU `ext = 1` will always be the header information and HDU `ext = 2` will always be the data cube produced. In this case, for a spectral data cube there are a series of `raw_images` output into subsequent HDUs. In the case of a velocity data cube, we would also see several `observed_images` included in the output.
+
+The first HDU (`ext = 1`) is a header element describes the properties of the observation. This acts as a record for reproducing that identical observation again in the future. Information that is recorded in the header is listed below. These are consistent across all FITS files written using this function, regardless of variety in `build_datacube` options.
+
+```r
+head = Rfits_read_header("~/Desktop/gadget_cube.FITS")
+head$header
+# [1] "SIMPLE  =                    T / file does conform to FITS standard"             
+# [2] "BITPIX  =                    8 / number of bits per data pixel"                  
+# [3] "NAXIS   =                    0 / number of data axes"                            
+# [4] "EXTEND  =                    T / FITS dataset may contain extensions"            
+# [5] "COMMENT   FITS (Flexible Image Transport System) format is defined in 'Astronomy"
+# [6] "COMMENT   and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H" 
+# [7] "ORIGIN  = 'SimSpin '           / Mock observation"                               
+# [8] "TELESCOP= 'Telescope '         / Telescope name"                                 
+# [9] "INSTRUME= 'IFU     '           / Instrument used"                                
+#[10] "RA      =                    0 / [deg] 11:41:21.1 RA (J2000) pointing"           
+#[11] "DEC     =                    0 / [deg] -01:34:59.0 DEC (J2000) pointing"         
+#[12] "EQINOX  =                 2000 / Standard FK5"                                   
+#[13] "RADECSYS= 'FK5     '           / Coordinate system"                              
+#[14] "EXPTIME =                 1320 / Integration time"                               
+#[15] "MJD-OBS =             58906.11 / Obs start"                                      
+#[16] "DATE-OBS= '2021-11-16 14:47:20' / Observing date"                                
+#[17] "UTC     =                 9654 / [s] 02:40:54.000 UTC"                           
+#[18] "LST     =             30295.18 / [s] 08:24:55.178 LST"                           
+#[19] "PI-COI  = 'UNKNOWN '           / PI-COI name."                                   
+#[20] "OBSERVER= 'Anonymous'          / Name of observer."                              
+#[21] "REDSHIFT=                  0.1 / Observed redshift."                             
+#[22] "PIPEFILE= 'gadget_cube.FITS'   / Filename of data product"                       
+#[23] "BUNIT   = 'erg/s/cm**2'        / Angstrom"                                       
+#[24] "ARCFILE = '/Users/path/Library/R/4.0/library/SimSpin/extdata/SimSpin_exampl'"
+#[25] "DATAMD5 = '4aece79473a5c88f6533382655e948bf' / MD5 checksum"                     
+#[26] "OBJECT  = 'GalaxyID_unknown'   / Original target."            
+
+```
+
+Observing details such as the name of the person who ran the file, the name of the object and the redshift at which is was observed are all included in this header. 
+Importantly, we also record the name and location of the `SimSpin` file from which this observation was made (denoted as `ARCFILE`), enabling files to be reproduced in the future. 
+Admittedly, several aspects to this header have to be invented as they do not have any physical meaning for mock observations (`RA` and `DEC`, for example), but are required for consistency with their observational counterparts. 
+**We have made these *invented* properties clear to the user by stating `mocked` in the comment of the header parameters.**
+
+Finally, we can go about reading in and working with the data cube itself. 
+Each HDU comes along with its own header to describe the properties of the image contained i.e. the units and dimensions of the pixels. 
+These details can be used to examine and process the data.
+
+**code demonstration of reading in the spectral data cube**
+
+Similar methodology can be used to examine both the 3-dimensional data cubes and the 2-dimensional images contained within sequential HDUs. 
+The only difference is the number of CVAL units (three for cubes versus two for images).
+
+*These steps can be used to generate a mock observation of a simulated galaxy. In this Basic Usage section, we have run the simplest recipe using the inbuilt defaults of each function. In the next section, we go into details of additional functionality that may be relevant for your work.*
+

@@ -2,6 +2,17 @@
 title: SimSpin
 layout: default
 filename: installation.md
+navigation:
+  - title: Home
+    url: /
+  - title: Installation
+    url: installation
+  - title: Basic Usage
+    url: basic_usage
+  - title: Documentation
+    url: documentation
+  - title: Examples
+    url: examples
 ---
 
 Here, we explain how to install `SimSpin` on your machine, listing specific instructions for both MacOSX and Linux. 
