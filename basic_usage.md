@@ -2,19 +2,30 @@
 title: SimSpin
 layout: default
 filename: basic_usage.md
+navigation:
+  - title: Home
+    url: /
+  - title: Installation
+    url: installation
+  - title: Basic Usage
+    url: basic_usage
+  - title: Documentation
+    url: documentation
+  - title: Examples
+    url: examples
 ---
 
-*Following this [installation](https://kateharborne.github.io/SimSpin/installation), you will have access to the range of functions within the `SimSpin` package. In this section, we take you through a simple mock observation routine using the default parameters for each function.*
+*Following the [installation of SimSpin](https://kateharborne.github.io/SimSpin/installation), you will have access to a range of functions. 
+Here, we take you through a simple mock observation routine using the default parameters for each function.*
 
-Once you have installed `SimSpin` successfully, you can build your first mock data cube.
-There are four steps to this process: 
+There are four steps to build your first `SimSpin` mock data cube: 
     1. [making the input file](#step-1),
     1. [defining the conditions of the observing telescope and target galaxy](#step-2),
     1. generating the observation, 
     1. writing the output to FITS. 
 
 We take you through each of these steps in the simplest form below.
-More extensive examples can be found in ... 
+More extensive examples can be found in [Examples](https://kateharborne.github.io/SimSpin/examples).
 
 ## Step 1
 ### Making the input file
@@ -23,12 +34,12 @@ The main input for `SimSpin` is a galaxy simulation.
 This may be either an isolated galaxy model (*N*-body or hydro-dynamical) or a region cut out from a cosmological simulation. 
 We define groups of particles or cells in each simulation according to the convention defined by Gadget [(Springel, 2005)](https://ui.adsabs.harvard.edu/abs/2005MNRAS.364.1105S/abstract):
 
-* \code{PartType0} - gas,
-* \code{PartType1} - dark matter, 
-* \code{PartType2} - $N$-body disk, 
-* \code{PartType3} - $N$-body bulge, 
-* \code{PartType4} - stars, 
-* \code{PartType5} - boundary/black holes. 
+* `PartType0` - gas,
+* `PartType1` - dark matter, 
+* `PartType2` - $N$-body disk, 
+* `PartType3` - $N$-body bulge, 
+* `PartType4` - stars, 
+* `PartType5` - boundary/black holes. 
 
 We begin by running the [`make_simspin_file`](https://kateharborne.github.io/SimSpin/docs/make_simspin_file) function. 
 This will organise the provided data into a consistent format for `SimSpin` processing and assign SEDs to stellar particles given their individual ages and metallicities. 
