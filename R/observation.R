@@ -8,16 +8,16 @@
 #' galaxy has been observed.
 #'
 #'@param telescope A \code{telescope} object.
-#'@param observing_strategy An \code{observing_strategy} object.
+#'@param objective An \code{objective} object.
 #'@return Returns an object of class "observation" that summarises the
 #' properties of the observation. Run within the \code{build_datacube()}
 #' function.
 #'@examples
 #'sami = telescope(type="SAMI")
-#'conditions = observing_strategy()
-#'observation_summary = observation(telescope=sami, observing_strategy=conditions)
+#'conditions = objective()
+#'observation_summary = observation(telescope=sami, objective=conditions)
 #'
-observation = function(telescope, observing_strategy){
+observation = function(telescope, objective){
 
   ang_size      = celestial::cosdistAngScale(observing_strategy$z, ref="Planck") # angular size given z, kpc/"
   lum_dist      = celestial::cosdistLumDist(observing_strategy$z, ref="Planck") # computing Luminosity Distance in units of Mpc
