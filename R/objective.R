@@ -12,8 +12,7 @@
 #' is projected. Default is 0.1 in units of redshift "z". Avaliable unit
 #' options include `distance_unit = 'z'` (redshift distance),
 #' `distance_unit = 'Mpc'`  (physical distance in units of mega-parsec) and
-#' `distance_unit = 'kpc/pix'` (physical size of each pixel in kpc i.e.
-#' kilo-parsec).
+#' `distance_unit = 'kpc/arcsec'` (angular size in kilo-parsec/arcsecond).
 #'@param distance_units Character describing the type of units used for the
 #' distance parameter. Default is `z` for distances given in units of redshift.
 #' Avaliable options include `z` (redshift distance), `Mpc` (physical distance
@@ -41,11 +40,11 @@
 #' given in arcsec.
 #'@param psf A string to describe the shape of the PSF. Options include
 #' "Gaussian" or "Moffat". Input is NOT case sensitive.
-#'@return Returns an object of class "observing_strategy" that describes the
+#'@return Returns an object of class "objective" that describes the
 #' conditions in which the observation is made. Required to run
 #' \code{build_datacube()}.
 #'@examples
-#'conditions = observing_strategy()
+#'conditions = objective()
 #'
 
 objective = function(distance = 0.1, distance_unit = "z",
