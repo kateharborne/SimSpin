@@ -48,10 +48,10 @@
 #'conditions = observing_strategy()
 #'
 
-object_properties = function(distance = 0.1, distance_unit = "z",
-                             inc_deg = 70, twist_deg = 0,
-                             pointing = c(0,0), pointing_unit ="kpc",
-                             blur = F, fwhm=2, psf="Gaussian"){
+objective = function(distance = 0.1, distance_unit = "z",
+                     inc_deg = 70, twist_deg = 0,
+                     pointing = c(0,0), pointing_unit ="kpc",
+                     blur = F, fwhm=2, psf="Gaussian"){
 
   # checks for validity
   if (stringr::str_to_upper(distance_unit) != "Z" & stringr::str_to_upper(distance_unit) != "MPC" & stringr::str_to_upper(distance_unit) != "KPC/PIX"){
@@ -109,5 +109,6 @@ object_properties = function(distance = 0.1, distance_unit = "z",
   }
 
   return(output)
+
 
 }
