@@ -11,12 +11,12 @@
 #' by the object.
 #'
 #'@param z A numeric describing the distance measured to the observed
-#' object in units of redshift, z.
+#' object in units of redshift, z. Precision to +/- 1e-7.
 #'@param Mpc A numeric describing the distance measured to the observed
-#' object in units of physical distance in mega-parsec.
+#' object in units of physical distance in mega-parsec. Precision to +/- 1e-3.
 #'@param kpc_per_arcsec A numeric describing the distance measured to the
 #' observed object in units of angular distance in kilo-parsec per arcsecond.
-#'
+#' Precision to +/- 1e-5.
 #'@return Returns an object of class "Distance" that summarises the
 #' projected distance to the object and the associated units.
 #'
@@ -51,8 +51,8 @@ Distance <- function(z, Mpc, kpc_per_arcsec){
     methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
 
   } else {
-    cat("Error: Invalid distance measure specified. \n",
-        "Please specify just ONE of the following parameters: z, Mpc, kpc_per_arcsec")
+    stop("Error: Invalid distance measure specified. \n",
+         "Please specify just ONE of the following parameters: z, Mpc, kpc_per_arcsec")
   }
 }
 
