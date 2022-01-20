@@ -34,7 +34,11 @@
 
 Pointing <- function(xy_deg, xy_kpc, distance){
 
-  if (!missing(xy_deg) & missing(xy_kpc) & !missing(distance)){
+  if (missing(xy_deg) & missing(xy_kpc) & missing(distance)){
+    stop("Error: Invalid pointing measure specified. \n",
+         "Please specify inputs 'xy_deg' and 'distance' OR 'xy_kpc' & 'distance'. ")
+
+  } else if (!missing(xy_deg) & missing(xy_kpc) & !missing(distance)){
     xy_deg = as.double(xy_deg)
 
     kpc_per_degree = kpc_per_arcsec(distance) * 3600
@@ -54,12 +58,12 @@ Pointing <- function(xy_deg, xy_kpc, distance){
     methods::new("Pointing", xy_deg = xy_deg, xy_kpc = xy_kpc)
 
   } else if (missing(distance)) {
-    cat("Error: Distance class object required to specify scale. \n",
-        "Please specify 'distance' input. ")
+    stop("Error: Distance class object required to specify scale. \n",
+         "Please specify 'distance' input. ")
 
   } else {
-    cat("Error: Invalid pointing measure specified. \n",
-        "Please specify just ONE of the following parameters: 'xy_deg' OR 'xy_kpc' ")
+    stop("Error: Invalid pointing measure specified. \n",
+         "Please specify just ONE of the following parameters: 'xy_deg' OR 'xy_kpc' ")
   }
 }
 
