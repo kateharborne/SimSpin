@@ -32,7 +32,7 @@ Distance <- function(z, Mpc, kpc_per_arcsec){
     Mpc = celestial::cosdistLumDist(z, ref="Planck") # computing distance in units of Mpc
     kpc_per_arcsec = celestial::cosdistAngScale(z, ref="Planck") # angular size given z, kpc/"
 
-    new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
+    methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
 
   } else if (missing(z) & missing(Mpc) & !missing(kpc_per_arcsec)){
 
@@ -40,7 +40,7 @@ Distance <- function(z, Mpc, kpc_per_arcsec){
     z = .get_z_from_ang_size(kpc_per_arcsec)
     Mpc = celestial::cosdistLumDist(z, ref="Planck") # computing distance in units of Mpc
 
-    new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
+    methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
 
   } else if (missing(z) & !missing(Mpc) & missing(kpc_per_arcsec)){
 
@@ -48,7 +48,7 @@ Distance <- function(z, Mpc, kpc_per_arcsec){
     z = .get_z_from_phy_size(Mpc)
     kpc_per_arcsec = celestial::cosdistAngScale(z, ref="Planck") # angular size given z, kpc/"
 
-    new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
+    methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
 
   } else {
     cat("Error: Invalid distance measure specified. \n",
