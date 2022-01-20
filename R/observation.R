@@ -19,10 +19,10 @@
 #'
 observation = function(telescope, objective){
 
-  ang_size      = celestial::cosdistAngScale(observing_strategy$z, ref="Planck") # angular size given z, kpc/"
-  lum_dist      = celestial::cosdistLumDist(observing_strategy$z, ref="Planck") # computing Luminosity Distance in units of Mpc
-  aperture_size = ang_size * telescope$fov                 # diameter size of the telescope, kpc
-  sbin_size     = aperture_size / telescope$sbin           # spatial bin size (kpc per bin)
+  ang_size      = kpc_per_arcsec(objective$distance) # angular size given z, kpc/"
+  lum_dist      = Mpc(objective$distance)            # computing Luminosity Distance in units of Mpc
+  aperture_size = ang_size * telescope$fov           # diameter size of the telescope, kpc
+  sbin_size     = aperture_size / telescope$sbin     # spatial bin size (kpc per bin)
   sbin_seq      = seq(-(telescope$sbin * sbin_size) / 2,
                       (telescope$sbin * sbin_size) / 2, by=sbin_size) # spatial bin break positions
   wave_seq      = seq(telescope$wave_range[1], telescope$wave_range[2], by = telescope$wave_res) # wavelength bin break positions
@@ -40,8 +40,8 @@ observation = function(telescope, objective){
     aperture_region = .hexagonal_ap(telescope$sbin)
   }
 
-  if (observing_strategy$blur){
-    psf_fwhm = observing_strategy$fwhm
+  if (objective$blur){
+    psf_fwhm = objective$fwhm
     fwhm_scaled = (psf_fwhm * ang_size)/ sbin_size  # the fwhm scaled to image pixel dimensions
     if (telescope$sbin < 25 && telescope$sbin %% 2 != 0){
       psf_dim = telescope$sbin
@@ -49,10 +49,10 @@ observation = function(telescope, objective){
       psf_dim = telescope$sbin-1
       } else {psf_dim = 25} # dimensions of the PSF kernel
 
-    if (observing_strategy$psf == "Gaussian"){
+    if (objective$psf == "Gaussian"){
       psf_k = .gaussian_kernel(m = psf_dim, n = psf_dim, sigma = fwhm_scaled/(2*sqrt(2*log(2)))) # the psf kernel
     }
-    if (observing_strategy$psf == "Moffat"){
+    if (objective$psf == "Moffat"){
       psf_k = ProFit::profitCubaMoffat(fwhm = fwhm_scaled, mag = 1, con = 5, dim = c(psf_dim,psf_dim))
     }
   } else {
@@ -69,14 +69,15 @@ observation = function(telescope, objective){
                 date            = as.character(Sys.time()),
                 fov             = telescope$fov,
                 filter          = telescope$filter,
-                inc_deg         = observing_strategy$inc_deg,
-                inc_rad         = observing_strategy$inc_deg * (pi/180),
-                twist_deg       = observing_strategy$twist_deg,
-                twist_rad       = observing_strategy$twist_deg * (pi/180),
+                inc_deg         = objective$inc_deg,
+                inc_rad         = objective$inc_deg * (pi/180),
+                twist_deg       = objective$twist_deg,
+                twist_rad       = objective$twist_deg * (pi/180),
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
                 method          = telescope$method,
-                particle_limit  = observing_strategy$particle_limit,
+                pointing_kpc    = xy_kpc(objective$pointing),
+                pointing_deg    = xy_deg(objective$pointing),
                 pixel_region    = aperture_region * pixel_index,
                 psf_fwhm        = psf_fwhm,
                 psf_kernel      = psf_k,
@@ -92,7 +93,7 @@ observation = function(telescope, objective){
                 wave_edges      = wave_edges,
                 vbin_size       = vbin_size,
                 vbin_error      = vbin_error,
-                z               = observing_strategy$z)
+                z               = z(objective$distance))
 
   return(output)
 }
