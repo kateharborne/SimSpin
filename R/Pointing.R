@@ -28,64 +28,59 @@
 #' being observed in all associated units.
 #'
 #'@examples
-#'Pointing(x_kpc = -1.0, y_kpc = 0)
+#'dist = Distance(z=0.3)
+#'Pointing(x_kpc = -1.0, y_kpc = 0, distance = dist)
 #'
 
-Pointing <- function(x_deg, y_deg, x_kpc, y_kpc, distance){
+Pointing <- function(xy_deg, xy_kpc, distance){
 
-  if (!missing(x_deg) & !missing(y_deg) & missing(x_kpc) & missing(y_kpc)){
-    x_deg = as.double(x_deg)
-    y_deg = as.double(y_deg)
+  if (!missing(xy_deg) & missing(xy_kpc) & !missing(distance)){
+    xy_deg = as.double(xy_deg)
+
     kpc_per_degree = kpc_per_arcsec(distance) * 3600
 
-    x_kpc = x_deg * kpc_per_degree
-    y_kpc = y_deg * kpc_per_degree
+    xy_kpc = xy_deg * kpc_per_degree
 
-    new("Pointing", x_deg = x_deg, y_deg = y_deg, x_kpc = x_kpc, y_kpc = y_kpc)
+    methods::new("Pointing", xy_deg = xy_deg, xy_kpc = xy_kpc)
 
-  } else if (missing(x_deg) & missing(y_deg) & !missing(x_kpc) & !missing(y_kpc)) {
+  } else if (missing(xy_deg) & !missing(xy_kpc) & !missing(distance)) {
 
-    x_kpc = as.double(x_kpc)
-    y_kpc = as.double(y_kpc)
+    xy_kpc = as.double(xy_kpc)
+
     kpc_per_degree = kpc_per_arcsec(distance) * 3600
 
-    x_deg = x_kpc / kpc_per_degree
-    y_deg = y_kpc / kpc_per_degree
+    xy_deg = xy_kpc / kpc_per_degree
 
-    new("Pointing", x_deg = x_deg, y_deg = y_deg, x_kpc = x_kpc, y_kpc = y_kpc)
+    methods::new("Pointing", xy_deg = xy_deg, xy_kpc = xy_kpc)
+
+  } else if (missing(distance)) {
+    cat("Error: Distance class object required to specify scale. \n",
+        "Please specify 'distance' input. ")
 
   } else {
     cat("Error: Invalid pointing measure specified. \n",
-        "Please specify just ONE PAIR of the following parameters: 'x_deg', 'y_deg' OR 'x_kpc', 'y_kpc' ")
+        "Please specify just ONE of the following parameters: 'xy_deg' OR 'xy_kpc' ")
   }
 }
 
 # Description of the Pointing class --------------------------------------------
 setClass("Pointing",
          slots = c(
-           x_deg = "numeric",
-           y_deg = "numeric",
-           x_kpc = "numeric",
-           y_kpc = "numeric"
+           xy_deg = "numeric",
+           xy_kpc = "numeric"
          ),
          prototype = list(
-           x_deg = NA_real_,
-           y_deg = NA_real_,
-           x_kpc = NA_real_,
-           y_kpc = NA_real_
+           xy_deg = NA_real_,
+           xy_kpc = NA_real_
          )
 )
 
 setValidity("Pointing", function(object){
 
-  if (length(object@x_deg) > 1) {
-    "@x_deg must be a single numeric input"
-  } else if (length(object@y_deg) > 1) {
-    "@y_deg must be a single numeric input"
-  } else if (length(object@x_kpc) > 1) {
-    "@x_kpc must be a single numeric input"
-  } else if (length(object@y_kpc) > 1) {
-    "@y_kpc must be a single numeric input"
+  if (length(object@xy_deg) != 2) {
+    "@xy_deg must be a numeric input of length 2"
+  } else if (length(object@xy_kpc) != 2) {
+    "@xy_kpc must be a numeric input of length 2"
   } else {
     TRUE
   }
@@ -94,21 +89,14 @@ setValidity("Pointing", function(object){
 
 setMethod("show", "Pointing", function(object) {
   cat(is(object)[[1]], " relative to observed galaxy centre at (0,0) is:", "\n",
-      "    x_deg:", object@x_deg,  " degrees ---- ", "\n",
-      "   y_deg:", object@y_deg, " degrees ---- ", "\n",
-      " (x,y):  (", object@x_kpc, ",", object@y_kpc, ") kpc ---- ", "\n",
+      " (x,y):  (", object@xy_deg[1], ",", object@xy_deg[2], ") degrees -- ", "\n",
+      " (x,y):  (", object@xy_kpc[1], ",", object@xy_kpc[2], ") kpc ------ ", "\n",
       sep = "")
 })
 
 # setting ability to query the slots of a pointing object
-setGeneric("x_deg", function(x) standardGeneric("x_deg"))
-setMethod("x_deg", "Pointing", function(x) x@x_deg)
+setGeneric("xy_deg", function(x) standardGeneric("xy_deg"))
+setMethod("xy_deg", "Pointing", function(x) x@xy_deg)
 
-setGeneric("y_deg", function(x) standardGeneric("y_deg"))
-setMethod("y_deg", "Pointing", function(x) x@y_deg)
-
-setGeneric("x_kpc", function(x) standardGeneric("x_kpc"))
-setMethod("x_kpc", "Pointing", function(x) x@x_kpc)
-
-setGeneric("y_kpc", function(x) standardGeneric("y_kpc"))
-setMethod("y_kpc", "Pointing", function(x) x@y_kpc)
+setGeneric("xy_kpc", function(x) standardGeneric("xy_kpc"))
+setMethod("xy_kpc", "Pointing", function(x) x@xy_kpc)
