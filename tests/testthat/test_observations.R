@@ -106,8 +106,8 @@ test_that("Initial run of objective() function - w/ blur", {
 # Testing that an error triggers if incompatible parameters are given
 test_that("objective() issues error when incompatible parameters are given.", {
   expect_error(objective(blur = T, psf = "round"))
-  expect_error(objective(distance = Distance(z=0)))
-  expect_error(objective(distance = Distance(z=-0.2)))
+  expect_error(objective(dist_z=0))
+  expect_error(objective(dist_z=-0.2))
 })
 
 # Testing that you can generate an observation with each of the telescope types
@@ -186,9 +186,9 @@ test_that("Distance class errors if multiple parameters specified", {
 
 # Testing Distance class still performs as expected within objective() function
 test_that("Check that when input z, or Mpc, or kpc_per_arcsec to objective, other answers are consistent", {
-  set_z = objective(distance = Distance(z=0.3))
-  set_Mpc = objective(distance = Distance(Mpc=1588.662))
-  set_kpc = objective(distance = Distance(kpc_per_arcsec = 4.557426))
+  set_z = objective(dist_z=0.3)
+  set_Mpc = objective(dist_Mpc=1588.662)
+  set_kpc = objective(dist_kpc_per_arcsec = 4.557426)
 
   z_tol = 1e-7
   Mpc_tol = 1e-3
@@ -203,11 +203,11 @@ test_that("Check that when input z, or Mpc, or kpc_per_arcsec to objective, othe
 })
 
 test_that("objective() errors if wrong parameter specified for Distance class", {
-  expect_error(objective(distance = Distance(k = 22)))
+  expect_error(objective(k = 22))
 })
 
 test_that("objective errors if multiple parameters specified for Distance class", {
-  expect_error(objective(distance = Distance(z = 0.2, kpc_per_arcsec = 1)))
+  expect_error(objective(dist_z = 0.2, dist_kpc_per_arcsec = 1))
 })
 
 # Testing Pointing class
@@ -235,9 +235,8 @@ test_that("Pointing class errors if multiple parameters specified", {
 
 # Testing Pointing class still performs as expected within objective() function
 test_that("Check that when input xy_deg or xy_kpc to Pointing, other answers are consistent", {
-  distance = Distance(z=0.3)
-  set_deg = objective(distance = distance, pointing = c(0.1,0.05), pointing_unit = "deg")
-  set_kpc = objective(distance = distance, pointing = c(1640.673,820.3367), pointing_unit = "kpc")
+  set_deg = objective(dist_z=0.3, pointing_deg = c(0.1,0.05))
+  set_kpc = objective(dist_z=0.3, pointing_kpc = c(1640.673,820.3367))
 
   deg_tol = 1e-7
   kpc_tol = 1e-3
@@ -248,9 +247,9 @@ test_that("Check that when input xy_deg or xy_kpc to Pointing, other answers are
 })
 
 test_that("Pointing class errors if wrong parameter specified", {
-  expect_error(objective(distance = distance, pointing = c(0.1), pointing_unit = "k"))
+  expect_error(objective(dist_z=0.3, pointing_k = c(0.1)))
 })
 
 test_that("Pointing class errors if multiple parameters specified", {
-  expect_error(objective(distance = distance, pointing = c(0.1), pointing_unit = "kpc"))
+  expect_error(objective(dist_z=0.3, pointing_kpc = c(0.1), pointing_deg = c(123,125)))
 })
