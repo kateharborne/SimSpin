@@ -12,10 +12,12 @@
 #' output list from \code{make_simspin_file()}.
 #'@param telescope An object of the telescope class describing the
 #' specifications of the observing telescope (i.e. field of view, spatial
-#' resolution, wavelength resolution, etc.).
-#'@param observing_strategy An object of the observing_strategy class that
+#' resolution, wavelength resolution, etc.). See
+#' \code{\link{telescope}} help for more details.
+#'@param objective An object of the objective class that
 #' describes the properties of the observed simulation (i.e. redshift,
-#' inclination, seeing conditions).
+#' inclination, seeing conditions). See \code{\link{objective}}
+#' help for more details.
 #'@param verbose Default is \code{FALSE}. If you would like the code to give
 #' updates about its progress, change this parameter to \code{TRUE}.
 #'@param write_fits Default is \code{FALSE}. If you would like the code to
@@ -57,10 +59,10 @@
 #'                         package = "SimSpin")
 #'cube = build_datacube(simspin_file = ss_gadget,
 #'                      telescope = telescope(type="SAMI"),
-#'                      observing_strategy = observing_strategy())
+#'                      objective = objective())
 #'
 
-build_datacube = function(simspin_file, telescope, observing_strategy,
+build_datacube = function(simspin_file, telescope, objective,
                           verbose = F, write_fits = F, output_location,
                           object_name="GalaxyID_unknown",
                           telescope_name="SimSpin",
@@ -68,7 +70,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                           cores=1, mass_flag = F){
 
   if (verbose){cat("Computing observation parameters... \n")}
-  observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+  observation = observation(telescope = telescope, objective = objective)
 
   # Reading in SimSpin file data
   if (typeof(simspin_file) == "character"){ # if provided with path to file
@@ -95,7 +97,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # Projecting the galaxy to given inclination
   obs_data = obs_galaxy(part_data = twisted_data, inc_rad = observation$inc_rad)
 
-  galaxy_data$x = obs_data$x;   galaxy_data$y = obs_data$y;   galaxy_data$z = obs_data$z
+  galaxy_data$x = (obs_data$x + observation$pointing_kpc[1])   # adjusting pointing of the aperture by x_kpc
+  galaxy_data$y = obs_data$y                                   #   and y_kpc
+  galaxy_data$z = (obs_data$z + observation$pointing_kpc[2])
   galaxy_data$vx = obs_data$vx; galaxy_data$vy = obs_data$vy; galaxy_data$vz = obs_data$vz
 
   if (verbose){cat("Assigning particles to spaxels... \n")}
