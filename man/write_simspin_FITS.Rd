@@ -51,7 +51,7 @@ temp_loc = tempdir()
 make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.Rdata", sep=""))
 cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
                      telescope = telescope(type="SAMI"),
-                     observing_strategy = observing_strategy())
+                     objective = objective())
 write_simspin_FITS(output_file = paste(temp_loc, "cube.fits", sep=""),
                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
                   telescope_name = "AAO", instrument_name = "SAMI",

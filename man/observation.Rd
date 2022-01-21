@@ -4,12 +4,14 @@
 \alias{observation}
 \title{A class to describe the basic properties of the observation}
 \usage{
-observation(telescope, observing_strategy)
+observation(telescope, objective)
 }
 \arguments{
-\item{telescope}{A \code{telescope} object.}
+\item{telescope}{A \code{telescope} object. See
+\code{\link{telescope}} help for more details.}
 
-\item{observing_strategy}{An \code{observing_strategy} object.}
+\item{objective}{An \code{objective} object. See
+\code{\link{objective}} help for more details.}
 }
 \value{
 Returns an object of class "observation" that summarises the
@@ -22,7 +24,7 @@ galaxy has been observed.
 }
 \examples{
 sami = telescope(type="SAMI")
-conditions = observing_strategy()
-observation_summary = observation(telescope=sami, observing_strategy=conditions)
+conditions = objective()
+observation_summary = observation(telescope=sami, objective=conditions)
 
 }

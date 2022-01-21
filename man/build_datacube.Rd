@@ -7,7 +7,7 @@
 build_datacube(
   simspin_file,
   telescope,
-  observing_strategy,
+  objective,
   verbose = F,
   write_fits = F,
   output_location,
@@ -24,11 +24,13 @@ output list from \code{make_simspin_file()}.}
 
 \item{telescope}{An object of the telescope class describing the
 specifications of the observing telescope (i.e. field of view, spatial
-resolution, wavelength resolution, etc.).}
+resolution, wavelength resolution, etc.). See
+\code{\link{telescope}} help for more details.}
 
-\item{observing_strategy}{An object of the observing_strategy class that
+\item{objective}{An object of the objective class that
 describes the properties of the observed simulation (i.e. redshift,
-inclination, seeing conditions).}
+inclination, seeing conditions). See \code{\link{objective}}
+help for more details.}
 
 \item{verbose}{Default is \code{FALSE}. If you would like the code to give
 updates about its progress, change this parameter to \code{TRUE}.}
@@ -85,6 +87,6 @@ ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
                         package = "SimSpin")
 cube = build_datacube(simspin_file = ss_gadget,
                      telescope = telescope(type="SAMI"),
-                     observing_strategy = observing_strategy())
+                     objective = objective())
 
 }
