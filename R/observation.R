@@ -7,8 +7,10 @@
 #'The purpose of this function is to generate an object that describes how the
 #' galaxy has been observed.
 #'
-#'@param telescope A \code{telescope} object.
-#'@param objective An \code{objective} object.
+#'@param telescope A \code{telescope} object. See
+#' \code{\link{telescope}} help for more details.
+#'@param objective An \code{objective} object. See
+#' \code{\link{objective}} help for more details.
 #'@return Returns an object of class "observation" that summarises the
 #' properties of the observation. Run within the \code{build_datacube()}
 #' function.
