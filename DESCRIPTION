@@ -18,6 +18,7 @@ Imports:
     FITSio,
     hdf5r,
     magicaxis,
+    methods,
     pracma,
     ProSpect (>= 1.0.7),
     ProFit,
