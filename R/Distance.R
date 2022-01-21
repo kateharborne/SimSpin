@@ -2,7 +2,8 @@
 # Date: 13/01/2022
 # Title: Distance class descriptor
 #
-#'A class to describe the projected distance to the observed object
+#'A class helper function to describe the projected distance to the observed
+#' object
 #'
 #'The purpose of this function is to generate an object that contains the
 #' projected distance to the observed galaxy in a variety of units. Supply a
@@ -64,6 +65,15 @@ Distance <- function(z, Mpc, kpc_per_arcsec){
 .get_z_from_phy_size = approxfun(x = .possible_phy_size, y = .possible_z, method = "linear", rule = 1, ties = mean)
 
 # Description of the Distance class --------------------------------------------
+
+#' An S4 class to represent projected distance to a galaxy
+#'
+#' @slot z Describes the projected distance to a galaxy in units of redshift.
+#' @slot Mpc Describes the projected distance to a galaxy in physical units of
+#'  Mega-parsecs.
+#' @slot kpc_per_arcsec Describes the projected distance to a galaxy in angular
+#'  units of kilo-parsecs per arcsecond.
+
 setClass("Distance",
          slots = c(
            z = "numeric",
@@ -94,7 +104,7 @@ setValidity("Distance", function(object){
 } )
 
 setMethod("show", "Distance", function(object) {
-  cat(is(object)[[1]], " to observed galaxy is:", "\n",
+  cat(methods::is(object)[[1]], " to observed galaxy is:", "\n",
       " ", object@Mpc,            " Mpc ---- physical distance,", "\n",
       " ", object@kpc_per_arcsec, " kpc/'' - angular scale on the sky,", "\n",
       " z = ", object@z,          " -------- projected redshift distance,", "\n",
@@ -102,11 +112,30 @@ setMethod("show", "Distance", function(object) {
 })
 
 # setting ability to query the slots of a distance object
+#' @describeIn Distance Query the kpc_per_arcsec of a Distance object
+#' @param x Distance object
 setGeneric("kpc_per_arcsec", function(x) standardGeneric("kpc_per_arcsec"))
+
+#' Query the kpc_per_arcsec of a Distance object
+#' @param x Distance object
+#' @return The distance to the projected galaxy in units of kilo-parsec per
+#'  arcsecond.
 setMethod("kpc_per_arcsec", "Distance", function(x) x@kpc_per_arcsec)
 
+#' @describeIn Distance Query the Mpc of a Distance object
+#' @param x Distance object
 setGeneric("Mpc", function(x) standardGeneric("Mpc"))
+
+#' Query the Mpc of a Distance object
+#' @inheritParams kpc_per_arcsec
+#' @return The distance to the projected galaxy in units of Mpc.
 setMethod("Mpc", "Distance", function(x) x@Mpc)
 
+#' @describeIn Distance Query the z of a Distance object
+#' @param x Distance object
 setGeneric("z", function(x) standardGeneric("z"))
+
+#' Distance Query the z of a Distance object
+#' @inheritParams kpc_per_arcsec
+#' @return The distance to the projected galaxy in units of redshift.
 setMethod("z", "Distance", function(x) x@z)
