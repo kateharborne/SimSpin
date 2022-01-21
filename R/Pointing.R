@@ -12,14 +12,10 @@
 #' distance, "x_deg" and "y_deg") and all others will be contained
 #' by the object.
 #'
-#'@param x_deg Offset from centre (0,0) in angular units of degrees along the
-#' x-axis.
-#'@param y_deg Offset from centre (0,0) in angular units of degrees along the
-#' y-axis.
-#'@param x_kpc Offset from centre (0,0) in  physical units of kilo-parsec along
-#' the x-axis.
-#'@param y_kpc Offset from centre (0,0) in  physical units of kilo-parsec along
-#' the y-axis.
+#'@param xy_deg Offset from centre (0,0) in angular units of degrees along the
+#' x-axis and y-axis respectively.
+#'@param xy_kpc Offset from centre (0,0) in  physical units of kilo-parsec along
+#' the x-axis and y-axis respectively.
 #'@param distance The Distance object used to describe the projected distance
 #' of the observed galaxy.
 #'
@@ -29,7 +25,7 @@
 #'
 #'@examples
 #'dist = Distance(z=0.3)
-#'Pointing(x_kpc = -1.0, y_kpc = 0, distance = dist)
+#'Pointing(xy_kpc = c(-1,0), distance = dist)
 #'
 
 Pointing <- function(xy_deg, xy_kpc, distance){
@@ -68,6 +64,14 @@ Pointing <- function(xy_deg, xy_kpc, distance){
 }
 
 # Description of the Pointing class --------------------------------------------
+
+#' An S4 class to represent the telescope pointing relative to the galaxy centre
+#'
+#' @slot xy_deg Numeric of length 2. Describes the pointing relative to the
+#'  galaxy centre in units of degrees.
+#' @slot xy_kpc Numeric of length 2. Describes the pointing relative to the
+#'  galaxy centre in units of kilo-parsecs.
+
 setClass("Pointing",
          slots = c(
            xy_deg = "numeric",
@@ -92,15 +96,29 @@ setValidity("Pointing", function(object){
 } )
 
 setMethod("show", "Pointing", function(object) {
-  cat(is(object)[[1]], " relative to observed galaxy centre at (0,0) is:", "\n",
+  cat(methods::is(object)[[1]], " relative to observed galaxy centre at (0,0) is:", "\n",
       " (x,y):  (", object@xy_deg[1], ",", object@xy_deg[2], ") degrees -- ", "\n",
       " (x,y):  (", object@xy_kpc[1], ",", object@xy_kpc[2], ") kpc ------ ", "\n",
       sep = "")
 })
 
 # setting ability to query the slots of a pointing object
+#' @describeIn Pointing Query the xy_deg of a Pointing object
+#' @param x Pointing object
 setGeneric("xy_deg", function(x) standardGeneric("xy_deg"))
+
+#' Query the xy_deg of a Pointing object
+#' @param x Pointing object
+#' @return The (x,y) offset (in units of degrees) of the telescope pointing
+#'  relative to the galaxy centre.
 setMethod("xy_deg", "Pointing", function(x) x@xy_deg)
 
+#' @describeIn Pointing Query the xy_kpc of a Pointing object
+#' @param x Pointing object
 setGeneric("xy_kpc", function(x) standardGeneric("xy_kpc"))
+
+#' Query the xy_kpc of a Pointing object
+#' @param x Pointing object
+#' @return The (x,y) offset (in units of kilo-parsec) of the telescope pointing
+#'  relative to the galaxy centre.
 setMethod("xy_kpc", "Pointing", function(x) x@xy_kpc)
