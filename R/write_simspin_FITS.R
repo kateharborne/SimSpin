@@ -28,7 +28,7 @@
 #'make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.Rdata", sep=""))
 #'cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
 #'                      telescope = telescope(type="SAMI"),
-#'                      observing_strategy = observing_strategy())
+#'                      objective = objective())
 #'write_simspin_FITS(output_file = paste(temp_loc, "cube.fits", sep=""),
 #'                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
 #'                   telescope_name = "AAO", instrument_name = "SAMI",
@@ -60,7 +60,8 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   header_keyvalues = list("SIMPLE"=TRUE, "BITPIX"=8, "NAXIS"=0, "EXTEND"=TRUE,
                           "DATE"=Sys.time(), "ORIGIN"="SimSpin", "TELESCOP"=telescope_name,
-                          "INSTRUME"=instrument_name, "RA"=0, "DEC"=0, "EQINOX"=2000,
+                          "INSTRUME"=instrument_name, "RA"=observation$pointing_deg[1],
+                          "DEC"=observation$pointing_deg[2], "EQINOX"=2000,
                           "RADECSYS"="FK5", "EXPTIME"=1320, "MJD-OBS"=58906.11,
                           "DATE-OBS"=observation$date, "UTC"=9654, "LST"=30295.18,
                           "PI-COI"="UNKNOWN", "OBSERVER"=observer_name, "REDSHIFT"=observation$z,
