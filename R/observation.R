@@ -9,20 +9,20 @@
 #'
 #'@param telescope A \code{telescope} object. See
 #' \code{\link{telescope}} help for more details.
-#'@param objective An \code{objective} object. See
-#' \code{\link{objective}} help for more details.
+#'@param observing_strategy An \code{observing_strategy} object. See
+#' \code{\link{observing_strategy}} help for more details.
 #'@return Returns an object of class "observation" that summarises the
 #' properties of the observation. Run within the \code{build_datacube()}
 #' function.
 #'@examples
 #'sami = telescope(type="SAMI")
-#'conditions = objective()
-#'observation_summary = observation(telescope=sami, objective=conditions)
+#'conditions = observing_strategy()
+#'observation_summary = observation(telescope=sami, observing_strategy=conditions)
 #'
-observation = function(telescope, objective){
+observation = function(telescope, observing_strategy){
 
-  ang_size      = kpc_per_arcsec(objective$distance) # angular size given z, kpc/"
-  lum_dist      = Mpc(objective$distance)            # computing Luminosity Distance in units of Mpc
+  ang_size      = kpc_per_arcsec(observing_strategy$distance) # angular size given z, kpc/"
+  lum_dist      = Mpc(observing_strategy$distance)            # computing Luminosity Distance in units of Mpc
   aperture_size = ang_size * telescope$fov           # diameter size of the telescope, kpc
   sbin_size     = aperture_size / telescope$sbin     # spatial bin size (kpc per bin)
   sbin_seq      = seq(-(telescope$sbin * sbin_size) / 2,
@@ -42,8 +42,8 @@ observation = function(telescope, objective){
     aperture_region = .hexagonal_ap(telescope$sbin)
   }
 
-  if (objective$blur){
-    psf_fwhm = objective$fwhm
+  if (observing_strategy$blur){
+    psf_fwhm = observing_strategy$fwhm
     fwhm_scaled = (psf_fwhm * ang_size)/ sbin_size  # the fwhm scaled to image pixel dimensions
     if (telescope$sbin < 25 && telescope$sbin %% 2 != 0){
       psf_dim = telescope$sbin
@@ -51,10 +51,10 @@ observation = function(telescope, objective){
       psf_dim = telescope$sbin-1
       } else {psf_dim = 25} # dimensions of the PSF kernel
 
-    if (objective$psf == "Gaussian"){
+    if (observing_strategy$psf == "Gaussian"){
       psf_k = .gaussian_kernel(m = psf_dim, n = psf_dim, sigma = fwhm_scaled/(2*sqrt(2*log(2)))) # the psf kernel
     }
-    if (objective$psf == "Moffat"){
+    if (observing_strategy$psf == "Moffat"){
       psf_k = ProFit::profitCubaMoffat(fwhm = fwhm_scaled, mag = 1, con = 5, dim = c(psf_dim,psf_dim))
     }
   } else {
@@ -71,15 +71,15 @@ observation = function(telescope, objective){
                 date            = as.character(Sys.time()),
                 fov             = telescope$fov,
                 filter          = telescope$filter,
-                inc_deg         = objective$inc_deg,
-                inc_rad         = objective$inc_deg * (pi/180),
-                twist_deg       = objective$twist_deg,
-                twist_rad       = objective$twist_deg * (pi/180),
+                inc_deg         = observing_strategy$inc_deg,
+                inc_rad         = observing_strategy$inc_deg * (pi/180),
+                twist_deg       = observing_strategy$twist_deg,
+                twist_rad       = observing_strategy$twist_deg * (pi/180),
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
                 method          = telescope$method,
-                pointing_kpc    = xy_kpc(objective$pointing),
-                pointing_deg    = xy_deg(objective$pointing),
+                pointing_kpc    = xy_kpc(observing_strategy$pointing),
+                pointing_deg    = xy_deg(observing_strategy$pointing),
                 pixel_region    = aperture_region * pixel_index,
                 psf_fwhm        = psf_fwhm,
                 psf_kernel      = psf_k,
@@ -95,7 +95,7 @@ observation = function(telescope, objective){
                 wave_edges      = wave_edges,
                 vbin_size       = vbin_size,
                 vbin_error      = vbin_error,
-                z               = z(objective$distance))
+                z               = z(observing_strategy$distance))
 
   return(output)
 }

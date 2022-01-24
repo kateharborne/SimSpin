@@ -14,9 +14,9 @@
 #' specifications of the observing telescope (i.e. field of view, spatial
 #' resolution, wavelength resolution, etc.). See
 #' \code{\link{telescope}} help for more details.
-#'@param objective An object of the objective class that
+#'@param observing_strategy An object of the observing_strategy class that
 #' describes the properties of the observed simulation (i.e. redshift,
-#' inclination, seeing conditions). See \code{\link{objective}}
+#' inclination, seeing conditions). See \code{\link{observing_strategy}}
 #' help for more details.
 #'@param verbose Default is \code{FALSE}. If you would like the code to give
 #' updates about its progress, change this parameter to \code{TRUE}.
@@ -59,10 +59,10 @@
 #'                         package = "SimSpin")
 #'cube = build_datacube(simspin_file = ss_gadget,
 #'                      telescope = telescope(type="SAMI"),
-#'                      objective = objective())
+#'                      observing_strategy = observing_strategy())
 #'
 
-build_datacube = function(simspin_file, telescope, objective,
+build_datacube = function(simspin_file, telescope, observing_strategy,
                           verbose = F, write_fits = F, output_location,
                           object_name="GalaxyID_unknown",
                           telescope_name="SimSpin",
@@ -70,7 +70,7 @@ build_datacube = function(simspin_file, telescope, objective,
                           cores=1, mass_flag = F){
 
   if (verbose){cat("Computing observation parameters... \n")}
-  observation = observation(telescope = telescope, objective = objective)
+  observation = observation(telescope = telescope, observing_strategy = observing_strategy)
 
   # Reading in SimSpin file data
   if (typeof(simspin_file) == "character"){ # if provided with path to file

@@ -93,68 +93,68 @@ test_that("telescope() fixes the inordered wave-range.", {
   expect_equal(telescope(wave_range = c(5700,3700))$wave_range, c(3700,5700))
 })
 
-# Testing that the objective() function works with each of the possible
+# Testing that the observing_strategy() function works with each of the possible
 #  default "types".
-test_that("Initial run of objective() function - w/o blur", {
-  expect_length(objective(), 5)
+test_that("Initial run of observing_strategy() function - w/o blur", {
+  expect_length(observing_strategy(), 5)
 })
 
-test_that("Initial run of objective() function - w/ blur", {
-  expect_length(objective(blur=T), 7)
+test_that("Initial run of observing_strategy() function - w/ blur", {
+  expect_length(observing_strategy(blur=T), 7)
 })
 
 # Testing that an error triggers if incompatible parameters are given
-test_that("objective() issues error when incompatible parameters are given.", {
-  expect_error(objective(blur = T, psf = "round"))
-  expect_error(objective(dist_z=0))
-  expect_error(objective(dist_z=-0.2))
+test_that("observing_strategy() issues error when incompatible parameters are given.", {
+  expect_error(observing_strategy(blur = T, psf = "round"))
+  expect_error(observing_strategy(dist_z=0))
+  expect_error(observing_strategy(dist_z=-0.2))
 })
 
 # Testing that you can generate an observation with each of the telescope types
 test_that("Initial run of observation() function with default types #1.", {
-  expect_length(observation(telescope(type="SAMI"), objective()), 32)
+  expect_length(observation(telescope(type="SAMI"), observing_strategy()), 32)
 })
 
 test_that("Initial run of observation() function with default types #2.", {
-  expect_length(observation(telescope(type="MaNGA"), objective()), 32)
+  expect_length(observation(telescope(type="MaNGA"), observing_strategy()), 32)
 })
 
 test_that("Initial run of observation() function with default types #3.", {
-  expect_length(observation(telescope(type="Hector"), objective()), 32)
+  expect_length(observation(telescope(type="Hector"), observing_strategy()), 32)
 })
 
 test_that("Initial run of observation() function with default types #4.", {
-  expect_length(observation(telescope(type="CALIFA"), objective()), 32)
+  expect_length(observation(telescope(type="CALIFA"), observing_strategy()), 32)
 })
 
 test_that("Initial run of observation() function with default types #5 - w/o blur.", {
-  expect_length(observation(telescope(type="IFU"), objective()), 32)
+  expect_length(observation(telescope(type="IFU"), observing_strategy()), 32)
 })
 
 test_that("Initial run of observation() function with default types #6 w/ blur.", {
-  expect_length(observation(telescope(type="IFU"), objective(blur=T)), 32)
+  expect_length(observation(telescope(type="IFU"), observing_strategy(blur=T)), 32)
 })
 
 # Testing that the psf produced is symmetrical
 test_that("The PSF shape produced is symmetrical - Gaussian", {
-  expect_true(isSymmetric(observation(telescope(type="SAMI"), objective(blur=T))$psf_kernel))
-  expect_true(isSymmetric(observation(telescope(type="SAMI"), objective(blur=T, psf="Moffat"))$psf_kernel))
+  expect_true(isSymmetric(observation(telescope(type="SAMI"), observing_strategy(blur=T))$psf_kernel))
+  expect_true(isSymmetric(observation(telescope(type="SAMI"), observing_strategy(blur=T, psf="Moffat"))$psf_kernel))
 })
 
 # Testing uncovered features
 test_that("Aperture shape = 'square' works", {
   expect_length(telescope(type="IFU", aperture_shape = "square"), 12)
-  expect_length(observation(telescope(type="IFU", aperture_shape = "square"), objective()), 32)
+  expect_length(observation(telescope(type="IFU", aperture_shape = "square"), observing_strategy()), 32)
 })
 
 test_that("Check even field-of-view leads to psf scaled", {
   expect_length(telescope(type="IFU", fov = 10), 12)
-  expect_length(observation(telescope(type="IFU", fov = 10), objective(blur=T))$psf_kernel, 19*19)
+  expect_length(observation(telescope(type="IFU", fov = 10), observing_strategy(blur=T))$psf_kernel, 19*19)
 })
 
 test_that("Initial run of telescope() function with non-default types - check fov leads to psf scaled", {
   expect_length(telescope(type="IFU", fov = 11.5), 12)
-  expect_length(observation(telescope(type="IFU", fov = 11.5), objective(blur=T))$psf_kernel, 23*23)
+  expect_length(observation(telescope(type="IFU", fov = 11.5), observing_strategy(blur=T))$psf_kernel, 23*23)
 
 })
 
@@ -184,11 +184,11 @@ test_that("Distance class errors if multiple parameters specified", {
   expect_error(Distance(z = 0.2, kpc_per_arcsec = 1))
 })
 
-# Testing Distance class still performs as expected within objective() function
-test_that("Check that when input z, or Mpc, or kpc_per_arcsec to objective, other answers are consistent", {
-  set_z = objective(dist_z=0.3)
-  set_Mpc = objective(dist_Mpc=1588.662)
-  set_kpc = objective(dist_kpc_per_arcsec = 4.557426)
+# Testing Distance class still performs as expected within observing_strategy() function
+test_that("Check that when input z, or Mpc, or kpc_per_arcsec to observing_strategy, other answers are consistent", {
+  set_z = observing_strategy(dist_z=0.3)
+  set_Mpc = observing_strategy(dist_Mpc=1588.662)
+  set_kpc = observing_strategy(dist_kpc_per_arcsec = 4.557426)
 
   z_tol = 1e-7
   Mpc_tol = 1e-3
@@ -202,12 +202,12 @@ test_that("Check that when input z, or Mpc, or kpc_per_arcsec to objective, othe
   expect_equal(kpc_per_arcsec(set_z$distance), kpc_per_arcsec(set_kpc$distance), tolerance = kpc_tol)
 })
 
-test_that("objective() errors if wrong parameter specified for Distance class", {
-  expect_error(objective(k = 22))
+test_that("observing_strategy() errors if wrong parameter specified for Distance class", {
+  expect_error(observing_strategy(k = 22))
 })
 
-test_that("objective errors if multiple parameters specified for Distance class", {
-  expect_error(objective(dist_z = 0.2, dist_kpc_per_arcsec = 1))
+test_that("observing_strategy errors if multiple parameters specified for Distance class", {
+  expect_error(observing_strategy(dist_z = 0.2, dist_kpc_per_arcsec = 1))
 })
 
 # Testing Pointing class
@@ -233,10 +233,10 @@ test_that("Pointing class errors if multiple parameters specified", {
   expect_error(Pointing(xy_deg = c(0.1,0.05), xy_kpc = c(1640.673,820.3367), distance = Distance(z=0.3)))
 })
 
-# Testing Pointing class still performs as expected within objective() function
+# Testing Pointing class still performs as expected within observing_strategy() function
 test_that("Check that when input xy_deg or xy_kpc to Pointing, other answers are consistent", {
-  set_deg = objective(dist_z=0.3, pointing_deg = c(0.1,0.05))
-  set_kpc = objective(dist_z=0.3, pointing_kpc = c(1640.673,820.3367))
+  set_deg = observing_strategy(dist_z=0.3, pointing_deg = c(0.1,0.05))
+  set_kpc = observing_strategy(dist_z=0.3, pointing_kpc = c(1640.673,820.3367))
 
   deg_tol = 1e-7
   kpc_tol = 1e-3
@@ -247,9 +247,14 @@ test_that("Check that when input xy_deg or xy_kpc to Pointing, other answers are
 })
 
 test_that("Pointing class errors if wrong parameter specified", {
-  expect_error(objective(dist_z=0.3, pointing_k = c(0.1)))
+  expect_error(observing_strategy(dist_z=0.3, pointing_k = c(0.1)))
 })
 
 test_that("Pointing class errors if multiple parameters specified", {
-  expect_error(objective(dist_z=0.3, pointing_kpc = c(0.1), pointing_deg = c(123,125)))
+  expect_error(observing_strategy(dist_z=0.3, pointing_kpc = c(0.1), pointing_deg = c(123,125)))
+})
+
+# Testing that a warning is issued if "z" input is specified -------------------
+test_that("Warning is issued if old input parameter is specified", {
+  expect_warning(observing_strategy(z = 0.3))
 })

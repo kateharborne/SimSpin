@@ -22,7 +22,7 @@ ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
                         package = "SimSpin")
 cube = build_datacube(simspin_file = ss_gadget,
                      telescope = telescope(type="SAMI"),
-                     objective = objective())
+                     observing_strategy = observing_strategy())
 blurred_cube = blur_datacube(datacube_output = cube)
 
 }
