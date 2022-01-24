@@ -20,6 +20,11 @@
 #' placed in terms of angular distance in units of kilo-parsec per arcsecond.
 #' This parameter is the third of three optional ways of describing the distance
 #' to the observed galaxy. Only ONE of these three must be specified.
+#'@param z The projected distance at which the galaxy is placed in terms of
+#' redshift distance. This input will give identical results to the same value
+#' input to the \code{dist_z} parameter, but is included here for consistency
+#' with previous SimSpin versions (> v2.0.5). This input will be depreciated
+#' over time and will issue a warning when used.
 #'@param inc_deg Numeric describing the projected inclination of the observed
 #' galaxy relative to the z-axis - 0 deg places the galaxy face-on, 90 deg is
 #' edge-on aligned with the horizontal axis. Default is 70.
@@ -48,10 +53,17 @@
 #'conditions = observing_strategy()
 #'
 
-observing_strategy = function(dist_z = 0.05, dist_Mpc, dist_kpc_per_arcsec,
+observing_strategy = function(dist_z = 0.05, dist_Mpc, dist_kpc_per_arcsec, z,
                      inc_deg = 70, twist_deg = 0,
                      pointing_kpc = c(0,0), pointing_deg,
                      blur = F, fwhm=2, psf="Gaussian"){
+
+  if (!missing(z)){
+    warning("z input will be depreciated in future versions of SimSpin. \n
+             Please use the input 'dist_z' for < v2.1.0. \n
+             Setting dist_z = z.")
+        dist_z = z
+  }
 
   if (missing(dist_Mpc) & missing(dist_kpc_per_arcsec)){
     distance = Distance(z = dist_z)
