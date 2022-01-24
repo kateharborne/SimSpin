@@ -9,7 +9,7 @@
 
 <p>&nbsp;</p>
 
-SimSpin v2.0.6 - A package for producing mock observations of particle simulations
+SimSpin v2.1.0 - A package for producing mock observations of particle simulations
 
 The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument.
 
@@ -42,7 +42,7 @@ ss_file = make_simspin_file(filename = system.file("extdata","SimSpin_example_Ga
                                                     package = "SimSpin"),
                             write_to_file = FALSE) # generate a spectra file
 SAMI = telescope(type="SAMI")                      # initialise a telescope
-strategy = observing_strategy(z = 0.05)            # initialise obsering conditions
+strategy = observing_strategy(dist_z = 0.05)       # initialise obsering conditions
 
 cube = build_datacube(simspin_file = ss_file,      # build data cube
                       telescope = SAMI,
