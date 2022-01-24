@@ -2,21 +2,43 @@
 % Please edit documentation in R/observing_strategy.R
 \name{observing_strategy}
 \alias{observing_strategy}
-\title{A class to describe the basic properties of the observing conditions}
+\title{A class to describe the basic properties of the object being observed}
 \usage{
 observing_strategy(
-  z = 0.1,
+  dist_z = 0.05,
+  dist_Mpc,
+  dist_kpc_per_arcsec,
+  z,
   inc_deg = 70,
   twist_deg = 0,
-  particle_limit = 1,
+  pointing_kpc = c(0, 0),
+  pointing_deg,
   blur = F,
   fwhm = 2,
   psf = "Gaussian"
 )
 }
 \arguments{
-\item{z}{Numeric describing the redshift to which the observed galaxy is
-projected. Default is 0.1.}
+\item{dist_z}{The projected distance at which the galaxy is placed in terms of
+redshift distance. This parameter is one of three optional ways of describing
+the distance to the observed galaxy. Only ONE of these three must be
+specified.}
+
+\item{dist_Mpc}{The projected distance at which the galaxy is placed in terms
+of physical distance in units of Mega-parsec. This parameter is the second of
+three optional ways of describing the distance to the observed galaxy. Only
+ONE of these three must be specified.}
+
+\item{dist_kpc_per_arcsec}{The projected distance at which the galaxy is
+placed in terms of angular distance in units of kilo-parsec per arcsecond.
+This parameter is the third of three optional ways of describing the distance
+to the observed galaxy. Only ONE of these three must be specified.}
+
+\item{z}{The projected distance at which the galaxy is placed in terms of
+redshift distance. This input will give identical results to the same value
+input to the \code{dist_z} parameter, but is included here for consistency
+with previous SimSpin versions (> v2.0.5). This input will be depreciated
+over time and will issue a warning when used.}
 
 \item{inc_deg}{Numeric describing the projected inclination of the observed
 galaxy relative to the z-axis - 0 deg places the galaxy face-on, 90 deg is
@@ -26,8 +48,15 @@ edge-on aligned with the horizontal axis. Default is 70.}
 x-axis - 0 deg places the galaxy face-on, 90 deg places the galaxy edge-on
 aligned with the vertical axis. Default is 0.}
 
-\item{particle_limit}{Numeric describing the number of particles that must be
-present along the line of sight for the spaxel to be occupied.}
+\item{pointing_kpc}{Numeric array `c(x,y)`. Two elements specifying the
+position at which the observation is centred given as a shift relative to the
+centre at (0,0) in units of kilo-parsecs. This parameter is ONE of two
+optional ways of describing this offset. Default is c(0,0) offset.}
+
+\item{pointing_deg}{Numeric array `c(x,y)`. Two elements specifying the
+position at which the observation is centred given as a shift relative to the
+centre at (0,0) in units of degrees. This parameter is ONE of two
+optional ways of describing this offset. Default is c(0,0) offset.}
 
 \item{blur}{Boolean describing whether seeing conditions should be applied.
 Default is FALSE.}

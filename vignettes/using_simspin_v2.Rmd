@@ -137,14 +137,14 @@ eagle_hdf5_galaxy = make_simspin_file(filename = system.file("extdata",
 
 par(pty="s", fig=c(0,0.5,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1)
 magicaxis::magplot(eagle_hdf5_galaxy$star_part$x, eagle_hdf5_galaxy$star_part$z, type="p", pch=20,
-                   xlim = c(-15, 15), ylim = c(-15,15), col="purple",
+                   xlim = c(-2, 2), ylim = c(-2,2), col="purple",
                    xlab = "x, kpc", ylab = "z, kpc")
 legend("topleft", inset=c(-0.02,0.01), c("Edge-on"), bty="n")
 legend("bottomright", inset=c(0.01,0.01), c("stars"), col=c("purple"), pch=16)
 
 par(pty="s", fig=c(0.5,1,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1, new=TRUE)
 magicaxis::magplot(eagle_hdf5_galaxy$star_part$x, eagle_hdf5_galaxy$star_part$y, type="p", pch=20,
-                   xlim = c(-15, 15), ylim = c(-15,15), col="purple",
+                   xlim = c(-2, 2), ylim = c(-2,2), col="purple",
                    xlab = "x, kpc", ylab = "y, kpc")
 legend("topleft", inset=c(-0.02,0.01), c("Face-on"), bty="n")
 
@@ -235,7 +235,7 @@ Other `type` predefined include `MaNGA`, `CALIFA` and `Hector`. This input is NO
 We then need to decide how our object is projected and placed on the sky. This is done using the `observing_strategy` class.
 
 ```{r}
-strategy_one = observing_strategy(z              = 0.03, # redshift distance at which the galaxy is placed
+strategy_one = observing_strategy(dist_z         = 0.03, # redshift distance at which the galaxy is placed
                                   inc_deg        = 75,   # projected inclination on the sky (0 - face-on, 90 - edge-on)
                                   blur           = F)    # whether seeing conditions are included
 ```
@@ -243,12 +243,12 @@ strategy_one = observing_strategy(z              = 0.03, # redshift distance at 
 We can also add observational blurring due to the seeing conditions in which the observation is made.
 
 ```{r}
-strategy_two = observing_strategy(z              = 0.03, # redshift distance at which the galaxy is placed
+strategy_two = observing_strategy(dist_z         = 0.03, # redshift distance at which the galaxy is placed
                                   inc_deg        = 75,   # projected inclination on the sky (0 - face-on, 90 - edge-on)
                                   twist_deg      = 180,  # angle of observation (longitude)
                                   blur           = T,    # whether seeing conditions are included
                                   fwhm           = 2,    # the full-width-half-max of the blurring kernel in arcsec
-                                  psf      = "Gaussian") # the shape of the blurring kernel
+                                  psf            = "Gaussian") # the shape of the blurring kernel
 ```
 
 This provides an observing strategy object that describes the observational properties of your model.  
@@ -262,10 +262,10 @@ With the telescope and observing strategy defined, we can now observe our model.
 Finally, we can observe our simulated galaxies using the `build_datacube` function. In this, we specify the SimSpin file, the observing telescope and the observing strategy. The produced data cube can also be saved to a FITS file for further processing with pPXF, for example. 
 
 ```{r}
-gadget2_binary_cube = build_datacube(simspin_file       = gadget2_binary_galaxy,
-                                     telescope          = IFU,
-                                     observing_strategy = strategy_one,
-                                     write_fits         = FALSE)
+gadget2_binary_cube = build_datacube(simspin_file = gadget2_binary_galaxy,
+                                     telescope    = IFU,
+                                     observing_strategy    = strategy_one,
+                                     write_fits   = FALSE)
 ```
 
 This output produced by `build_datacube` is a list with 4 elements as described below.
@@ -334,11 +334,11 @@ These spectra can be provided to an observational software, such as pPXF, for fi
 ```{r}
 temp_loc = tempdir()
 
-eagle_hdf5_cube = build_datacube(simspin_file       = eagle_hdf5_galaxy,
-                                 telescope          = SAMI,
-                                 observing_strategy = strategy_two,
-                                 write_fits         = TRUE,                               # write results to a FITS file
-                                 output_location    = paste0(temp_loc, "_eagle_obs.FITS")) #   at this location
+eagle_hdf5_cube = build_datacube(simspin_file    = eagle_hdf5_galaxy,
+                                 telescope       = SAMI,
+                                 observing_strategy       = strategy_two,
+                                 write_fits      = TRUE,                               # write results to a FITS file
+                                 output_location = paste0(temp_loc, "_eagle_obs.FITS")) #   at this location
 
 ```
 

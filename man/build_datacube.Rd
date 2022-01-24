@@ -24,11 +24,13 @@ output list from \code{make_simspin_file()}.}
 
 \item{telescope}{An object of the telescope class describing the
 specifications of the observing telescope (i.e. field of view, spatial
-resolution, wavelength resolution, etc.).}
+resolution, wavelength resolution, etc.). See
+\code{\link{telescope}} help for more details.}
 
 \item{observing_strategy}{An object of the observing_strategy class that
 describes the properties of the observed simulation (i.e. redshift,
-inclination, seeing conditions).}
+inclination, seeing conditions). See \code{\link{observing_strategy}}
+help for more details.}
 
 \item{verbose}{Default is \code{FALSE}. If you would like the code to give
 updates about its progress, change this parameter to \code{TRUE}.}

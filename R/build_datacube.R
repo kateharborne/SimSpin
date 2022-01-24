@@ -12,10 +12,12 @@
 #' output list from \code{make_simspin_file()}.
 #'@param telescope An object of the telescope class describing the
 #' specifications of the observing telescope (i.e. field of view, spatial
-#' resolution, wavelength resolution, etc.).
+#' resolution, wavelength resolution, etc.). See
+#' \code{\link{telescope}} help for more details.
 #'@param observing_strategy An object of the observing_strategy class that
 #' describes the properties of the observed simulation (i.e. redshift,
-#' inclination, seeing conditions).
+#' inclination, seeing conditions). See \code{\link{observing_strategy}}
+#' help for more details.
 #'@param verbose Default is \code{FALSE}. If you would like the code to give
 #' updates about its progress, change this parameter to \code{TRUE}.
 #'@param write_fits Default is \code{FALSE}. If you would like the code to
@@ -95,7 +97,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # Projecting the galaxy to given inclination
   obs_data = obs_galaxy(part_data = twisted_data, inc_rad = observation$inc_rad)
 
-  galaxy_data$x = obs_data$x;   galaxy_data$y = obs_data$y;   galaxy_data$z = obs_data$z
+  galaxy_data$x = (obs_data$x + observation$pointing_kpc[1])   # adjusting pointing of the aperture by x_kpc
+  galaxy_data$y = obs_data$y                                   #   and y_kpc
+  galaxy_data$z = (obs_data$z + observation$pointing_kpc[2])
   galaxy_data$vx = obs_data$vx; galaxy_data$vy = obs_data$vy; galaxy_data$vz = obs_data$vz
 
   if (verbose){cat("Assigning particles to spaxels... \n")}

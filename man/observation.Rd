@@ -7,9 +7,11 @@
 observation(telescope, observing_strategy)
 }
 \arguments{
-\item{telescope}{A \code{telescope} object.}
+\item{telescope}{A \code{telescope} object. See
+\code{\link{telescope}} help for more details.}
 
-\item{observing_strategy}{An \code{observing_strategy} object.}
+\item{observing_strategy}{An \code{observing_strategy} object. See
+\code{\link{observing_strategy}} help for more details.}
 }
 \value{
 Returns an object of class "observation" that summarises the
