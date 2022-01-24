@@ -1,3 +1,9 @@
+# SimSpin v2.1.0 News
+### Author: Kate Harborne
+### Last edit: 24/01/22
+
+Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021. 
+
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                      	| Version 	| Commit                                   	|
 |----------	|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	|
 | 26/08/21 	| Adjusting the images output from the `build_datacube()` function to have clearer labels -  images until v2.0.3 have been produced as raw particle images before convolution with a PSF,  though this was unclear. To improve, the following changes have been implemented:                                                             	| 2.0.4   	| b6b6089a6295d2a47794be100e04494261e79476 	|
@@ -22,3 +28,4 @@
 |          	| (1) Allow user to specify the 'pointing' of the telescope relative to the centre of the galaxy. Can be specified using (x,y) offsets in kpc (`pointing_kpc`) or deg (`pointing_deg`). Useful for observing galaxies that are closer to the observer than the aperture width allows for the full object to be seen in one observation.  	|         	|                                          	|
 |          	| (2) Modification to input names. Specifying projected distance can now be done in terms of redshift distance, physical distance (i.e. in Mpc) or angular scale (i.e. specifying kpc per arcsecond). These are now called `dist_z`, `dist_Mpc` and `dist_kpc_per_arcsec`. See `?observing_strategy` for more details.                   	|         	|                                          	|
 |          	| (3) Break changes avoided by still allowing users to specify `z` to indicate projected distance. A depreciation warning will also be issues when specifying `z` rather than `dist_z` however.                                                                                                                                          	|         	|                                          	|
+

@@ -110,18 +110,16 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                         "HDUCLAS1"="IMAGE", "HDUCLAS2"="DATA", "ERRDATA"="STAT",
                         "OBJECT"=object_name, "BUNIT"="erg/s/cm**2",
                         "CRPIX1"=1, "CRPIX2"=1,
-                        "CD1_1"=-observation$sbin_size/observation$ang_size/3600,
-                        "CD1_2"=numeric(1), "CD2_1"=numeric(1),
-                        "CD2_2"=observation$sbin_size/observation$ang_size/3600,
+                        "CDELT1"=-observation$sbin_size/observation$ang_size/3600,
+                        "CDELT2"=observation$sbin_size/observation$ang_size/3600,
                         "CUNIT1"="deg", "CUNIT2"="deg",
                         "CTYPE1"="RA---TAN", "CTYPE2"="DEC--TAN",
                         "CSYER1"=character(1), "CSYER2"=character(1),
                         "CRVAL1"=(diff(observation$sbin_seq[1:2])/2 + observation$sbin_seq[1])/observation$ang_size/3600,
                         "CRVAL2"=(diff(observation$sbin_seq[1:2])/2 + observation$sbin_seq[1])/observation$ang_size/3600,
                         "CTYPE3"=character(1), "CUNIT3"=character(1),
-                        "CD3_3"=numeric(1), "CRPIX3"=1,
-                        "CRVAL3"=numeric(1), "CD1_3"=0, "CD2_3"=0,
-                        "CD3_1"=0, "CD3_2"=0)
+                        "CDELT3"=numeric(1), "CRPIX3"=1,
+                        "CRVAL3"=numeric(1))
 
   data_keycomments = list("XTENSION"="IMAGE extension",
                           "BITPIX"="number of bits per data pixel",
@@ -141,10 +139,8 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                           "BUNIT"="Angstrom",
                           "CRPIX1"="Pixel coordinate of reference point",
                           "CRPIX2"="Pixel coordinate of reference point",
-                          "CD1_1"="Coordinate transformation matrix element",
-                          "CD1_2"="Coordinate transformation matrix element",
-                          "CD2_1"="Coordinate transformation matrix element",
-                          "CD2_2"="Coordinate transformation matrix element",
+                          "CDELT1"="Coordinate transformation matrix element",
+                          "CDELT2"="Coordinate transformation matrix element",
                           "CUNIT1"="Units of coordinate increment and value",
                           "CUNIT2"="Units of coordinate increment and value",
                           "CTYPE1"="Right ascension, gnomonic projection",
@@ -155,13 +151,9 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                           "CRVAL2"="Pixel value at reference point",
                           "CTYPE3"=character(1),
                           "CUNIT3"="Units of coordinate increment and value",
-                          "CD3_3"="Coordinate transformation matrix element",
+                          "CDELT3"="Coordinate transformation matrix element",
                           "CRPIX3"="Pixel coordinate of reference point",
-                          "CRVAL3"="Pixel value at reference point",
-                          "CD1_3"="Coordinate transformation matrix element",
-                          "CD2_3"="Coordinate transformation matrix element",
-                          "CD3_1"="Coordinate transformation matrix element",
-                          "CD3_2"="Coordinate transformation matrix element")
+                          "CRVAL3"="Pixel value at reference point")
 
   # Writing data to HDUs based on the observation method employed ----
 
@@ -169,7 +161,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
     data_keyvalues$CTYPE3 = "WAVE"
     data_keyvalues$CUNIT3 = "Angstrom"
-    data_keyvalues$CD3_3  = observation$wave_res
+    data_keyvalues$CDELT3 = observation$wave_res
     data_keyvalues$CRVAL3 = observation$wave_seq[1]
 
     Rfits::Rfits_write_cube(data = simspin_cube, filename = output_file, ext=2,
@@ -230,7 +222,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
     data_keyvalues$CTYPE3 = "VELOCITY"
     data_keyvalues$CUNIT3 = "km/s"
-    data_keyvalues$CD3_3  = observation$vbin_size
+    data_keyvalues$CDELT3  = observation$vbin_size
     data_keyvalues$CRVAL3 = observation$vbin_seq[1]
 
     Rfits::Rfits_write_cube(data = simspin_cube, filename = output_file, ext=2,
@@ -300,7 +292,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
     data_keyvalues$CTYPE3 = "GAS_VELO"
     data_keyvalues$CUNIT3 = "km/s"
-    data_keyvalues$CD3_3  = observation$vbin_size
+    data_keyvalues$CDELT3  = observation$vbin_size
     data_keyvalues$CRVAL3 = observation$vbin_seq[1]
 
     Rfits::Rfits_write_cube(data = simspin_cube, filename = output_file, ext=2,
