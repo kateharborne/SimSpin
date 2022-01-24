@@ -41,14 +41,14 @@
 #' given in arcsec.
 #'@param psf A string to describe the shape of the PSF. Options include
 #' "Gaussian" or "Moffat". Input is NOT case sensitive.
-#'@return Returns an object of class "objective" that describes the
+#'@return Returns an object of class "observing_strategy" that describes the
 #' conditions in which the observation is made. Required to run
 #' \code{build_datacube()}.
 #'@examples
-#'conditions = objective()
+#'conditions = observing_strategy()
 #'
 
-objective = function(dist_z = 0.05, dist_Mpc, dist_kpc_per_arcsec,
+observing_strategy = function(dist_z = 0.05, dist_Mpc, dist_kpc_per_arcsec,
                      inc_deg = 70, twist_deg = 0,
                      pointing_kpc = c(0,0), pointing_deg,
                      blur = F, fwhm=2, psf="Gaussian"){
