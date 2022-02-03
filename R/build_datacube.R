@@ -306,7 +306,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     write_simspin_FITS(output_file = output_location,
                        simspin_datacube = output, object_name = object_name,
-                       telescope_name = telescope_name , instrument_name = telescope$type,
+                       telescope_name = telescope_name, instrument_name = telescope$type,
                        observer_name = observer_name,
                        input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
   }

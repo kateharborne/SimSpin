@@ -19,6 +19,8 @@
 #' (i.e. the file output from make_simspin_file).
 #'@param mask (Optional) A binary array describing the masked regions of the
 #' cube/images.
+#'@param galaxy_centre (Optional) A numeric array (x,y,z) describing the centre
+#' of potential of the observed galaxy within it's simulation.
 #'@return Returns an .fits file that contains a the generated data and
 #' relevant header describing the mock observation.
 #'@examples
@@ -41,10 +43,20 @@
 
 write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                               telescope_name, instrument_name, observer_name,
-                              input_simspin_file, mask=NA){
+                              input_simspin_file, mask=NA,
+                              galaxy_centre = c(0,0,0)){
 
   observation = simspin_datacube$observation
   simspin_cube = simspin_datacube[[1]] # getting either the "velocity cube" or the "spectral cube"
+
+  galaxy_centre_norm = galaxy_centre / sqrt((galaxy_centre[1]^2) + (galaxy_centre[2]^2) + (galaxy_centre[3]^2))
+
+  if (any(is.na(galaxy_centre_norm))){
+    galaxy_centre_norm = c(0,0,0)
+  }
+
+  gal_DEC = asin(galaxy_centre_norm[3])
+  gal_RA  = asin(galaxy_centre_norm[2]/cos(gal_DEC))
 
   # FITS files always have the first HDU containing the header information.
   #
@@ -59,9 +71,10 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
   output_name = rev(stringr::str_split(output_file, "/")[[1]])[1]
 
   header_keyvalues = list("SIMPLE"=TRUE, "BITPIX"=8, "NAXIS"=0, "EXTEND"=TRUE,
-                          "DATE"=Sys.time(), "ORIGIN"="SimSpin", "TELESCOP"=telescope_name,
-                          "INSTRUME"=instrument_name, "RA"=observation$pointing_deg[1],
-                          "DEC"=observation$pointing_deg[2], "EQINOX"=2000,
+                          "DATE"=Sys.time(), "ORIGIN"=observation$origin,
+                          "TELESCOP"=telescope_name,
+                          "INSTRUME"=instrument_name, "RA"=(observation$pointing_deg[1]+(gal_RA*(180/pi))),
+                          "DEC"=(observation$pointing_deg[2]+(gal_DEC*(180/pi))), "EQINOX"=2000,
                           "RADECSYS"="FK5", "EXPTIME"=1320, "MJD-OBS"=58906.11,
                           "DATE-OBS"=observation$date, "UTC"=9654, "LST"=30295.18,
                           "PI-COI"="UNKNOWN", "OBSERVER"=observer_name, "REDSHIFT"=observation$z,

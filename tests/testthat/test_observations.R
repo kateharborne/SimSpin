@@ -5,70 +5,75 @@
 library(testthat)
 context("Testing observation description functions.\n")
 
+telescope_length = 12
+obs_strategy_wo_blur_length = 5
+obs_strategy_w_blur_length = 7
+obs_length = 33
+
 # Testing that the telescope() function works with each of the possible default
 #  "types".
 test_that("Initial run of telescope() function with default types - SAMI.", {
-  expect_length(telescope(type="SAMI"), 12)
+  expect_length(telescope(type="SAMI"), telescope_length)
   })
 
 test_that("Initial run of telescope() function with default types - MaNGA", {
-  expect_length(telescope(type="MaNGA"), 12)
+  expect_length(telescope(type="MaNGA"), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default types - MaNGA", {
-  expect_length(telescope(type="MUSE"), 12)
+  expect_length(telescope(type="MUSE"), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default types - Hector", {
-  expect_length(telescope(type="Hector"), 12)
+  expect_length(telescope(type="Hector"), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default types - CALIFA", {
-  expect_length(telescope(type="CALIFA"), 12)
+  expect_length(telescope(type="CALIFA"), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default types - IFU", {
-  expect_length(telescope(type="IFU"), 12)
+  expect_length(telescope(type="IFU"), telescope_length)
 })
 
 # Testing case sensitivity of "type" parameter.
 test_that("Checking case sensitivity #1", {
-  expect_length(telescope(type="SAMI"), 12)
+  expect_length(telescope(type="SAMI"), telescope_length)
 })
 
 test_that("Checking case sensitivity #2", {
-  expect_length(telescope(type="sami"), 12)
+  expect_length(telescope(type="sami"), telescope_length)
 })
 
 test_that("Checking case sensitivity #3", {
-  expect_length(telescope(type="Sami"), 12)
+  expect_length(telescope(type="Sami"), telescope_length)
 })
 
 test_that("Checking case sensitivity #4", {
-  expect_length(telescope(type="SaMi"), 12)
-  expect_length(telescope(type="sAmI"), 12)
+  expect_length(telescope(type="SaMi"), telescope_length)
+  expect_length(telescope(type="sAmI"), telescope_length)
 })
 
 # Testing that the telescope() function works with each of the possible default
 #  "filters".
 test_that("Initial run of telescope() function with default filters - r", {
-  expect_length(telescope(type="IFU", filter = "r"), 12)
+  expect_length(telescope(type="IFU", filter = "r"), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default filters - u", {
-  expect_length(telescope(type="IFU", filter = "u"), 12)
+  expect_length(telescope(type="IFU", filter = "u"), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default filters - g", {
-  expect_length(telescope(type="IFU", filter = "g"), 12)
+  expect_length(telescope(type="IFU", filter = "g"), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default filters - i", {
-  expect_length(telescope(type="IFU", filter = "i"), 12)
+  expect_length(telescope(type="IFU", filter = "i"), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default filters - z", {
-  expect_length(telescope(type="IFU", filter = "z"), 12)
+  expect_length(telescope(type="IFU", filter = "z"), telescope_length)
 })
 
 # Testing that an error triggers when you give it a range in the wrong format,
@@ -96,11 +101,11 @@ test_that("telescope() fixes the inordered wave-range.", {
 # Testing that the observing_strategy() function works with each of the possible
 #  default "types".
 test_that("Initial run of observing_strategy() function - w/o blur", {
-  expect_length(observing_strategy(), 5)
+  expect_length(observing_strategy(), obs_strategy_wo_blur_length)
 })
 
 test_that("Initial run of observing_strategy() function - w/ blur", {
-  expect_length(observing_strategy(blur=T), 7)
+  expect_length(observing_strategy(blur=T), obs_strategy_w_blur_length)
 })
 
 # Testing that an error triggers if incompatible parameters are given
@@ -112,27 +117,27 @@ test_that("observing_strategy() issues error when incompatible parameters are gi
 
 # Testing that you can generate an observation with each of the telescope types
 test_that("Initial run of observation() function with default types #1.", {
-  expect_length(observation(telescope(type="SAMI"), observing_strategy()), 32)
+  expect_length(observation(telescope(type="SAMI"), observing_strategy()), obs_length)
 })
 
 test_that("Initial run of observation() function with default types #2.", {
-  expect_length(observation(telescope(type="MaNGA"), observing_strategy()), 32)
+  expect_length(observation(telescope(type="MaNGA"), observing_strategy()), obs_length)
 })
 
 test_that("Initial run of observation() function with default types #3.", {
-  expect_length(observation(telescope(type="Hector"), observing_strategy()), 32)
+  expect_length(observation(telescope(type="Hector"), observing_strategy()), obs_length)
 })
 
 test_that("Initial run of observation() function with default types #4.", {
-  expect_length(observation(telescope(type="CALIFA"), observing_strategy()), 32)
+  expect_length(observation(telescope(type="CALIFA"), observing_strategy()), obs_length)
 })
 
 test_that("Initial run of observation() function with default types #5 - w/o blur.", {
-  expect_length(observation(telescope(type="IFU"), observing_strategy()), 32)
+  expect_length(observation(telescope(type="IFU"), observing_strategy()), obs_length)
 })
 
 test_that("Initial run of observation() function with default types #6 w/ blur.", {
-  expect_length(observation(telescope(type="IFU"), observing_strategy(blur=T)), 32)
+  expect_length(observation(telescope(type="IFU"), observing_strategy(blur=T)), obs_length)
 })
 
 # Testing that the psf produced is symmetrical
@@ -143,17 +148,17 @@ test_that("The PSF shape produced is symmetrical - Gaussian", {
 
 # Testing uncovered features
 test_that("Aperture shape = 'square' works", {
-  expect_length(telescope(type="IFU", aperture_shape = "square"), 12)
-  expect_length(observation(telescope(type="IFU", aperture_shape = "square"), observing_strategy()), 32)
+  expect_length(telescope(type="IFU", aperture_shape = "square"), telescope_length)
+  expect_length(observation(telescope(type="IFU", aperture_shape = "square"), observing_strategy()), obs_length)
 })
 
 test_that("Check even field-of-view leads to psf scaled", {
-  expect_length(telescope(type="IFU", fov = 10), 12)
+  expect_length(telescope(type="IFU", fov = 10), telescope_length)
   expect_length(observation(telescope(type="IFU", fov = 10), observing_strategy(blur=T))$psf_kernel, 19*19)
 })
 
 test_that("Initial run of telescope() function with non-default types - check fov leads to psf scaled", {
-  expect_length(telescope(type="IFU", fov = 11.5), 12)
+  expect_length(telescope(type="IFU", fov = 11.5), telescope_length)
   expect_length(observation(telescope(type="IFU", fov = 11.5), observing_strategy(blur=T))$psf_kernel, 23*23)
 
 })

@@ -78,6 +78,7 @@ observation = function(telescope, observing_strategy){
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
                 method          = telescope$method,
+                origin          = paste0("SimSpin_v", packageVersion("SimSpin")),
                 pointing_kpc    = xy_kpc(observing_strategy$pointing),
                 pointing_deg    = xy_deg(observing_strategy$pointing),
                 pixel_region    = aperture_region * pixel_index,
