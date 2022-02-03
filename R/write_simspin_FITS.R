@@ -59,7 +59,8 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
   output_name = rev(stringr::str_split(output_file, "/")[[1]])[1]
 
   header_keyvalues = list("SIMPLE"=TRUE, "BITPIX"=8, "NAXIS"=0, "EXTEND"=TRUE,
-                          "DATE"=Sys.time(), "ORIGIN"="SimSpin", "TELESCOP"=telescope_name,
+                          "DATE"=Sys.time(), "ORIGIN"=observation$origin,
+                          "TELESCOP"=telescope_name,
                           "INSTRUME"=instrument_name, "RA"=observation$pointing_deg[1],
                           "DEC"=observation$pointing_deg[2], "EQINOX"=2000,
                           "RADECSYS"="FK5", "EXPTIME"=1320, "MJD-OBS"=58906.11,
