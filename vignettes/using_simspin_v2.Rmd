@@ -336,7 +336,7 @@ temp_loc = tempdir()
 
 eagle_hdf5_cube = build_datacube(simspin_file    = eagle_hdf5_galaxy,
                                  telescope       = SAMI,
-                                 observing_strategy       = strategy_two,
+                                 observing_strategy = strategy_two,
                                  write_fits      = TRUE,                               # write results to a FITS file
                                  output_location = paste0(temp_loc, "_eagle_obs.FITS")) #   at this location
 
