@@ -562,7 +562,7 @@
   cum_mass  = cumsum(ordered_galaxy_data$Mass) # cumulative sum of mass given this order
   half_mass_ind = which(abs(cum_mass - half_mass) == min(abs(cum_mass - half_mass)))[1] # at what radius does this half-mass now occur?
 
-  return(ordered_galaxy_data[1:(half_mass_ind-1),])
+  return(ordered_galaxy_data[1:half_mass_ind,])
 }
 
 .ellipsoid_tensor = function(galaxy_data, p, q){
@@ -595,7 +595,7 @@
   yax = eig$vectors[,2]
   zax = eig$vectors[,3]
 
-  return(list("eigenvalues"= eig$values, "p" = p, "q" = q, "y_axis" = yax, "z_axis" = zax))
+  return(list("eigenvalues"= eig$values, "p" = p, "q" = q, "y_axis" = yax, "z_axis" = zax, "ellipsoid_tensor" = M))
 }
 
 # Function to iteratively find the shape and align at the half-mass stellar radius
@@ -609,6 +609,10 @@
 
   # Select all particles within initial half-mass (spherical) of stellar
   hm_galaxy_data = .new_half_mass_data(galaxy_data$star_part, p, q, half_mass)
+
+  cat("\n Galaxy half mass is: ", half_mass,
+      "\n Mass within the ellipsoid is: ", sum(hm_galaxy_data$Mass),
+      "\n i.e. as a percentage of the total mass: ", (sum(hm_galaxy_data$Mass)/(half_mass*2))*100, "%")
 
   while (flag == 0){
     fit_ellip = .ellipsoid_ratios_p_q(hm_galaxy_data, p, q)
@@ -670,6 +674,11 @@
     p = fit_ellip$p
     q = fit_ellip$q
     cnt = cnt + 1
+
+    cat("\n Galaxy half mass is: ", half_mass,
+        "\n Mass within the ellipsoid is: ", sum(hm_galaxy_data$Mass),
+        "\n i.e. as a percentage of the total mass: ", (sum(hm_galaxy_data$Mass)/(half_mass*2))*100, "%")
+
   }
 
   return(list("galaxy_data" = galaxy_data, "p" = mean(tail(temp_p, n=6)), "q" = mean(tail(temp_q, n=6))))
