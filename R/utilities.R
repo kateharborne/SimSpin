@@ -894,7 +894,7 @@
     part_map[part_in_spaxel$spaxel_ID[i]] = num_part
 
     # if number is greater than the particle limit
-    if (num_part >= observation$particle_limit){
+    #if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
       intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
         (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
@@ -928,12 +928,12 @@
       vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
       dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
 
-    } else { # if insufficient particles in spaxel
-      spectra[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$wave_bin)
-      lum_map[part_in_spaxel$spaxel_ID[i]] = NA
-      vel_los[part_in_spaxel$spaxel_ID[i]] = NA
-      dis_los[part_in_spaxel$spaxel_ID[i]] = NA
-    }
+    #} else { # if insufficient particles in spaxel
+    #  spectra[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$wave_bin)
+    #  lum_map[part_in_spaxel$spaxel_ID[i]] = NA
+    #  vel_los[part_in_spaxel$spaxel_ID[i]] = NA
+    #  dis_los[part_in_spaxel$spaxel_ID[i]] = NA
+    #}
     if (verbose){cat(i, "... ", sep = "")}
   }
   return(list(spectra, lum_map, vel_los, dis_los, part_map))
@@ -956,7 +956,7 @@
                      num_part = length(part_in_spaxel$val[[i]])
                      part_map = num_part
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part >= observation$particle_limit){
+                     #if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
                        intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
                                                   nrow = num_part, byrow = T) *
@@ -990,12 +990,12 @@
                                                     flux_in = "wave", flux_out = "wave")
                        vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                        dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-                     } else { # if insufficient particles in spaxel
-                       spectra = rep(NA, observation$wave_bin)
-                       lum_map = NA
-                       vel_los = NA
-                       dis_los = NA
-                     }
+                     #} else { # if insufficient particles in spaxel
+                      # spectra = rep(NA, observation$wave_bin)
+                      # lum_map = NA
+                      # vel_los = NA
+                      # dis_los = NA
+                     #}
                      result = list(spectra, lum_map, vel_los, dis_los, part_map)
                      return(result)
                      closeAllConnections()
@@ -1028,7 +1028,7 @@
     part_map[part_in_spaxel$spaxel_ID[i]] = num_part
 
     # if number is greater than the particle limit
-    if (num_part >= observation$particle_limit){
+    #if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
       if (mass_flag){
@@ -1058,15 +1058,15 @@
       age_map[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
       met_map[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
 
-    } else { # if insufficient particles in spaxel
-      vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
-      lum_map[part_in_spaxel$spaxel_ID[i]] = NA
-      vel_los[part_in_spaxel$spaxel_ID[i]] = NA
-      dis_los[part_in_spaxel$spaxel_ID[i]] = NA
-      age_map[part_in_spaxel$spaxel_ID[i]] = NA
-      met_map[part_in_spaxel$spaxel_ID[i]] = NA
+    #} else { # if insufficient particles in spaxel
+    #  vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
+    #  lum_map[part_in_spaxel$spaxel_ID[i]] = NA
+    #  vel_los[part_in_spaxel$spaxel_ID[i]] = NA
+    #  dis_los[part_in_spaxel$spaxel_ID[i]] = NA
+    #  age_map[part_in_spaxel$spaxel_ID[i]] = NA
+    #  met_map[part_in_spaxel$spaxel_ID[i]] = NA
 
-    }
+    #}
     if (verbose){cat(i, "... ", sep = "")}
 
   }
@@ -1093,7 +1093,7 @@
                      num_part = length(part_in_spaxel$val[[i]])
                      part_map = num_part
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part >= observation$particle_limit){
+                     #if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
                        if (mass_flag){
@@ -1122,14 +1122,14 @@
                        age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
                        met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
 
-                     } else { # if insufficient particles in spaxel
-                       vel_spec = rep(NA, observation$vbin)
-                       lum_map = NA
-                       vel_los = NA
-                       dis_los = NA
-                       age_map = NA
-                       met_map = NA
-                     }
+                    # } else { # if insufficient particles in spaxel
+                      # vel_spec = rep(NA, observation$vbin)
+                      # lum_map = NA
+                      # vel_los = NA
+                      # dis_los = NA
+                      # age_map = NA
+                      # met_map = NA
+                     #}
                      result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map)
                      return(result)
                      closeAllConnections()
@@ -1163,7 +1163,7 @@
     num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
 
     # if number is greater than the particle limit
-    if (num_part >= observation$particle_limit){
+    #if (num_part >= observation$particle_limit){
       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
       # adding the "gaussians" of each particle to the velocity bins
@@ -1175,15 +1175,15 @@
       Z_map[part_in_spaxel$spaxel_ID[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
       OH_map[part_in_spaxel$spaxel_ID[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
-    } else { # if insufficient particles in spaxel
-      vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
-      mass_map[part_in_spaxel$spaxel_ID[i]]  = NA
-      vel_los[part_in_spaxel$spaxel_ID[i]]   = NA
-      dis_los[part_in_spaxel$spaxel_ID[i]]   = NA
-      SFR_map[part_in_spaxel$spaxel_ID[i]]   = NA
-      Z_map[part_in_spaxel$spaxel_ID[i]]     = NA
-      OH_map[part_in_spaxel$spaxel_ID[i]]    = NA
-    }
+    #} else { # if insufficient particles in spaxel
+    #  vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
+    #  mass_map[part_in_spaxel$spaxel_ID[i]]  = NA
+    #  vel_los[part_in_spaxel$spaxel_ID[i]]   = NA
+    #  dis_los[part_in_spaxel$spaxel_ID[i]]   = NA
+    #  SFR_map[part_in_spaxel$spaxel_ID[i]]   = NA
+    #  Z_map[part_in_spaxel$spaxel_ID[i]]     = NA
+    #  OH_map[part_in_spaxel$spaxel_ID[i]]    = NA
+    #}
     if (verbose){cat(i, "... ", sep = "")}
 
   }
@@ -1209,7 +1209,7 @@
 
                      num_part = length(part_in_spaxel$val[[i]])
                      # if the number of particles in the spaxel is greater than the particle limit
-                     if (num_part >= observation$particle_limit){
+                    # if (num_part >= observation$particle_limit){
                        galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
                        # adding the "gaussians" of each particle to the velocity bins
@@ -1222,15 +1222,15 @@
                        OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
 
-                     } else { # if insufficient particles in spaxel
-                       vel_spec = rep(NA, observation$vbin)
-                       mass_map = NA
-                       vel_los  = NA
-                       dis_los  = NA
-                       SFR_map  = NA
-                       Z_map    = NA
-                       OH_map   = NA
-                     }
+                     #} else { # if insufficient particles in spaxel
+                    #   vel_spec = rep(NA, observation$vbin)
+                    #   mass_map = NA
+                    #   vel_los  = NA
+                    #   dis_los  = NA
+                    #   SFR_map  = NA
+                    #   Z_map    = NA
+                    #   OH_map   = NA
+                    # }
                      result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map)
                      return(result)
                      closeAllConnections()

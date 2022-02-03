@@ -1,7 +1,7 @@
 # SimSpin
 <!-- badges: start -->
-[![Build Status](https://travis-ci.org/kateharborne/SimSpin.svg?branch=master)](https://travis-ci.org/kateharborne/SimSpin)
-[![codecov](https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=tKlm0WNmfv)](https://codecov.io/gh/kateharborne/SimSpin)
+<a href="https://github.com/kateharborne/SimSpin/actions"><img src="https://github.com/kateharborne/SimSpin/actions/workflows/r.yml/badge.svg" alt="R-CMD-check"/></a>
+<a href="https://app.codecov.io/gh/kateharborne/SimSpin"><img src="https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=2T1BDWZYSV" alt="codecov"/></a>
 <a href="https://ascl.net/1903.006"><img src="https://img.shields.io/badge/ascl-1903.006-blue.svg?colorB=262255" alt="ascl:1903.006" /></a>
 <!-- badges: end -->
 
@@ -9,7 +9,7 @@
 
 <p>&nbsp;</p>
 
-SimSpin v2.0.6 - A package for producing mock observations of particle simulations
+SimSpin v2.1.1 - A package for producing mock observations of particle simulations
 
 The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument.
 
@@ -42,7 +42,7 @@ ss_file = make_simspin_file(filename = system.file("extdata","SimSpin_example_Ga
                                                     package = "SimSpin"),
                             write_to_file = FALSE) # generate a spectra file
 SAMI = telescope(type="SAMI")                      # initialise a telescope
-strategy = observing_strategy(z = 0.05)            # initialise obsering conditions
+strategy = observing_strategy(dist_z = 0.05)       # initialise obsering conditions
 
 cube = build_datacube(simspin_file = ss_file,      # build data cube
                       telescope = SAMI,

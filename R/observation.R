@@ -7,8 +7,10 @@
 #'The purpose of this function is to generate an object that describes how the
 #' galaxy has been observed.
 #'
-#'@param telescope A \code{telescope} object.
-#'@param observing_strategy An \code{observing_strategy} object.
+#'@param telescope A \code{telescope} object. See
+#' \code{\link{telescope}} help for more details.
+#'@param observing_strategy An \code{observing_strategy} object. See
+#' \code{\link{observing_strategy}} help for more details.
 #'@return Returns an object of class "observation" that summarises the
 #' properties of the observation. Run within the \code{build_datacube()}
 #' function.
@@ -19,10 +21,10 @@
 #'
 observation = function(telescope, observing_strategy){
 
-  ang_size      = celestial::cosdistAngScale(observing_strategy$z, ref="Planck") # angular size given z, kpc/"
-  lum_dist      = celestial::cosdistLumDist(observing_strategy$z, ref="Planck") # computing Luminosity Distance in units of Mpc
-  aperture_size = ang_size * telescope$fov                 # diameter size of the telescope, kpc
-  sbin_size     = aperture_size / telescope$sbin           # spatial bin size (kpc per bin)
+  ang_size      = kpc_per_arcsec(observing_strategy$distance) # angular size given z, kpc/"
+  lum_dist      = Mpc(observing_strategy$distance)            # computing Luminosity Distance in units of Mpc
+  aperture_size = ang_size * telescope$fov           # diameter size of the telescope, kpc
+  sbin_size     = aperture_size / telescope$sbin     # spatial bin size (kpc per bin)
   sbin_seq      = seq(-(telescope$sbin * sbin_size) / 2,
                       (telescope$sbin * sbin_size) / 2, by=sbin_size) # spatial bin break positions
   wave_seq      = seq(telescope$wave_range[1], telescope$wave_range[2], by = telescope$wave_res) # wavelength bin break positions
@@ -76,7 +78,9 @@ observation = function(telescope, observing_strategy){
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
                 method          = telescope$method,
-                particle_limit  = observing_strategy$particle_limit,
+                origin          = paste0("SimSpin_v", packageVersion("SimSpin")),
+                pointing_kpc    = xy_kpc(observing_strategy$pointing),
+                pointing_deg    = xy_deg(observing_strategy$pointing),
                 pixel_region    = aperture_region * pixel_index,
                 psf_fwhm        = psf_fwhm,
                 psf_kernel      = psf_k,
@@ -92,7 +96,7 @@ observation = function(telescope, observing_strategy){
                 wave_edges      = wave_edges,
                 vbin_size       = vbin_size,
                 vbin_error      = vbin_error,
-                z               = observing_strategy$z)
+                z               = z(observing_strategy$distance))
 
   return(output)
 }

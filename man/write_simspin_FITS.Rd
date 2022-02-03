@@ -12,7 +12,8 @@ write_simspin_FITS(
   instrument_name,
   observer_name,
   input_simspin_file,
-  mask = NA
+  mask = NA,
+  galaxy_centre = c(0, 0, 0)
 )
 }
 \arguments{
@@ -35,6 +36,9 @@ telescope.}
 
 \item{mask}{(Optional) A binary array describing the masked regions of the
 cube/images.}
+
+\item{galaxy_centre}{(Optional) A numeric array (x,y,z) describing the centre
+of potential of the observed galaxy within it's simulation.}
 }
 \value{
 Returns an .fits file that contains a the generated data and
