@@ -1,5 +1,5 @@
 ---
-title: "Using SimSpin v2.0.0"
+title: "Using SimSpin v2.1.1"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using SimSpin v2.0.0}
@@ -168,9 +168,9 @@ We have specified the **spectral templates** used as `BC03lr`. This corresponds 
 
 Spectral Templates: 
 
- : `BC03lr` -- a low resolution GALEXEV set compiled from Bruzual and Charlot 2003 computed for a Chabrier IMF and Padova Isochrones.
- : `BC03hr` -- a high resolution GALEXEV set compiled from Bruzual and Charlot 2003 computed for a Chabrier IMF and Padova Isochrones.
- : `EMILES` --  a high resolution E-MILES set compiled by Vazdekis et al. 2016 computed for a Chabrier IMF and Padova Isochrones.
+ * `BC03lr` -- a low resolution GALEXEV set compiled from Bruzual and Charlot 2003 computed for a Chabrier IMF and Padova Isochrones.
+ * `BC03hr` -- a high resolution GALEXEV set compiled from Bruzual and Charlot 2003 computed for a Chabrier IMF and Padova Isochrones.
+ * `EMILES` --  a high resolution E-MILES set compiled by Vazdekis et al. 2016 computed for a Chabrier IMF and Padova Isochrones.
 
 Further templates will be incorporated over time. Keep an eye on the [GitHub repository](https://github.com/kateharborne/SimSpin) for any additions or report an issue for the inclusion of a specific set of templates. 
 
@@ -201,9 +201,9 @@ Using the `make_simspin_file` function, we have reconstructed the raw input part
 
 `make_simspin_file` 
 
-  : `star_part` -- *data.frame* -- This contains a data table of the particle properties, including the IDs, positions (physical kpc), velocities (km/s), initial and current masses (10$^{10}$ solar masses), and the SED ID corresponding the to spectrum index of that particle. These properties are listed for each particle in the simulation. 
-  : `spectra` -- *List* -- This list contains the individual spectra associated with each. The number of unique spectra is dependent on the input simulation. Particles are matched to their relevant spectra by the SED ID value in the `star_part` table. That SED ID corresponds to the row number in the `spectra` list. i.e. `sed_id = 2` corresponds to the spectrum in row 2 of the `spectra` list (accessed via `spectra[[2]]`).
-  : `wave` -- *numeric* -- This 1D array contains the wavelength units for each spectrum in the `spectra` list.
+* `star_part` -- *data.frame* -- This contains a data table of the particle properties, including the IDs, positions (physical kpc), velocities (km/s), initial and current masses (10$^{10}$ solar masses), and the SED ID corresponding the to spectrum index of that particle. These properties are listed for each particle in the simulation. 
+* `spectra` -- *List* -- This list contains the individual spectra associated with each. The number of unique spectra is dependent on the input simulation. Particles are matched to their relevant spectra by the SED ID value in the `star_part` table. That SED ID corresponds to the row number in the `spectra` list. i.e. `sed_id = 2` corresponds to the spectrum in row 2 of the `spectra` list (accessed via `spectra[[2]]`).
+* `wave` -- *numeric* -- This 1D array contains the wavelength units for each spectrum in the `spectra` list.
   
 All simulations, no matter if they are N-body models or hydrodynamical simulations, will produce the *same output type*. This output type can then be used to construct a data cube. 
 
@@ -272,12 +272,14 @@ This output produced by `build_datacube` is a list with 4 elements as described 
 
 `build_datacube`
 
-  : `spectral_cube` -- *3D numeric array* -- This describes your 3D spectral data cube. The axes of the cube are [spatial x spatial x wavelength] and the values within the cube are given in CGS units (erg/s/cm$^{2}$/$\unicode{x212B}$). 
-  : `observation` -- *List* -- A list of 22 elements that describe the specifics calculated for that specific observation. Generally describes the details you've entered with regards to the `telescope` and `observing_strategy` objects, as well as other properties derived from this information. Includes information about the units of the cube dimensions. 
-  : `raw_images` -- *List* -- A list of 2D arrays corresponding to various properties of the binned raw particle data within the observation.  WIthin this list, there is two key comparison images: 
-      : `velocity_image` -- *2D numeric array* -- This is a 2D array that represents the physical, mean line-of-sight (LOS) velocity of the particles within each spaxel of your image. This is provided for comparison with the fit LOS velocity image produced through spectral analysis. 
-      : `dispersion_image` -- *2D numeric array* -- This is a 2D array that represents the physical, mean LOS velocity dispersion of the particles within each spaxel of your image. This is provided for comparison with the fit LOS velocity dispersion image produced through spectral analysis. 
-  : `observed_images` -- *List* -- This will be `NULL` for spectral data cubes, but when used in `velocity` mode, this list will contain 2D arrays that correspond to the observed flux/mass, LOS velocity and LOS dispersion calculated using the collapsed velocity cube. 
+1. `spectral_cube` -- *3D numeric array* -- This describes your 3D spectral data cube. The axes of the cube are [spatial x spatial x wavelength] and the values within the cube are given in CGS units (erg/s/cm$^{2}$/$\unicode{x212B}$). 
+2. `observation` -- *List* -- A list of 22 elements that describe the specifics calculated for that specific observation. Generally describes the details you've entered with regards to the `telescope` and `observing_strategy` objects, as well as other properties derived from this information. Includes information about the units of the cube dimensions. 
+3. `raw_images` -- *List* -- A list of 2D arrays corresponding to various properties of the binned raw particle data within the observation.  Within this list, there are four key comparison images. 
+    + `flux_image` -- *2D numeric array* -- This is a 2D array that represents the sum of the individual particle flux along that spaxel. 
+    + `velocity_image` -- *2D numeric array* -- This is a 2D array that represents the physical, mean line-of-sight (LOS) velocity of the particles within each spaxel of your image. This is provided for comparison with the fit LOS velocity image produced through spectral analysis. 
+    + `dispersion_image` -- *2D numeric array* -- This is a 2D array that represents the physical, mean LOS velocity dispersion of the particles within each spaxel of your image. This is provided for comparison with the fit LOS velocity dispersion image produced through spectral analysis.
+    + `particle_image` -- *2D numeric array* -- This is the final 2D array that contains the number of particles contained in a given pixel. 
+4. `observed_images` -- *List* -- This will be `NULL` for spectral data cubes, but when used in `velocity` mode, this list will contain 2D arrays that correspond to the observed flux/mass, LOS velocity and LOS dispersion calculated using the collapsed velocity cube. 
 
 ```{r, echo=FALSE, fig.dim=c(7,5), fig.align='center'}
 
@@ -354,11 +356,11 @@ spectral_cube = cube[[1]] # The spectral data cube is stored in the first HDU (c
 header = cube$axDat # The header of the file gives everything you need to assign values to the cube axes.
                     # In FITSio, we access the numerical header properties using the axDat element.
 
-spatial_range = header$crval[1] + (seq(-(header$crpix[1]-1), header$crpix[1])*header$cdelt[1])
+spatial_range = header$crval[1] + (seq(header$crpix[1], header$len[1])*header$cdelt[1])
                     # We use the first or second inputs to the axDat to describe the spatial axes of the cube. As
                     # the aperture is square, the first and second inputs give the same answer.
 
-wavelength_range = header$crval[3] + (seq(-(header$crpix[3]-1), header$crpix[3])*header$cdelt[3])
+wavelength_range = header$crval[3] + (seq(header$crpix[3], header$len[3])*header$cdelt[3])
                     # Because the wavelength is the third axis of the cube, we use the third element in the axDat 
                     # element to define the wavelength range. 
 
@@ -367,7 +369,7 @@ wavelength_range = header$crval[3] + (seq(-(header$crpix[3]-1), header$crpix[3])
 We define the elements of the `axDat` header in the table below:
 
 +:--------+:-------------------------------------------------------------------+
-|  crpix  |  The index of the centre pixels in the cube.                       |
+|  crpix  |  The pixel index at which values are defined. Default (1,1,1).     |
 +---------+--------------------------------------------------------------------+
 |  crval  |  The value associated with the `crpix` pixel.                      |
 +---------+--------------------------------------------------------------------+
