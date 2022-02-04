@@ -53,7 +53,7 @@ For a longer example of how each function can be used, please take a look at the
 
 From within R, you can display the package documentation by typing `?SimSpin` and select "Index" at the bottom of the page to view all available functions. Alternatively, type `?` followed by the function name to see function specific documentation. 
 
-Longer examples are published [here](https://rpubs.com/kateharborne) and demonstrate a walk-through the basic code operation for SimSpin v2.0.0 (and v1.1.3).
+Longer examples are published [here](https://rpubs.com/kateharborne) and demonstrate a walk-through the basic code operation for SimSpin v2.1.1 (and v1.1.3).
 
 If you have any further questions or requests for features in the code, report an issue or drop an email to katherine.harborne@uwa.edu.au.
 
