@@ -610,10 +610,6 @@
   # Select all particles within initial half-mass (spherical) of stellar
   hm_galaxy_data = .new_half_mass_data(galaxy_data$star_part, p, q, half_mass)
 
-  cat("\n Galaxy half mass is: ", half_mass,
-      "\n Mass within the ellipsoid is: ", sum(hm_galaxy_data$Mass),
-      "\n i.e. as a percentage of the total mass: ", (sum(hm_galaxy_data$Mass)/(half_mass*2))*100, "%")
-
   while (flag == 0){
     fit_ellip = .ellipsoid_ratios_p_q(hm_galaxy_data, p, q)
     temp_p[cnt] = fit_ellip$p # recording the axis ratios at this iteration
@@ -674,10 +670,6 @@
     p = fit_ellip$p
     q = fit_ellip$q
     cnt = cnt + 1
-
-    cat("\n Galaxy half mass is: ", half_mass,
-        "\n Mass within the ellipsoid is: ", sum(hm_galaxy_data$Mass),
-        "\n i.e. as a percentage of the total mass: ", (sum(hm_galaxy_data$Mass)/(half_mass*2))*100, "%")
 
   }
 
