@@ -1,0 +1,24 @@
+{
+    "id": "12E77C5A",
+    "path": "~/repos/SimSpin/R/build_datacube.R",
+    "project_path": "R/build_datacube.R",
+    "type": "r_source",
+    "hash": "1169410467",
+    "contents": "",
+    "dirty": false,
+    "created": 1644904016125.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "cursorPosition": "129,74",
+        "scrollLine": "118"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1644904118,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1644904118788,
+    "read_only": false,
+    "read_only_alternatives": []
+}

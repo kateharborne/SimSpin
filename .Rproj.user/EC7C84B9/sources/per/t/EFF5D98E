@@ -1,0 +1,25 @@
+{
+    "id": "EFF5D98E",
+    "path": "~/repos/SimSpin/R/utilities.R",
+    "project_path": "R/utilities.R",
+    "type": "r_source",
+    "hash": "3695402902",
+    "contents": "",
+    "dirty": false,
+    "created": 1644907267168.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "docOutlineVisible": "1",
+        "cursorPosition": "836,80",
+        "scrollLine": "822"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1644903591,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1644903591,
+    "read_only": false,
+    "read_only_alternatives": []
+}
