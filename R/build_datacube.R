@@ -121,10 +121,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (observation$method == "spectral"){
 
     original_wave  = simspin_data$wave # read original wavelengths
-    wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
-    lsf_fwhm   = (observation$z * observation$lsf_fwhm) + observation$lsf_fwhm # adjusting the LSF for the resolution at z
-
+    wavelength = original_wave * (observation$z + 1) # and then applying a shift due to redshift, z
+    lsf_fwhm   = observation$lsf_fwhm
     spec_res_sigma_sq = lsf_fwhm^2 - (min(diff(wavelength)))^2
+
     if (spec_res_sigma_sq < 0){ # if the lsf is smaller than the wavelength resolution of the spectra
       warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
       cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", min(diff(wavelength)), " A. \n")
