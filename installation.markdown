@@ -4,6 +4,7 @@ title: Installation
 permalink: /installation/
 description: "How to install SimSpin on your machine."
 nav_order: 2
+last_modified_date: "Wed, 16 February 2022 13:57:00 AWST"
 ---
 
 # Installing SimSpin
@@ -33,7 +34,6 @@ If you encounter problems, check for missing dependencies on your operating syst
 [Get started now](#installing-simspin-1){: .btn .btn-purple }
 
 ## Installing dependencies 
-{: .text-delta .fs-5 }
 
 You will need an installation of **R** to run this software. 
 This can be downloaded from your local mirror for your operating system.
@@ -76,7 +76,6 @@ sudo apt-get libfftw3-dev
 ```
 
 ## Installing SimSpin
-{: .text-delta }
 
 Assuming that you have successfully installed a copy of R on your machine, the most recent release of `SimSpin` can be installed from GitHub from within your R session using the following commands:
 
