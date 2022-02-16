@@ -10,21 +10,37 @@ permalink: /
 {: .fs-9 }
 
 A package for producing mock observations of particle simulations
-{: .fs-6 .fw-300 }
+{: .fs-6 .fw-300 .mb-5 }
 
-The purpose of the [SimSpin](https://github.com/kateharborne/SimSpin) package is to take a particle simulation of a galaxy and produce an integral field spectroscopy (IFS) observation.
+[View on GitHub](https://github.com/kateharborne/SimSpin){: .btn .btn-purple }
+[Download Citation](https://github.com/kateharborne/SimSpin/blob/master/CITATION.cff){: .btn .btn-purple }
+[View on ADS](https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract){: .btn .btn-purple }
+{: .mb-1 }
+
+<img align="right" src="assets/images/logo.png" width="175" height="175" />
+{: .pl-3 .pb-1 } 
+
+[`SimSpin`](https://github.com/kateharborne/SimSpin) is an R-package designed to take a simulation of a galaxy and produce a "mock" integral field spectroscopy (IFS) observation.
 
 This produces a **data cube** - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
 
 A mock data cube can be produced using this package. 
-This is a simple process comprised of four steps:
+This is a simple process comprised of three steps:
 
-<img class="center" src="assets/images/SimSpin_methodology.png" /> 
+  1. Read in your particle data and produce the relevant spectra using the `make_simspin_file` function.
+  1. Setup the observation by defining your `telescope` and `observing_strategy`.
+  1. Build your data cube using the `build_datacube`.
 
 We incorporate some of the limitations encountered by observers so that more consistent comparisons can be made between observations and theory.
 
 From this data cube, "observables" can be measured using observational pipelines. 
 This package, once installed, is fully documented and tested.
+
+<!-- badges: start -->
+<a href="https://github.com/kateharborne/SimSpin/actions"><img src="https://github.com/kateharborne/SimSpin/actions/workflows/r.yml/badge.svg" alt="R-CMD-check"/></a>
+<a href="https://app.codecov.io/gh/kateharborne/SimSpin"><img src="https://codecov.io/gh/kateharborne/SimSpin/branch/master/graph/badge.svg?token=2T1BDWZYSV" alt="codecov"/></a>
+<a href="https://ascl.net/1903.006"><img src="https://img.shields.io/badge/ascl-1903.006-blue.svg?colorB=262255" alt="ascl:1903.006" /></a>
+<!-- badges: end -->
 
 Another implementation of this code (SimSpin v1.1.3) written in Julia is also available at [SimSpin.jl](https://github.com/kateharborne/SimSpin.jl) developed by [Gerry Gralton](https://github.com/gerrygralton). 
 
