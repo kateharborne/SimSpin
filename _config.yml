@@ -21,14 +21,13 @@
 title: SimSpin
 email: katherine.harborne@uwa.edu.au
 description: A package for producing mock observations of particle simulations.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "/SimSpin" # the subpath of your site, e.g. /blog
+url: "https://kateharborne.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
 remote_theme: pmarsceill/just-the-docs
 plugins:
   - jekyll-feed
-gems:
   - jekyll-seo-tag
 
 # Set a path/url to a logo that will be displayed instead of the title
