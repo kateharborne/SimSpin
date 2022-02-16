@@ -1,11 +1,11 @@
 ---
 layout: default
-title: make_simspin_file
+title: telescope
 parent: Documentation
-nav_order: 1
+nav_order: 2
 last_modified_date: "Wed, 16 February 2022 15:57:00 AWST"
 ---
 
-# Making the input file for SimSpin
+# Defining the properties of the telescope
 
-`make_simspin_file`
+`telescope()`

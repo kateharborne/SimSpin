@@ -1,11 +1,11 @@
 ---
 layout: default
-title: make_simspin_file
+title: build_datacube
 parent: Documentation
-nav_order: 1
+nav_order: 4
 last_modified_date: "Wed, 16 February 2022 15:57:00 AWST"
 ---
 
-# Making the input file for SimSpin
+# Constructing your data cube
 
-`make_simspin_file`
+`build_datacube()`
