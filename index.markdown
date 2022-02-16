@@ -3,7 +3,7 @@ layout: default
 title: Home
 nav_order: 1
 description: "SimSpin is a package for producing mock IFS observations of galaxy simulations."
-permalink: /
+permalink: /SimSpin
 ---
 
 # SimSpin v2.1.1 
