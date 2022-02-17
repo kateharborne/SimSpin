@@ -171,5 +171,34 @@ test_that("Test that sph_spawn functionality works on multiple cores - Magneticu
   expect_length(gas_data_c2$gas_part$ID, 1000)
 })
 
+# Test that the added header information works as expected ---------------------
+test_that("", {
+  gadget = readRDS(paste(temp_loc, "gadget_test", sep=""))
+  hdf5 = readRDS(paste(temp_loc, "hdf5_test", sep=""))
+  eagle  = readRDS(paste(temp_loc, "eagle_test", sep=""))
+  magneticum = readRDS(paste(temp_loc, "magneticum_test", sep=""))
+
+  expect_equal(gadget$header$Type, "nbody")
+  expect_equal(hdf5$header$Type, "nbody")
+  expect_equal(eagle$header$Type, "EAGLE")
+  expect_equal(magneticum$header$Type, "Magneticum")
+
+  expect_equal(gadget$header$Template, "EMILES")
+  expect_equal(hdf5$header$Template, "BC03lr")
+  expect_equal(eagle$header$Template, "EMILES")
+  expect_equal(magneticum$header$Template, "EMILES")
+
+  expect_equal(gadget$header$Template_LSF, 2.51)
+  expect_equal(hdf5$header$Template_LSF, 3)
+  expect_equal(eagle$header$Template_LSF, 2.51)
+  expect_equal(magneticum$header$Template_LSF, 2.51)
+
+  expect_equal(gadget$header$Template_waveres, eagle$header$Template_waveres)
+  expect_equal(hdf5$header$Template_waveres, 1)
+  expect_equal(eagle$header$Template_waveres, 0.9)
+  expect_equal(magneticum$header$Template_waveres, eagle$header$Template_waveres)
+ })
+
+
 unlink(c(paste(temp_loc, "gadget_test", sep=""), paste(temp_loc, "hdf5_test", sep=""),
          paste(temp_loc, "eagle_test", sep="")))
