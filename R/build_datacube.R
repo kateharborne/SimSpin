@@ -126,19 +126,40 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   if (observation$method == "spectral"){
 
-    original_wave  = simspin_data$wave # read original wavelengths
-    wavelength = original_wave * (observation$z + 1) # and then applying a shift due to redshift, z
+    original_wave  = simspin_data$wave # read original wavelengths of the template spectra
+    wavelength = original_wave * (observation$z + 1) # and then applying a shift to those spectra due to redshift, z
+
+    # If the requested wavelength resolution of the telescope is a smaller number than the intrinsic wavelength
+    # resolution of the template spectra, the interpolation onto a finer grid can cause errors that pPXF cannot
+    # account for in extreme cases. Issue a warning to the user in this case.
+
+    if (observation$wave_res < min(diff(wavelength))){
+      warning(cat("WARNING! - Wavelength resolution of provided template spectra at this redshift is too coarse for the requested telescope wavelength resolution.\n"))
+      cat("Dlambda_telescope = ", observation$wave_res,  " A < Dlambda_templates ", min(diff(wavelength)), " A. \n")
+      cat("This will cause some interpolation that may make spectral fitting techniques fail.")
+      }
+
+    # Similarly, the template spectra for each particle have some intrinsic spectral resolution
+    # These vary dependent on the template. If the requested spectral resolution of the telescope
+    # is lower than the spectral resolution of the templates, we can't convolve them.
+
     lsf_fwhm   = observation$lsf_fwhm
-    spec_res_sigma_sq = lsf_fwhm^2 - (min(diff(wavelength)))^2
+    lsf_fwhm_temp = simspin_data$header$Template_LSF * (observation$z + 1)
+    # applying a shift to that intrinsic template LSF due to redshift, z
+
+    spec_res_sigma_sq = lsf_fwhm^2 - lsf_fwhm_temp^2
 
     if (spec_res_sigma_sq < 0){ # if the lsf is smaller than the wavelength resolution of the spectra
-      warning(cat("WARNING! - Wavelength resolution of provided spectra is lower than the requested telescope resolution.\n"))
-      cat("LSF = ", observation$lsf_fwhm,  " A < wavelength resolution ", min(diff(wavelength)), " A. \n")
-      cat("No LSF will be applied in this case.\n")
+      warning(cat("WARNING! - Spectral resolution of provided template spectra is lower than the requested telescope spectral resolution.\n"))
+      cat("LSF_telescope = ", observation$lsf_fwhm,  " A < LSF_templates ", lsf_fwhm_temp, " A. \n")
+      cat("No LSF convolution will be applied in this case. \n")
+      cat("Intrinsic LSF of observation = ", lsf_fwhm_temp, " A for comparison with kinematic cubes. \n")
       observation$LSF_conv = FALSE
     } else {
       observation$LSF_conv = TRUE
       observation$lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2))))
+      # To get to the telescope's LSF, we only need to convolve with a Gaussian the width of the additional
+      # difference between the redshifted template and the intrinsic telescope LSF.
     }
 
     if (verbose){cat("Generating spectra per spaxel... \n")}
