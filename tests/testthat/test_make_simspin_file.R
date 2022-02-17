@@ -10,30 +10,32 @@ ss_hdf5 = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin
 ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 ss_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
 
+ss_file_length = 5
+
 temp_loc = tempdir()
 
 # Test that they the function runs successfully without error
 test_that("Initial run of each simulation type - Gadget.", {
   expect_null(make_simspin_file(ss_gadget, template = "BC03hr", output = paste(temp_loc, "gadget_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "gadget_test", sep="")), 4)
+  expect_length(readRDS(paste(temp_loc, "gadget_test", sep="")), ss_file_length)
   expect_true(length(readRDS(paste(temp_loc, "gadget_test", sep=""))$gas_part) == 0)
 })
 
 test_that("Initial run of each simulation type - HDF5", {
   expect_null(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "hdf5_test", sep="")), 4)
+  expect_length(readRDS(paste(temp_loc, "hdf5_test", sep="")), ss_file_length)
   expect_true(length(readRDS(paste(temp_loc, "hdf5_test", sep=""))$gas_part) == 0)
 })
 
 test_that("Initial run of each simulation type - EAGLE", {
   expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep=""), centre = c(0.01,0.02,0.01), half_mass = 1483809589))
-  expect_length(readRDS(paste(temp_loc, "eagle_test", sep="")), 4)
+  expect_length(readRDS(paste(temp_loc, "eagle_test", sep="")), ss_file_length)
   expect_true(length(readRDS(paste(temp_loc, "eagle_test", sep=""))$gas_part) == 16)
 })
 
 test_that("Initial run of each simulation type - Magneticum", {
   expect_null(make_simspin_file(ss_magneticum, output = paste(temp_loc, "magneticum_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "magneticum_test", sep="")), 4)
+  expect_length(readRDS(paste(temp_loc, "magneticum_test", sep="")), ss_file_length)
   expect_true(length(readRDS(paste(temp_loc, "magneticum_test", sep=""))$gas_part) == 16)
 })
 
