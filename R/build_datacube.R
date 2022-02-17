@@ -147,7 +147,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     lsf_fwhm_temp = simspin_data$header$Template_LSF * (observation$z + 1)
     # applying a shift to that intrinsic template LSF due to redshift, z
 
-    spec_res_sigma_sq = lsf_fwhm^2 - lsf_fwhm_temp^2
+    spec_res_sigma_sq = ((lsf_fwhm^2) - (lsf_fwhm_temp^2))
 
     if (spec_res_sigma_sq < 0){ # if the lsf is smaller than the wavelength resolution of the spectra
       warning(cat("WARNING! - Spectral resolution of provided template spectra is lower than the requested telescope spectral resolution.\n"))
