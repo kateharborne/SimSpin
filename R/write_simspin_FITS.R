@@ -5,7 +5,11 @@
 #'A function for making a mock spectral cube FITS file output
 #'
 #'The purpose of this function is to write the spectral cube generated using
-#' the \code{build_datacube()} function to a FITS file.
+#' the \code{build_datacube()} function to a FITS file. This code will also
+#' write the images produced by \code{build_datacube()} to a further series of
+#' FITS files automatically. The number of FITS files written is dependent on
+#' the input simspin_datacube. They will be named suitably to reflect their
+#' content automatically.
 #'
 #'@param output_file The path to the location where the FITS file should be
 #' written.
