@@ -301,7 +301,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
                                error = function(e){"./"})
       output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
-                              observation$psf_fwhm,"fwhm_images.FITS", sep="")
+                              observation$psf_fwhm,"fwhm.FITS", sep="")
     }
 
     write_simspin_FITS(output_file = output_location,
