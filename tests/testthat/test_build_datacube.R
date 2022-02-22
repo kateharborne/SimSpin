@@ -261,28 +261,62 @@ test_that("Data cubes can be written to file", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", method="velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "velocity_cube.FITS")), built_cube_size)
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_gadget.FITS")), built_cube_size)
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", method="gas", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "gas_velocity_cube.FITS")), built_cube_size)
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_eagle.FITS")), built_cube_size)
 
   expect_length(build_datacube(simspin_file = ss_magneticum,
                                telescope = telescope(type="IFU", method="sf gas", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "sfgas_velocity_cube.FITS")), built_cube_size)
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_magneticum.FITS")), built_cube_size)
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), built_cube_size)
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_hdf5.FITS")), built_cube_size)
 })
 
-unlink(c(paste(temp_loc, "cube.FITS", sep=""), paste(temp_loc, "velocity_cube.FITS", sep=""),
-         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_spectral.FITS"),
-         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_images.FITS"),
-         paste0(temp_loc, "sfgas_velocity_cube.FITS"), paste0(temp_loc, "gas_velocity_cube.FITS")))
+unlink(c(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_spectral_cube.FITS"),
+         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_flux_image.FITS"),
+         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_velocity_image.FITS"),
+         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_dispersion_image.FITS"),
+         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_particle_image.FITS"),
+
+         paste0(temp_loc, "/ss_gadget_velocity_cube.FITS"),
+         paste0(temp_loc, "/ss_gadget_flux_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_age_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_metallicity_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_particle_image.FITS"),
+
+         paste0(temp_loc, "/ss_eagle_gas_velocity_cube.FITS"),
+         paste0(temp_loc, "/ss_eagle_mass_image.FITS"),
+         paste0(temp_loc, "/ss_eagle_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_eagle_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_eagle_OH_image.FITS"),
+         paste0(temp_loc, "/ss_eagle_metallicity_image.FITS"),
+         paste0(temp_loc, "/ss_eagle_SFR_image.FITS"),
+
+         paste0(temp_loc, "/ss_magenticum_gas_velocity_cube.FITS"),
+         paste0(temp_loc, "/ss_magenticum_mass_image.FITS"),
+         paste0(temp_loc, "/ss_magenticum_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_magenticum_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_magenticum_OH_image.FITS"),
+         paste0(temp_loc, "/ss_magenticum_metallicity_image.FITS"),
+         paste0(temp_loc, "/ss_magenticum_SFR_image.FITS"),
+
+         paste0(temp_loc, "/ss_hdf5_spectral_cube.FITS"),
+         paste0(temp_loc, "/ss_hdf5_flux_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_age_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_metallicity_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_particle_image.FITS")
+         ))
 
 # Testing that build_datacube will give warning if the spectra given is low res
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {

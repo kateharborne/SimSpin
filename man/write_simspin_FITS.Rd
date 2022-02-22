@@ -41,7 +41,7 @@ cube/images.}
 of potential of the observed galaxy within it's simulation.}
 }
 \value{
-Returns an .fits file that contains a the generated data and
+Returns an .FITS file that contains a the generated data and
 relevant header describing the mock observation.
 }
 \description{
@@ -56,13 +56,13 @@ make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.Rdata", sep=""))
 cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
                      telescope = telescope(type="SAMI"),
                      observing_strategy = observing_strategy())
-write_simspin_FITS(output_file = paste(temp_loc, "cube.fits", sep=""),
+write_simspin_FITS(output_file = paste(temp_loc, "cube.FITS", sep=""),
                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
                   telescope_name = "AAO", instrument_name = "SAMI",
                   observer_name = "K.E.Harborne",
                   input_simspin_file = paste(temp_loc, "spectra.Rdata", sep=""))
 unlink(paste(temp_loc, "spectra.fst", sep=""))
-unlink(paste(temp_loc, "cube.fits", sep=""))
+unlink(paste(temp_loc, "cube.FITS", sep=""))
 }
 
 }
