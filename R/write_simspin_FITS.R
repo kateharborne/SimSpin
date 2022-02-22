@@ -21,7 +21,7 @@
 #' cube/images.
 #'@param galaxy_centre (Optional) A numeric array (x,y,z) describing the centre
 #' of potential of the observed galaxy within it's simulation.
-#'@return Returns an .fits file that contains a the generated data and
+#'@return Returns an .FITS file that contains a the generated data and
 #' relevant header describing the mock observation.
 #'@examples
 #'\dontrun{
@@ -31,13 +31,13 @@
 #'cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
 #'                      telescope = telescope(type="SAMI"),
 #'                      observing_strategy = observing_strategy())
-#'write_simspin_FITS(output_file = paste(temp_loc, "cube.fits", sep=""),
+#'write_simspin_FITS(output_file = paste(temp_loc, "cube.FITS", sep=""),
 #'                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
 #'                   telescope_name = "AAO", instrument_name = "SAMI",
 #'                   observer_name = "K.E.Harborne",
 #'                   input_simspin_file = paste(temp_loc, "spectra.Rdata", sep=""))
 #'unlink(paste(temp_loc, "spectra.fst", sep=""))
-#'unlink(paste(temp_loc, "cube.fits", sep=""))
+#'unlink(paste(temp_loc, "cube.FITS", sep=""))
 #'}
 #'
 
@@ -45,6 +45,11 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                               telescope_name, instrument_name, observer_name,
                               input_simspin_file, mask=NA,
                               galaxy_centre = c(0,0,0)){
+
+  # Sorting names for each file ------------------------------------------------
+  output_name = rev(stringr::str_split(output_file, "/")[[1]])[1]
+  output_dir  = stringr::str_remove(output_file, output_name)
+  output_file_root = stringr::str_remove(stringr::str_remove(output_name, ".fits"), ".FITS")
 
   observation = simspin_datacube$observation
   simspin_cube = simspin_datacube[[1]] # getting either the "velocity cube" or the "spectral cube"
@@ -59,16 +64,12 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
   gal_RA  = asin(galaxy_centre_norm[2]/cos(gal_DEC))
 
   # FITS files always have the first HDU containing the header information.
-  #
-  # Then, depending on the type of data cube that has been constructed, images
-  # and their respective header information is stored in subsequent HDUs.
-  #
+
   # Basic header information is initiallised in this function to begin.
   # This is then modified in the following "if"s depending on the telescope
   # mode employed.
 
-  # Making header for file and saving to HDU 1 ----
-  output_name = rev(stringr::str_split(output_file, "/")[[1]])[1]
+  # Making header for all files ----
 
   header_keyvalues = list("SIMPLE"=TRUE, "BITPIX"=8, "NAXIS"=0, "EXTEND"=TRUE,
                           "DATE"=Sys.time(), "ORIGIN"=observation$origin,
@@ -108,10 +109,6 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                             "ARCFILE"="Archive File Name",
                             "DATAMD5"="MD5 checksum",
                             "OBJECT"="Original target.")
-
-  Rfits::Rfits_write_header(filename = output_file, keyvalues = header_keyvalues,
-                            keycomments = header_keycomments, ext=1, create_file = T,
-                            overwrite_file = TRUE)
 
   # Data header to be modified and added for each HDU ----
 
@@ -172,12 +169,18 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   if (observation$method == "spectral"){
 
+    cube_file_name = paste0(output_dir, "/", output_file_root, "_spectral_cube.FITS") # adding "cube" to end of file name
+
+    Rfits::Rfits_write_header(filename = cube_file_name, keyvalues = header_keyvalues,
+                              keycomments = header_keycomments, ext=1, create_file = T,
+                              overwrite_file = TRUE)
+
     data_keyvalues$CTYPE3 = "WAVE"
     data_keyvalues$CUNIT3 = "Angstrom"
     data_keyvalues$CDELT3 = observation$wave_res
     data_keyvalues$CRVAL3 = observation$wave_seq[1]
 
-    Rfits::Rfits_write_cube(data = simspin_cube, filename = output_file, ext=2,
+    Rfits::Rfits_write_cube(data = simspin_cube, filename = cube_file_name, ext=2,
                             keyvalues = data_keyvalues, keycomments = data_keycomments,
                             create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
@@ -214,17 +217,22 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("FLUX", "LOS_VEL", "LOS_DISP", "NPART")
+    extnames = c("RAW_FLUX", "RAW_VEL", "RAW_DISP", "NPART")
     bunits = c("erg/s/cm**2", "km/s", "km/s", "Particle number")
-    extnum = c(3,4,5,6)
     image_names = c("flux_image", "velocity_image", "dispersion_image", "particle_image")
+    output_image_file_names = paste0(output_dir, "/", output_file_root, "_", image_names, ".FITS")
 
     for (i in 1:4){
+
+      Rfits::Rfits_write_header(filename = output_image_file_names[i], keyvalues = header_keyvalues,
+                                keycomments = header_keycomments, ext=1, create_file = T,
+                                overwrite_file = TRUE)
+
       image_keyvalues$BUNIT = bunits[i]
       image_keyvalues$EXTNAME = extnames[i]
 
       Rfits::Rfits_write_image(data = simspin_datacube$raw_images[[which(names(simspin_datacube$raw_images) == image_names[i])]],
-                               filename = output_file, ext=extnum[i],
+                               filename = output_image_file_names[i], ext=2,
                                keyvalues = image_keyvalues, keycomments = image_keycomments,
                                create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
     }
@@ -233,12 +241,18 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   if (observation$method == "velocity"){
 
+    cube_file_name = paste0(output_dir, "/", output_file_root, "_velocity_cube.FITS") # adding "cube" to end of file name
+
+    Rfits::Rfits_write_header(filename = cube_file_name, keyvalues = header_keyvalues,
+                              keycomments = header_keycomments, ext=1, create_file = T,
+                              overwrite_file = TRUE)
+
     data_keyvalues$CTYPE3 = "VELOCITY"
     data_keyvalues$CUNIT3 = "km/s"
     data_keyvalues$CDELT3  = observation$vbin_size
     data_keyvalues$CRVAL3 = observation$vbin_seq[1]
 
-    Rfits::Rfits_write_cube(data = simspin_cube, filename = output_file, ext=2,
+    Rfits::Rfits_write_cube(data = simspin_cube, filename = cube_file_name, ext=2,
                             keyvalues = data_keyvalues, keycomments = data_keycomments,
                             create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
@@ -275,23 +289,28 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = if("flux_image" %in% names(simspin_datacube$raw_images)){c("FLUX", "LOS_VEL", "LOS_DISP", "AGE", "METALS", "NPART")}else{c("MASS", "LOS_VEL", "LOS_DISP", "AGE", "METALS", "NPART")}
+    extnames = if("flux_image" %in% names(simspin_datacube$raw_images)){c("FLUX", "OBS_VEL", "OBS_DISP", "RAW_AGE", "RAW_Z", "NPART")}else{c("MASS", "OBS_VEL", "OBS_DISP", "RAW_AGE", "RAW_Z", "NPART")}
     bunits = if("flux_image" %in% names(simspin_datacube$raw_images)){c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")}else{c("Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")}
-    extnum = c(3,4,5,6,7,8)
     image_names = if("flux_image" %in% names(simspin_datacube$raw_images)){c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")}else{c("mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")}
+    output_image_file_names = paste0(output_dir, "/", output_file_root, "_", image_names, ".FITS")
 
     for (i in 1:6){
+
+      Rfits::Rfits_write_header(filename = output_image_file_names[i], keyvalues = header_keyvalues,
+                                keycomments = header_keycomments, ext=1, create_file = T,
+                                overwrite_file = TRUE)
+
       image_keyvalues$BUNIT = bunits[i]
       image_keyvalues$EXTNAME = extnames[i]
 
       if (i < 4){
         Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
-                                 filename = output_file, ext=extnum[i],
+                                 filename = output_image_file_names[i], ext=2,
                                  keyvalues = image_keyvalues, keycomments = image_keycomments,
                                  create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
       } else {
         Rfits::Rfits_write_image(data = simspin_datacube$raw_images[[which(names(simspin_datacube$raw_images) == image_names[i])]],
-                                 filename = output_file, ext=extnum[i],
+                                 filename = output_image_file_names[i], ext=2,
                                  keyvalues = image_keyvalues, keycomments = image_keycomments,
                                  create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
@@ -303,12 +322,18 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   if (observation$method == "gas" | observation$method == "sf gas"){
 
+    cube_file_name = paste0(output_dir, "/", output_file_root, "_gas_velocity_cube.FITS") # adding "cube" to end of file name
+
+    Rfits::Rfits_write_header(filename = cube_file_name, keyvalues = header_keyvalues,
+                              keycomments = header_keycomments, ext=1, create_file = T,
+                              overwrite_file = TRUE)
+
     data_keyvalues$CTYPE3 = "GAS_VELO"
     data_keyvalues$CUNIT3 = "km/s"
     data_keyvalues$CDELT3  = observation$vbin_size
     data_keyvalues$CRVAL3 = observation$vbin_seq[1]
 
-    Rfits::Rfits_write_cube(data = simspin_cube, filename = output_file, ext=2,
+    Rfits::Rfits_write_cube(data = simspin_cube, filename = cube_file_name, ext=2,
                             keyvalues = data_keyvalues, keycomments = data_keycomments,
                             create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
@@ -345,23 +370,28 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("MASS", "LOS_VEL", "LOS_DISP", "METALS", "OH_ABUND", "SFR")
+    extnames = c("MASS", "OBS_VEL", "OBS_DISP", "RAW_Z", "RAW_OH", "RAW_SFR")
     bunits = c("Msol", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Msol/year")
-    extnum = c(3,4,5,6,7,8)
     image_names = c("mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "SFR_image")
+    output_image_file_names = paste0(output_dir, "/", output_file_root, "_", image_names, ".FITS")
 
     for (i in 1:6){
+
+      Rfits::Rfits_write_header(filename = output_image_file_names[i], keyvalues = header_keyvalues,
+                                keycomments = header_keycomments, ext=1, create_file = T,
+                                overwrite_file = TRUE)
+
       image_keyvalues$BUNIT = bunits[i]
       image_keyvalues$EXTNAME = extnames[i]
 
       if (i < 4){ # write observed mass, velocity and dispersion images to the file
         Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
-                                 filename = output_file, ext=extnum[i],
+                                 filename = output_image_file_names[i], ext=2,
                                  keyvalues = image_keyvalues, keycomments = image_keycomments,
                                  create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
       } else { # and the raw particle data for metallicity and OH
         Rfits::Rfits_write_image(data = simspin_datacube$raw_images[[which(names(simspin_datacube$raw_images) == image_names[i])]],
-                                 filename = output_file, ext=extnum[i],
+                                 filename = output_image_file_names[i], ext=2,
                                  keyvalues = image_keyvalues, keycomments = image_keycomments,
                                  create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
@@ -373,6 +403,12 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
 
   if (!all(is.na(mask))){
+
+    mask_file_name = paste0(output_dir, "/", output_file_root, "_mask.FITS")
+
+    Rfits::Rfits_write_header(filename = mask_file_name, keyvalues = header_keyvalues,
+                              keycomments = header_keycomments, ext=1, create_file = T,
+                              overwrite_file = TRUE)
 
     mask_keyvalues = list("XTENSION"="IMAGE", "BITPIX"=-64, "NAXIS"=2,
                           "NAXIS1"=dim(mask)[1], "NAXIS2"=dim(mask)[2],
@@ -392,12 +428,12 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                             "EXTNAME"="Extension name")
 
     Rfits::Rfits_write_image(data = mask,
-                             filename = output_file,
+                             filename = mask_file_name,
                              keyvalues = mask_keyvalues, keycomments = mask_keycomments,
                              create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
   }
 
-  message("FITS file written to: ", output_file)
+  message("FITS files written to directory: ", output_dir)
 
 }
