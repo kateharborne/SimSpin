@@ -334,33 +334,33 @@ magicaxis::magplot(gadget2_binary_cube$observation$wave_seq,
 These spectra can be provided to an observational software, such as pPXF, for fitting and recovery of the LOS velocity and velocity dispersion maps. To do so, it is best to save these observations to a FITS file. This can be done by specifying `write_fits = TRUE` and the path to the desired save location `output_location = "/PATH/to/.FITS"`, as demonstrated below.
 
 ```{r}
-temp_loc = tempdir()
+temp_loc = tempdir(check = T)
 
 eagle_hdf5_cube = build_datacube(simspin_file    = eagle_hdf5_galaxy,
                                  telescope       = SAMI,
                                  observing_strategy = strategy_two,
                                  write_fits      = TRUE,                               # write results to a FITS file
-                                 output_location = paste0(temp_loc, "_eagle_obs.FITS")) #   at this location
+                                 output_location = file.path(temp_loc, "eagle_obs.FITS")) #   at this location
 
 ```
 
-Below, we demonstrate how to open and view the data using a FITS reader package called `FITSio`. 
+Below, we demonstrate how to open and view the data using a FITS reader package called `Rfits`. 
 
 ```{r}
-library(FITSio)
+library(Rfits)
 
-cube = readFITS(paste0(temp_loc, "_eagle_obs.FITS"))
+cube = Rfits::Rfits_read_all(file.path(temp_loc, "eagle_obs_spectral_cube.FITS"))
 
-spectral_cube = cube[[1]] # The spectral data cube is stored in the first HDU (can also be accessed cube$imDat).
-                          # The cube has dimensions [spatial x spatial x wavelength].
-header = cube$axDat # The header of the file gives everything you need to assign values to the cube axes.
-                    # In FITSio, we access the numerical header properties using the axDat element.
+spectral_cube = cube[["DATA"]]$imDat # The spectral data cube is stored in the first HDU (can also be accessed cube$imDat).
+                                     # The cube has dimensions [spatial x spatial x wavelength].
+header = cube[["DATA"]]$keyvalues    # The keyvalues header of the file gives everything 
+                                     # you need to assign values to the cube axes.
 
-spatial_range = header$crval[1] + (seq(header$crpix[1], header$len[1])*header$cdelt[1])
+spatial_range = header$CRVAL1 + (seq(header$CRPIX1, header$NAXIS1)*header$CDELT1)
                     # We use the first or second inputs to the axDat to describe the spatial axes of the cube. As
                     # the aperture is square, the first and second inputs give the same answer.
 
-wavelength_range = header$crval[3] + (seq(header$crpix[3], header$len[3])*header$cdelt[3])
+wavelength_range = header$CRVAL3 + (seq(header$CRPIX3, header$NAXIS3)*header$CDELT3)
                     # Because the wavelength is the third axis of the cube, we use the third element in the axDat 
                     # element to define the wavelength range. 
 
@@ -405,7 +405,11 @@ file.remove(list.files(pattern=".png"))
 ![Demontrating the wavelength slices stored within the FITS file.](SAMI_cube_phys.gif)
 
 ```{r, echo=FALSE}
-unlink(paste0(temp_loc, "_eagle_obs.FITS"))
+unlink(c(file.path(temp_loc, "eagle_obs_spectral_cube.FITS"),
+         file.path(temp_loc, "eagle_obs_flux_image.FITS"),
+         file.path(temp_loc, "eagle_obs_velocity_image.FITS"),
+         file.path(temp_loc, "eagle_obs_dispersion_image.FITS"),
+         file.path(temp_loc, "eagle_obs_particle_image.FITS")))
 ```
 
 This brings us to the end of this walk-through. We have demonstrated how to:
