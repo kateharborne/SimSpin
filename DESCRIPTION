@@ -9,7 +9,7 @@ License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
-Depends: R (>= 3.0), foreach
+Depends: R (>= 4.0), foreach
 Imports:
     celestial,
     data.table,
