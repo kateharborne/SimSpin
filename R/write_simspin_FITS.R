@@ -231,7 +231,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("RAW_FLUX", "RAW_VEL", "RAW_DISP", "NPART")
+    extnames = c("FLUX", "RAW_VEL", "RAW_DISP", "NPART")
     bunits = c("erg/s/cm**2", "km/s", "km/s", "Particle number")
     image_names = c("flux_image", "velocity_image", "dispersion_image", "particle_image")
     extnum = c(3,4,5,6)
