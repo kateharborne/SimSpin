@@ -32,6 +32,11 @@
 #' describe the name of the telescope used for observation in FITS header.
 #'@param observer_name Optional string used in \code{write_simspin_FITS} to
 #' describe the name of the person who ran the observation in FITS header.
+#'@param split_save Boolean describing whether to split the output from
+#' \code{build_datacube()} into multiple files while saving to FITS. If TRUE,
+#' several FITS files will be saved with file names that reflect their content
+#' (i.e."_spectral_cube.FITS", "_velocity_image.FITS", "_flux_images.FITS",
+#' etc.). Default option is FALSE.
 #'@param cores Float describing the number of cores to run the interpolation
 #' and velocity gridding on. Default is 1.
 #'@param mass_flag Boolean flag that, when set to TRUE, will compute properties
@@ -67,6 +72,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                           object_name="GalaxyID_unknown",
                           telescope_name="SimSpin",
                           observer_name="Anonymous",
+                          split_save=F,
                           cores=1, mass_flag = F){
 
   if (verbose){cat("Computing observation parameters... \n")}
@@ -307,7 +313,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     write_simspin_FITS(output_file = output_location,
                        simspin_datacube = output, object_name = object_name,
                        telescope_name = telescope_name, instrument_name = telescope$type,
-                       observer_name = observer_name,
+                       observer_name = observer_name, split_save=split_save,
                        input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
   }
 
