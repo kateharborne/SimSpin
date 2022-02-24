@@ -12,6 +12,7 @@ write_simspin_FITS(
   instrument_name,
   observer_name,
   input_simspin_file,
+  split_save = F,
   mask = NA,
   galaxy_centre = c(0, 0, 0)
 )
@@ -34,6 +35,12 @@ telescope.}
 \item{input_simspin_file}{A string describing the original SimSpin file
 (i.e. the file output from make_simspin_file).}
 
+\item{split_save}{Boolean describing whether to split the output from
+\code{build_datacube()} into multiple files. If TRUE, several FITS files
+will be saved with file names that reflect their content (i.e.
+"_spectral_cube.FITS", "_velocity_image.FITS", "_dispersion_images.FITS",
+etc.). Default option is FALSE.}
+
 \item{mask}{(Optional) A binary array describing the masked regions of the
 cube/images.}
 
@@ -41,12 +48,17 @@ cube/images.}
 of potential of the observed galaxy within it's simulation.}
 }
 \value{
-Returns an .fits file that contains a the generated data and
+Returns an .FITS file that contains a the generated data and
 relevant header describing the mock observation.
 }
 \description{
 The purpose of this function is to write the spectral cube generated using
-the \code{build_datacube()} function to a FITS file.
+the \code{build_datacube()} function to a FITS file. This code will also
+write the images produced by \code{build_datacube()} to a further series of
+FITS files automatically. Images are either added to subsequent HDU within
+the same FITS file, or saved seperately to a series of files. The number of
+FITS HDU or files written is dependent on the input simspin_datacube. Files
+and HDU will be named suitably to reflect their content automatically.
 }
 \examples{
 \dontrun{
@@ -56,13 +68,13 @@ make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.Rdata", sep=""))
 cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
                      telescope = telescope(type="SAMI"),
                      observing_strategy = observing_strategy())
-write_simspin_FITS(output_file = paste(temp_loc, "cube.fits", sep=""),
+write_simspin_FITS(output_file = paste(temp_loc, "cube.FITS", sep=""),
                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
                   telescope_name = "AAO", instrument_name = "SAMI",
                   observer_name = "K.E.Harborne",
                   input_simspin_file = paste(temp_loc, "spectra.Rdata", sep=""))
 unlink(paste(temp_loc, "spectra.fst", sep=""))
-unlink(paste(temp_loc, "cube.fits", sep=""))
+unlink(paste(temp_loc, "cube.FITS", sep=""))
 }
 
 }
