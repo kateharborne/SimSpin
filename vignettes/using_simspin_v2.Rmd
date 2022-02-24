@@ -349,7 +349,7 @@ Below, we demonstrate how to open and view the data using a FITS reader package 
 ```{r}
 library(Rfits)
 
-cube = Rfits::Rfits_read_all(file.path(temp_loc, "eagle_obs_spectral_cube.FITS"))
+cube = Rfits::Rfits_read_all(file.path(temp_loc, "eagle_obs.FITS"))
 
 spectral_cube = cube[["DATA"]]$imDat # The spectral data cube is stored in the first HDU (can also be accessed cube$imDat).
                                      # The cube has dimensions [spatial x spatial x wavelength].
@@ -366,20 +366,20 @@ wavelength_range = header$CRVAL3 + (seq(header$CRPIX3, header$NAXIS3)*header$CDE
 
 ```
 
-We define the elements of the `axDat` header in the table below:
+We define the key elements of the `keyvalues` header in the table below:
 
 +:--------+:-------------------------------------------------------------------+
-|  crpix  |  The pixel index at which values are defined. Default (1,1,1).     |
+|  CRPIX  |  The pixel index at which values are defined. Default (1,1,1).     |
 +---------+--------------------------------------------------------------------+
-|  crval  |  The value associated with the `crpix` pixel.                      |
+|  CRVAL  |  The value associated with the `CRPIX` pixel.                      |
 +---------+--------------------------------------------------------------------+
-|  cdelt  |  The difference in value between each pixel.                       |
+|  CDELT  |  The difference in value between each pixel.                       |
 +---------+--------------------------------------------------------------------+
-|  len    |  The dimensions of the cube (number of pixels along each axis).    |
+|  NAXIS  |  The dimensions of the cube (number of pixels along each axis).    |
 +---------+--------------------------------------------------------------------+
-|  ctype  |  The name that defines each dimension of the cube.                 |
+|  CTYPE  |  The name that defines each dimension of the cube.                 |
 +---------+--------------------------------------------------------------------+
-|  cunit  |  The units for each dimension of the cube.                         |
+|  CUNIT  |  The units for each dimension of the cube.                         |
 +---------+--------------------------------------------------------------------+
 
 These values can be used to reconstruct the data cube for kinematic fitting. 
@@ -405,11 +405,7 @@ file.remove(list.files(pattern=".png"))
 ![Demontrating the wavelength slices stored within the FITS file.](SAMI_cube_phys.gif)
 
 ```{r, echo=FALSE}
-unlink(c(file.path(temp_loc, "eagle_obs_spectral_cube.FITS"),
-         file.path(temp_loc, "eagle_obs_flux_image.FITS"),
-         file.path(temp_loc, "eagle_obs_velocity_image.FITS"),
-         file.path(temp_loc, "eagle_obs_dispersion_image.FITS"),
-         file.path(temp_loc, "eagle_obs_particle_image.FITS")))
+unlink(file.path(temp_loc, "eagle_obs.FITS"))
 ```
 
 This brings us to the end of this walk-through. We have demonstrated how to:
