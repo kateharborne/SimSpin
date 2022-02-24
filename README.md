@@ -9,7 +9,7 @@
 
 <p>&nbsp;</p>
 
-SimSpin v2.1.1 - A package for producing mock observations of particle simulations
+SimSpin v2.1.2 - A package for producing mock observations of particle simulations
 
 The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument.
 
