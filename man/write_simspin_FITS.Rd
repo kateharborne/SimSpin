@@ -12,6 +12,7 @@ write_simspin_FITS(
   instrument_name,
   observer_name,
   input_simspin_file,
+  split_save = F,
   mask = NA,
   galaxy_centre = c(0, 0, 0)
 )
@@ -34,6 +35,12 @@ telescope.}
 \item{input_simspin_file}{A string describing the original SimSpin file
 (i.e. the file output from make_simspin_file).}
 
+\item{split_save}{Boolean describing whether to split the output from
+\code{build_datacube()} into multiple files. If TRUE, several FITS files
+will be saved with file names that reflect their content (i.e.
+"_spectral_cube.FITS", "_velocity_image.FITS", "_dispersion_images.FITS",
+etc.). Default option is FALSE.}
+
 \item{mask}{(Optional) A binary array describing the masked regions of the
 cube/images.}
 
@@ -48,9 +55,10 @@ relevant header describing the mock observation.
 The purpose of this function is to write the spectral cube generated using
 the \code{build_datacube()} function to a FITS file. This code will also
 write the images produced by \code{build_datacube()} to a further series of
-FITS files automatically. The number of FITS files written is dependent on
-the input simspin_datacube. They will be named suitably to reflect their
-content automatically.
+FITS files automatically. Images are either added to subsequent HDU within
+the same FITS file, or saved seperately to a series of files. The number of
+FITS HDU or files written is dependent on the input simspin_datacube. Files
+and HDU will be named suitably to reflect their content automatically.
 }
 \examples{
 \dontrun{
