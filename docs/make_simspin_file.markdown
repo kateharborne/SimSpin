@@ -64,5 +64,19 @@ simulation_file = system.file("extdata", "SimSpin_example_Gadget", package = "Si
 simspin_file = make_simspin_file(filename = simulation_file,    
                                  write_to_file = FALSE)
 
-# Examining the SimSpin file structure, we can see that it contains 
+# Examining the SimSpin file structure, we can see that it contains:
+summary(simspin_file)
+#           Length Class      Mode   
+# star_part   12   data.frame list   
+# gas_part     0   -none-     NULL   
+# spectra      2   -none-     list   
+# wave      1221   -none-     numeric
+
+# star_part is a data.frame that contains the stellar particle information for that simulation. 
+# As the input model was an N-body model, this is a summary of both the disk (`PartType2`) and bulge (`PartType3`) particle properties. 
+# If the input model was a hydrodynamic simulation, this would just contain the stellar particle information (`PartType4`).
+summary(simspin_file$star_part)
+
+
 ```
+
