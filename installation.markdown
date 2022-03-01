@@ -12,7 +12,7 @@ last_modified_date: "Wed, 16 February 2022 13:57:00 AWST"
 
 Here, we explain how to install SimSpin on your machine, listing specific instructions for both MacOSX and Linux. 
 {: .fs-5 .fw-300 }
-
+---
 ## Table of contents
 {: .no_toc .text-delta }
 
@@ -33,6 +33,8 @@ If you encounter problems, check for missing dependencies on your operating syst
 
 [Get started now](#installing-simspin-1){: .btn .btn-purple }
 
+---
+
 ## Installing dependencies 
 
 You will need an installation of **R** to run this software. 
@@ -46,6 +48,8 @@ You can download these programs using the instructions at the buttons below.
 Beyond base R itself, there are some dependencies that will be required that may not exist on your machine.
 `SimSpin` requires the C libraries **FFTW** and **HDF5**. 
 Instructions for downloading these libraries are provided below for Mac OSX and Linux machines. 
+
+---
 
 ### Mac OSX
 In order to install `SimSpin` you will need a copy of  **XCode** (11 or greater), which can be downloaded and installed from the Apple App Store for free. 
@@ -66,6 +70,8 @@ brew install fftw
 brew install hdf5
 ```
 
+---
+
 ### Linux
 To install the FFTW and HDF5 packages on a Linux machine, open a Terminal window and use the commands:
 
@@ -74,6 +80,8 @@ sudo apt-get update
 sudo apt-get libhdf5-dev
 sudo apt-get libfftw3-dev
 ```
+
+---
 
 ## Installing SimSpin
 

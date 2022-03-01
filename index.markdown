@@ -11,24 +11,25 @@ last_modified_date: "Wed, 16 February 2022 13:57:00 AWST"
 {: .fs-9 }
 
 A package for producing mock observations of particle simulations
-{: .fs-6 .fw-300 .mb-5 }
+{: .fs-6 .fw-300 .mb-3 .lh-tight }
 
 [View on GitHub](https://github.com/kateharborne/SimSpin){: .btn .btn-purple }
 [Download Citation](https://github.com/kateharborne/SimSpin/blob/master/CITATION.cff){: .btn .btn-purple }
 [View on ADS](https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract){: .btn .btn-purple }
-{: .mb-1 }
+{: .lh-tight }
 
 <img align="right" src="assets/images/logo.png" width="175" height="175" />
-{: .pl-3 .pb-1 } 
+{: .pl-4 .pb-1 } 
 
 [`SimSpin`](https://github.com/kateharborne/SimSpin) is an R-package designed to take a simulation of a galaxy and produce a "mock" integral field spectroscopy (IFS) observation.
+{: .fs-5 .fw-300 }
 
-This produces a **data cube** - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
+This software can be used to produce a synthetic **data cube** - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
 
 A mock data cube can be produced using this package. 
 This is a simple process comprised of three steps:
 
-  1. Read in your particle data and produce the relevant spectra using the `make_simspin_file` function.
+  1. Read in your particle data and produce the relevant spectra using the [`make_simspin_file`](docs/make_simspin_file) function.
   1. Setup the observation by defining your `telescope` and `observing_strategy`.
   1. Build your data cube using the `build_datacube`.
 

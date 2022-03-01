@@ -14,6 +14,8 @@ Here, we demonstrate how to create your first mock observation.
 At each step, we take you through the simplest routine using the default parameters for each function.
 {: .fs-5 .fw-300 .pb-2 }
 
+---
+
 There are four steps to build your first `SimSpin` mock data cube: 
 {: .fw-300 }
 
@@ -23,6 +25,8 @@ There are four steps to build your first `SimSpin` mock data cube:
 We take you through each of these steps in the simplest form below.
 More extensive examples can be found in [Examples](https://kateharborne.github.io/SimSpin/examples).
 {: .fw-300 }
+
+---
 
 ## Making the input file
 
@@ -36,6 +40,7 @@ We define groups of particles or cells in each simulation according to the conve
 * `PartType3` - *N*-body bulge, 
 * `PartType4` - stars, 
 * `PartType5` - boundary/black holes. 
+{: .lh-tight }
 
 We begin by running the [`make_simspin_file`](https://kateharborne.github.io/SimSpin/docs/make_simspin_file) function. 
 This will organise the provided data into a consistent format for `SimSpin` processing and assign SEDs to stellar particles given their individual ages and metallicities. 
@@ -79,6 +84,8 @@ In this case, because the input file is an *N*-body model containing both bulge 
 For a hydrodynamical model, the  `spectra` element may have many more entries due to the broader variety in stellar ages and metallicities, but will remain an element of mode `list`. 
 Once a file has been produced for a single simulated galaxy, the same file can be used to produce any number of different observations.
 *Bear in mind that the resolution and wavelength range of the spectral templates used to generate the file need to overlap with the resolution and wavelength range of the observing telescope.*
+
+---
 
 ## Defining the observation properties
 
@@ -159,6 +166,8 @@ summary(strategy)
 
 With these properties specified, we have fully described the parameters necessary to construct the observation. 
 
+---
+
 ## Generating the observation
 
 Once the particulars of the observation have been defined, we can go ahead and make the observation. 
@@ -196,6 +205,8 @@ The overall format of this output will be consistent.
 However, the names of individual elements change to reflect the variety in the requested properties specified by [`telescope`]() and [`observing_strategy`]().
 * For example,  `method = 'spectral'` will return a variable `spectral_cube` as its first element; specifying instead `method = 'velocity'` will return a `velocity_cube`.
 * Similarly, if we are working in velocity mode with `mass_flag = T`, the images within the `raw_images` and `observed_images` elements will include an array called `mass_image`, rather than `flux_image`.
+
+---
 
 ## Writing the output to FITS
 
