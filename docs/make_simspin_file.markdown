@@ -3,7 +3,7 @@ layout: default
 title: make_simspin_file
 parent: Documentation
 nav_order: 1
-last_modified_date: "Wed, 16 February 2022 15:57:00 AWST"
+last_modified_date: "Wed, 16 February 2022 17:10:00 AWST"
 ---
 
 # Making the input file for SimSpin
@@ -20,7 +20,6 @@ Once we have generated a `SimSpin` file, that file can be used as input to `buil
 [See an example](#example){: .btn .btn-purple }
 
 ---
-## Code
 
 The following code shows the default parameters used in the `make_simspin_file` function. Calling the function without specifying anything other than the required input `filename` will produce a SimSpin file saved at the same directory location as the input simulation file with the following defaults. 
 
@@ -57,26 +56,66 @@ make_simspin_file(filename,                         # REQUIRED input file
 ## Example
 
 ```R
-# Using an example Gadget simulation file stored within the SimSpin software:
-simulation_file = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin"),
+# Using a Gadget model stored within the SimSpin software:
+> simulation_file = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
 
 # Writing a SimSpin file directly to the R environment with all other defaults:
-simspin_file = make_simspin_file(filename = simulation_file,    
-                                 write_to_file = FALSE)
+> simspin_file = make_simspin_file(filename = simulation_file,    
+                                   write_to_file = FALSE)
 
 # Examining the SimSpin file structure, we can see that it contains:
-summary(simspin_file)
-#           Length Class      Mode   
-# star_part   12   data.frame list   
-# gas_part     0   -none-     NULL   
-# spectra      2   -none-     list   
-# wave      1221   -none-     numeric
+> summary(simspin_file)
+           Length Class      Mode
+ header       8   -none-     list    
+ star_part   12   data.frame list   
+ gas_part     0   -none-     NULL   
+ spectra      2   -none-     list   
+ wave      1221   -none-     numeric
 
-# star_part is a data.frame that contains the stellar particle information for that simulation. 
-# As the input model was an N-body model, this is a summary of both the disk (`PartType2`) and bulge (`PartType3`) particle properties. 
-# If the input model was a hydrodynamic simulation, this would just contain the stellar particle information (`PartType4`).
-summary(simspin_file$star_part)
+# `header` is a list that contains details of the file you've just created. This allows you to 
+# recreate this file in the future using the same information. 
+> names(simspin_file$header)
+[1] "InputFile"        "OutputFile"       "Type"             "Template"         "Template_LSF"    
+[6] "Template_waveres" "Origin"           "Date"        
 
+# `star_part` is a data.frame that contains the stellar particle information for that simulation.
+# As the input model was an N-body model, this is a summary of both the disk (`PartType2`) and 
+# bulge (`PartType3`) particle properties. If the input model was a hydrodynamic simulation, this
+# would just contain the stellar particle information (`PartType4`).
+> names(simspin_file$star_part)
+ [1] "ID"           "x"            "y"            "z"            "vx"           "vy"          
+ [7] "vz"           "Mass"         "sed_id"       "Metallicity"  "Age"          "Initial_Mass"
 
+# `gas_part` in this file is NULL as the input simulation was an N-body model. However, in the case
+# that the input was a hydrodynamical simulation with gas particles, this would be a data.frame 
+# similar to `star_part` but summarising the gas particle properties instead. 
+> simspin_file[["gas_part"]]
+NULL
+
+# `spectra` is a list where each element describes the flux at a given wavelength for one group of 
+# stellar particles. These have been generated within the function for a distinct group of stellar
+# particle ages and metallicities using the specified `template` spectra. Mapping between stellar 
+# particles and their respective spectra is given by the `sed_id` within the `star_part` 
+# data.frame. Each number `sed_id` corresponds to the element within `spectra` list. 
+> simspin_file[["spectra"]]
+[[1]]
+   [1] 7.659288e-10 1.176103e-09 1.558386e-09 2.104659e-09 2.769032e-09 3.559435e-09 4.178723e-09
+   [8] 5.006696e-09 6.134861e-09 8.460731e-09 1.130473e-08 1.429757e-08 5.147714e-08 6.069533e-08
+  [15] ... [1221]
+[[2]]
+   [1] 1.089325e-08 1.397532e-08 1.675843e-08 2.010100e-08 2.321242e-08 2.587942e-08 2.695232e-08
+   [8] 2.921529e-08 3.182460e-08 4.229105e-08 4.810211e-08 5.303458e-08 1.067975e-07 1.186373e-07
+  [15] ... [1221]
+
+# Because the input simulation was an N-body model, we only have two associated spectra - one for
+# the disk particles (with `disk_age = 5` and `disk_Z = 0.024`) and one for the bulge particles 
+# (with `bulge_age = 10` and `bulge_Z = 0.001`). 
+
+# Finally `wave` contains the wavelength values in units of angstrom for all of the spectra 
+# contained in the `spectra` list.
+> simspin_file[["wave"]]
+   [1]    91    94    96    98   100   102   104   106   108   110   114   118   121   125   127   128
+  [17]   131   132   134   137   140   143   147   151   155   159   162   166   170   173   177   180
+  [33] ... [1221]
 ```
 
