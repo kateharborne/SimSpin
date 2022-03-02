@@ -36,7 +36,7 @@ Suggests:
     knitr,
     rmarkdown
 Remotes:
-    asgr/ProSpect,
-    asgr/Rfits,
-    ICRAR/ProFit
+    git::https://github.com/asgr/ProSpect@master,
+    git::https://github.com/asgr/Rfits,
+    git::https://github.com/ICRAR/ProFit@master
 VignetteBuilder: knitr
