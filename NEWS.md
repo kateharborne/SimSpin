@@ -1,6 +1,6 @@
-# SimSpin v2.1.2 News
+# SimSpin v2.1.3 News
 ### Author: Kate Harborne
-### Last edit: 23/02/22
+### Last edit: 03/03/22
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021. 
 
@@ -35,3 +35,4 @@ Below is a table containing a summary of all changes made to SimSpin, since the 
 |          	| (1) Adding the ability to `split_save` to both functions i.e. when the input data includes both the cube and summary images, this mode give the user to option to save all components into seperate files automatically. If "FALSE" (as default), all components will be saved into subsequent HDU's of the output FITS file.          	|         	|                                          	|
 |          	| (2) Modifying the EXTNAME for the HDU associated with the "raw" particle data (now prefixed with `"RAW_"`) and the "observed" collapsed velocity data cubes (now prefixed with `"OBS_").`                                                                                                                                              	|         	|                                          	|
 |          	| (3) Update to the depends version number of R. Now requires R >= 4.0. This is to enable the generation of a container for the web application of SimSpin.                                                                                                                                                                              	|         	|                                          	|
+| 03/03/22 	| *Minor bugfix*. Specifying branch of ProSpect in the remotes installation.                                                                                                                                                                                                                                                             	| 2.1.3   	| a8b45bafa139304ee5d66d559b9b1cb0f510e365 	|
