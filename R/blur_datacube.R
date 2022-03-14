@@ -47,7 +47,7 @@ blur_datacube = function(datacube_output){
     aperture_region = matrix(data = calc_region, nrow = cube_dims[1], ncol=cube_dims[2])
 
     # 1. Blurring each plane of the spectral datacube
-    blur_cube = array(data = NA, dim = cube_dims)
+    blur_cube = array(data = 0.0, dim = cube_dims)
     for (spatial_plane in seq(1, dim(cube)[3])){
       blur_cube[,,spatial_plane] = ProFit::profitBruteConv(cube[,,spatial_plane], observation$psf_kernel) * aperture_region
     }
@@ -72,7 +72,7 @@ blur_datacube = function(datacube_output){
     aperture_region = matrix(data = calc_region, nrow = cube_dims[1], ncol=cube_dims[2])
 
     # 1. Blurring each plane of the velocity datacube
-    blur_cube = array(data = NA, dim = cube_dims)
+    blur_cube = array(data = 0.0, dim = cube_dims)
     for (spatial_plane in seq(1, cube_dims[3])){
       blur_cube[,,spatial_plane] = ProFit::profitBruteConv(cube[,,spatial_plane], observation$psf_kernel) * aperture_region
     }
@@ -87,9 +87,9 @@ blur_datacube = function(datacube_output){
 
     # 2. Recompute the velocity and dispersion images from the blurred cube.
     # Initializing empty arrays
-    blur_flux = array(NA, dim = c(cube_dims[c(1,2)]))
-    blur_velocity = array(NA, dim = c(cube_dims[c(1,2)]))
-    blur_dispersion = array(NA, dim = c(cube_dims[c(1,2)]))
+    blur_flux = array(0.0, dim = c(cube_dims[c(1,2)]))
+    blur_velocity = array(0.0, dim = c(cube_dims[c(1,2)]))
+    blur_dispersion = array(0.0, dim = c(cube_dims[c(1,2)]))
 
     # Filling array based on blurred cubes
     for (c in 1:cube_dims[1]){

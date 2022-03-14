@@ -571,7 +571,7 @@
 
   ellip_radius = sqrt((x*x) + ((y/p)*(y/p)) + ((z/q)*(z/q)))
 
-  M = array(data = NA, dim = c(3,3))
+  M = array(data = 0.0, dim = c(3,3))
 
   M[1,1] = sum((galaxy_data$Mass * x * x) / ellip_radius)
   M[1,2] = sum((galaxy_data$Mass * x * y) / ellip_radius)
@@ -753,7 +753,7 @@
                          "lohi" = Z[3] * A[4],
                          "lolo" = Z[3] * A[3])
 
-    part_spec = array(data = NA, dim = c(1, length(Template$Wave)))
+    part_spec = array(data = 0.0, dim = c(1, length(Template$Wave)))
 
     part_spec = ((Template$Zspec[[Z[2]]][A[2],] * weights$hihi) +
                  (Template$Zspec[[Z[2]]][A[1],] * weights$hilo) +
@@ -786,7 +786,7 @@
 }
 
 .circular_ap=function(sbin){
-  ap_region = matrix(data = NA, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
+  ap_region = matrix(data = 0, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
   xcentre = sbin/2 + 0.5; ycentre = sbin/2 + 0.5
   x = matrix(data = rep(seq(1,sbin), each=sbin), nrow = sbin, ncol = sbin)
   y = matrix(data = rep(seq(sbin,1), sbin), nrow = sbin, ncol = sbin)
@@ -797,7 +797,7 @@
 }
 
 .hexagonal_ap=function(sbin){
-  ap_region = matrix(data = NA, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
+  ap_region = matrix(data = 0, ncol = sbin, nrow = sbin)# empty matrix for aperture mask
   xcentre = sbin/2 + 0.5; ycentre = sbin/2 + 0.5
   for (x in 1:sbin){
     for (y in 1:sbin){
@@ -874,10 +874,10 @@
 # spectral mode -
 .spectral_spaxels = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose){
 
-  spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
-  vel_los = array(data = NA, dim = observation$sbin^2)
-  dis_los = array(data = NA, dim = observation$sbin^2)
-  lum_map = array(data = NA, dim = observation$sbin^2)
+  spectra = matrix(data = 0.0, ncol = observation$wave_bin, nrow = observation$sbin^2)
+  vel_los = array(data = 0.0, dim = observation$sbin^2)
+  dis_los = array(data = 0.0, dim = observation$sbin^2)
+  lum_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){ # computing the spectra at each occupied spatial pixel position
@@ -933,10 +933,10 @@
 
 .spectral_spaxels_mc = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose, cores){
 
-  spectra = matrix(data = NA, ncol = observation$wave_bin, nrow = observation$sbin^2)
-  vel_los = array(data = NA, dim = observation$sbin^2)
-  dis_los = array(data = NA, dim = observation$sbin^2)
-  lum_map = array(data = NA, dim = observation$sbin^2)
+  spectra = matrix(data = 0.0, ncol = observation$wave_bin, nrow = observation$sbin^2)
+  vel_los = array(data = 0.0, dim = observation$sbin^2)
+  dis_los = array(data = 0.0, dim = observation$sbin^2)
+  lum_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
@@ -1007,11 +1007,11 @@
 .velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, mass_flag){
 
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
-  vel_los  = array(data = NA, dim = observation$sbin^2)
-  dis_los  = array(data = NA, dim = observation$sbin^2)
-  lum_map  = array(data = NA, dim = observation$sbin^2)
-  age_map  = array(data = NA, dim = observation$sbin^2)
-  met_map  = array(data = NA, dim = observation$sbin^2)
+  vel_los  = array(data = 0.0, dim = observation$sbin^2)
+  dis_los  = array(data = 0.0, dim = observation$sbin^2)
+  lum_map  = array(data = 0.0, dim = observation$sbin^2)
+  age_map  = array(data = 0.0, dim = observation$sbin^2)
+  met_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
@@ -1069,11 +1069,11 @@
 .velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores, mass_flag){
 
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
-  vel_los  = array(data = NA, dim = observation$sbin^2)
-  dis_los  = array(data = NA, dim = observation$sbin^2)
-  lum_map  = array(data = NA, dim = observation$sbin^2)
-  age_map  = array(data = NA, dim = observation$sbin^2)
-  met_map  = array(data = NA, dim = observation$sbin^2)
+  vel_los  = array(data = 0.0, dim = observation$sbin^2)
+  dis_los  = array(data = 0.0, dim = observation$sbin^2)
+  lum_map  = array(data = 0.0, dim = observation$sbin^2)
+  age_map  = array(data = 0.0, dim = observation$sbin^2)
+  met_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
@@ -1142,13 +1142,13 @@
 # gas velocity mode -
 .gas_velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose){
 
-  vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
-  vel_los  = array(data = NA, dim = observation$sbin^2)
-  dis_los  = array(data = NA, dim = observation$sbin^2)
-  mass_map = array(data = NA, dim = observation$sbin^2)
-  SFR_map  = array(data = NA, dim = observation$sbin^2)
-  Z_map    = array(data = NA, dim = observation$sbin^2)
-  OH_map   = array(data = NA, dim = observation$sbin^2)
+  vel_spec = matrix(data = 0.0, ncol = observation$vbin, nrow = observation$sbin^2)
+  vel_los  = array(data = 0.0, dim = observation$sbin^2)
+  dis_los  = array(data = 0.0, dim = observation$sbin^2)
+  mass_map = array(data = 0.0, dim = observation$sbin^2)
+  SFR_map  = array(data = 0.0, dim = observation$sbin^2)
+  Z_map    = array(data = 0.0, dim = observation$sbin^2)
+  OH_map   = array(data = 0.0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
@@ -1185,13 +1185,13 @@
 
 .gas_velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
 
-  vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
-  vel_los  = array(data = NA, dim = observation$sbin^2)
-  dis_los  = array(data = NA, dim = observation$sbin^2)
-  mass_map  = array(data = NA, dim = observation$sbin^2)
-  SFR_map  = array(data = NA, dim = observation$sbin^2)
-  Z_map    = array(data = NA, dim = observation$sbin^2)
-  OH_map   = array(data = NA, dim = observation$sbin^2)
+  vel_spec = matrix(data = 0.0, ncol = observation$vbin, nrow = observation$sbin^2)
+  vel_los  = array(data = 0.0, dim = observation$sbin^2)
+  dis_los  = array(data = 0.0, dim = observation$sbin^2)
+  mass_map  = array(data = 0.0, dim = observation$sbin^2)
+  SFR_map  = array(data = 0.0, dim = observation$sbin^2)
+  Z_map    = array(data = 0.0, dim = observation$sbin^2)
+  OH_map   = array(data = 0.0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 

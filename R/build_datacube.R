@@ -214,9 +214,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dims = dim(output$raw_images$velocity_image)
 
       names(output$observed_images) = c("flux_image", "velocity_image", "dispersion_image") # default calling flux/mass as flux_image
-      output$observed_images$flux_image       = array(NA, dim = dims[c(1,2)])
-      output$observed_images$velocity_image   = array(NA, dim = dims[c(1,2)])
-      output$observed_images$dispersion_image = array(NA, dim = dims[c(1,2)])
+      output$observed_images$flux_image       = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
 
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
@@ -273,9 +273,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dims = dim(output$raw_images$velocity_image)
 
       names(output$observed_images) = c("mass_image", "velocity_image", "dispersion_image")
-      output$observed_images$mass_image       = array(NA, dim = dims[c(1,2)])
-      output$observed_images$velocity_image   = array(NA, dim = dims[c(1,2)])
-      output$observed_images$dispersion_image = array(NA, dim = dims[c(1,2)])
+      output$observed_images$mass_image       = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
 
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
