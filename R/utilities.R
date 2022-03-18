@@ -79,10 +79,12 @@
 
   extract = ((1:floor(sum(Npart)))*3)-2 # giving integers of x/vx within pos/vel
 
-  part = data.frame("ID" = id,          # the particle data table
-                    "x" = pos[extract], "y"=pos[extract+1], "z"=pos[extract+2],
-                    "vx" = vel[extract], "vy" = vel[extract+1], "vz"=vel[extract+2],
-                    "Mass" = masses*1e10)
+  part = data.table::data.table("ID" = id,          # the particle data table
+                                "x" = pos[extract], "y" = pos[extract+1],
+                                "z" = pos[extract+2],
+                                "vx" = vel[extract], "vy" = vel[extract+1],
+                                "vz"=vel[extract+2],
+                                "Mass" = masses*1e10)
 
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
               "Time" = Time, "Redshift" = Redshift, # relevent simulation data
@@ -152,18 +154,18 @@
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
-    gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = if(one_p_flag){gas$Coordinates[1]}else{gas$Coordinates[1,]},# Coordinates in kpc
-                          "y"  = if(one_p_flag){gas$Coordinates[2]}else{gas$Coordinates[2,]},
-                          "z"  = if(one_p_flag){gas$Coordinates[3]}else{gas$Coordinates[3,]},
-                          "vx"  = if(one_p_flag){gas$Velocity[1]}else{gas$Velocity[1,]}, # Velocities in km/s
-                          "vy"  = if(one_p_flag){gas$Velocity[2]}else{gas$Velocity[2,]},
-                          "vz"  = if(one_p_flag){gas$Velocity[3]}else{gas$Velocity[3,]},
-                          "Mass" = gas$Mass*1e10, # Mass in solar masses
-                          "SFR" = gas$StarFormationRate,
-                          "Density" = gas$Density, # Density in Msol/kpc^3
-                          "Temperature" = gas$Temperature,
-                          "SmoothingLength" = gas$SmoothingLength) # Smoothing length in kpc
+    gas_part = data.table::data.table("ID" = gas$ParticleIDs,
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]}else{gas$Coordinates[1,]},# Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]}else{gas$Coordinates[2,]},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]}else{gas$Coordinates[3,]},
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]}else{gas$Velocity[1,]}, # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]}else{gas$Velocity[2,]},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]}else{gas$Velocity[3,]},
+                                      "Mass" = gas$Mass*1e10, # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate,
+                                      "Density" = gas$Density, # Density in Msol/kpc^3
+                                      "Temperature" = gas$Temperature,
+                                      "SmoothingLength" = gas$SmoothingLength) # Smoothing length in kpc
 
     remove(gas); remove(PT0_attr)
 
@@ -183,14 +185,14 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    disk_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
-                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
-                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses*1e10) # Mass in solar masses
+    disk_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                                       "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                                       "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
+                                       "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT2_attr)
 
@@ -206,14 +208,14 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = c(disk_part$ID, stars$ParticleIDs),
-                           "x"  = c(disk_part$x, if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}), # Coordinates in kpc
-                           "y"  = c(disk_part$y, if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]}),
-                           "z"  = c(disk_part$z, if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]}),
-                           "vx"  = c(disk_part$vx, if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}), # Velocities in km/s
-                           "vy"  = c(disk_part$vy, if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]}),
-                           "vz"  = c(disk_part$vz, if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]}),
-                           "Mass" = c(disk_part$Mass, stars$Masses*1e10)) # Mass in solar masses
+    star_part = data.table::data.table("ID" = c(disk_part$ID, stars$ParticleIDs),
+                                       "x"  = c(disk_part$x, if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}), # Coordinates in kpc
+                                       "y"  = c(disk_part$y, if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]}),
+                                       "z"  = c(disk_part$z, if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]}),
+                                       "vx"  = c(disk_part$vx, if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}), # Velocities in km/s
+                                       "vy"  = c(disk_part$vy, if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]}),
+                                       "vz"  = c(disk_part$vz, if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]}),
+                                       "Mass" = c(disk_part$Mass, stars$Masses*1e10)) # Mass in solar masses
 
     remove(stars); remove(PT3_attr); remove(disk_part)
 
@@ -230,14 +232,14 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
-                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
-                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses*1e10) # Mass in solar masses
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                                       "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                                       "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
+                                       "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT2_attr)
   } else if ("PartType3" %in% groups){
@@ -254,14 +256,14 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
-                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
-                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses*1e10) # Mass in solar masses
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                                       "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                                       "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
+                                       "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT3_attr);
 
@@ -299,22 +301,22 @@
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
-    gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
-                          "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
-                          "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
-                          "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
-                          "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
-                          "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
-                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
-                          "SFR" = gas$StarFormationRate,
-                          "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
-                          "Temperature" = gas$Temperature,
-                          "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
-                          "Metallicity" = gas$SmoothedMetallicity,
-                          "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
-                          "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
-                          "Oxygen" = gas$`SmoothedElementAbundance/Oxygen`)
+    gas_part = data.table::data.table("ID" = gas$ParticleIDs,
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
+                                      "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate,
+                                      "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
+                                      "Temperature" = gas$Temperature,
+                                      "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
+                                      "Metallicity" = gas$SmoothedMetallicity,
+                                      "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
+                                      "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
+                                      "Oxygen" = gas$`SmoothedElementAbundance/Oxygen`)
 
     remove(gas); remove(PT0_attr)
 
@@ -337,18 +339,18 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
-                           "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
-                           "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
-                           "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                                       "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                                       "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
+                                       "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
-    ssp = data.frame("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                     "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
-                     "Metallicity" = stars$SmoothedMetallicity)
+    ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Metallicity" = stars$SmoothedMetallicity)
 
     remove(stars); remove(PT4_attr)
 
@@ -382,22 +384,22 @@
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
-    gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
-                          "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
-                          "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
-                          "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
-                          "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
-                          "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
-                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
-                          "SFR" = gas$StarFormationRate,
-                          "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
-                          "Temperature" = gas$Temperature,
-                          "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
-                          "Metallicity" = (colSums(gas$Metallicity[2:11,]))/(gas$Mass),
-                          "Carbon" = gas$Metallicity[2,] / gas$Mass,
-                          "Hydrogen" = (gas$Mass - colSums(gas$Metallicity)) / gas$Mass,
-                          "Oxygen" =  gas$Metallicity[4,] / gas$Mass)
+    gas_part = data.table::data.table("ID" = gas$ParticleIDs,
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
+                                      "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate,
+                                      "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
+                                      "Temperature" = gas$Temperature,
+                                      "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
+                                      "Metallicity" = (colSums(gas$Metallicity[2:11,]))/(gas$Mass),
+                                      "Carbon" = gas$Metallicity[2,] / gas$Mass,
+                                      "Hydrogen" = (gas$Mass - colSums(gas$Metallicity)) / gas$Mass,
+                                      "Oxygen" =  gas$Metallicity[4,] / gas$Mass)
 
     remove(gas); remove(PT0_attr)
 
@@ -420,18 +422,18 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
-                           "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
-                           "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
-                           "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                                       "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                                       "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
+                                       "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
-    ssp = data.frame("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                     "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
-                     "Metallicity" = (colSums(stars$Metallicity[2:11,]))/(stars$Mass))
+    ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Metallicity" = (colSums(stars$Metallicity[2:11,]))/(stars$Mass))
 
     remove(stars); remove(PT4_attr)
 
@@ -487,8 +489,8 @@
 
   } else if (!is.null(galaxy_data$star_part)){
     stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
-    galaxy_data$star_part = stellar_data$part_data
-    if (!is.null(galaxy_data$gas_part)){ # if gas is present, centering these particles based on stellar medians
+    galaxy_data$star_part = data.table::as.data.table(stellar_data$part_data)
+    if (!is.null(galaxy_data$gas_part)){ # if gas is also present, centering these particles based on stellar medians
       gas_data = galaxy_data$gas_part
       gas_data$x = gas_data$x - stellar_data$xcen
       gas_data$y = gas_data$y - stellar_data$ycen
