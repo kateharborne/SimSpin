@@ -72,11 +72,17 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
-    temp = ProSpect::BC03lr
+    temp = fst::read.fst("data/BC03lr.fst")
+    temp_Z = .BC03_Z
+    temp_A = .BC03_A
   } else if (temp_name == "BC03HR"){
-    temp = ProSpect::BC03hr
+    temp = fst::read.fst("data/BC03hr.fst")
+    temp_Z = .BC03_Z
+    temp_A = .BC03_A
   } else if (temp_name == "EMILES"){
-    temp = ProSpect::EMILES
+    temp = fst::read.fst("data/EMILES.fst")
+    temp_Z = .EMILES_Z
+    temp_A = .EMILES_A
   } else {
     stop(cat("Error: template specified is unavailable.", "\n",
              "Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'"))
