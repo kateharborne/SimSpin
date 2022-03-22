@@ -75,7 +75,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4800,
                   spatial_res     = spatial_res,
-                  filter          = ProSpect::filt_g_SDSS,
+                  filter          = readRDS("data/filt_g_SDSS.Rdata"),
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.65,
                   signal_to_noise = signal_to_noise,
@@ -91,7 +91,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = spatial_res,
-                  filter          = ProSpect::filt_g_SDSS,
+                  filter          = readRDS("data/filt_g_SDSS.Rdata"),
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.8,
                   signal_to_noise = signal_to_noise,
@@ -107,7 +107,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(4700.15,9351.4),
                   wave_centre     = 6975,
                   spatial_res     = spatial_res,
-                  filter          = ProSpect::filt_r_SDSS,
+                  filter          = readRDS("data/filt_r_SDSS.Rdata"),
                   wave_res        = 1.25,
                   lsf_fwhm        = 2.63,
                   signal_to_noise = signal_to_noise,
@@ -125,7 +125,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = spatial_res,
-                  filter          = ProSpect::filt_g_SDSS,
+                  filter          = readRDS("data/filt_g_SDSS.Rdata"),
                   wave_res        = 1.6,
                   lsf_fwhm        = 1.3,
                   signal_to_noise = signal_to_noise,
@@ -143,7 +143,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = spatial_res,
-                  filter          = ProSpect::filt_g_SDSS,
+                  filter          = readRDS("data/filt_g_SDSS.Rdata"),
                   wave_res        = 2,
                   lsf_fwhm        = 5.65,
                   signal_to_noise = signal_to_noise,
@@ -154,15 +154,15 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
   if(stringr::str_to_upper(type)  == "IFU"){
 
     if (stringr::str_to_lower(filter) == "r"){
-      filter = ProSpect::filt_r_SDSS
+      filter = readRDS("data/filt_r_SDSS.Rdata")
     } else if (stringr::str_to_lower(filter) == "u"){
-      filter = ProSpect::filt_u_SDSS
+      filter = readRDS("data/filt_u_SDSS.Rdata")
     } else if (stringr::str_to_lower(filter) == "g"){
-      filter = ProSpect::filt_g_SDSS
+      filter = readRDS("data/filt_g_SDSS.Rdata")
     } else if (stringr::str_to_lower(filter) == "i"){
-      filter = ProSpect::filt_i_SDSS
+      filter = readRDS("data/filt_i_SDSS.Rdata")
     } else if (stringr::str_to_lower(filter) == "z"){
-      filter = ProSpect::filt_z_SDSS
+      filter = readRDS("data/filt_z_SDSS.Rdata")
     } else {
       stop("Error: Invalid filter. \n Please specify filter = 'r', 'u' or 'g', 'i' or 'z' and try again.")
     }
