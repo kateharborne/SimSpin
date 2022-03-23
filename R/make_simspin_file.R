@@ -174,7 +174,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     galaxy_data$star_part$Age          = galaxy_data$ssp$Age
     galaxy_data$star_part$Initial_Mass = galaxy_data$ssp$Initial_Mass
 
-    sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
+    sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = cores) # returns a list
 
   } else {sed = NULL}
 
