@@ -97,6 +97,15 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     stop("Error: Invalid method. \n Please specify observation$method = 'spectral', 'velocity', 'sf gas', or 'gas' and try again.")
   }
 
+  if (!data.table::is.data.table(galaxy_data)){
+    # if we are working with a simspin file from before v2.1.5
+    warning(cat("WARNING! - You are using an old SimSpin file (< v2.1.5). \n"))
+    cat("For quicker processing, consider re-making your SimSpin files using the make_simspin_file() function.")
+    # convert from a data.frame() to a data.table.
+    galaxy_data = data.table::as.data.table(galaxy_data)
+    simspin_data$spectra = data.table::as.data.table(simspin_data$spectra)
+  }
+
   # Twisting galaxy about the z-axis to look from an angle
   twisted_data = twist_galaxy(galaxy_data, twist_rad = observation$twist_rad)
 
@@ -108,6 +117,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   galaxy_data$z = (obs_data$z + observation$pointing_kpc[2])
   galaxy_data$vx = obs_data$vx; galaxy_data$vy = obs_data$vy; galaxy_data$vz = obs_data$vz
 
+  remove(obs_data, twisted_data)
+
   if (verbose){cat("Assigning particles to spaxels... \n")}
   galaxy_data$pixel_pos = cut(galaxy_data$x, breaks=observation$sbin_seq, labels=F) +
     (observation$sbin * cut(galaxy_data$z, breaks=observation$sbin_seq, labels=F)) - (observation$sbin)
@@ -117,17 +128,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   if (verbose){cat("Sorting spaxels... \n")}
 
-  particle_ID = NULL # initiallising varible to avoid CRAN error in checks
-
-  galaxy_data_table = data.table::data.table("particle_ID" = seq(1, length(galaxy_data$x)), "spaxel_ID"=galaxy_data$pixel_pos)
-
   # which particles sit in each spaxel?
-  part_in_spaxel = galaxy_data_table[, list(val=list(particle_ID)), by = "spaxel_ID"]
+  part_in_spaxel = galaxy_data[, list(val=list(ID), .N), by = "pixel_pos"]
 
   if (observation$method == "spectral"){
 
-    original_wave  = simspin_data$wave # read original wavelengths
-    wavelength = (observation$z * original_wave) + original_wave # and then applying a shift due to redshift, z
+    wavelength = (observation$z * simspin_data$wave) + simspin_data$wave # applying a shift due to redshift, z, to original wavelength
     lsf_fwhm   = (observation$z * observation$lsf_fwhm) + observation$lsf_fwhm # adjusting the LSF for the resolution at z
 
     spec_res_sigma_sq = lsf_fwhm^2 - (min(diff(wavelength)))^2
