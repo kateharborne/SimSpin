@@ -859,14 +859,12 @@
 }
 
 .interpolate_spectra = function(shifted_wave, spectra, wave_seq){ # function for interpolating the spectra onto a new grid
-  shifted_spectra = vector(mode = "list", length = dim(shifted_wave)[1])
-  for(j in 1:dim(shifted_wave)[1]){
-    shifted_spectra[[j]] = stats::approx(x = shifted_wave[j,], y = spectra[j,], xout = wave_seq, rule=1)[2]
-  }
-  output = matrix(unlist(shifted_spectra, use.names=FALSE), nrow = dim(shifted_wave)[1], byrow = TRUE)
-  spaxel_spectra = colSums(output)
 
-  return(spaxel_spectra)
+  shifted_spectra = data.table::as.data.table(matrix(data=0.0, nrow = length(wave_seq), ncol=dim(shifted_wave)[1]))
+  for(j in 1:dim(shifted_wave)[1]){
+    data.table::set(x = shifted_spectra, i = NULL, j = j, value = stats::approx(x = shifted_wave[j,], y = spectra[[j]], xout = wave_seq, rule=1)[[2]])
+  }
+  return(rowSums(shifted_spectra))
 }
 
 .sum_velocities = function(galaxy_sample, observation){
@@ -929,63 +927,28 @@
   }
 }
 
-# Taken from https://github.com/asgr/ProSpect/blob/d340c64555ba631257513ea4c99b0069cdebf477/R/photom.R#L348
-# to avoid ProSpect dependency
-
-.convert_wave2freq=function(flux_wave, wave, wavefac=1e-10, freqfac=1){
-  return(flux_wave*((wavefac/freqfac)*wave^2)/.c_to_mps)
-}
-
-.convert_freq2wave=function(flux_freq, wave, wavefac=1e-10, freqfac=1){
-  return(flux_freq*.c_to_mps/((wavefac/freqfac)*wave^2))
-}
-
 # Taken from https://github.com/asgr/ProSpect/blob/d340c64555ba631257513ea4c99b0069cdebf477/R/photom.R#L281
-# to avoid ProSpect dependency
+# to avoid ProSpect dependency and trimmed for the purpose of these internal functions
 
-.bandpass=function(wave, flux, filter, flux_in='freq', flux_out='freq', detect_type='photon'){
+.bandpass=function(wave, flux, filter){
   # flux must be flux_nu, i.e. erg/s / cm^2 / Hz, not erg/s / cm^2 / Ang!
-  if(!is.vector(wave)){
-    if(dim(wave)[2]==2){
-      flux=wave[,2]
-      wave=wave[,1]
-    }
-  }
-  if(!is.function(filter)){
-    filter = approxfun(x = filter[, 1], y = abs(filter[, 2]))
-  }
+
   response = filter(wave)
   response[is.na(response)] = 0
 
-  if(flux_in=='freq' & flux_out=='wave'){
-    flux = .convert_freq2wave(flux, wave)
-    flux_in = 'wave'
+  wave_diff=abs(.qdiff(wave))
+
+  if (is.null(dim(flux))){
+    output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
+    return(sum(output, na.rm=TRUE))
+  } else {
+    for (j in 1:dim(flux)[2]){
+    set(flux, j = j,
+        value = response * wave * flux[[j]] * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE))
+    }
+    return(as.numeric(colSums(flux, na.rm=TRUE)))
   }
 
-  if(flux_in=='wave' & flux_out=='freq'){
-    flux = .convert_wave2freq(flux, wave)
-    flux_out = 'freq'
-  }
-
-  if(flux_out=='freq'){
-    freq=1/wave
-    freq_diff=abs(.qdiff(freq))
-    if(detect_type=='photon'){
-      output = response * wave * flux * freq_diff/sum(response * wave * freq_diff, na.rm = TRUE)
-    }else if(detect_type=='energy'){
-      output = response * flux * freq_diff/sum(response * freq_diff, na.rm = TRUE)
-    }
-  }else if(flux_out=='wave'){
-    wave_diff=abs(.qdiff(wave))
-    if(detect_type=='photon'){
-      output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
-    }else if(detect_type=='energy'){
-      output = response * flux * wave_diff/sum(response * wave_diff, na.rm = TRUE)
-    }
-  }else{
-    stop('flux_out must be one of: freq / wave.')
-  }
-  return(sum(output, na.rm=TRUE))
 }
 
 # spectral mode -
@@ -996,14 +959,15 @@
   dis_los = array(data = 0.0, dim = observation$sbin^2)
   lum_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  filter = approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){ # computing the spectra at each occupied spatial pixel position
 
     num_part = part_in_spaxel$N[i] # number of particles in spaxel
-    part_map[part_in_spaxel$spaxel_ID[i]] = num_part
+    part_map[part_in_spaxel$pixel_pos[i]] = num_part
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
-    intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
+    intrinsic_spectra = simspin_data$spectra[,galaxy_sample$sed_id, with=FALSE] *
       (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
     # pulling wavelengths and using doppler formula to compute the shift in
@@ -1026,15 +990,13 @@
 
     # transform luminosity into flux detected at telescope
     #    flux in units erg/s/cm^2/Ang
-    spectra[part_in_spaxel$spaxel_ID[i],] = (luminosity*.lsol_to_erg) /
+    spectra[part_in_spaxel$pixel_pos[i],] = (luminosity*.lsol_to_erg) /
                                                 (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
-    lum_map[part_in_spaxel$spaxel_ID[i]] = .bandpass(wave = observation$wave_seq,
-                                                     flux = spectra[part_in_spaxel$spaxel_ID[i],],
-                                                     filter = observation$filter,
-                                                     flux_in = "wave",
-                                                     flux_out = "wave")
-    vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-    dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+    lum_map[part_in_spaxel$pixel_pos[i]] = .bandpass(wave = observation$wave_seq,
+                                                     flux = spectra[part_in_spaxel$pixel_pos[i],],
+                                                     filter = filter)
+    vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+    dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
 
     if (verbose){cat(i, "... ", sep = "")}
   }
@@ -1048,6 +1010,7 @@
   dis_los = array(data = 0.0, dim = observation$sbin^2)
   lum_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  filter = approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
@@ -1059,9 +1022,8 @@
                      part_map = num_part
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
-                     intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
-                                                nrow = num_part, byrow = T) *
-                                                (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+                     intrinsic_spectra = simspin_data$spectra[,galaxy_sample$sed_id, with=FALSE] *
+                       (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
                      # pulling wavelengths and using doppler formula to compute the shift in
                      #   wavelengths caused by LOS velocity
@@ -1087,9 +1049,7 @@
                      spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
                      lum_map = .bandpass(wave = observation$wave_seq,
                                          flux = spectra,
-                                         filter = observation$filter,
-                                         flux_in = "wave",
-                                         flux_out = "wave")
+                                         filter = filter)
                      vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
 
@@ -1098,11 +1058,11 @@
                      closeAllConnections()
                    }
 
-  spectra[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$wave_bin, byrow = T)
-  lum_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
-  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
-  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
-  part_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
+  spectra[part_in_spaxel$pixel_pos,] = matrix(unlist(output[[1]]), ncol=observation$wave_bin, byrow = T)
+  lum_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
+  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
 
   return(list(spectra, lum_map, vel_los, dis_los, part_map))
 }
@@ -1118,42 +1078,44 @@
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  filter = approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
     num_part = part_in_spaxel$N[i] # number of particles in spaxel
-    part_map[part_in_spaxel$spaxel_ID[i]] = num_part
+    part_map[part_in_spaxel$pixel_pos[i]] = num_part
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
     if (mass_flag){
 
-      galaxy_sample$luminosity = galaxy_sample$Mass # replace luminosity weighting with a mass weight
+      galaxy_sample[, luminosity := Mass, ]
 
     } else {
-      intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
-          (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+      intrinsic_spectra = simspin_data$spectra[,galaxy_sample$sed_id, with=FALSE] *
+        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
       # transform luminosity into flux detected at telescope
       #    flux in units erg/s/cm^2/Ang
-      spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+      for (j in 1:num_part){
+        set(intrinsic_spectra, i=NULL, j = j,
+            value = ((intrinsic_spectra[[j]]*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)))
+        }
 
       # computing the r-band luminosity per particle from spectra
-      galaxy_sample$luminosity = apply(spectral_flux, 1, .bandpass,
-                                       wave = simspin_data$wave,
-                                       filter = observation$filter,
-                                       flux_in = "wave",
-                                       flux_out = "wave")
+      galaxy_sample[ , luminosity := .bandpass(wave = simspin_data$wave,
+                                               flux = intrinsic_spectra,
+                                               filter = filter), ]
       }
 
 
     # adding the "gaussians" of each particle to the velocity bins
-    vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
-    lum_map[part_in_spaxel$spaxel_ID[i]] = sum(galaxy_sample$luminosity)
-    vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
-    dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
-    age_map[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
-    met_map[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
+    vel_spec[part_in_spaxel$pixel_pos[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
+    lum_map[part_in_spaxel$pixel_pos[i]] = sum(galaxy_sample$luminosity)
+    vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
+    dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
+    age_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
+    met_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
 
     if (verbose){cat(i, "... ", sep = "")}
 
@@ -1171,6 +1133,7 @@
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  filter = approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
@@ -1185,22 +1148,22 @@
 
                      if (mass_flag){
 
-                        galaxy_sample$luminosity = galaxy_sample$Mass
+                       galaxy_sample[, luminosity := Mass, ]
 
                      } else {
-                        intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
-                                                   nrow = num_part, byrow = T) *
-                             (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+                       intrinsic_spectra = simspin_data$spectra[,galaxy_sample$sed_id, with=FALSE] *
+                         (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
                         # transform luminosity into flux detected at telescope
                         #    flux in units erg/s/cm^2/Ang
-                        spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
-
+                       for (j in 1:num_part){
+                         set(intrinsic_spectra, i=NULL, j = j,
+                             value = ((intrinsic_spectra[[j]]*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)))
+                       }
                         # computing the r-band luminosity per particle from spectra
-                        galaxy_sample$luminosity = apply(spectral_flux, 1, .bandpass,
-                                                         wave = simspin_data$wave,
-                                                         filter = observation$filter,
-                                                         flux_in = "wave",
-                                                         flux_out = "wave")
+                       # computing the r-band luminosity per particle from spectra
+                       galaxy_sample[ , luminosity := .bandpass(wave = simspin_data$wave,
+                                                                flux = intrinsic_spectra,
+                                                                filter = filter), ]
                       }
 
                      # adding the "gaussians" of each particle to the velocity bins
@@ -1216,13 +1179,13 @@
                      closeAllConnections()
                    }
 
-  vel_spec[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
-  lum_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
-  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
-  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
-  age_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
-  met_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
-  part_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[7]]))
+  vel_spec[part_in_spaxel$pixel_pos,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
+  lum_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
+  age_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
+  met_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[6]]))
+  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[7]]))
 
   return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 
@@ -1245,13 +1208,13 @@
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
     # adding the "gaussians" of each particle to the velocity bins
-    vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
-    mass_map[part_in_spaxel$spaxel_ID[i]]  = sum(galaxy_sample$Mass)
-    vel_los[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-    dis_los[part_in_spaxel$spaxel_ID[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-    SFR_map[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
-    Z_map[part_in_spaxel$spaxel_ID[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
-    OH_map[part_in_spaxel$spaxel_ID[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
+    vel_spec[part_in_spaxel$pixel_pos[i],] = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
+    mass_map[part_in_spaxel$pixel_pos[i]]  = sum(galaxy_sample$Mass)
+    vel_los[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+    dis_los[part_in_spaxel$pixel_pos[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+    SFR_map[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
+    Z_map[part_in_spaxel$pixel_pos[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
+    OH_map[part_in_spaxel$pixel_pos[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
     if (verbose){cat(i, "... ", sep = "")}
 
@@ -1293,13 +1256,13 @@
                      closeAllConnections()
                    }
 
-  vel_spec[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
-  mass_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
-  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
-  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
-  SFR_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
-  Z_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
-  OH_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[7]]))
+  vel_spec[part_in_spaxel$pixel_pos,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
+  mass_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
+  SFR_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
+  Z_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[6]]))
+  OH_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[7]]))
 
   return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
 
