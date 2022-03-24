@@ -5,11 +5,13 @@
 library(testthat)
 context("Testing build_datacube function.\n")
 
+ss_pd_gadget   = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
 ss_pd_hdf5  = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
 ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 ss_pd_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
 
-ss_gadget   = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
+ss_gadget_old = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
+ss_gadget   = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 ss_hdf5     = make_simspin_file(ss_pd_hdf5, write_to_file = FALSE)
 ss_eagle    = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
 ss_magneticum = make_simspin_file(ss_pd_magneticum, write_to_file = FALSE)
@@ -24,6 +26,10 @@ velocity_raw_images_size = 6
 velocity_observed_images_size = 3
 
 test_that("Gadget files can be built - spectral mode", {
+  expect_warning(build_datacube(simspin_file = ss_gadget_old,
+                                telescope = telescope(type="IFU", method = "spectral", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
   gadget_spectra = build_datacube(simspin_file = ss_gadget,
                                   telescope = telescope(type="IFU", method = "spectral", lsf_fwhm = 3.6, signal_to_noise = 3),
                                   observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
@@ -84,9 +90,9 @@ test_that("Magneticum files can be built in parallel - spectral mode", {
 # Testing that build_datacube works in velocity mode ----
 test_that("Gadget files can be built - velocity mode.", {
   gadget_velocity = build_datacube(simspin_file = ss_gadget,
-                               telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
-                               verbose = T)
+                                   telescope = telescope(type="IFU", method = "velocity", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                   observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                   verbose = T)
 
   expect_length(gadget_velocity, built_cube_size)
   expect_length(gadget_velocity$raw_images, velocity_raw_images_size)
@@ -258,9 +264,9 @@ test_that("Data cubes can be written to a single files", {
                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                write_fits = T), built_cube_size)
 
-  expect_true(file.exists(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm.FITS")))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS"))
 
-  spectral_fits = Rfits::Rfits_read(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm.FITS"))
+  spectral_fits = Rfits::Rfits_read("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS")
   expect_true(length(spectral_fits) == 6)
   expect_true(spectral_fits[[2]]$keyvalues$CTYPE3 == "WAVE")
   expect_true(all(dim(spectral_fits[[2]]$imDat) == c(spectral_fits[[2]]$keyvalues$NAXIS1, spectral_fits[[2]]$keyvalues$NAXIS2, spectral_fits[[2]]$keyvalues$NAXIS3)))
@@ -303,7 +309,7 @@ test_that("Data cubes can be written to a single files", {
 
 })
 
-unlink(c(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm.FITS"),
+unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS",
          paste0(temp_loc, "/ss_gadget.FITS"),
          paste0(temp_loc, "/ss_eagle.FITS"),
          paste0(temp_loc, "/ss_magenticum.FITS"),
@@ -315,13 +321,13 @@ test_that("Data cubes can be written to multiple files", {
                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                write_fits = T, split_save=T), built_cube_size)
 
-  expect_true(file.exists(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_spectral_cube.FITS")))
-  expect_true(file.exists(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_flux_image.FITS")))
-  expect_true(file.exists(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_velocity_image.FITS")))
-  expect_true(file.exists(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_dispersion_image.FITS")))
-  expect_true(file.exists(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_particle_image.FITS")))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_flux_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_velocity_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_dispersion_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_particle_image.FITS"))
 
-  spectral_fits = Rfits::Rfits_read(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_spectral_cube.FITS"))
+  spectral_fits = Rfits::Rfits_read("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS")
   expect_true(length(spectral_fits) == 2)
   expect_true(spectral_fits[[2]]$keyvalues$CTYPE3 == "WAVE")
   expect_true(all(dim(spectral_fits[[2]]$imDat) == c(spectral_fits[[2]]$keyvalues$NAXIS1, spectral_fits[[2]]$keyvalues$NAXIS2, spectral_fits[[2]]$keyvalues$NAXIS3)))
@@ -382,11 +388,11 @@ test_that("Data cubes can be written to multiple files", {
 
 })
 
-unlink(c(paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_spectral_cube.FITS"),
-         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_flux_image.FITS"),
-         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_velocity_image.FITS"),
-         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_dispersion_image.FITS"),
-         paste0(stringr::str_remove(ss_gadget,".Rdata"),"_inc45deg_seeing2fwhm_particle_image.FITS"),
+unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_flux_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_velocity_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_dispersion_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_particle_image.FITS",
 
          paste0(temp_loc, "/ss_gadget_velocity_cube.FITS"),
          paste0(temp_loc, "/ss_gadget_flux_image.FITS"),
@@ -433,7 +439,7 @@ test_that("Mask can be included in FITS files correctly", {
                      mask = mask, object_name = "ss_gadget",
                      telescope_name = "SimSpin",
                      instrument_name = "SAMI", observer_name = "K Harborne",
-                     input_simspin_file = ss_gadget)
+                     input_simspin_file = "ss_gadget.Rdata")
 
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget.FITS")))
   fits_w_mask = Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))
@@ -445,7 +451,7 @@ test_that("Mask can be included in FITS files correctly", {
                      mask = mask, object_name = "ss_gadget",
                      telescope_name = "SimSpin",
                      instrument_name = "SAMI", observer_name = "K Harborne",
-                     input_simspin_file = ss_gadget)
+                     input_simspin_file = "ss_gadget.Rdata")
 
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mask.FITS")))
 
@@ -485,7 +491,7 @@ test_that("velocity shift for wavelengths work correctly", {
 
 # Test that the spectra pulled for each particle are correct -------------------
 test_that("Repeated spectra are included in intrinsic spectra", {
-  simspin_data = readRDS(ss_gadget)
+  simspin_data = ss_gadget
   galaxy_data = simspin_data$star_part
 
   obs_data = obs_galaxy(part_data = galaxy_data, inc_rad = 0.7853982) # projecting the galaxy to given inclination

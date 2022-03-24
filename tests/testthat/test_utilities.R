@@ -77,16 +77,25 @@ test_that("Galaxy alignment is aligning the gas correctly", {
 
 })
 
-test_that("SED is returned as a list when 1 or multiple cores are used", {
+test_that("SED is returned as a list and data.table when 1 or multiple cores are used", {
   ages = sample(seq(3e7, 1.4e10, length.out = 100), 100)/1e9
   metallicity = sample(seq(1e-4, 4e-2, length.out = 100), 100)
+  temp = fst::read.fst(system.file("extdata","BC03lr.fst", package="SimSpin"))
+  temp_A = .BC03_A
+  temp_Z = .BC03_Z
 
-  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = ProSpect::BC03lr, cores = 1), "list")
-  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = ProSpect::BC03lr, cores = 2), "list")
+  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = 1), "list")
+  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = 2), "list")
+  expect_true(data.table::is.data.table(.spectra(Metallicity = metallicity, Age = ages, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = 1)))
+  expect_true(data.table::is.data.table(.spectra(Metallicity = metallicity, Age = ages, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = 2)))
 })
 
 test_that("SED is returned as a list when only one age and metallicity are given", {
-  expect_type(.spectra(Metallicity = 1e-4, Age = 5, Template = ProSpect::BC03lr, cores = 1), "list")
+  temp = fst::read.fst(system.file("extdata","BC03lr.fst", package="SimSpin"))
+  temp_A = .BC03_A
+  temp_Z = .BC03_Z
+  expect_type(.spectra(Metallicity = 1e-4, Age = 5, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = 1), "list")
+  expect_true(data.table::is.data.table(.spectra(Metallicity = 1e-4, Age = 5, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = 1)))
 })
 
 
