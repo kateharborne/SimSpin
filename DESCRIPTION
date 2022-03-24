@@ -15,7 +15,7 @@ Imports:
     data.table,
     doParallel,
     fields,
-    FITSio,
+    fst,
     hdf5r,
     magicaxis,
     methods,
