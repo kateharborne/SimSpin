@@ -177,9 +177,9 @@ Further templates will be incorporated over time. Keep an eye on the [GitHub rep
 ```{r, echo=FALSE, fig.dim=c(7,5), fig.align="center"}
 # Code not printed in vignette as the plotting script is just to illustrate the 
 #  shape of the galaxy model.
-BC03lr = fst::read.fst(system.file("data","BC03lr.fst", package="SimSpin"))
-BC03hr = fst::read.fst(system.file("data","BC03hr.fst", package="SimSpin"))
-EMILES = fst::read.fst(system.file("data","EMILES.fst", package="SimSpin"))
+BC03lr = fst::read.fst(system.file("extdata","BC03lr.fst", package="SimSpin"))
+BC03hr = fst::read.fst(system.file("extdata","BC03hr.fst", package="SimSpin"))
+EMILES = fst::read.fst(system.file("extdata","EMILES.fst", package="SimSpin"))
 
 par(options(scipen = 999), xpd=FALSE, ps=12, cex=1)
 magicaxis::magplot(BC03hr$Wave, BC03hr$`Z4e-04_Age2e+09`,

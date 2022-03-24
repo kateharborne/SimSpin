@@ -72,15 +72,15 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
-    temp = fst::read.fst(system.file("data","BC03lr.fst", package="SimSpin"))
+    temp = fst::read.fst(system.file("extdata","BC03lr.fst", package="SimSpin"))
     temp_Z = .BC03_Z
     temp_A = .BC03_A
   } else if (temp_name == "BC03HR"){
-    temp = fst::read.fst(system.file("data","BC03hr.fst", package="SimSpin"))
+    temp = fst::read.fst(system.file("extdata","BC03hr.fst", package="SimSpin"))
     temp_Z = .BC03_Z
     temp_A = .BC03_A
   } else if (temp_name == "EMILES"){
-    temp = fst::read.fst(system.file("data","EMILES.fst", package="SimSpin"))
+    temp = fst::read.fst(system.file("extdata","EMILES.fst", package="SimSpin"))
     temp_Z = .EMILES_Z
     temp_A = .EMILES_A
   } else {
