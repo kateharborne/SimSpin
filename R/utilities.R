@@ -63,6 +63,9 @@
               "1.05e+10", "1.1e+10", "1.15e+10", "1.2e+10", "1.25e+10",
               "1.3e+10", "1.35e+10", "1.4e+10")
 
+# globalVariable definitions
+globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity", "luminosity", "sed_id"))
+
 # Functions for computing weighted means
 .meanwt = function(x,wt){
   return(sum(x*wt, na.rm=T)/sum(wt,na.rm=T))
@@ -983,7 +986,7 @@
   dis_los = array(data = 0.0, dim = observation$sbin^2)
   lum_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
-  filter = approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){ # computing the spectra at each occupied spatial pixel position
 
@@ -1034,7 +1037,7 @@
   dis_los = array(data = 0.0, dim = observation$sbin^2)
   lum_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
-  filter = approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
@@ -1102,7 +1105,7 @@
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
-  filter = approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
@@ -1157,7 +1160,7 @@
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
-  filter = approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
