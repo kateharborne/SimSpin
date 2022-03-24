@@ -778,7 +778,7 @@
     return(c(1,1,1,0))
   }
   if(x > max(params)){
-    return(c(max(params),max(params),0,1))
+    return(c(length(params), length(params),0,1))
   }
   if(log){
     params = log(params)
@@ -824,7 +824,7 @@
       closeAllConnections()
       output = data.table::as.data.table(part_spec)
     } else {
-      output = data.table::data.table(mapply(f, Metallicity, Age))
+      output = data.table::as.data.table(mapply(f, Metallicity, Age))
     }
     return(output)
 
@@ -967,7 +967,7 @@
     part_map[part_in_spaxel$pixel_pos[i]] = num_part
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
-    intrinsic_spectra = simspin_data$spectra[,galaxy_sample$sed_id, with=FALSE] *
+    intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
       (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
     # pulling wavelengths and using doppler formula to compute the shift in
@@ -1022,7 +1022,7 @@
                      part_map = num_part
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
-                     intrinsic_spectra = simspin_data$spectra[,galaxy_sample$sed_id, with=FALSE] *
+                     intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
                        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
                      # pulling wavelengths and using doppler formula to compute the shift in
@@ -1092,7 +1092,7 @@
       galaxy_sample[, luminosity := Mass, ]
 
     } else {
-      intrinsic_spectra = simspin_data$spectra[,galaxy_sample$sed_id, with=FALSE] *
+      intrinsic_spectra = simspin_data$spectra[ , c(galaxy_sample$sed_id), with=FALSE] *
         (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
       # transform luminosity into flux detected at telescope
@@ -1151,7 +1151,7 @@
                        galaxy_sample[, luminosity := Mass, ]
 
                      } else {
-                       intrinsic_spectra = simspin_data$spectra[,galaxy_sample$sed_id, with=FALSE] *
+                       intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
                          (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
                         # transform luminosity into flux detected at telescope
                         #    flux in units erg/s/cm^2/Ang
