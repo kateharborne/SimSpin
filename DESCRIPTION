@@ -20,7 +20,6 @@ Imports:
     magicaxis,
     methods,
     pracma,
-    ProSpect (>= 1.0.7),
     ProFit,
     RColorBrewer,
     Rcpp,
@@ -36,7 +35,6 @@ Suggests:
     knitr,
     rmarkdown
 Remotes:
-    asgr/ProSpect@master,
     asgr/Rfits,
     ICRAR/ProFit@master
 VignetteBuilder: knitr
