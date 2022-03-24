@@ -511,12 +511,12 @@ test_that("Repeated spectra are included in intrinsic spectra", {
   particle_IDs = which(galaxy_data$pixel_pos == i)
   galaxy_sample = galaxy_data[particle_IDs,]
 
-  intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = length(particle_IDs), byrow = T)
+  intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE]
   spectra = intrinsic_spectra * (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-  expect_true(all(intrinsic_spectra[3,] == simspin_data$spectra[[2]]))
-  expect_equal((intrinsic_spectra[1,] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[1,])
-  expect_equal((intrinsic_spectra[2,] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[2,])
+  expect_true(all(intrinsic_spectra[,c(3),] == simspin_data$spectra[["V2"]]))
+  expect_equal((intrinsic_spectra[,c(1),] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[,c(1),], tolerance = 0.001)
+  expect_equal((intrinsic_spectra[,c(2),] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[,c(2),], tolerance = 0.001)
 })
 
 # Test that the output of blurred and un-blurred format is the same ------------
