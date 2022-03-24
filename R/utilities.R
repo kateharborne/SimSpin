@@ -801,10 +801,10 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 .interp_quick = function(x, params, log=FALSE){
   if(length(x) > 1){stop('x must be scalar!')}
   if(x < min(params)){
-    return(c(1,1,1,0))
+    return(c(ID_lo = 1, ID_hi = 1, wt_lo = 1, wt_hi = 0))
   }
   if(x > max(params)){
-    return(c(length(params), length(params),0,1))
+    return(c(ID_lo = length(params), ID_hi = length(params), wt_lo = 0, wt_hi = 1))
   }
   if(log){
     params = log(params)
