@@ -100,7 +100,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (!data.table::is.data.table(galaxy_data)){
     # if we are working with a simspin file from before v2.1.5
     warning(cat("WARNING! - You are using an old SimSpin file (< v2.1.5). \n"))
-    cat("For quicker processing, consider re-making your SimSpin files using the make_simspin_file() function.")
+    cat("For quicker processing, consider re-making your SimSpin files using the make_simspin_file() function. \n")
     # convert from a data.frame() to a data.table.
     galaxy_data = data.table::as.data.table(galaxy_data)
     simspin_data$spectra = data.table::as.data.table(simspin_data$spectra)
