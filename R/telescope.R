@@ -64,6 +64,19 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
   if (missing(wave_centre)){
     wave_centre = wave_range[1] + (diff(wave_range)/2)
   }
+  if (stringr::str_to_lower(filter) == "r"){
+    filter = SimSpin::filt_r_SDSS
+  } else if (stringr::str_to_lower(filter) == "u"){
+    filter = SimSpin::filt_u_SDSS
+  } else if (stringr::str_to_lower(filter) == "g"){
+    filter = SimSpin::filt_g_SDSS
+  } else if (stringr::str_to_lower(filter) == "i"){
+    filter = SimSpin::filt_i_SDSS
+  } else if (stringr::str_to_lower(filter) == "z"){
+    filter = SimSpin::filt_z_SDSS
+  } else {
+    stop("Error: Invalid filter. \n Please specify filter = 'r', 'u' or 'g', 'i' or 'z' and try again.")
+  }
 
   if(stringr::str_to_upper(type)  == "SAMI"){
     fov = 15
@@ -75,7 +88,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4800,
                   spatial_res     = spatial_res,
-                  filter          = readRDS("data/filt_g_SDSS.Rdata"),
+                  filter          = filter,
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.65,
                   signal_to_noise = signal_to_noise,
@@ -91,7 +104,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = spatial_res,
-                  filter          = readRDS("data/filt_g_SDSS.Rdata"),
+                  filter          = filter,
                   wave_res        = 1.04,
                   lsf_fwhm        = 2.8,
                   signal_to_noise = signal_to_noise,
@@ -107,7 +120,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(4700.15,9351.4),
                   wave_centre     = 6975,
                   spatial_res     = spatial_res,
-                  filter          = readRDS("data/filt_r_SDSS.Rdata"),
+                  filter          = filter,
                   wave_res        = 1.25,
                   lsf_fwhm        = 2.63,
                   signal_to_noise = signal_to_noise,
@@ -125,7 +138,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = spatial_res,
-                  filter          = readRDS("data/filt_g_SDSS.Rdata"),
+                  filter          = filter,
                   wave_res        = 1.6,
                   lsf_fwhm        = 1.3,
                   signal_to_noise = signal_to_noise,
@@ -143,7 +156,7 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
                   wave_range      = c(3700,5700),
                   wave_centre     = 4700,
                   spatial_res     = spatial_res,
-                  filter          = readRDS("data/filt_g_SDSS.Rdata"),
+                  filter          = filter,
                   wave_res        = 2,
                   lsf_fwhm        = 5.65,
                   signal_to_noise = signal_to_noise,
@@ -152,20 +165,6 @@ telescope = function(type="IFU", method="spectral", fov=15, aperture_shape="circ
   }
 
   if(stringr::str_to_upper(type)  == "IFU"){
-
-    if (stringr::str_to_lower(filter) == "r"){
-      filter = readRDS("data/filt_r_SDSS.Rdata")
-    } else if (stringr::str_to_lower(filter) == "u"){
-      filter = readRDS("data/filt_u_SDSS.Rdata")
-    } else if (stringr::str_to_lower(filter) == "g"){
-      filter = readRDS("data/filt_g_SDSS.Rdata")
-    } else if (stringr::str_to_lower(filter) == "i"){
-      filter = readRDS("data/filt_i_SDSS.Rdata")
-    } else if (stringr::str_to_lower(filter) == "z"){
-      filter = readRDS("data/filt_z_SDSS.Rdata")
-    } else {
-      stop("Error: Invalid filter. \n Please specify filter = 'r', 'u' or 'g', 'i' or 'z' and try again.")
-    }
 
     output = list(type            = "IFU",
                   fov             = fov,
