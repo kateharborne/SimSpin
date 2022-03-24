@@ -72,15 +72,15 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
-    temp = fst::read.fst("data/BC03lr.fst")
+    temp = fst::read.fst(system.file("data","BC03lr.fst", package="SimSpin"))
     temp_Z = .BC03_Z
     temp_A = .BC03_A
   } else if (temp_name == "BC03HR"){
-    temp = fst::read.fst("data/BC03hr.fst")
+    temp = fst::read.fst(system.file("data","BC03hr.fst", package="SimSpin"))
     temp_Z = .BC03_Z
     temp_A = .BC03_A
   } else if (temp_name == "EMILES"){
-    temp = fst::read.fst("data/EMILES.fst")
+    temp = fst::read.fst(system.file("data","EMILES.fst", package="SimSpin"))
     temp_Z = .EMILES_Z
     temp_A = .EMILES_A
   } else {
@@ -169,10 +169,10 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   if (!is.null(galaxy_data$ssp)){ # if there are stellar particles in the file at all
     # adding info to stellar_particle data
-    galaxy_data$star_part$sed_id       = AZ_bins$sed_id[match(az_pos,AZ_bins$id)]
-    galaxy_data$star_part$Metallicity  = galaxy_data$ssp$Metallicity
-    galaxy_data$star_part$Age          = galaxy_data$ssp$Age
-    galaxy_data$star_part$Initial_Mass = galaxy_data$ssp$Initial_Mass
+    galaxy_data$star_part[, sed_id := AZ_bins$sed_id[match(az_pos,AZ_bins$id)], ]
+    galaxy_data$star_part[, Metallicity := galaxy_data$ssp$Metallicity, ]
+    galaxy_data$star_part[, Age := galaxy_data$ssp$Age, ]
+    galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
 
     sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = cores) # returns a list
 
