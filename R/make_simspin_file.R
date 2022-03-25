@@ -72,17 +72,11 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
-    temp = fst::read.fst(system.file("extdata","BC03lr.fst", package="SimSpin"))
-    temp_Z = .BC03_Z
-    temp_A = .BC03_A
+    temp = SimSpin::BC03lr
   } else if (temp_name == "BC03HR"){
-    temp = fst::read.fst(system.file("extdata","BC03hr.fst", package="SimSpin"))
-    temp_Z = .BC03_Z
-    temp_A = .BC03_A
+    temp = SimSpin::BC03hr
   } else if (temp_name == "EMILES"){
-    temp = fst::read.fst(system.file("extdata","EMILES.fst", package="SimSpin"))
-    temp_Z = .EMILES_Z
-    temp_A = .EMILES_A
+    temp = SimSpin::EMILES
   } else {
     stop(cat("Error: template specified is unavailable.", "\n",
              "Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'"))
@@ -174,7 +168,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     galaxy_data$star_part[, Age := galaxy_data$ssp$Age, ]
     galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
 
-    sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, Temp_A = temp_A, Temp_Z = temp_Z, cores = cores) # returns a list
+    sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
 
   } else {sed = NULL}
 

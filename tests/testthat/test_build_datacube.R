@@ -474,7 +474,7 @@ test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", 
 # Testing that the velocity shift functions work as expected -------------------
 test_that("velocity shift for wavelengths work correctly", {
 
-  wavelength = ProSpect::EMILES$Wave
+  wavelength = SimSpin::EMILES$Wave
   velocity_los = c(27.04932, 40.94573)
   wave = matrix(data = rep(wavelength, length(velocity_los)), nrow = length(velocity_los), byrow=T)
   wave_shift = ((velocity_los / .speed_of_light) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
