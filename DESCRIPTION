@@ -15,7 +15,6 @@ Imports:
     data.table,
     doParallel,
     fields,
-    fst,
     hdf5r,
     magicaxis,
     methods,
