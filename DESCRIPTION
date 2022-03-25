@@ -37,3 +37,4 @@ Remotes:
     asgr/Rfits,
     ICRAR/ProFit@master
 VignetteBuilder: knitr
+LazyDataCompression: xz
