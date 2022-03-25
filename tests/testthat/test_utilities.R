@@ -94,4 +94,24 @@ test_that("SED is returned as a list when only one age and metallicity are given
 })
 
 
+test_that("Filters and templates can be loaded successfully", {
+  BC03lr = SimSpin::BC03lr
+  BC03hr = SimSpin::BC03hr
+  EMILES = SimSpin::EMILES
 
+  expect_type(BC03lr, "list")
+  expect_type(BC03hr, "list")
+  expect_type(EMILES, "list")
+
+  g_filter = SimSpin::filt_g_SDSS
+  r_filter = SimSpin::filt_r_SDSS
+  u_filter = SimSpin::filt_u_SDSS
+  i_filter = SimSpin::filt_i_SDSS
+  z_filter = SimSpin::filt_z_SDSS
+
+  expect_type(g_filter, "list")
+  expect_type(r_filter, "list")
+  expect_type(u_filter, "list")
+  expect_type(i_filter, "list")
+  expect_type(z_filter, "list")
+})
