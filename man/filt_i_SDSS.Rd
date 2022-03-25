@@ -7,8 +7,8 @@
 \format{
 A data table with 2 variables and 89 observations:
 \describe{
-\item{wave}{a numeric representing the wavelength at which the relative response is recorded, given in Angstroms}
-\item{response}{a numeric representing the relative response of the filter at that wavelength}
+\item{wave}{A numeric representing the wavelength at which the relative response is recorded, given in Angstroms}
+\item{response}{A numeric representing the relative response of the filter at that wavelength}
 }
 }
 \source{
