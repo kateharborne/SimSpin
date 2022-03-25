@@ -177,19 +177,19 @@ Further templates will be incorporated over time. Keep an eye on the [GitHub rep
 ```{r, echo=FALSE, fig.dim=c(7,5), fig.align="center"}
 # Code not printed in vignette as the plotting script is just to illustrate the 
 #  shape of the galaxy model.
-BC03lr = fst::read.fst(system.file("extdata","BC03lr.fst", package="SimSpin"))
-BC03hr = fst::read.fst(system.file("extdata","BC03hr.fst", package="SimSpin"))
-EMILES = fst::read.fst(system.file("extdata","EMILES.fst", package="SimSpin"))
+BC03lr = SimSpin::BC03lr
+BC03hr = SimSpin::BC03hr
+EMILES = SimSpin::EMILES
 
 par(options(scipen = 999), xpd=FALSE, ps=12, cex=1)
-magicaxis::magplot(BC03hr$Wave, BC03hr$`Z4e-04_Age2e+09`,
+magicaxis::magplot(EMILES$Wave, EMILES$Zspec[[6]][25,],
                    type="l", log="x",
                    xlab="Wavelength / Ang", ylab="Lsun / Ang (for 1 Msun/Yr SFR)", 
-                   lwd=1, col="red", xlim = c(3000, 8000), ylim = c(0,0.0002))
-lines(BC03lr$Wave, BC03lr$`Z4e-04_Age2e+09`, 
-      lwd=1, col="orange")
-lines(EMILES$Wave, EMILES$`Z0.004_Age2e+09`,
-      lwd = 1, col="blue")
+                   lwd=1, col="blue", xlim = c(3000, 8000), ylim = c(0,0.0002))
+lines(BC03hr$Wave, BC03hr$Zspec[[3]][145,],
+      lwd = 2, col="red")
+lines(BC03lr$Wave, BC03lr$Zspec[[3]][145,], 
+      lwd=2, col="orange")
 legend("topright", inset=c(0.01,0.01), c("BC03lr", "BC03hr", "EMILES"), col=c("orange", "red", "blue"), lty=c(1,1,1), lwd= c(3,3,3))
 
 ```
