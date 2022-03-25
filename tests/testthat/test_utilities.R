@@ -115,3 +115,7 @@ test_that("Filters and templates can be loaded successfully", {
   expect_type(i_filter, "list")
   expect_type(z_filter, "list")
 })
+
+test_that("interp_quick fails if given more than a scalar", {
+ expect_error(.interp_quick(x = c(1,2,3), params = c(seq(1,10), log = T)))
+})

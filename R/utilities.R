@@ -896,13 +896,9 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 # Taken from https://github.com/asgr/ProSpect/blob/d340c64555ba631257513ea4c99b0069cdebf477/R/utility.R#L123
 # to avoid ProSpect dependency
 
-.qdiff=function(vec, pad0=TRUE){
-  if(pad0){
+.qdiff=function(vec){
     return(c(0,vec[2:length(vec)]-vec[1:(length(vec)-1)]))
-  }else{
-    return(vec[2:length(vec)]-vec[1:(length(vec)-1)])
-  }
-}
+ }
 
 # Taken from https://github.com/asgr/ProSpect/blob/d340c64555ba631257513ea4c99b0069cdebf477/R/photom.R#L281
 # to avoid ProSpect dependency and trimmed for the purpose of these internal functions
