@@ -78,7 +78,6 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
                "If you wish to overwrite this file, please specify 'overwrite=T'. \n"))
     }
-
     header$OutputFile = output
   }
 
