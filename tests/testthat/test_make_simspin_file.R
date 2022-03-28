@@ -172,6 +172,7 @@ test_that("Test that sph_spawn functionality works on multiple cores - Magneticu
 })
 
 # Test that the added header information works as expected ---------------------
+
 test_that("Testing that the header data works as expected", {
   gadget = readRDS(paste(temp_loc, "gadget_test", sep=""))
   hdf5 = readRDS(paste(temp_loc, "hdf5_test", sep=""))
