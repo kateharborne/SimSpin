@@ -133,6 +133,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   if (observation$method == "spectral"){
 
+<<<<<<< HEAD
     # read original wavelengths of the template spectra
     wavelength = simspin_data$wave * (observation$z + 1) # and then applying a shift to those spectra due to redshift, z
 
@@ -155,6 +156,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     # applying a shift to that intrinsic template LSF due to redshift, z
 
     spec_res_sigma_sq = ((lsf_fwhm^2) - (lsf_fwhm_temp^2))
+=======
+    original_wave  = simspin_data$wave # read original wavelengths
+    wavelength = original_wave * (observation$z + 1) # and then applying a shift due to redshift, z
+    lsf_fwhm   = observation$lsf_fwhm
+    spec_res_sigma_sq = lsf_fwhm^2 - (min(diff(wavelength)))^2
+>>>>>>> 5f3ab4f (The LSF should not be broadened for redshift - confusion in reversing the pPXF outputs, when de-shifting the observed spectra back to rest-frame, we reduce the size of the LSF to accomodate the telescope effect.)
 
     if (spec_res_sigma_sq < 0){ # if the lsf is smaller than the wavelength resolution of the spectra
       warning(cat("WARNING! - Spectral resolution of provided template spectra is lower than the requested telescope spectral resolution.\n"))
