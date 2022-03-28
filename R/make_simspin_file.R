@@ -59,13 +59,14 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              write_to_file=TRUE, output, overwrite = F,
                              centre=NA, half_mass=NA, sph_spawn_n=1){
 
-  head = list("InputFile" = filename,
-              "OutputFile" = NULL,
-              "Type" = character(1),
-              "Template" = character(1),
-              "Template_LSF" = numeric(1),
-              "Template_waveres" = numeric(1),
-              "Origin" = paste0("SimSpin_v", packageVersion("SimSpin")))
+  header = list("InputFile" = filename,
+                "OutputFile" = NULL,
+                "Type" = character(1),
+                "Template" = character(1),
+                "Template_LSF" = numeric(1),
+                "Template_waveres" = numeric(1),
+                "Origin" = paste0("SimSpin_v", packageVersion("SimSpin")),
+                "Date" = Sys.time())
 
   temp_name = stringr::str_to_upper(template)
 
@@ -77,7 +78,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
                "If you wish to overwrite this file, please specify 'overwrite=T'. \n"))
     }
-    head$OutputFile = output
+    header$OutputFile = output
   }
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
@@ -107,6 +108,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   galaxy_data = tryCatch(expr = {.read_gadget(filename)},
                          error = function(e){.read_hdf5(filename, cores)})
+
+  header$Type = galaxy_data$head$Type
 
   Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
 
@@ -226,7 +229,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   }
 
-  simspin_file = list("star_part" = galaxy_data$star_part,
+  simspin_file = list("header"    = header,
+                      "star_part" = galaxy_data$star_part,
                       "gas_part"  = galaxy_data$gas_part,
                       "spectra"   = sed,
                       "wave"      = temp$Wave)
