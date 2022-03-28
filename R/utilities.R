@@ -13,6 +13,9 @@
 .g_constant_cgs = 6.67430e-11
 .g_in_kpcMsolkms2 = 4.3009e-6
 
+# globalVariable definitions
+globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity", "luminosity", "sed_id"))
+
 # Functions for computing weighted means
 .meanwt = function(x,wt){
   return(sum(x*wt, na.rm=T)/sum(wt,na.rm=T))
@@ -79,10 +82,12 @@
 
   extract = ((1:floor(sum(Npart)))*3)-2 # giving integers of x/vx within pos/vel
 
-  part = data.frame("ID" = id,          # the particle data table
-                    "x" = pos[extract], "y"=pos[extract+1], "z"=pos[extract+2],
-                    "vx" = vel[extract], "vy" = vel[extract+1], "vz"=vel[extract+2],
-                    "Mass" = masses*1e10)
+  part = data.table::data.table("ID" = id,          # the particle data table
+                                "x" = pos[extract], "y" = pos[extract+1],
+                                "z" = pos[extract+2],
+                                "vx" = vel[extract], "vy" = vel[extract+1],
+                                "vz"=vel[extract+2],
+                                "Mass" = masses*1e10)
 
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
               "Time" = Time, "Redshift" = Redshift, # relevent simulation data
@@ -152,18 +157,18 @@
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
-    gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = if(one_p_flag){gas$Coordinates[1]}else{gas$Coordinates[1,]},# Coordinates in kpc
-                          "y"  = if(one_p_flag){gas$Coordinates[2]}else{gas$Coordinates[2,]},
-                          "z"  = if(one_p_flag){gas$Coordinates[3]}else{gas$Coordinates[3,]},
-                          "vx"  = if(one_p_flag){gas$Velocity[1]}else{gas$Velocity[1,]}, # Velocities in km/s
-                          "vy"  = if(one_p_flag){gas$Velocity[2]}else{gas$Velocity[2,]},
-                          "vz"  = if(one_p_flag){gas$Velocity[3]}else{gas$Velocity[3,]},
-                          "Mass" = gas$Mass*1e10, # Mass in solar masses
-                          "SFR" = gas$StarFormationRate,
-                          "Density" = gas$Density, # Density in Msol/kpc^3
-                          "Temperature" = gas$Temperature,
-                          "SmoothingLength" = gas$SmoothingLength) # Smoothing length in kpc
+    gas_part = data.table::data.table("ID" = gas$ParticleIDs,
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]}else{gas$Coordinates[1,]},# Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]}else{gas$Coordinates[2,]},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]}else{gas$Coordinates[3,]},
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]}else{gas$Velocity[1,]}, # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]}else{gas$Velocity[2,]},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]}else{gas$Velocity[3,]},
+                                      "Mass" = gas$Mass*1e10, # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate,
+                                      "Density" = gas$Density, # Density in Msol/kpc^3
+                                      "Temperature" = gas$Temperature,
+                                      "SmoothingLength" = gas$SmoothingLength) # Smoothing length in kpc
 
     remove(gas); remove(PT0_attr)
 
@@ -183,14 +188,14 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    disk_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
-                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
-                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses*1e10) # Mass in solar masses
+    disk_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                                       "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                                       "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
+                                       "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT2_attr)
 
@@ -206,14 +211,14 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = c(disk_part$ID, stars$ParticleIDs),
-                           "x"  = c(disk_part$x, if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}), # Coordinates in kpc
-                           "y"  = c(disk_part$y, if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]}),
-                           "z"  = c(disk_part$z, if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]}),
-                           "vx"  = c(disk_part$vx, if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}), # Velocities in km/s
-                           "vy"  = c(disk_part$vy, if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]}),
-                           "vz"  = c(disk_part$vz, if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]}),
-                           "Mass" = c(disk_part$Mass, stars$Masses*1e10)) # Mass in solar masses
+    star_part = data.table::data.table("ID" = c(disk_part$ID, stars$ParticleIDs),
+                                       "x"  = c(disk_part$x, if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}), # Coordinates in kpc
+                                       "y"  = c(disk_part$y, if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]}),
+                                       "z"  = c(disk_part$z, if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]}),
+                                       "vx"  = c(disk_part$vx, if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}), # Velocities in km/s
+                                       "vy"  = c(disk_part$vy, if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]}),
+                                       "vz"  = c(disk_part$vz, if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]}),
+                                       "Mass" = c(disk_part$Mass, stars$Masses*1e10)) # Mass in solar masses
 
     remove(stars); remove(PT3_attr); remove(disk_part)
 
@@ -230,14 +235,14 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
-                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
-                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses*1e10) # Mass in solar masses
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                                       "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                                       "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
+                                       "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT2_attr)
   } else if ("PartType3" %in% groups){
@@ -254,14 +259,14 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
-                           "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
-                           "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
-                           "Mass" = stars$Masses*1e10) # Mass in solar masses
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]}else{stars$Coordinates[1,]}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]}else{stars$Coordinates[2,]},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]}else{stars$Coordinates[3,]},
+                                       "vx"  = if(one_p_flag){stars$Velocities[1]}else{stars$Velocities[1,]}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
+                                       "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
+                                       "Mass" = stars$Masses*1e10) # Mass in solar masses
 
     remove(stars); remove(PT3_attr);
 
@@ -299,22 +304,22 @@
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
-    gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
-                          "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
-                          "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
-                          "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
-                          "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
-                          "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
-                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
-                          "SFR" = gas$StarFormationRate,
-                          "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
-                          "Temperature" = gas$Temperature,
-                          "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
-                          "Metallicity" = gas$SmoothedMetallicity,
-                          "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
-                          "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
-                          "Oxygen" = gas$`SmoothedElementAbundance/Oxygen`)
+    gas_part = data.table::data.table("ID" = gas$ParticleIDs,
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
+                                      "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate,
+                                      "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
+                                      "Temperature" = gas$Temperature,
+                                      "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
+                                      "Metallicity" = gas$SmoothedMetallicity,
+                                      "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
+                                      "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
+                                      "Oxygen" = gas$`SmoothedElementAbundance/Oxygen`)
 
     remove(gas); remove(PT0_attr)
 
@@ -337,18 +342,18 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
-                           "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
-                           "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
-                           "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                                       "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                                       "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
+                                       "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
-    ssp = data.frame("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                     "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
-                     "Metallicity" = stars$SmoothedMetallicity)
+    ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Metallicity" = stars$SmoothedMetallicity)
 
     remove(stars); remove(PT4_attr)
 
@@ -382,22 +387,22 @@
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
-    gas_part = data.frame("ID" = gas$ParticleIDs,
-                          "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
-                          "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
-                          "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
-                          "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
-                          "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
-                          "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
-                          "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
-                          "SFR" = gas$StarFormationRate,
-                          "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
-                          "Temperature" = gas$Temperature,
-                          "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
-                          "Metallicity" = (colSums(gas$Metallicity[2:11,]))/(gas$Mass),
-                          "Carbon" = gas$Metallicity[2,] / gas$Mass,
-                          "Hydrogen" = (gas$Mass - colSums(gas$Metallicity)) / gas$Mass,
-                          "Oxygen" =  gas$Metallicity[4,] / gas$Mass)
+    gas_part = data.table::data.table("ID" = gas$ParticleIDs,
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
+                                      "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate,
+                                      "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
+                                      "Temperature" = gas$Temperature,
+                                      "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
+                                      "Metallicity" = (colSums(gas$Metallicity[2:11,]))/(gas$Mass),
+                                      "Carbon" = gas$Metallicity[2,] / gas$Mass,
+                                      "Hydrogen" = (gas$Mass - colSums(gas$Metallicity)) / gas$Mass,
+                                      "Oxygen" =  gas$Metallicity[4,] / gas$Mass)
 
     remove(gas); remove(PT0_attr)
 
@@ -420,18 +425,18 @@
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
-    star_part = data.frame("ID" = stars$ParticleIDs,
-                           "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
-                           "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
-                           "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
-                           "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
-                           "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
-                           "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
-                           "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                                       "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                                       "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
+                                       "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
-    ssp = data.frame("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                     "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
-                     "Metallicity" = (colSums(stars$Metallicity[2:11,]))/(stars$Mass))
+    ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Metallicity" = (colSums(stars$Metallicity[2:11,]))/(stars$Mass))
 
     remove(stars); remove(PT4_attr)
 
@@ -487,8 +492,8 @@
 
   } else if (!is.null(galaxy_data$star_part)){
     stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
-    galaxy_data$star_part = stellar_data$part_data
-    if (!is.null(galaxy_data$gas_part)){ # if gas is present, centering these particles based on stellar medians
+    galaxy_data$star_part = data.table::as.data.table(stellar_data$part_data)
+    if (!is.null(galaxy_data$gas_part)){ # if gas is also present, centering these particles based on stellar medians
       gas_data = galaxy_data$gas_part
       gas_data$x = gas_data$x - stellar_data$xcen
       gas_data$y = gas_data$y - stellar_data$ycen
@@ -742,11 +747,30 @@
   return(sph_kernel)
 }
 
+# interp_quick function from https://github.com/asgr/ProSpect/blob/master/R/utility.R
+.interp_quick = function(x, params, log=FALSE){
+  if(length(x) > 1){stop('x must be scalar!')}
+  if(x < min(params)){
+    return(c(ID_lo = 1, ID_hi = 1, wt_lo = 1, wt_hi = 0))
+  }
+  if(x > max(params)){
+    return(c(ID_lo = length(params), ID_hi = length(params), wt_lo = 0, wt_hi = 1))
+  }
+  if(log){
+    params = log(params)
+    x = log(x)
+  }
+  interp = approx(params, 1:length(params), xout=x)$y
+  IDlo = floor(interp)
+  IDhi = ceiling(interp)
+  return(c(ID_lo = IDlo, ID_hi = IDhi, wt_lo = 1-(interp-IDlo), wt_hi = interp-IDlo))
+}
+
 # Function to generate spectra (w/o mass weighting)
 .spectra = function(Metallicity, Age, Template, cores){
   f = function(metallicity, age) {
-    Z = as.numeric(ProSpect::interp_quick(metallicity, Template$Z, log = TRUE))
-    A = as.numeric(ProSpect::interp_quick(age * 1e9, Template$Age, log = TRUE))
+    Z = as.numeric(.interp_quick(metallicity, Template$Z, log = TRUE))
+    A = as.numeric(.interp_quick(age * 1e9, Template$Age, log = TRUE))
 
     weights = data.frame("hihi" = Z[4] * A[4],   # ID_lo = 1, ID_hi = 2, wt_lo = 3, wt_hi = 4
                          "hilo" = Z[4] * A[3],
@@ -754,7 +778,6 @@
                          "lolo" = Z[3] * A[3])
 
     part_spec = array(data = 0.0, dim = c(1, length(Template$Wave)))
-
     part_spec = ((Template$Zspec[[Z[2]]][A[2],] * weights$hihi) +
                  (Template$Zspec[[Z[2]]][A[1],] * weights$hilo) +
                  (Template$Zspec[[Z[1]]][A[2],] * weights$lohi) +
@@ -764,21 +787,21 @@
   }
 
   if (length(Age) == 1){
-    spectra = list(f(Metallicity, Age))
+    spectra = data.table::data.table(f(Metallicity, Age))
     return(spectra)
   } else {
 
     if (cores > 1) {
       doParallel::registerDoParallel(cores = cores)
       i = integer()
-      part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("ProSpect", "SimSpin", "foreach")) %dopar% {
+      part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("SimSpin", "foreach")) %dopar% {
         f(Metallicity[i], Age[i])
       }
       closeAllConnections()
-      output = part_spec
+      output = data.table::as.data.table(part_spec)
     } else {
-      part_spec = mapply(f, Metallicity, Age)
-      output = lapply(seq_len(ncol(part_spec)), function(i) part_spec[,i])
+      output = mapply(f, Metallicity, Age)
+      output = data.table::as.data.table(output)
     }
     return(output)
 
@@ -813,14 +836,12 @@
 }
 
 .interpolate_spectra = function(shifted_wave, spectra, wave_seq){ # function for interpolating the spectra onto a new grid
-  shifted_spectra = vector(mode = "list", length = dim(shifted_wave)[1])
-  for(j in 1:dim(shifted_wave)[1]){
-    shifted_spectra[[j]] = stats::approx(x = shifted_wave[j,], y = spectra[j,], xout = wave_seq, rule=1)[2]
-  }
-  output = matrix(unlist(shifted_spectra, use.names=FALSE), nrow = dim(shifted_wave)[1], byrow = TRUE)
-  spaxel_spectra = colSums(output)
 
-  return(spaxel_spectra)
+  shifted_spectra = data.table::as.data.table(matrix(data=0.0, nrow = length(wave_seq), ncol=dim(shifted_wave)[1]))
+  for(j in 1:dim(shifted_wave)[1]){
+    data.table::set(x = shifted_spectra, i = NULL, j = j, value = stats::approx(x = shifted_wave[j,], y = spectra[[j]], xout = wave_seq, rule=1)[[2]])
+  }
+  return(rowSums(shifted_spectra))
 }
 
 .sum_velocities = function(galaxy_sample, observation){
@@ -871,6 +892,38 @@
 }
 
 # Functions for computing spaxel properties
+
+# Taken from https://github.com/asgr/ProSpect/blob/d340c64555ba631257513ea4c99b0069cdebf477/R/utility.R#L123
+# to avoid ProSpect dependency
+
+.qdiff=function(vec){
+    return(c(0,vec[2:length(vec)]-vec[1:(length(vec)-1)]))
+ }
+
+# Taken from https://github.com/asgr/ProSpect/blob/d340c64555ba631257513ea4c99b0069cdebf477/R/photom.R#L281
+# to avoid ProSpect dependency and trimmed for the purpose of these internal functions
+
+.bandpass=function(wave, flux, filter){
+  # flux must be flux_nu, i.e. erg/s / cm^2 / Hz, not erg/s / cm^2 / Ang!
+
+  response = filter(wave)
+  response[is.na(response)] = 0
+
+  wave_diff=abs(.qdiff(wave))
+
+  if (is.null(dim(flux))){
+    output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
+    return(sum(output, na.rm=TRUE))
+  } else {
+    for (j in 1:dim(flux)[2]){
+    set(flux, j = j,
+        value = response * wave * flux[[j]] * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE))
+    }
+    return(as.numeric(colSums(flux, na.rm=TRUE)))
+  }
+
+}
+
 # spectral mode -
 .spectral_spaxels = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose){
 
@@ -879,53 +932,45 @@
   dis_los = array(data = 0.0, dim = observation$sbin^2)
   lum_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){ # computing the spectra at each occupied spatial pixel position
 
-    num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
-    part_map[part_in_spaxel$spaxel_ID[i]] = num_part
+    num_part = part_in_spaxel$N[i] # number of particles in spaxel
+    part_map[part_in_spaxel$pixel_pos[i]] = num_part
 
-    # if number is greater than the particle limit
-    #if (num_part >= observation$particle_limit){
-      galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
-      intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
-        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+    galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
+    intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
+      (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-      # pulling wavelengths and using doppler formula to compute the shift in
-      #   wavelengths caused by LOS velocity
-      wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
-      wave_shift = ((galaxy_sample$vy / .speed_of_light) * wave) + wave
+    # pulling wavelengths and using doppler formula to compute the shift in
+    #   wavelengths caused by LOS velocity
+    wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
+    wave_shift = ((galaxy_sample$vy / .speed_of_light) * wave) + wave
 
-      # interpolate each shifted wavelength to telescope grid of wavelengths
-      #   and sum to one spectra
-      luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra,
-                                        wave_seq = observation$wave_seq)
+    # interpolate each shifted wavelength to telescope grid of wavelengths
+    #   and sum to one spectra
+    luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra,
+                                      wave_seq = observation$wave_seq)
 
-      if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-        luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=observation$lsf_sigma)
-      }
+    if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
+      luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=observation$lsf_sigma)
+    }
 
-      if (!is.na(observation$signal_to_noise)){ # should we add noise?
-        luminosity = .add_noise(luminosity, observation$signal_to_noise)
-      }
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      luminosity = .add_noise(luminosity, observation$signal_to_noise)
+    }
 
-      # transform luminosity into flux detected at telescope
-      #    flux in units erg/s/cm^2/Ang
-      spectra[part_in_spaxel$spaxel_ID[i],] = (luminosity*.lsol_to_erg) /
-                                                  (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
-      lum_map[part_in_spaxel$spaxel_ID[i]] = ProSpect::bandpass(wave = observation$wave_seq,
-                                                                flux = spectra[part_in_spaxel$spaxel_ID[i],],
-                                                                filter = observation$filter, flux_in = "wave",
-                                                                flux_out = "wave")
-      vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-      dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+    # transform luminosity into flux detected at telescope
+    #    flux in units erg/s/cm^2/Ang
+    spectra[part_in_spaxel$pixel_pos[i],] = (luminosity*.lsol_to_erg) /
+                                                (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+    lum_map[part_in_spaxel$pixel_pos[i]] = .bandpass(wave = observation$wave_seq,
+                                                     flux = spectra[part_in_spaxel$pixel_pos[i],],
+                                                     filter = filter)
+    vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+    dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
 
-    #} else { # if insufficient particles in spaxel
-    #  spectra[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$wave_bin)
-    #  lum_map[part_in_spaxel$spaxel_ID[i]] = NA
-    #  vel_los[part_in_spaxel$spaxel_ID[i]] = NA
-    #  dis_los[part_in_spaxel$spaxel_ID[i]] = NA
-    #}
     if (verbose){cat(i, "... ", sep = "")}
   }
   return(list(spectra, lum_map, vel_los, dis_los, part_map))
@@ -938,6 +983,7 @@
   dis_los = array(data = 0.0, dim = observation$sbin^2)
   lum_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
@@ -945,59 +991,51 @@
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
                    .init=list(list(), list(), list(), list(), list())) %dopar% {
 
-                     num_part = length(part_in_spaxel$val[[i]])
+                     num_part = part_in_spaxel$N[i]
                      part_map = num_part
-                     # if the number of particles in the spaxel is greater than the particle limit
-                     #if (num_part >= observation$particle_limit){
-                       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
-                       intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
-                                                  nrow = num_part, byrow = T) *
-                                                  (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-                       # pulling wavelengths and using doppler formula to compute the shift in
-                       #   wavelengths caused by LOS velocity
-                       wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
-                       wave_shift = ((galaxy_sample$vy / .speed_of_light) * wave) + wave
+                     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
+                     intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
+                       (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-                       # interpolate each shifted wavelength to telescope grid of wavelengths
-                       #   and sum to one spectra
-                       luminosity = .interpolate_spectra(shifted_wave = wave_shift,
-                                                         spectra = intrinsic_spectra,
-                                                         wave_seq = observation$wave_seq)
+                     # pulling wavelengths and using doppler formula to compute the shift in
+                     #   wavelengths caused by LOS velocity
+                     wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
+                     wave_shift = ((galaxy_sample$vy / .speed_of_light) * wave) + wave
 
-                       if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-                         luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
-                                                       lsf_sigma=observation$lsf_sigma)
-                       }
-                       if (!is.na(observation$signal_to_noise)){ # should we add noise?
-                         luminosity = .add_noise(luminosity, observation$signal_to_noise)
-                       }
+                     # interpolate each shifted wavelength to telescope grid of wavelengths
+                     #   and sum to one spectra
+                     luminosity = .interpolate_spectra(shifted_wave = wave_shift,
+                                                       spectra = intrinsic_spectra,
+                                                       wave_seq = observation$wave_seq)
 
-                       # transform luminosity into flux detected at telescope
-                       #    flux in units erg/s/cm^2/Ang
-                       spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
-                       lum_map = ProSpect::bandpass(wave = observation$wave_seq,
-                                                    flux = spectra,
-                                                    filter = observation$filter,
-                                                    flux_in = "wave", flux_out = "wave")
-                       vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-                       dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-                     #} else { # if insufficient particles in spaxel
-                      # spectra = rep(NA, observation$wave_bin)
-                      # lum_map = NA
-                      # vel_los = NA
-                      # dis_los = NA
-                     #}
+                     if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
+                       luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
+                                                     lsf_sigma=observation$lsf_sigma)
+                     }
+                     if (!is.na(observation$signal_to_noise)){ # should we add noise?
+                       luminosity = .add_noise(luminosity, observation$signal_to_noise)
+                     }
+
+                     # transform luminosity into flux detected at telescope
+                     #    flux in units erg/s/cm^2/Ang
+                     spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+                     lum_map = .bandpass(wave = observation$wave_seq,
+                                         flux = spectra,
+                                         filter = filter)
+                     vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+                     dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+
                      result = list(spectra, lum_map, vel_los, dis_los, part_map)
                      return(result)
                      closeAllConnections()
                    }
 
-  spectra[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$wave_bin, byrow = T)
-  lum_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
-  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
-  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
-  part_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
+  spectra[part_in_spaxel$pixel_pos,] = matrix(unlist(output[[1]]), ncol=observation$wave_bin, byrow = T)
+  lum_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
+  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
 
   return(list(spectra, lum_map, vel_los, dis_los, part_map))
 }
@@ -1013,52 +1051,45 @@
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
-    num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
-    part_map[part_in_spaxel$spaxel_ID[i]] = num_part
+    num_part = part_in_spaxel$N[i] # number of particles in spaxel
+    part_map[part_in_spaxel$pixel_pos[i]] = num_part
 
-    # if number is greater than the particle limit
-    #if (num_part >= observation$particle_limit){
-      galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+    galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
-      if (mass_flag){
+    if (mass_flag){
 
-        galaxy_sample$luminosity = galaxy_sample$Mass # replace luminosity weighting with a mass weight
+      galaxy_sample[, luminosity := Mass, ]
 
-      } else {
-        intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]), nrow = num_part, byrow = T) *
-          (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+    } else {
+      intrinsic_spectra = simspin_data$spectra[ , c(galaxy_sample$sed_id), with=FALSE] *
+        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-        # transform luminosity into flux detected at telescope
-        #    flux in units erg/s/cm^2/Ang
-        spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+      # transform luminosity into flux detected at telescope
+      #    flux in units erg/s/cm^2/Ang
+      for (j in 1:num_part){
+        set(intrinsic_spectra, i=NULL, j = j,
+            value = ((intrinsic_spectra[[j]]*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)))
+        }
 
-        # computing the r-band luminosity per particle from spectra
-        galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
-                                         wave = simspin_data$wave,
-                                         filter = observation$filter, flux_in = "wave", flux_out = "wave")
+      # computing the r-band luminosity per particle from spectra
+      galaxy_sample[ , luminosity := .bandpass(wave = simspin_data$wave,
+                                               flux = intrinsic_spectra,
+                                               filter = filter), ]
       }
 
 
-      # adding the "gaussians" of each particle to the velocity bins
-      vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
-      lum_map[part_in_spaxel$spaxel_ID[i]] = sum(galaxy_sample$luminosity)
-      vel_los[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
-      dis_los[part_in_spaxel$spaxel_ID[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
-      age_map[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
-      met_map[part_in_spaxel$spaxel_ID[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
+    # adding the "gaussians" of each particle to the velocity bins
+    vel_spec[part_in_spaxel$pixel_pos[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
+    lum_map[part_in_spaxel$pixel_pos[i]] = sum(galaxy_sample$luminosity)
+    vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
+    dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
+    age_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
+    met_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
 
-    #} else { # if insufficient particles in spaxel
-    #  vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
-    #  lum_map[part_in_spaxel$spaxel_ID[i]] = NA
-    #  vel_los[part_in_spaxel$spaxel_ID[i]] = NA
-    #  dis_los[part_in_spaxel$spaxel_ID[i]] = NA
-    #  age_map[part_in_spaxel$spaxel_ID[i]] = NA
-    #  met_map[part_in_spaxel$spaxel_ID[i]] = NA
-
-    #}
     if (verbose){cat(i, "... ", sep = "")}
 
   }
@@ -1075,6 +1106,7 @@
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
@@ -1082,58 +1114,51 @@
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
                    .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
-                     num_part = length(part_in_spaxel$val[[i]])
+                     num_part = part_in_spaxel$N[i]
                      part_map = num_part
-                     # if the number of particles in the spaxel is greater than the particle limit
-                     #if (num_part >= observation$particle_limit){
-                       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
 
-                       if (mass_flag){
+                     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
-                         galaxy_sample$luminosity = galaxy_sample$Mass
+                     if (mass_flag){
 
-                       } else {
-                         intrinsic_spectra = matrix(unlist(simspin_data$spectra[galaxy_sample$sed_id]),
-                                                  nrow = num_part, byrow = T) *
+                       galaxy_sample[, luminosity := Mass, ]
+
+                     } else {
+                       intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
                          (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
-                         # transform luminosity into flux detected at telescope
-                         #    flux in units erg/s/cm^2/Ang
-                         spectral_flux = (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+                        # transform luminosity into flux detected at telescope
+                        #    flux in units erg/s/cm^2/Ang
+                       for (j in 1:num_part){
+                         set(intrinsic_spectra, i=NULL, j = j,
+                             value = ((intrinsic_spectra[[j]]*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)))
+                       }
+                        # computing the r-band luminosity per particle from spectra
+                       # computing the r-band luminosity per particle from spectra
+                       galaxy_sample[ , luminosity := .bandpass(wave = simspin_data$wave,
+                                                                flux = intrinsic_spectra,
+                                                                filter = filter), ]
+                      }
 
-                         # computing the r-band luminosity per particle from spectra
-                         galaxy_sample$luminosity = apply(spectral_flux, 1, ProSpect::bandpass,
-                                                          wave = simspin_data$wave,
-                                                          filter = observation$filter, flux_in = "wave", flux_out = "wave")
-                         }
+                     # adding the "gaussians" of each particle to the velocity bins
+                     vel_spec = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
+                     lum_map = sum(galaxy_sample$luminosity)
+                     vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
+                     dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
+                     age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
+                     met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
 
-                       # adding the "gaussians" of each particle to the velocity bins
-                       vel_spec = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
-                       lum_map = sum(galaxy_sample$luminosity)
-                       vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
-                       dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
-                       age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
-                       met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
-
-                    # } else { # if insufficient particles in spaxel
-                      # vel_spec = rep(NA, observation$vbin)
-                      # lum_map = NA
-                      # vel_los = NA
-                      # dis_los = NA
-                      # age_map = NA
-                      # met_map = NA
-                     #}
                      result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map)
                      return(result)
                      closeAllConnections()
                    }
 
-  vel_spec[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
-  lum_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
-  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
-  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
-  age_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
-  met_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
-  part_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[7]]))
+  vel_spec[part_in_spaxel$pixel_pos,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
+  lum_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
+  age_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
+  met_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[6]]))
+  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[7]]))
 
   return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 
@@ -1152,30 +1177,18 @@
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
-    num_part = length(part_in_spaxel$val[[i]]) # number of particles in spaxel
+    num_part = part_in_spaxel$N[i] # number of particles in spaxel
+    galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
-    # if number is greater than the particle limit
-    #if (num_part >= observation$particle_limit){
-      galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+    # adding the "gaussians" of each particle to the velocity bins
+    vel_spec[part_in_spaxel$pixel_pos[i],] = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
+    mass_map[part_in_spaxel$pixel_pos[i]]  = sum(galaxy_sample$Mass)
+    vel_los[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+    dis_los[part_in_spaxel$pixel_pos[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+    SFR_map[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
+    Z_map[part_in_spaxel$pixel_pos[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
+    OH_map[part_in_spaxel$pixel_pos[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
-      # adding the "gaussians" of each particle to the velocity bins
-      vel_spec[part_in_spaxel$spaxel_ID[i],] = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
-      mass_map[part_in_spaxel$spaxel_ID[i]]  = sum(galaxy_sample$Mass)
-      vel_los[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-      dis_los[part_in_spaxel$spaxel_ID[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-      SFR_map[part_in_spaxel$spaxel_ID[i]]   = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
-      Z_map[part_in_spaxel$spaxel_ID[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
-      OH_map[part_in_spaxel$spaxel_ID[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
-
-    #} else { # if insufficient particles in spaxel
-    #  vel_spec[part_in_spaxel$spaxel_ID[i],] = rep(NA, observation$vbin)
-    #  mass_map[part_in_spaxel$spaxel_ID[i]]  = NA
-    #  vel_los[part_in_spaxel$spaxel_ID[i]]   = NA
-    #  dis_los[part_in_spaxel$spaxel_ID[i]]   = NA
-    #  SFR_map[part_in_spaxel$spaxel_ID[i]]   = NA
-    #  Z_map[part_in_spaxel$spaxel_ID[i]]     = NA
-    #  OH_map[part_in_spaxel$spaxel_ID[i]]    = NA
-    #}
     if (verbose){cat(i, "... ", sep = "")}
 
   }
@@ -1199,42 +1212,30 @@
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
                    .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
-                     num_part = length(part_in_spaxel$val[[i]])
-                     # if the number of particles in the spaxel is greater than the particle limit
-                    # if (num_part >= observation$particle_limit){
-                       galaxy_sample = galaxy_data[part_in_spaxel$val[[i]],]
+                     num_part = part_in_spaxel$N[i]
+                     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
-                       # adding the "gaussians" of each particle to the velocity bins
-                       vel_spec = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
-                       mass_map = sum(galaxy_sample$Mass)
-                       vel_los  = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-                       dis_los  = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-                       SFR_map  = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
-                       Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
-                       OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
+                     # adding the "gaussians" of each particle to the velocity bins
+                     vel_spec = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
+                     mass_map = sum(galaxy_sample$Mass)
+                     vel_los  = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+                     dis_los  = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+                     SFR_map  = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
+                     Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
+                     OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
-
-                     #} else { # if insufficient particles in spaxel
-                    #   vel_spec = rep(NA, observation$vbin)
-                    #   mass_map = NA
-                    #   vel_los  = NA
-                    #   dis_los  = NA
-                    #   SFR_map  = NA
-                    #   Z_map    = NA
-                    #   OH_map   = NA
-                    # }
                      result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map)
                      return(result)
                      closeAllConnections()
                    }
 
-  vel_spec[part_in_spaxel$spaxel_ID,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
-  mass_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[2]]))
-  vel_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[3]]))
-  dis_los[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[4]]))
-  SFR_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[5]]))
-  Z_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[6]]))
-  OH_map[part_in_spaxel$spaxel_ID] = matrix(unlist(output[[7]]))
+  vel_spec[part_in_spaxel$pixel_pos,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
+  mass_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[2]]))
+  vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
+  dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
+  SFR_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
+  Z_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[6]]))
+  OH_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[7]]))
 
   return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
 

@@ -72,11 +72,11 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
-    temp = ProSpect::BC03lr
+    temp = SimSpin::BC03lr
   } else if (temp_name == "BC03HR"){
-    temp = ProSpect::BC03hr
+    temp = SimSpin::BC03hr
   } else if (temp_name == "EMILES"){
-    temp = ProSpect::EMILES
+    temp = SimSpin::EMILES
   } else {
     stop(cat("Error: template specified is unavailable.", "\n",
              "Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'"))
@@ -163,10 +163,10 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   if (!is.null(galaxy_data$ssp)){ # if there are stellar particles in the file at all
     # adding info to stellar_particle data
-    galaxy_data$star_part$sed_id       = AZ_bins$sed_id[match(az_pos,AZ_bins$id)]
-    galaxy_data$star_part$Metallicity  = galaxy_data$ssp$Metallicity
-    galaxy_data$star_part$Age          = galaxy_data$ssp$Age
-    galaxy_data$star_part$Initial_Mass = galaxy_data$ssp$Initial_Mass
+    galaxy_data$star_part[, sed_id := AZ_bins$sed_id[match(az_pos,AZ_bins$id)], ]
+    galaxy_data$star_part[, Metallicity := galaxy_data$ssp$Metallicity, ]
+    galaxy_data$star_part[, Age := galaxy_data$ssp$Age, ]
+    galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
 
     sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
 

@@ -226,6 +226,8 @@ test_that("Check that when input xy_deg or xy_kpc to Pointing, other answers are
 
   expect_equal(xy_deg(set_kpc), xy_deg(set_deg), tolerance = deg_tol)
   expect_equal(xy_kpc(set_kpc), xy_kpc(set_deg), tolerance = kpc_tol)
+  expect_output(show(distance))
+  expect_output(show(set_deg))
 
 })
 

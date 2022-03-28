@@ -77,17 +77,45 @@ test_that("Galaxy alignment is aligning the gas correctly", {
 
 })
 
-test_that("SED is returned as a list when 1 or multiple cores are used", {
+test_that("SED is returned as a list and data.table when 1 or multiple cores are used", {
   ages = sample(seq(3e7, 1.4e10, length.out = 100), 100)/1e9
   metallicity = sample(seq(1e-4, 4e-2, length.out = 100), 100)
-
-  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = ProSpect::BC03lr, cores = 1), "list")
-  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = ProSpect::BC03lr, cores = 2), "list")
+  temp = SimSpin::BC03lr
+  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = 1), "list")
+  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = 2), "list")
+  expect_true(data.table::is.data.table(.spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = 1)))
+  expect_true(data.table::is.data.table(.spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = 2)))
 })
 
 test_that("SED is returned as a list when only one age and metallicity are given", {
-  expect_type(.spectra(Metallicity = 1e-4, Age = 5, Template = ProSpect::BC03lr, cores = 1), "list")
+  temp = SimSpin::BC03lr
+  expect_type(.spectra(Metallicity = 1e-4, Age = 5, Template = temp, cores = 1), "list")
+  expect_true(data.table::is.data.table(.spectra(Metallicity = 1e-4, Age = 5, Template = temp, cores = 1)))
 })
 
 
+test_that("Filters and templates can be loaded successfully", {
+  BC03lr = SimSpin::BC03lr
+  BC03hr = SimSpin::BC03hr
+  EMILES = SimSpin::EMILES
 
+  expect_type(BC03lr, "list")
+  expect_type(BC03hr, "list")
+  expect_type(EMILES, "list")
+
+  g_filter = SimSpin::filt_g_SDSS
+  r_filter = SimSpin::filt_r_SDSS
+  u_filter = SimSpin::filt_u_SDSS
+  i_filter = SimSpin::filt_i_SDSS
+  z_filter = SimSpin::filt_z_SDSS
+
+  expect_type(g_filter, "list")
+  expect_type(r_filter, "list")
+  expect_type(u_filter, "list")
+  expect_type(i_filter, "list")
+  expect_type(z_filter, "list")
+})
+
+test_that("interp_quick fails if given more than a scalar", {
+ expect_error(.interp_quick(x = c(1,2,3), params = c(seq(1,10), log = T)))
+})

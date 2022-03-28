@@ -1,6 +1,6 @@
-# SimSpin v2.1.4 News
+# SimSpin v2.1.5 News
 ### Author: Kate Harborne
-### Last edit: 03/03/22
+### Last edit: 24/03/22
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021. 
 
@@ -36,4 +36,5 @@ Below is a table containing a summary of all changes made to SimSpin, since the 
 |          	| (2) Modifying the EXTNAME for the HDU associated with the "raw" particle data (now prefixed with `"RAW_"`) and the "observed" collapsed velocity data cubes (now prefixed with `"OBS_").`                                                                                                                                              	|         	|                                          	|
 |          	| (3) Update to the depends version number of R. Now requires R >= 4.0. This is to enable the generation of a container for the web application of SimSpin.                                                                                                                                                                              	|         	|                                          	|
 | 03/03/22 	| *Minor bugfix*. Specifying branch of ProSpect in the remotes installation.                                                                                                                                                                                                                                                             	| 2.1.3   	| a8b45bafa139304ee5d66d559b9b1cb0f510e365 	|
-| 14/03/22 	| *Minor bugfix*. Specifying all initialised arrays with the correct type (rather than initiallised `NA`s) to imporve code memory handling and speed.                                                                                                                                                                                    	| 2.1.4   	|  6a4c46fe9da4d2bafbecd1251ae7b97664cba970 |
+| 14/03/22 	| *Minor bugfix*. Specifying all initialised arrays with the correct type (rather than initiallised `NA`s) to imporve code memory handling and speed.                                                                                                                                                                                    	| 2.1.4   	| 6a4c46fe9da4d2bafbecd1251ae7b97664cba970 	|
+| 24/03/22 	| *Minor bugfix*. Modifying how particle and spectral data are treated in the back-end of the code to reduce memory load. Also, removed ProSpect depenedency and [fixed bug in interp_quick()](https://github.com/asgr/ProSpect/issues/7) where interpolation above the expected range was returning a value rather than an index.         	| 2.1.5   	| ba8e95f704fe4d0c0faf38fc198091c28f07cdd8 	|
