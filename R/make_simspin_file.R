@@ -83,19 +83,19 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
     temp = SimSpin::BC03lr
-    head$Template = "BC03lr"
-    head$Template_LSF = 3 # as according to Bruzual & Charlot (2003) MNRAS 344, pg 1000-1028
-    head$Template_waveres = min(diff(temp$Wave))
+    header$Template = "BC03lr"
+    header$Template_LSF = 3 # as according to Bruzual & Charlot (2003) MNRAS 344, pg 1000-1028
+    header$Template_waveres = min(diff(temp$Wave))
   } else if (temp_name == "BC03HR"){
     temp = SimSpin::BC03hr
-    head$Template = "BC03hr"
-    head$Template_LSF = 3 # as according to Bruzual & Charlot (2003) MNRAS 344, pg 1000-1028
-    head$Template_waveres = min(diff(temp$Wave))
+    header$Template = "BC03hr"
+    header$Template_LSF = 3 # as according to Bruzual & Charlot (2003) MNRAS 344, pg 1000-1028
+    header$Template_waveres = min(diff(temp$Wave))
   } else if (temp_name == "EMILES"){
     temp = SimSpin::EMILES
-    head$Template = "EMILES"
-    head$Template_LSF = 2.51 # as according to Vazdekis et al (2016) MNRAS 463, pg 3409-3436
-    head$Template_waveres = min(diff(temp$Wave))
+    header$Template = "EMILES"
+    header$Template_LSF = 2.51 # as according to Vazdekis et al (2016) MNRAS 463, pg 3409-3436
+    header$Template_waveres = min(diff(temp$Wave))
   } else {
     stop(cat("Error: template specified is unavailable.", "\n",
              "Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'"))
