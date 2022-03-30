@@ -338,3 +338,88 @@ figure.highlight {
     border-top-right-radius: 0;
   }
 }
+
+//pre.highlight > button {
+//  color: $link-color;
+//  background-color: $code-background-color;
+//  position: relative;
+//  right: 0.16em;
+//  top: 0.16em;
+//  border-radius: $border-radius;
+//  border: $border $border-color;
+//  opacity: 0;
+//}
+
+//pre.highlight:hover > button {
+//  color: $link-color;
+//  background-color: $code-background-color;
+//  position: relative;
+//  right: 0.16em;
+//  top: 0.16em;
+//  border-radius: $border-radius;
+//  border: $border $border-color;
+//  opacity: 1;
+//}
+
+//pre.highlight > button:focus {
+//  color: $link-color;
+//  background-color: $code-background-color;
+//  position: relative;
+//  right: 0.16em;
+//  top: 0.16em;
+//  border-radius: $border-radius;
+//  border: $border $border-color;
+//  opacity: 1;
+//}
+
+pre.highlight {
+  padding: $sp-3;
+  position: relative;
+
+  // override skeleton styles
+  > code {
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+
+  &.highlight {
+    border: $border $border-color;
+    //color: $link-color;
+    overflow: auto;
+    white-space: pre;
+    word-wrap: normal;
+
+    &,
+    code {
+      background-color: $code-background-color;
+    }
+  }
+
+  // copy code to clipboard
+  .copy {
+    color: $link-color;
+    border: $border $border-color;
+    border-radius: $border-radius;
+    @include fs-3;
+    font-weight: 500;
+    position: absolute;
+    right: 0.16em;
+    top: 0.16em;
+    opacity: 0;
+
+    &:active,
+    &:focus,
+    &:hover {
+      background: $border-color;
+      opacity: 1;
+    }
+  }
+
+  &:active .copy,
+  &:focus .copy,
+  &:hover .copy {
+    background: $border-color;
+    opacity: 1;
+  }
+}
