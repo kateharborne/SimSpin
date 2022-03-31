@@ -39,7 +39,7 @@ codeBlocks.forEach(function (codeBlock) {
     var code = codeBlock.querySelector('code').innerText.trim();
     window.navigator.clipboard.writeText(code);
 
-    copyButton.innerText = 'Copied';
+    copyButton.innerText = 'Copied!';
     var fourSeconds = 2000;
 
     setTimeout(function () {

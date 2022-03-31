@@ -3,7 +3,7 @@ layout: default
 title: telescope
 parent: Documentation
 nav_order: 2
-last_modified_date: "Wed, 16 February 2022 15:57:00 AWST"
+last_modified_date: "Wed, 30 March 2022 15:57:00 AWST"
 ---
 
 # Defining the properties of the telescope
@@ -11,28 +11,84 @@ last_modified_date: "Wed, 16 February 2022 15:57:00 AWST"
 In order to build a data cube, we need to describe the properties of the telescope used to observe the model. 
 {: .fs-5 .fw-300 .pb-2 }
 
-Using the `telecope` function, a single telescope object is generated with a set number of expected properties. These 
+Using the `telecope` function, a single telescope object is generated with a set number of expected properties. These properties are used with the `observing_strategy` to describe a specific observation. You can fully specify the particulars of your chosen telescope, or you can select from a number of inbuilt telescopes designed to mimic current IFS surveys. 
 {: .fw-300 }
 
-
 [See an example](#example){: .btn .btn-purple }
+[See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/telescope.R#L44){: .btn .btn-purple }
 
 ---
 
-The following code shows the default parameters used in the `make_simspin_file` function. Calling the function without specifying anything other than the required input `filename` will produce a SimSpin file saved at the same directory location as the input simulation file with the following defaults. 
+The following code shows the default parameters used in the `telescope` function. Calling the function without specifying any input will produce a telescope object with the following properties:
 
 ```R
-make_simspin_file(filename,                         # REQUIRED input file 
-                  disk_age = 5, disk_Z = 0.024,     # for N-body disk particles
-                  bulge_age = 10, bulge_Z = 0.001,  # for N-body bulge particles
-                  cores = 1, write_to_file = TRUE, 
-                  output, overwrite = F,
-                  template = "BC03lr",              # template choice for spectra
-                  centre = NA, half_mass = NA,      # alignment choice
-                  sph_spawn_n = 1)                  # gas smoothing choice
-
+telescope(type="IFU",                # specify a type or define your own using "IFU"
+          method="spectral",         # spectral or kinematic data cube output?
+          fov=15,                    # diameter of the field-of-view in arcsec          
+          aperture_shape="circular", 
+          wave_range=c(3700,5700),   # in angstrom
+          wave_centre,               # wave_centre is auto-generated if not supplied
+          wave_res=1.04,             # wavelength resolution in angstrom
+          spatial_res=0.5,           # spatial resolution in arcsec
+          filter="r",                # luminosities output in this band  
+          lsf_fwhm=2.65,             # spectral uncertainty due to instrument in angstrom
+          signal_to_noise = 10)      # target signal-to-noise ratio at any pixel
 ```
 
 ---
 
 ## Parameters
+
+| **type**              | A character string describing the type of telescope you wish to create. Default is `"IFU"`, in which case the telescope properties are described by the input parameters to this function. Other input types include: `"SAMI"`, `"MaNGA"`, `"CALIFA"` and `"MUSE"`. With these, the telescope properties are set to the default parameters specified by the respective instrument.    |
+| **method**            |  A character string that describes whether to generate a spectral data cube or a kinematic data cube. Options include `"spectral"` and `"velocity"` to produce these for the stellar component of the simulation. If wishing to analyse the kinematics of the gas, you can also specify `"gas"` or `"sf_gas"` (i.e. star forming gas) to produce a kinematic data cube of this component alone.   |
+| **fov**               | A numeric describing the diameter of the field-of-view of the telescope in arcsec.    |
+| **aperture_shape**    | A character string describing the shape of the field-of-view. Options include: `"circular"`, `"hexagonal"`, and `"square"`.   |
+| **wave_range**        | Two numeric parameters describing the beginning and end of the wavelength range visible to the telescope, given in angstrom. Format is expected `c(wave_start, wave_end)`, and errors will be issued if not in this format.   |
+| **wave_centre**       | A numeric parameter describing the centre of the wavelength range in angstrom. If no `wave_centre` is provided, SimSpin assumes that the central wavelength is at the centre of the wavelength range provided above.   |
+| **wave_res**          | A numeric that gives the resolution of the wavelength axis of the telescope in angstrom. For a given `wave_range`, this resolution defines the width of the bins along that range.    |
+| **spatial_res**       |  A numeric that gives the resolution of the spatial axis of the telescope in arcsec. For a given `fov`, this resolution defines the width of the pixels within the observation produced.  |
+| **filter**            | A character string that describes which band to use to calculate luminoisity at the telescope. Options include: `"r"`, `"g"`, `"u"`, `"i"`, and `"z"` and use the SDSS filter bandpass functions to compute the luminosity that would be detected in that band.   |
+| **lsf_fwhm**          | A numeric describing the full-width half-maximum of the Gaussian line-spread-function of the telescope in units of angstrom, i.e. the spectral uncertainty of the underlying spectrograph used in the observation.    |
+| **signal_to_noise**   | A numeric describing the target signal-to-noise ratio at any pixel.   |
+
+---
+
+## Example
+
+Start by building a telescope using the default parameters:
+```R
+scope = telescope()
+```
+We can inspect the object produced and see that the default parameters have been stored as a list.
+```R
+summary(scope)
+#                 Length Class      Mode     
+# type            1      -none-     character
+# fov             1      -none-     numeric  
+# method          1      -none-     character
+# aperture_shape  1      -none-     character
+# wave_range      2      -none-     numeric  
+# wave_centre     1      -none-     numeric  
+# wave_res        1      -none-     numeric  
+# spatial_res     1      -none-     numeric  
+# filter          2      data.table list     
+# lsf_fwhm        1      -none-     numeric  
+# signal_to_noise 1      -none-     numeric  
+# sbin            1      -none-     numeric  
+``` 
+To inspect individual properties of our telescope, use the named elements in one of two ways to achieve the same result:
+
+```R
+scope$type
+# [1] "IFU"
+
+scope[["type"]]
+# [1] "IFU"
+```
+
+An additional parameter `sbin` has been added to the list. This parameter describes the number of spatial pixels that fit across the diameter of the field-of-view. This is used in later functions. 
+
+```R
+scope$sbin
+# [1] 30
+``` 
