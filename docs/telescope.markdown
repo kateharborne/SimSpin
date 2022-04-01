@@ -37,7 +37,7 @@ telescope(type="IFU",                # specify a type or define your own using "
 
 ---
 
-## Parameters
+## Input Parameters
 
 | **type**              | A character string describing the type of telescope you wish to create. Default is `"IFU"`, in which case the telescope properties are described by the input parameters to this function. Other input types include: `"SAMI"`, `"MaNGA"`, `"CALIFA"` and `"MUSE"`. With these, the telescope properties are set to the default parameters specified by the respective instrument.    |
 | **method**            |  A character string that describes whether to generate a spectral data cube or a kinematic data cube. Options include `"spectral"` and `"velocity"` to produce these for the stellar component of the simulation. If wishing to analyse the kinematics of the gas, you can also specify `"gas"` or `"sf_gas"` (i.e. star forming gas) to produce a kinematic data cube of this component alone.   |
@@ -50,6 +50,40 @@ telescope(type="IFU",                # specify a type or define your own using "
 | **filter**            | A character string that describes which band to use to calculate luminoisity at the telescope. Options include: `"r"`, `"g"`, `"u"`, `"i"`, and `"z"` and use the SDSS filter bandpass functions to compute the luminosity that would be detected in that band.   |
 | **lsf_fwhm**          | A numeric describing the full-width half-maximum of the Gaussian line-spread-function of the telescope in units of angstrom, i.e. the spectral uncertainty of the underlying spectrograph used in the observation.    |
 | **signal_to_noise**   | A numeric describing the target signal-to-noise ratio at any pixel.   |
+
+---
+
+## Output Value
+The output of `telescope` is a *List* element that will be stored as a variable to the environment. 
+
+The list will contain the following 12 elements:
+
+1. `type` - *Character* element recording the requested telescope type. Must be one of `"IFU"`, `"SAMI"`, `"MaNGA"`, `"MUSE"` or `"Hector"`.
+
+1. `fov` - *Numeric* element describing the diameter of the field-of-view in arcseconds. 
+
+1. `method` - *Character* element recording the type of data cube observed by this telescope. Must be one of `"spectral"`, `"velocity"`, `"gas"` or `"sf_gas"`.
+
+1. `aperture_shape` - *Character* element recording the shape of the field-of-view. Must be one of `"circular"`, `"hexagonal"` or `"square"`.
+
+1. `wave_range` - *Numeric* element of length 2 describing the beginning and end of the wavelength axis in angstrom. 
+
+1. `wave_centre` - *Numeric* element describing the centre of the wavelength axis in angstrom. 
+
+1. `wave_res` - *Numeric* element describing the width of each bin on the wavelength axis in angstrom. 
+
+1. `spatial_res` - *Numeric* element describing the width of each spatial pixel in arcseconds.
+
+1. `filter` - A *data.table* element with two columns:
+
+    | `wave` | *Numeric* element describing the wavelengths at which the spectral reponse has been computed for a given spectral filter. |
+    | `response` | *Numeric* element describing the spectral response of that requested filter, given as a fraction. |
+
+1. `lsf_fwhm` - *Numeric* element describing the line-spread-function full-width-half-maximum of the spectrograph in the specified telescope. Given in units of angstrom. 
+
+1. `signal_to_noise` - *Numeric* element describing the maximum signal-to-noise ratio per pixel. 
+
+1. `sbin` - *Numeric* element describing the number of spatial pixels across the diameter of the aperture. 
 
 ---
 
@@ -85,10 +119,17 @@ scope$type
 scope[["type"]]
 # [1] "IFU"
 ```
+For pre-defined `type` classes, certain parameters cannot be modified:
 
-An additional parameter `sbin` has been added to the list. This parameter describes the number of spatial pixels that fit across the diameter of the field-of-view. This is used in later functions. 
+| *telescope parameter* | **SAMI** | **MaNGA** | **CALIFA** | **MUSE** | **Hector** |
+| --------------------- | -------- | --------- | ---------- | -------- | ---------- |
+| fov (") | 15 | *n* = 12, 17, 22, 27 or 32 | 74 | *n* < 60 | 30 |
+| aperture_shape | "circular" | "hexagonal" | "hexagonal" | "square" | "hexagonal" |
+| wave_range (&#8491;)[^1] | 3750 - 5750 | 3600 - 6350 | 3700 – 4750 | 4700.15 - 9351.4 | 3720 - 5910 |
+| wave_centre (&#8491;)[^1] | 4800 | 4700 |  | 6975 | 4815 |
+| wave_res (&#8491;) | 1.04 | 1.04 | 2.7 | 1.25 | 1.60 |
+| spatial_res ("/pixel) | 0.5 | 0.5 | 1 | 0.2 | 0.2 |
+| lsf_fwhm (&#8491;) | 2.65 | 2.85 | 2.7 | | 1.3 |
 
-```R
-scope$sbin
-# [1] 30
-``` 
+
+[^1]: Wave ranges and central wave lengths are quoted for the blue arm of each spectrograph as this is the wavelength range across which the kinematics are commonly measured. 

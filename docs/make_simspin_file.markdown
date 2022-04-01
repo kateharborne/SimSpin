@@ -37,7 +37,7 @@ make_simspin_file(filename,                         # REQUIRED input file
 
 ---
 
-## Parameters
+## Input Parameters
 
 | **filename**      	| The path to the snapshot file containing the galaxy of interest. Note that this file can be a Gadget binary file or an HDF5 file directly from a simulation. In the case that your simulation outputs data in an alternative format, either see [this example](examples/generating_hdf5) for more information about how to set up an HDF5 file for `SimSpin`, or [file an issue on GitHub](https://github.com/kateharborne/SimSpin/issues/new/choose) to see the inclusion of your format in the `SimSpin` code directly.                                                                                                                                                                                                                                                                                                                                               	|
 | **cores**         	| The number of cores across which to multi-thread the problem.                                                                                                                                                                                                                                                                                                                                                     	|
@@ -57,7 +57,7 @@ make_simspin_file(filename,                         # REQUIRED input file
 
 ## Output Value
 The output of `make_simspin_file` is a *List* element.
-If `write_to_file = T`, this list will be written to an .Rdata file at the location specified by `output`. 
+If `write_to_file = T`, this list will be written to an .Rdata file at the location specified by `output`. Otherwise, it will be written as a variable to the environment.
 
 The list will contain the following 5 elements:
 
@@ -72,7 +72,7 @@ The list will contain the following 5 elements:
     | `Origin`           | the version of SimSpin used to build the file. |
     | `Date`             | the date and time at which the SimSpin file was built. |
 
-1. `star_part` - *data.table* element containing properties of each stellar particle contained in the simulation. (`NULL` if no star particles are present in the simulation.)
+1. `star_part` - A *data.table* element containing properties of each stellar particle contained in the simulation. (`NULL` if no star particles are present in the simulation.)
 
     | `ID` | the unique stellar particle ID number. |
     | `x`, `y` and `z` | the stellar particle positions in each of the 3 dimensions in kpc. |
@@ -83,7 +83,7 @@ The list will contain the following 5 elements:
     | `Age` | the stellar age of each particle given in Gyr. For `nbody` models, these values are assigned by the function. For any hydrodynamical simulations, these values are pulled from the simulation file. |
     | `Initial_Mass` | the stellar mass of each star particle at the birth of the star (used for scaling spectra). For `nbody` models, these values are assigned by the function. We assume that the star has doubled in mass since its birth by default. For any hydrodynamical simulations, these values are pulled from the simulation file. |
 
-1. `gas_part` - *data.table* element containing properties of each gas particle contained within the simulation. (`NULL` if no gas particles are present in the simulation.)
+1. `gas_part` - A *data.table* element containing properties of each gas particle contained within the simulation. (`NULL` if no gas particles are present in the simulation.)
 
     | `ID` | the unique gas particle ID number. |
     | `x`, `y` and `z` | the gas particle positions in each of the 3 dimensions in kpc. |
@@ -98,9 +98,9 @@ The list will contain the following 5 elements:
     | `Hydrogen` | the fraction of hydrogen within the particle, given as a fraction of its total mass. |
     | `Oxygen` | the fraction of oxygen within the particle, given as a fraction of its total mass. |
 
-1. `spectra` - *data.table* element containing the spectral flux associated with each particle, linked to each particle by the `sed_id` within the `star_part` element. Each row corresponds to the spectrum associated with an individual spectral ID. 
+1. `spectra` - A *data.table* element containing the spectral flux associated with each particle, linked to each particle by the `sed_id` within the `star_part` element. Each row corresponds to the spectrum associated with an individual spectral ID. 
 
-1. `wave` - *numeric* element containing the wavelengths in angstrom for the spectra in the element above. 
+1. `wave` - *Numeric* element containing the wavelengths in angstrom for the spectra in the element above. 
 
 ---
 
