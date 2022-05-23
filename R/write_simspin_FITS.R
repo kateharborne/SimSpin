@@ -12,8 +12,8 @@
 #' FITS HDU or files written is dependent on the input simspin_datacube. Files
 #' and HDU will be named suitably to reflect their content automatically.
 #'
-#'@param output_file The path to the location where the FITS file should be
-#' written.
+#'@param output_file The path and file name to the location where the FITS file
+#' should be written.
 #'@param simspin_datacube The list output from \code{build_datacube()}.
 #'@param object_name A string that described the name of the observed object.
 #'@param telescope_name A string that describes the name of the telescope used.
