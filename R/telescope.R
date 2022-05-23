@@ -31,10 +31,12 @@
 #' line spread function.
 #'@param signal_to_noise Numeric describing the minimum signal-to-noise ratio per
 #' angstrom.
-#'@param ... Further arguments to be passed to telescope, providing backward
-#' compatibility for \code{method} specification. For v2.1.6 onwards,
-#' \code{method} should be specified in \link{build_datacube}. Support for this
-#' input will remain in all versions 2.X.X.
+#'@param method Providing backward compatibility for \code{method}
+#' specification. String to describe whether cubes output are "spectral", "gas",
+#' "sf gas" or "velocity" (as in SimSpin v1) along the z-axis. Default is
+#' "spectral". For v2.1.6  onwards, \code{method} should be specified in
+#' \link{build_datacube}. Support  for this input will remain in all
+#' versions 2.X.X.
 #'@return Returns an object of class "telescope" that describes the properties
 #' of the instrument doing the observation. Required to run
 #' \code{build_datacube()}.
@@ -44,22 +46,23 @@
 
 telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c(3700,5700),
                      wave_centre, wave_res=1.04, spatial_res=0.5, filter="r", lsf_fwhm=2.65,
-                     signal_to_noise = 10, ...){
+                     signal_to_noise = 10, method){
 
   if (!missing(method)){
-    warning(">>> WARNING! >>> \n
-             `method` is now specified within the build_datacube function directly,
-              rather than within the telescope() class. \n
-              Support for this input will remain in versions 2.X.X, but please consider
-              updating your code.")
-
-    method = stringr::str_to_lower(method)
 
     if (method != "spectral" &
         method != "velocity" &
         method != "gas" &
         method != "sf gas" ){
       stop("Error: Invalid method. \n Please specify method = 'spectral', 'velocity', 'gas' or 'sf gas' and try again.")
+    } else {
+      warning(">>> WARNING! >>> \n
+             `method` is now specified within the build_datacube function directly,
+              rather than within the telescope() class. \n
+              Support for this input will remain in versions 2.X.X, but please consider
+              updating your code.")
+
+      method = stringr::str_to_lower(method)
     }
   }
 
