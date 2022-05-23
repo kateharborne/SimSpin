@@ -344,7 +344,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
                               observation$psf_fwhm,"fwhm.FITS", sep="")
     }
-    if (length(grep(".fits", output_location)) == 0 | length(grep(".FITS", output_location)) == 0 ){
+    if (length(grep(".fits", output_location)) == 0 & length(grep(".FITS", output_location)) == 0 ){
       # if no filename has been specified, assume that the output location is just a path
       out_file_name = character(1)
       output_name = rev(stringr::str_split(simspin_file, "/")[[1]])[1]
