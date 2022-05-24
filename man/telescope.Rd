@@ -6,7 +6,6 @@
 \usage{
 telescope(
   type = "IFU",
-  method = "spectral",
   fov = 15,
   aperture_shape = "circular",
   wave_range = c(3700, 5700),
@@ -15,7 +14,8 @@ telescope(
   spatial_res = 0.5,
   filter = "r",
   lsf_fwhm = 2.65,
-  signal_to_noise = 10
+  signal_to_noise = 10,
+  method
 )
 }
 \arguments{
@@ -23,10 +23,6 @@ telescope(
 Current pre-loaded types include "SAMI", "MaNGA", "CALIFA", "MUSE" and
 "Hector". Input is NOT case sensitive. If you wish to specify different
 observing properties below, set \code{type = "IFU"} to define your own.}
-
-\item{method}{String to describe whether cubes output are "spectral", "gas",
-"sf gas" or "velocity" (as in SimSpin v1) along the z-axis. Default is
-"spectral".}
 
 \item{fov}{Numeric describing the field of view of the instrument in arcsec.}
 
@@ -52,6 +48,13 @@ line spread function.}
 
 \item{signal_to_noise}{Numeric describing the minimum signal-to-noise ratio per
 angstrom.}
+
+\item{method}{Providing backward compatibility for \code{method}
+specification. String to describe whether cubes output are "spectral", "gas",
+"sf gas" or "velocity" (as in SimSpin v1) along the z-axis. Default is
+"spectral". For v2.1.6  onwards, \code{method} should be specified in
+\link{build_datacube}. Support  for this input will remain in all
+versions 2.X.X.}
 }
 \value{
 Returns an object of class "telescope" that describes the properties

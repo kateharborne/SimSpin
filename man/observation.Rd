@@ -4,7 +4,7 @@
 \alias{observation}
 \title{A class to describe the basic properties of the observation}
 \usage{
-observation(telescope, observing_strategy)
+observation(telescope, observing_strategy, method)
 }
 \arguments{
 \item{telescope}{A \code{telescope} object. See
@@ -12,6 +12,9 @@ observation(telescope, observing_strategy)
 
 \item{observing_strategy}{An \code{observing_strategy} object. See
 \code{\link{observing_strategy}} help for more details.}
+
+\item{method}{String to describe whether cubes output are "spectral", "gas",
+"sf gas" or "velocity" (as in SimSpin v1) along the z-axis.}
 }
 \value{
 Returns an object of class "observation" that summarises the
@@ -25,6 +28,6 @@ galaxy has been observed.
 \examples{
 sami = telescope(type="SAMI")
 conditions = observing_strategy()
-observation_summary = observation(telescope=sami, observing_strategy=conditions)
+observation_summary = observation(telescope=sami, observing_strategy=conditions, method = "spectral")
 
 }

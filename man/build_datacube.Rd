@@ -8,6 +8,7 @@ build_datacube(
   simspin_file,
   telescope,
   observing_strategy,
+  method,
   verbose = F,
   write_fits = F,
   output_location,
@@ -33,16 +34,24 @@ describes the properties of the observed simulation (i.e. redshift,
 inclination, seeing conditions). See \code{\link{observing_strategy}}
 help for more details.}
 
+\item{method}{String to describe whether cubes output are "spectral", "gas",
+"sf gas" or "velocity" (as in SimSpin v1) along the z-axis. Default is
+"spectral".}
+
 \item{verbose}{Default is \code{FALSE}. If you would like the code to give
 updates about its progress, change this parameter to \code{TRUE}.}
 
 \item{write_fits}{Default is \code{FALSE}. If you would like the code to
 output a FITS file, change this parameter to \code{TRUE}.}
 
-\item{output_location}{Optional parameter that describes the path to the FITS
-file output if \code{write_fits = TRUE}. If \code{write_fits = TRUE} and no
-\code{output_location} is specified, the FITS file will be written to the
-same directory as the input \code{simspin_file}.}
+\item{output_location}{Optional parameter that describes the path and file
+name of the FITS file output if \code{write_fits = TRUE}.
+If \code{output_location} is specified as just a path, the file name will be
+auto-generated based on the name of the input \code{simspin_file} and the
+observing conditions and written to the specified directory.
+If \code{write_fits = TRUE} and no \code{output_location} is specified, the
+FITS file name will be auto-generated and written to the same directory as
+the input \code{simspin_file}.}
 
 \item{object_name}{Optional string used in \code{write_simspin_FITS} to
 describe the name of the object observed in FITS header.}
