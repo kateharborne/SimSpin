@@ -14,45 +14,45 @@ temp_loc = tempdir()
 
 # Test that they the function runs successfully without error
 test_that("Initial run of each simulation type - Gadget.", {
-  expect_null(make_simspin_file(ss_gadget, template = "BC03hr", output = paste(temp_loc, "gadget_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "gadget_test", sep="")), 4)
-  expect_true(length(readRDS(paste(temp_loc, "gadget_test", sep=""))$gas_part) == 0)
+  expect_null(make_simspin_file(ss_gadget, template = "BC03hr", output = paste(temp_loc, "/gadget_test", sep="")))
+  expect_length(readRDS(paste(temp_loc, "/gadget_test", sep="")), 4)
+  expect_true(length(readRDS(paste(temp_loc, "/gadget_test", sep=""))$gas_part) == 0)
 })
 
 test_that("Initial run of each simulation type - HDF5", {
-  expect_null(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "hdf5_test", sep="")), 4)
-  expect_true(length(readRDS(paste(temp_loc, "hdf5_test", sep=""))$gas_part) == 0)
+  expect_null(make_simspin_file(ss_hdf5, output = paste(temp_loc, "/hdf5_test", sep="")))
+  expect_length(readRDS(paste(temp_loc, "/hdf5_test", sep="")), 4)
+  expect_true(length(readRDS(paste(temp_loc, "/hdf5_test", sep=""))$gas_part) == 0)
 })
 
 test_that("Initial run of each simulation type - EAGLE", {
-  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep=""), centre = c(0.01,0.02,0.01), half_mass = 1483809589))
-  expect_length(readRDS(paste(temp_loc, "eagle_test", sep="")), 4)
-  expect_true(length(readRDS(paste(temp_loc, "eagle_test", sep=""))$gas_part) == 16)
+  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "/eagle_test", sep=""), centre = c(0.01,0.02,0.01), half_mass = 1483809589))
+  expect_length(readRDS(paste(temp_loc, "/eagle_test", sep="")), 4)
+  expect_true(length(readRDS(paste(temp_loc, "/eagle_test", sep=""))$gas_part) == 16)
 })
 
 test_that("Initial run of each simulation type - Magneticum", {
-  expect_null(make_simspin_file(ss_magneticum, output = paste(temp_loc, "magneticum_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "magneticum_test", sep="")), 4)
-  expect_true(length(readRDS(paste(temp_loc, "magneticum_test", sep=""))$gas_part) == 16)
+  expect_null(make_simspin_file(ss_magneticum, output = paste(temp_loc, "/magneticum_test", sep="")))
+  expect_length(readRDS(paste(temp_loc, "/magneticum_test", sep="")), 4)
+  expect_true(length(readRDS(paste(temp_loc, "/magneticum_test", sep=""))$gas_part) == 16)
 })
 
 
 # Test that the function fails when the file already exists
 test_that("Error when output file already exists and overwrite = F - Gadget",{
-  expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "gadget_test", sep="")))
+  expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "/gadget_test", sep="")))
   })
 
 test_that("Error when output file already exists and overwrite = F - HDF5",{
-  expect_error(make_simspin_file(ss_hdf5, output = paste(temp_loc, "hdf5_test", sep="")))
+  expect_error(make_simspin_file(ss_hdf5, output = paste(temp_loc, "/hdf5_test", sep="")))
 })
 
 test_that("Error when output file already exists and overwrite = F - EAGLE",{
-  expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "eagle_test", sep="")))
+  expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "/eagle_test", sep="")))
 })
 
 test_that("Error when output file already exists and overwrite = F - Magneticum",{
-  expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "magneticum_test", sep="")))
+  expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "/magneticum_test", sep="")))
 })
 
 # Test that function can output to environment
@@ -68,20 +68,20 @@ test_that("Error when template is unsupported", {
 
 # Test that the function will overwrite if overwrite = T
 test_that("Test that old files can be overwritten", {
-  expect_null(make_simspin_file(ss_gadget, template = "EMILES", output = paste(temp_loc, "gadget_test", sep=""),
+  expect_null(make_simspin_file(ss_gadget, template = "EMILES", output = paste(temp_loc, "/gadget_test", sep=""),
                                  overwrite = T))
 })
 
 test_that("Test that function works on multiple cores", {
-  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "/eagle_test", sep=""),
                                 overwrite = T, cores = 2))
 })
 
 # Test that none of the output arrays have NAs in
 test_that("Values are successfully associated with variables", {
-  gadget = readRDS(paste(temp_loc, "gadget_test", sep=""))
-  hdf5   = readRDS(paste(temp_loc, "hdf5_test", sep=""))
-  eagle  = readRDS(paste(temp_loc, "eagle_test", sep=""))
+  gadget = readRDS(paste(temp_loc, "/gadget_test", sep=""))
+  hdf5   = readRDS(paste(temp_loc, "/hdf5_test", sep=""))
+  eagle  = readRDS(paste(temp_loc, "/eagle_test", sep=""))
 
   expect_true(all(!is.na(gadget$star_part$x)))
   expect_true(all(!is.na(gadget$star_part$y)))
@@ -137,19 +137,19 @@ test_that("Values are successfully associated with variables", {
 
 # Testing the sph_spawn functionality ----
 test_that("Test that sph_spawn functionality works", {
-  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "/eagle_test", sep=""),
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
-  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+  expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "/eagle_test", sep=""),
                                 overwrite = T, cores = 2, sph_spawn_n = 10))
-  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "magneticum_test", sep=""),
+  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "/magneticum_test", sep=""),
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
-  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "magneticum_test", sep=""),
+  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "/magneticum_test", sep=""),
                                 overwrite = T, cores = 2, sph_spawn_n = 10))
 
 })
 
 test_that("Test that sph_spawn errors when N is not an integer", {
-  expect_error(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "eagle_test", sep=""),
+  expect_error(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "/eagle_test", sep=""),
                                 overwrite = T, cores = 1, sph_spawn_n = 10.2))
 })
 
@@ -169,5 +169,5 @@ test_that("Test that sph_spawn functionality works on multiple cores - Magneticu
   expect_length(gas_data_c2$gas_part$ID, 1000)
 })
 
-unlink(c(paste(temp_loc, "gadget_test", sep=""), paste(temp_loc, "hdf5_test", sep=""),
-         paste(temp_loc, "eagle_test", sep="")))
+unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", sep=""),
+         paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep="")))
