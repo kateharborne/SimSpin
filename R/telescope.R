@@ -19,10 +19,10 @@
 #'@param aperture_shape String to describe the shape of the IFU aperture.
 #' Options include "circular", "hexagonal" or "square".
 #'@param wave_range Numeric vector of length 2 describing the wave range of the
-#' IFU (i.e. \code{c(wave_min, wave_max)}.
+#' IFU (i.e. \code{c(wave_min, wave_max)}) in units of angstrom.
 #'@param wave_centre Numeric describing the central wavelength of the
-#' spectrograph used in the observation. If unsupplied, default is the exact
-#' centre of the provided `wave_range` parameter.
+#' spectrograph used in the observation in units of angstrom. If unsupplied,
+#' default is the exact centre of the provided `wave_range` parameter.
 #'@param wave_res Numeric describing the wavelength resolution in angstrom.
 #'@param spatial_res Numeric describing the size of spatial pixels in arcsec.
 #'@param filter String describing the relevent filter through which luminosities
@@ -101,7 +101,7 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
       output = list(type            = "SAMI",
                     fov             = fov,
                     aperture_shape  = "circular",
-                    wave_range      = c(3700,5700),
+                    wave_range      = c(3750,5750),
                     wave_centre     = 4800,
                     spatial_res     = spatial_res,
                     filter          = filter,
@@ -116,14 +116,14 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
       output = list(type            = "MaNGA",
                     fov             = fov,
                     aperture_shape  = "hexagonal",
-                    wave_range      = c(3700,5700),
+                    wave_range      = c(3600,6350),
                     wave_centre     = 4700,
                     spatial_res     = spatial_res,
                     filter          = filter,
                     wave_res        = 1.04,
-                    lsf_fwhm        = 2.8,
+                    lsf_fwhm        = 2.85,
                     signal_to_noise = signal_to_noise,
-                    sbin            =  floor(fov/spatial_res))
+                    sbin            = floor(fov/spatial_res))
     }
 
     if(stringr::str_to_upper(type)  == "MUSE"){
@@ -136,7 +136,7 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
                     spatial_res     = spatial_res,
                     filter          = filter,
                     wave_res        = 1.25,
-                    lsf_fwhm        = 2.63,
+                    lsf_fwhm        = 2.51,
                     signal_to_noise = signal_to_noise,
                     sbin            = floor(fov/spatial_res))
 
@@ -148,8 +148,8 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
       output = list(type            = "Hector",
                     fov             = fov,
                     aperture_shape  = "hexagonal",
-                    wave_range      = c(3700,5700),
-                    wave_centre     = 4700,
+                    wave_range      = c(3720,5910),
+                    wave_centre     = 4815,
                     spatial_res     = spatial_res,
                     filter          = filter,
                     wave_res        = 1.6,
@@ -160,17 +160,17 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
     }
 
     if(stringr::str_to_upper(type)  == "CALIFA"){
-      fov = 30
-      spatial_res = 0.8
+      fov = 74
+      spatial_res = 1
       output = list(type            = "CALIFA",
                     fov             = fov,
                     aperture_shape  = "hexagonal",
-                    wave_range      = c(3700,5700),
-                    wave_centre     = 4700,
+                    wave_range      = c(3700,4750),
+                    wave_centre     = 4225,
                     spatial_res     = spatial_res,
                     filter          = filter,
-                    wave_res        = 2,
-                    lsf_fwhm        = 5.65,
+                    wave_res        = 2.7,
+                    lsf_fwhm        = 2.7,
                     signal_to_noise = signal_to_noise,
                     sbin            = floor(fov/spatial_res))
 
@@ -198,7 +198,7 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
                     method          = method,
                     fov             = fov,
                     aperture_shape  = "circular",
-                    wave_range      = c(3700,5700),
+                    wave_range      = c(3750,5750),
                     wave_centre     = 4800,
                     spatial_res     = spatial_res,
                     filter          = filter,
@@ -214,12 +214,12 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
                     method          = method,
                     fov             = fov,
                     aperture_shape  = "hexagonal",
-                    wave_range      = c(3700,5700),
+                    wave_range      = c(3600,6350),
                     wave_centre     = 4700,
                     spatial_res     = spatial_res,
                     filter          = filter,
                     wave_res        = 1.04,
-                    lsf_fwhm        = 2.8,
+                    lsf_fwhm        = 2.85,
                     signal_to_noise = signal_to_noise,
                     sbin            =  floor(fov/spatial_res))
     }
@@ -235,7 +235,7 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
                     spatial_res     = spatial_res,
                     filter          = filter,
                     wave_res        = 1.25,
-                    lsf_fwhm        = 2.63,
+                    lsf_fwhm        = 2.51,
                     signal_to_noise = signal_to_noise,
                     sbin            = floor(fov/spatial_res))
 
@@ -248,8 +248,8 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
                     method          = method,
                     fov             = fov,
                     aperture_shape  = "hexagonal",
-                    wave_range      = c(3700,5700),
-                    wave_centre     = 4700,
+                    wave_range      = c(3720,5910),
+                    wave_centre     = 4815,
                     spatial_res     = spatial_res,
                     filter          = filter,
                     wave_res        = 1.6,
@@ -260,18 +260,18 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
     }
 
     if(stringr::str_to_upper(type)  == "CALIFA"){
-      fov = 30
-      spatial_res = 0.8
+      fov = 74
+      spatial_res = 1
       output = list(type            = "CALIFA",
                     method          = method,
                     fov             = fov,
                     aperture_shape  = "hexagonal",
-                    wave_range      = c(3700,5700),
-                    wave_centre     = 4700,
+                    wave_range      = c(3700,4750),
+                    wave_centre     = 4225,
                     spatial_res     = spatial_res,
                     filter          = filter,
-                    wave_res        = 2,
-                    lsf_fwhm        = 5.65,
+                    wave_res        = 2.7,
+                    lsf_fwhm        = 2.7,
                     signal_to_noise = signal_to_noise,
                     sbin            = floor(fov/spatial_res))
 

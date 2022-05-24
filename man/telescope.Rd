@@ -30,11 +30,11 @@ observing properties below, set \code{type = "IFU"} to define your own.}
 Options include "circular", "hexagonal" or "square".}
 
 \item{wave_range}{Numeric vector of length 2 describing the wave range of the
-IFU (i.e. \code{c(wave_min, wave_max)}.}
+IFU (i.e. \code{c(wave_min, wave_max)}) in units of angstrom.}
 
 \item{wave_centre}{Numeric describing the central wavelength of the
-spectrograph used in the observation. If unsupplied, default is the exact
-centre of the provided `wave_range` parameter.}
+spectrograph used in the observation in units of angstrom. If unsupplied,
+default is the exact centre of the provided `wave_range` parameter.}
 
 \item{wave_res}{Numeric describing the wavelength resolution in angstrom.}
 
