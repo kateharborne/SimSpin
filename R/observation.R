@@ -19,7 +19,9 @@
 #'@examples
 #'sami = telescope(type="SAMI")
 #'conditions = observing_strategy()
-#'observation_summary = observation(telescope=sami, observing_strategy=conditions, method = "spectral")
+#'observation_summary = observation(telescope=sami,
+#'                                  observing_strategy=conditions,
+#'                                  method = "spectral")
 #'
 observation = function(telescope, observing_strategy, method){
 
