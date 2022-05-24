@@ -18,12 +18,13 @@ ss_magneticum = make_simspin_file(ss_pd_magneticum, write_to_file = FALSE)
 
 temp_loc = tempdir()
 
-# Testing that build_datacube works in spectral mode ----
 built_cube_size = 4
 spectra_raw_images_size = 4
 spectra_observed_images_size = NULL
 velocity_raw_images_size = 6
 velocity_observed_images_size = 3
+
+# Testing that build_datacube works in spectral mode ----
 
 test_that("Gadget files can be built - spectral mode", {
   expect_warning(build_datacube(simspin_file = ss_gadget_old,
@@ -256,7 +257,35 @@ test_that("Error occurs when invalid method given.", {
                               method = "magpie"))
 })
 
-# Testing the mass flag functionalilty
+test_that("Warnings occurs when method is specified in telescope rather than build_datacube, but still makes a cube.", {
+  expect_warning(build_datacube(simspin_file = ss_eagle,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, method = "velocity"),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T)))
+
+  warn_cube = suppressWarnings(build_datacube(simspin_file = ss_eagle,
+                                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, method = "velocity"),
+                                              observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T)))
+
+  expect_length(warn_cube, built_cube_size)
+  remove(warn_cube)
+})
+
+test_that("Warning occurs if method is specified in BOTH telescope and build_datacube inputs.", {
+  expect_warning(build_datacube(simspin_file = ss_eagle,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, method = "spectral"),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                method="velocity"))
+
+  warn_cube = suppressWarnings(build_datacube(simspin_file = ss_eagle,
+                                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, method = "spectral"),
+                                              observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                              method="velocity"))
+
+  expect_true(warn_cube$observation$method == "velocity")
+
+})
+
+# Testing the mass flag functionalilty ----
 test_that("Data cubes can be generated using mass rather than luminosity weighting", {
   eagle_mass = build_datacube(simspin_file = ss_eagle,
                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -273,7 +302,7 @@ test_that("Data cubes can be generated using mass rather than luminosity weighti
   })
 
 
-# Testing that build_datacube works to write to FITS file
+# Testing that build_datacube works to write to FITS file ----
 test_that("Data cubes can be written to a single files", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -487,7 +516,28 @@ unlink(c(paste0(temp_loc, "/ss_gadget.FITS"),
          paste0(temp_loc, "/ss_gadget_particle_image.FITS"),
          paste0(temp_loc, "/ss_gadget_mask.FITS")))
 
-# Testing that build_datacube will give warning if the spectra given is low res
+test_that("FITS files will be written with automatic names at directory given by `output_location` if only PATH is specified", {
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                               write_fits = T, split_save=T,
+                               output_location = temp_loc), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_flux_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_velocity_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_particle_image.FITS")))
+})
+
+unlink(c(paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_flux_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_velocity_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_dispersion_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_particle_image.FITS")))
+
+
+# Testing that build_datacube will give warning if the spectra given is low res ----
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {
   expect_warning(build_datacube(simspin_file = ss_gadget, telescope = telescope(type="IFU", lsf_fwhm = 0.9),
                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45)))
