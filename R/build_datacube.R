@@ -95,6 +95,13 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
   }
 
+  if (!missing(method) & ("method" %in% names(telescope))){
+    warning(">>> WARNING >>> \n
+            `method` has been specified in BOTH build_datacube() and telescope(). \n
+            Using the `method` specified in build_datacube() and ignoring telescope(method). \n
+            Please remove the `method` specified in telescope() to suppress this warning.")
+  }
+
   method = stringr::str_to_lower(method)
 
   if (method != "spectral" &
