@@ -100,6 +100,12 @@ test_that("telescope() issues warning when method parameter is given.", {
   scope = suppressWarnings(telescope(method = "spectral"))
   expect_length(scope, telescope_length+1)
   remove(scope)
+
+  expect_warning(telescope(type="SAMI", method = "spectral"))
+  expect_warning(telescope(type="MaNGA", method = "spectral"))
+  expect_warning(telescope(type="MUSE", method = "spectral"))
+  expect_warning(telescope(type="Hector", method = "spectral"))
+  expect_warning(telescope(type="CALIFA", method = "spectral"))
 })
 
 test_that("telescope() issues error when incompatible parameters are given.", {
