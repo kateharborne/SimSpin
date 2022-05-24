@@ -266,9 +266,10 @@ Finally, we can observe our simulated galaxies using the `build_datacube` functi
 
 ```{r}
 gadget2_binary_cube = build_datacube(simspin_file = gadget2_binary_galaxy,
-                                     telescope    = IFU,
-                                     observing_strategy    = strategy_one,
-                                     write_fits   = FALSE)
+                                     telescope = IFU,
+                                     observing_strategy = strategy_one,
+                                     method = "spectral",
+                                     write_fits = FALSE)
 ```
 
 This output produced by `build_datacube` is a list with 4 elements as described below.

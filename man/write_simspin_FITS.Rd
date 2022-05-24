@@ -18,8 +18,8 @@ write_simspin_FITS(
 )
 }
 \arguments{
-\item{output_file}{The path to the location where the FITS file should be
-written.}
+\item{output_file}{The path and file name to the location where the FITS file
+should be written.}
 
 \item{simspin_datacube}{The list output from \code{build_datacube()}.}
 

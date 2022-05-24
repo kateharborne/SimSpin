@@ -11,15 +11,19 @@
 #' \code{\link{telescope}} help for more details.
 #'@param observing_strategy An \code{observing_strategy} object. See
 #' \code{\link{observing_strategy}} help for more details.
+#'@param method String to describe whether cubes output are "spectral", "gas",
+#' "sf gas" or "velocity" (as in SimSpin v1) along the z-axis.
 #'@return Returns an object of class "observation" that summarises the
 #' properties of the observation. Run within the \code{build_datacube()}
 #' function.
 #'@examples
 #'sami = telescope(type="SAMI")
 #'conditions = observing_strategy()
-#'observation_summary = observation(telescope=sami, observing_strategy=conditions)
+#'observation_summary = observation(telescope=sami,
+#'                                  observing_strategy=conditions,
+#'                                  method = "spectral")
 #'
-observation = function(telescope, observing_strategy){
+observation = function(telescope, observing_strategy, method){
 
   ang_size      = kpc_per_arcsec(observing_strategy$distance) # angular size given z, kpc/"
   lum_dist      = Mpc(observing_strategy$distance)            # computing Luminosity Distance in units of Mpc
@@ -77,7 +81,7 @@ observation = function(telescope, observing_strategy){
                 twist_rad       = observing_strategy$twist_deg * (pi/180),
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
-                method          = telescope$method,
+                method          = method,
                 origin          = paste0("SimSpin_v", packageVersion("SimSpin")),
                 pointing_kpc    = xy_kpc(observing_strategy$pointing),
                 pointing_deg    = xy_deg(observing_strategy$pointing),

@@ -18,14 +18,21 @@
 #' describes the properties of the observed simulation (i.e. redshift,
 #' inclination, seeing conditions). See \code{\link{observing_strategy}}
 #' help for more details.
+#'@param method String to describe whether cubes output are "spectral", "gas",
+#' "sf gas" or "velocity" (as in SimSpin v1) along the z-axis. Default is
+#' "spectral".
 #'@param verbose Default is \code{FALSE}. If you would like the code to give
 #' updates about its progress, change this parameter to \code{TRUE}.
 #'@param write_fits Default is \code{FALSE}. If you would like the code to
 #' output a FITS file, change this parameter to \code{TRUE}.
-#'@param output_location Optional parameter that describes the path to the FITS
-#' file output if \code{write_fits = TRUE}. If \code{write_fits = TRUE} and no
-#' \code{output_location} is specified, the FITS file will be written to the
-#' same directory as the input \code{simspin_file}.
+#'@param output_location Optional parameter that describes the path and file
+#' name of the FITS file output if \code{write_fits = TRUE}.
+#' If \code{output_location} is specified as just a path, the file name will be
+#' auto-generated based on the name of the input \code{simspin_file} and the
+#' observing conditions and written to the specified directory.
+#' If \code{write_fits = TRUE} and no \code{output_location} is specified, the
+#' FITS file name will be auto-generated and written to the same directory as
+#' the input \code{simspin_file}.
 #'@param object_name Optional string used in \code{write_simspin_FITS} to
 #' describe the name of the object observed in FITS header.
 #'@param telescope_name Optional string used in \code{write_simspin_FITS} to
@@ -68,15 +75,44 @@
 #'
 
 build_datacube = function(simspin_file, telescope, observing_strategy,
-                          verbose = F, write_fits = F, output_location,
-                          object_name="GalaxyID_unknown",
+                          method, verbose = F, write_fits = F,
+                          output_location, object_name="GalaxyID_unknown",
                           telescope_name="SimSpin",
                           observer_name="Anonymous",
                           split_save=F,
                           cores=1, mass_flag = F){
 
+  if (missing(method)){
+    if ("method" %in% names(telescope)){
+      warning(">>> WARNING! >>> \n
+              `method` is now specified within the build_datacube function directly,
+              rather than within the telescope() class. \n
+              Support for this input will remain in versions 2.X.X, but please consider
+              updating your code.")
+      method = telescope$method
+    } else {
+      method = "spectral"
+    }
+  }
+
+  if (!missing(method) & ("method" %in% names(telescope))){
+    warning(">>> WARNING >>> \n
+            `method` has been specified in BOTH build_datacube() and telescope(). \n
+            Using the `method` specified in build_datacube() and ignoring telescope(method). \n
+            Please remove the `method` specified in telescope() to suppress this warning.")
+  }
+
+  method = stringr::str_to_lower(method)
+
+  if (method != "spectral" &
+      method != "velocity" &
+      method != "gas" &
+      method != "sf gas" ){
+    stop("Error: Invalid method. \n Please specify method = 'spectral', 'velocity', 'gas' or 'sf gas' and try again.")
+  }
+
   if (verbose){cat("Computing observation parameters... \n")}
-  observation = observation(telescope = telescope, observing_strategy = observing_strategy)
+  observation = observation(telescope = telescope, observing_strategy = observing_strategy, method = method)
 
   # Reading in SimSpin file data
   if (typeof(simspin_file) == "character"){ # if provided with path to file
@@ -313,6 +349,15 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       out_file_name = tryCatch({stringr::str_remove(simspin_file, ".Rdata")},
                                error = function(e){"./"})
       output_location = paste(out_file_name, "_inc", observation$inc_deg, "deg_seeing",
+                              observation$psf_fwhm,"fwhm.FITS", sep="")
+    }
+    if (length(grep(".fits", output_location)) == 0 & length(grep(".FITS", output_location)) == 0 ){
+      # if no filename has been specified, assume that the output location is just a path
+      out_file_name = character(1)
+      output_name = rev(stringr::str_split(simspin_file, "/")[[1]])[1]
+      out_file_name = tryCatch({stringr::str_remove(output_name, ".Rdata")},
+                               error = function(e){"./"})
+      output_location = paste(output_location, "/", out_file_name, "_inc", observation$inc_deg, "deg_seeing",
                               observation$psf_fwhm,"fwhm.FITS", sep="")
     }
 
