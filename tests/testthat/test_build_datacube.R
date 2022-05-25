@@ -318,7 +318,7 @@ test_that("Data cubes can be written to a single files", {
 
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method="velocity",
                                write_fits = T, output_location = paste0(temp_loc, "/ss_gadget.FITS"),
                                split_save=F), built_cube_size)
@@ -329,7 +329,7 @@ test_that("Data cubes can be written to a single files", {
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method="gas",
                                write_fits = T, output_location = paste0(temp_loc, "/ss_eagle.FITS"),
                                split_save=F), built_cube_size)
@@ -338,21 +338,18 @@ test_that("Data cubes can be written to a single files", {
 
   expect_length(build_datacube(simspin_file = ss_magneticum,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method="sf gas",
                                write_fits = T, output_location = paste0(temp_loc, "/ss_magneticum.FITS"),
                                split_save=F), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum.FITS")))
 
+
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "/ss_hdf5.FITS"),
-                               split_save=F), built_cube_size)
-
-  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5.FITS")))
-  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_hdf5.FITS"))) == 6)
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), built_cube_size)
 
 })
 
