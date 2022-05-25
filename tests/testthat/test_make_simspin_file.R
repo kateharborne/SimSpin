@@ -173,10 +173,10 @@ test_that("Test that sph_spawn functionality works on multiple cores - Magneticu
 
 # Test that the added header information works as expected ---------------------
 test_that("Testing that the header data works as expected", {
-  gadget = readRDS(paste(temp_loc, "gadget_test", sep=""))
-  hdf5 = readRDS(paste(temp_loc, "hdf5_test", sep=""))
-  eagle  = readRDS(paste(temp_loc, "eagle_test", sep=""))
-  magneticum = readRDS(paste(temp_loc, "magneticum_test", sep=""))
+  gadget = readRDS(paste(temp_loc, "/gadget_test", sep=""))
+  hdf5 = readRDS(paste(temp_loc, "/hdf5_test", sep=""))
+  eagle  = readRDS(paste(temp_loc, "/eagle_test", sep=""))
+  magneticum = readRDS(paste(temp_loc, "/magneticum_test", sep=""))
 
   expect_equal(gadget$header$Type, "nbody")
   expect_equal(hdf5$header$Type, "nbody")
