@@ -8,22 +8,26 @@ last_modified_date: "Wed, 30 March 2022 15:57:00 AWST"
 
 # Defining the properties of the telescope
 
+Recent Updates
+{: .label .label-purple } 
+
 In order to build a data cube, we need to describe the properties of the telescope used to observe the model. 
 {: .fs-5 .fw-300 .pb-2 }
 
-Using the `telecope` function, a single telescope object is generated with a set number of expected properties. These properties are used with the `observing_strategy` to describe a specific observation. You can fully specify the particulars of your chosen telescope, or you can select from a number of inbuilt telescopes designed to mimic current IFS surveys. 
+Using the `telecope` function, a single telescope object is generated with a set number of expected properties. These properties are used with the `observing_strategy` to describe a specific observation. You can fully specify the particulars of your chosen telescope or you can select from a number of inbuilt telescopes designed to mimic current IFS surveys. 
 {: .fw-300 }
 
 [See an example](#example){: .btn .btn-purple }
 [See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/telescope.R#L44){: .btn .btn-purple }
 
+*As of version 2.2.0, the `method` input parameter has been moved directly to the [`build_datacube`](build_datacube.markdown) function. For backwards compatibility, this parameter can still be specified here, but a warning will be issued.*
+{: .fw-150 }
 ---
 
 The following code shows the default parameters used in the `telescope` function. Calling the function without specifying any input will produce a telescope object with the following properties:
 
 ```R
 telescope(type="IFU",                # specify a type or define your own using "IFU"
-          method="spectral",         # spectral or kinematic data cube output?
           fov=15,                    # diameter of the field-of-view in arcsec          
           aperture_shape="circular", 
           wave_range=c(3700,5700),   # in angstrom
@@ -40,7 +44,6 @@ telescope(type="IFU",                # specify a type or define your own using "
 ## Input Parameters
 
 | **type**              | A character string describing the type of telescope you wish to create. Default is `"IFU"`, in which case the telescope properties are described by the input parameters to this function. Other input types include: `"SAMI"`, `"MaNGA"`, `"CALIFA"` and `"MUSE"`. With these, the telescope properties are set to the default parameters specified by the respective instrument.    |
-| **method**            |  A character string that describes whether to generate a spectral data cube or a kinematic data cube. Options include `"spectral"` and `"velocity"` to produce these for the stellar component of the simulation. If wishing to analyse the kinematics of the gas, you can also specify `"gas"` or `"sf_gas"` (i.e. star forming gas) to produce a kinematic data cube of this component alone.   |
 | **fov**               | A numeric describing the diameter of the field-of-view of the telescope in arcsec.    |
 | **aperture_shape**    | A character string describing the shape of the field-of-view. Options include: `"circular"`, `"hexagonal"`, and `"square"`.   |
 | **wave_range**        | Two numeric parameters describing the beginning and end of the wavelength range visible to the telescope, given in angstrom. Format is expected `c(wave_start, wave_end)`, and errors will be issued if not in this format.   |
@@ -54,15 +57,14 @@ telescope(type="IFU",                # specify a type or define your own using "
 ---
 
 ## Output Value
+
 The output of `telescope` is a *List* element that will be stored as a variable to the environment. 
 
-The list will contain the following 12 elements:
+The list will contain the following 11 elements:
 
 1. `type` - *Character* element recording the requested telescope type. Must be one of `"IFU"`, `"SAMI"`, `"MaNGA"`, `"MUSE"` or `"Hector"`.
 
 1. `fov` - *Numeric* element describing the diameter of the field-of-view in arcseconds. 
-
-1. `method` - *Character* element recording the type of data cube observed by this telescope. Must be one of `"spectral"`, `"velocity"`, `"gas"` or `"sf_gas"`.
 
 1. `aperture_shape` - *Character* element recording the shape of the field-of-view. Must be one of `"circular"`, `"hexagonal"` or `"square"`.
 
@@ -99,7 +101,6 @@ summary(scope)
 #                 Length Class      Mode     
 # type            1      -none-     character
 # fov             1      -none-     numeric  
-# method          1      -none-     character
 # aperture_shape  1      -none-     character
 # wave_range      2      -none-     numeric  
 # wave_centre     1      -none-     numeric  
@@ -121,15 +122,15 @@ scope[["type"]]
 ```
 For pre-defined `type` classes, certain parameters cannot be modified:
 
-| *telescope parameter* | **SAMI** | **MaNGA** | **CALIFA** | **MUSE** | **Hector** |
-| --------------------- | -------- | --------- | ---------- | -------- | ---------- |
-| fov (") | 15 | *n* = 12, 17, 22, 27 or 32 | 74 | *n* < 60 | 30 |
-| aperture_shape | "circular" | "hexagonal" | "hexagonal" | "square" | "hexagonal" |
-| wave_range (&#8491;)[^1] | 3750 - 5750 | 3600 - 6350 | 3700 – 4750 | 4700.15 - 9351.4 | 3720 - 5910 |
-| wave_centre (&#8491;)[^1] | 4800 | 4700 |  | 6975 | 4815 |
-| wave_res (&#8491;) | 1.04 | 1.04 | 2.7 | 1.25 | 1.60 |
-| spatial_res ("/pixel) | 0.5 | 0.5 | 1 | 0.2 | 0.2 |
-| lsf_fwhm (&#8491;) | 2.65 | 2.85 | 2.7 | | 1.3 |
+| *telescope parameter* | *units* | **SAMI** | **MaNGA** | **CALIFA** | **MUSE** | **Hector** |
+| --------------------- | ------- | -------- | --------- | ---------- | -------- | ---------- |
+| `fov` | arcsec | 15 | *n* = 12, 17, 22, 27 or 32 | 74 | *n* < 60 | 30 |
+| `aperture_shape` |   | "circular" | "hexagonal" | "hexagonal" | "square" | "hexagonal" |
+| `wave_range` | &#8491;[^1] | 3750 - 5750 | 3600 - 6350 | 3700 – 4750 | 4700.15 - 9351.4 | 3720 - 5910 |
+| `wave_centre` | &#8491;[^1] | 4800 | 4700 | 4225 | 6975 | 4815 |
+| `wave_res` | &#8491; | 1.04 | 1.04 | 2.7 | 1.25 | 1.60 |
+| `spatial_res` | arcsec/pixel | 0.5 | 0.5 | 1 | 0.2 | 0.2 |
+| `lsf_fwhm` | &#8491; | 2.65 | 2.85 | 2.7 | 2.51 | 1.3 |
 
 
 [^1]: Wave ranges and central wave lengths are quoted for the blue arm of each spectrograph as this is the wavelength range across which the kinematics are commonly measured. 
