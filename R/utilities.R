@@ -1065,20 +1065,27 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
       galaxy_sample[, luminosity := Mass, ]
 
     } else {
-      intrinsic_spectra = simspin_data$spectra[ , c(galaxy_sample$sed_id), with=FALSE] *
-        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-      # transform luminosity into flux detected at telescope
-      #    flux in units erg/s/cm^2/Ang
-      for (j in 1:num_part){
-        set(intrinsic_spectra, i=NULL, j = j,
-            value = ((intrinsic_spectra[[j]]*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)))
-        }
+      band_lum = numeric(num_part)
 
-      # computing the r-band luminosity per particle from spectra
-      galaxy_sample[ , luminosity := .bandpass(wave = simspin_data$wave,
-                                               flux = intrinsic_spectra,
-                                               filter = filter), ]
+      for (p in 1:num_part){
+
+        intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
+          (galaxy_sample$Initial_Mass[p] * 1e10) # reading particle spectrum
+
+        # transform luminosity into flux detected at telescope
+        #    flux in units erg/s/cm^2/Ang
+        flux_spectra =
+        (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+
+        # computing the r-band luminosity per particle from spectra
+        band_lum[p] = .bandpass(wave = simspin_data$wave,
+                                  flux = flux_spectra,
+                                  filter = filter)
+      }
+
+      galaxy_sample[ , luminosity := band_lum, ]
+
       }
 
 
