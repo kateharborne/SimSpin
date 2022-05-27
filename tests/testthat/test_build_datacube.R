@@ -349,7 +349,7 @@ test_that("Data cubes can be written to a single files", {
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                               write_fits = T, output_location = paste0(temp_loc, "cube.FITS")), built_cube_size)
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_hdf5.FITS")), built_cube_size)
 
 })
 
@@ -553,7 +553,7 @@ test_that("velocity shift for wavelengths work correctly", {
   wave = matrix(data = rep(wavelength, length(velocity_los)), nrow = length(velocity_los), byrow=T)
   wave_shift = ((velocity_los / .speed_of_light) * wave) + wave # using doppler formula to compute the shift in wavelengths cause by LOS velocity
 
-  wave_shift_comp = matrix(data=NA, nrow=2, ncol=53689)
+  wave_shift_comp = matrix(data=NA, nrow=2, ncol=length(wavelength))
 
   for (i in 1:2){
     wave_shift_comp[i,] = ((velocity_los[i] / .speed_of_light) * wave[i,]) + wave[i,]
