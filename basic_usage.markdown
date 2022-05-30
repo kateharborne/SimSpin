@@ -4,7 +4,7 @@ title: Basic Usage
 permalink: /basic_usage/
 description: "A walkthrough demonstrating how to generate your first mock observation."
 nav_order: 3
-last_modified_date: "Wed, 16 February 2022 13:57:00 AWST"
+last_modified_date: "Mon, 30 May 2022 13:57:00 AWST"
 ---
 
 # A walkthrough SimSpin's functions
@@ -16,7 +16,7 @@ At each step, we take you through the simplest routine using the default paramet
 
 ---
 
-There are four steps to build your first `SimSpin` mock data cube: 
+There are four steps to build your first SimSpin mock data cube: 
 {: .fw-300 }
 
 1. TOC
@@ -30,8 +30,9 @@ More extensive examples can be found in [Examples](https://kateharborne.github.i
 
 ## Making the input file
 
-The main input for `SimSpin` is a galaxy simulation. 
-This may be either an isolated galaxy model (*N*-body or hydro-dynamical) or a region cut out from a cosmological simulation. 
+The main input for SimSpin is a galaxy simulation. This may be either an isolated galaxy model (*N*-body or hydro-dynamical) or a region cut out from a cosmological simulation. 
+{: .fw-300 }
+
 We define groups of particles or cells in each simulation according to the convention defined by Gadget [(Springel, 2005)](https://ui.adsabs.harvard.edu/abs/2005MNRAS.364.1105S/abstract):
 
 * `PartType0` - gas,
@@ -42,11 +43,17 @@ We define groups of particles or cells in each simulation according to the conve
 * `PartType5` - boundary/black holes. 
 {: .lh-tight }
 
-We begin by running the [`make_simspin_file`](https://kateharborne.github.io/SimSpin/docs/make_simspin_file) function. 
-This will organise the provided data into a consistent format for `SimSpin` processing and assign SEDs to stellar particles given their individual ages and metallicities. 
-We will discuss the variety of options available for each of the supported simulation input types within ... 
+This information can be structured in an HDF5 file, with groups containing each of these particle types. Alternatively, SimSpin can also process Gadget binary files (SnapFormat type 1). *If you have any issues with your input simulation file, check out [this page](examples/generating_hdf5.markdown) to check your input file structure.* 
 
-For this basic usage example, we will use one of the simulations included in the package:
+We begin by running the [`make_simspin_file`](https://kateharborne.github.io/SimSpin/docs/make_simspin_file) function. 
+This will organise the provided data into a consistent format for SimSpin processing and assign SEDs to stellar particles given their individual ages and metallicities. 
+
+As this is the most time consuming process of the data-cube construction, we want to only do this once. 
+However, a single SimSpin file can be usede multiple times for a variety of different observing strategies and telescope set ups.
+The variety of options available for this process is defined in the [documentation here](docs/make_simspin_file.markdown).
+
+For this basic usage example, we will use the default parameters and one of the simple simulations included in the package:
+{: .fw-500 .text-grey-dk-100 }
 
 ```R
 simulation_data = system.file("extdata", "SimSpin_example_Gadget", 
@@ -61,50 +68,52 @@ simspin_data    = make_simspin_file(filename = simulation_data,
                                     write_to_file = FALSE) 
 ```
 
-The output of this function will be a list that can either be written to an {.Rdata} file or written to an environment variable within your R session. 
-In the case above, we assign the output to the environment variable {`simspin_data'}. 
+The output of this function will be a list that can either be written to an Rdata file or written to an environment variable within your R session. 
+In the case above, we assign the output to the environment variable `simspin_data`. 
 
-Despite accepting a variety of different simulation inputs, the output of the \makesimspinfile{} function will always be the same. 
-The format will be a list containing 4 elements: 
+Despite accepting a variety of different simulation inputs, the output of the `make_simspin_file` function will always be the same. 
+The format will be a list containing 5 elements: 
 
 ```R
 typeof(simspin_file) 
 # [1] "list"
 
 summary(simspin_file) 
-#           Length Class      Mode   
+#           Length Class      Mode
+# header       8   -none-     list    
 # star_part   12   data.frame list   
 # gas_part     0   -none-     NULL   
 # spectra      2   -none-     list   
-# wave      1221   -none-     numeric
+# wave       842   -none-     numeric
 ```
 
 While the length of each element may change depending on the input simulation type or observation properties requested, the element structure of the output will remain consistent. 
+
 In this case, because the input file is an *N*-body model containing both bulge and disk particles, the resulting element `spectra` is a `list` with *2* entries (with one spectra assigned for the bulge particles and the second to the disk particles).
 For a hydrodynamical model, the  `spectra` element may have many more entries due to the broader variety in stellar ages and metallicities, but will remain an element of mode `list`. 
+
 Once a file has been produced for a single simulated galaxy, the same file can be used to produce any number of different observations.
-*Bear in mind that the resolution and wavelength range of the spectral templates used to generate the file need to overlap with the resolution and wavelength range of the observing telescope.*
+*Bear in mind that the resolution and wavelength range of the spectral templates used to generate the file need to overlap with the resolution and wavelength range of the observing telescope. A **WARNING** will be issued by the code if these do not match.*
 
 ---
 
 ## Defining the observation properties
 
-`SimSpin` acts as a virtual telescope wrapper. 
+SimSpin acts as a virtual telescope. 
 You can choose to observe your galaxy model in a variety of different ways with any integral field unit (IFU) instrument. 
-This requires you to set two distinct groups of properties - the properties of the instrument used to take the observation i.e. the `telescope()`, and the properties of the object under scrutiny i.e. the `observing_strategy()`. 
+This requires you to set two distinct groups of properties - the properties of the instrument used to take the observation i.e. the `telescope`, and the properties of the object under scrutiny i.e. the `observing_strategy`. 
+{: .fw-300 }
 
-The properties are split in this way to enable a suite of observations to be generated in a straightforward manner. 
-It is common that an observer will wish to observe a suite of galaxies using the same telescope, but may want to iterate over a number of projected inclinations, distances or seeing conditions. 
-Hence, we have split the description classes for the observing telescope and observed object into two to enable this method more smoothly. 
-
-### telescope()
+### telescope
 This class describes the properties of the instrument used for the observation.
 Several current instruments are included within the class (named by either the telescope or the survey that used them i.e. SAMI, MaNGA, CALIFA and MUSE) but you can also define your own instrument by specifying the `type = 'IFU'`. 
+{: .fw-300 }
+
 An example of a user defined instrument is shown below, with the default parameters specified:
+{: .fw-500 .text-grey-dk-100 }
 
 ```R
 ifu = telescope(type = "IFU", # other options include pre-defined instruments
-                method = "spectral", # to generate spectral data cube
                 fov = 15, # field-of-view in arcsec
                 aperture_shape = "circular", # shape of fov
                 wave_range = c(3700,5700), # given in angstroms
@@ -116,16 +125,15 @@ ifu = telescope(type = "IFU", # other options include pre-defined instruments
                 signal_to_noise = 10) # s/n ratio per angstrom
 ```
 
-This will return a `list` that contains 12 elements. Here we have precomputed properties that will be necessary for further computation steps. The units of each returned element have been added in the final column.
+This will return a `list` that contains 11 elements. Here we have precomputed properties that will be necessary for further computation steps. The units of each returned element have been added in the final column.
 ```R
 typeof(ifu) 
 # [1] "list"
 
 summary(ifu) 
-#                 Length Class      Mode        
+#                 Length Class      Mode        # Units
 # type            1      -none-     character   # describes the telescope
 # fov             1      -none-     numeric     # arcsec
-# method          1      -none-     character   # describes the type of output cube
 # aperture_shape  1      -none-     character   # shape of fov
 # wave_range      2      -none-     numeric     # angstrom
 # wave_centre     1      -none-     numeric     # angstrom
@@ -137,31 +145,38 @@ summary(ifu)
 # sbin            1      -none-     numeric     # number of spatial bins across fov
 ```
 
-### observing_strategy()
+### observing_strategy
 We describe the conditions of the object begin observed using this function. 
-For example, the level of atmospheric blurring can be modified, the angle from which the object is observed can be changed and the distance at which the galaxy is projected can be adjusted. An example with the default parameters specified is shown here:
+For example, the level of atmospheric blurring can be modified, the angle from which the object is observed can be changed and the distance at which the galaxy is projected can be adjusted. 
+{: .fw-300 }
+
+An example with the default parameters specified is shown here:
+{: .fw-500 .text-grey-dk-100 }
 
 ```R
-strategy = observing_strategy(z = 0.1, # redshift distance the galaxy is placed
+strategy = observing_strategy(dist_z = 0.05, # redshift distance the galaxy is placed
                               inc_deg = 70, # projection (0 - face-on, 90 - edge-on)
                               twist_deg = 0, # angle of observation (longitude)
+                              pointing_kpc = c(0,0), # pointing of the centre of the telescope
                               blur = F, # whether seeing conditions are included
                               fwhm = 2, # the fwhm of the blurring kernel in arcsec
                               psf = "Gaussian") # the shape of the blurring kernel
 ``` 
 
-This will return a `list` that contains 4 elements. If `blur = T`, an additional two elements will be included to describe the point-spread-function shape and size. Similar to the previous output, this class just stores precomputed properties relevant to the observed object that will be necessary in further processing steps. The units of each returned element are listed in the final column.
+This will return a `list` that contains 5 elements. If `blur = T`, an additional two elements will be included to describe the point-spread-function shape and size. Similar to the previous output, this class just stores precomputed properties relevant to the observed object that will be necessary in further processing steps. The units of each returned element are listed in the final column.
 
 ```R
 typeof(strategy) 
 # [1] "list"
 
-summary(strategy) 
-#                Length Class  Mode   
-# z              1      -none- numeric # redshift distance 
-# inc_deg        1      -none- numeric # degrees
-# twist_deg      1      -none- numeric # degrees
-# blur           1      -none- logical # describes whether seeing is included
+summary(strategy)
+#           Length Class    Mode    # Units
+# distance  1      Distance S4      # either redshift distance (z), physical (Mpc) or angular (kpc per arcsec)
+# inc_deg   1      -none-   numeric # degrees
+# twist_deg 1      -none-   numeric # degrees
+# pointing  1      Pointing S4      # either physical (kpc) or angular (deg)
+# blur      1      -none-   logical # FWHM specified in arcseconds
+
 ```
 
 With these properties specified, we have fully described the parameters necessary to construct the observation. 
@@ -171,15 +186,20 @@ With these properties specified, we have fully described the parameters necessar
 ## Generating the observation
 
 Once the particulars of the observation have been defined, we can go ahead and make the observation. 
-This means feeding our prepared parameters into the `build_datacube()` function. 
-Here, we choose not to write the output directly to file (`write_fits = F`) and output to a variable called `gadget_cube` instead. 
+This means feeding our prepared parameters into the `build_datacube` function.
+{: .fw-300 }
+
+An example is shown below.
+{: .fw-500 .text-grey-dk-100 }
 
 ```r
 gadget_cube = build_datacube(simspin_file       = simspin_data, 
                              telescope          = ifu,
                              observing_strategy = strategy,
+                             method             = "spectral",
                              write_fits         = F)
 ```
+We choose not to write the output directly to file (`write_fits = F`) and output to a variable called `gadget_cube` instead. 
 
 The returned variable will always be a list containing 4 elements:
 
@@ -187,6 +207,7 @@ The returned variable will always be a list containing 4 elements:
 2. followed by the observation summary,
 3. raw simulation images and
 4. mock observation images generated from collapsing the data cube. 
+{: .lh-tight }
 
 ```r
 > typeof(gadget_cube)
@@ -202,7 +223,8 @@ The returned variable will always be a list containing 4 elements:
 **add text about the structure of each element in the list**
 
 The overall format of this output will be consistent.
-However, the names of individual elements change to reflect the variety in the requested properties specified by [`telescope`]() and [`observing_strategy`]().
+However, the names of individual elements change to reflect the variety in the requested properties specified by [`telescope`](docs/telescope.markdown) and [`observing_strategy`](docs/observing_strategy.markdown).
+
 * For example,  `method = 'spectral'` will return a variable `spectral_cube` as its first element; specifying instead `method = 'velocity'` will return a `velocity_cube`.
 * Similarly, if we are working in velocity mode with `mass_flag = T`, the images within the `raw_images` and `observed_images` elements will include an array called `mass_image`, rather than `flux_image`.
 
@@ -210,9 +232,14 @@ However, the names of individual elements change to reflect the variety in the r
 
 ## Writing the output to FITS
 
-Using the `write_simspin_FITS()` function, the new observation can be written to a file that can be shared or re-analysed using observational pipelines.
-`SimSpin` can write such a FITS file using the variable produced by `build_datacube()`.
-A few further descriptive details are suggested as input for users of the file later on, but the function defaults to sensible suggestions, as shown in the code below.
+Using the `write_simspin_FITS` function, the new observation can be written to a file that can be shared or re-analysed using observational pipelines.
+SimSpin can write such a FITS file using the variable produced by `build_datacube`.
+{: .fw-300 }
+
+A few further descriptive details are suggested as input for users of the file later on, but the function defaults to sensible suggestions.
+
+An example is shown in the code below.
+{: .fw-500 .text-grey-dk-100 }
 
 ```r
 write_simspin_FITS(simspin_datacube   = gadget_cube,        # build_datacube() output
@@ -225,8 +252,8 @@ write_simspin_FITS(simspin_datacube   = gadget_cube,        # build_datacube() o
 ```
 
 The output of running this code will be a FITS file written at the location specified by `output_file`. 
-To explore this file within your R session, we suggest using the package `Rfits`, which can be downloaded using the instructions at the link provided [here](https://github.com/asgr/Rfits).
-We use the `Rfits_info()` function to examine the structure of the file that has been written:
+To explore this file within your R session, we suggest using the `HeaderExt` branch of the package `Rfits`, which can be downloaded [here](https://github.com/asgr/Rfits/tree/HeaderExt).
+We use the `Rfits_info` function to examine the structure of the file that has been written:
 
 ```r
 library("Rfits")
@@ -237,7 +264,7 @@ fits_summary$summary
 # [2] "XTENSION= 'IMAGE   '           / IMAGE extension"                   
 ```
 
-Here, we can clearly see that the file contains six HDU: a header table and a number of images. The exact number of HDU can vary depending on the type of observation made by `build_datacube()`. In all cases, HDU `ext = 1` will always be the header information and HDU `ext = 2` will always be the data cube produced. In this case, for a spectral data cube there are a series of `raw_images` output into subsequent HDUs. In the case of a velocity data cube, we would also see several `observed_images` included in the output.
+Here, we can clearly see that the file contains six HDU: a header table and a number of images. The exact number of HDU can vary depending on the type of observation made by `build_datacube`. In all cases, HDU `ext = 1` will always be the header information and HDU `ext = 2` will always be the data cube produced. In this case, for a spectral data cube there are a series of `raw_images` output into subsequent HDUs. In the case of a velocity data cube, we would also see several `observed_images` included in the output.
 
 The first HDU (`ext = 1`) is a header element describes the properties of the observation. This acts as a record for reproducing that identical observation again in the future. Information that is recorded in the header is listed below. These are consistent across all FITS files written using this function, regardless of variety in `build_datacube` options.
 
@@ -274,7 +301,8 @@ head$header
 ```
 
 Observing details such as the name of the person who ran the file, the name of the object and the redshift at which is was observed are all included in this header. 
-Importantly, we also record the name and location of the `SimSpin` file from which this observation was made (denoted as `ARCFILE`), enabling files to be reproduced in the future. 
+Importantly, we also record the name and location of the SimSpin file from which this observation was made (denoted as `ARCFILE`), enabling files to be reproduced in the future. 
+Similarly, the SimSpin version number is recorded within the `ORIGIN` element. 
 Admittedly, several aspects to this header have to be invented as they do not have any physical meaning for mock observations (`RA` and `DEC`, for example), but are required for consistency with their observational counterparts. 
 **We have made these *invented* properties clear to the user by stating `mocked` in the comment of the header parameters.**
 

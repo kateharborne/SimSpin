@@ -3,7 +3,7 @@ layout: default
 title: make_simspin_file
 parent: Documentation
 nav_order: 1
-last_modified_date: "Wed, 31 March 2022 18:34:00 AWST"
+last_modified_date: "Fri, 27 May 2022 15:57:00 AWST"
 ---
 
 # Making the input file for SimSpin
@@ -39,19 +39,19 @@ make_simspin_file(filename,                         # REQUIRED input file
 
 ## Input Parameters
 
-| **filename**      	| The path to the snapshot file containing the galaxy of interest. Note that this file can be a Gadget binary file or an HDF5 file directly from a simulation. In the case that your simulation outputs data in an alternative format, either see [this example](examples/generating_hdf5) for more information about how to set up an HDF5 file for `SimSpin`, or [file an issue on GitHub](https://github.com/kateharborne/SimSpin/issues/new/choose) to see the inclusion of your format in the `SimSpin` code directly.                                                                                                                                                                                                                                                                                                                                               	|
-| **cores**         	| The number of cores across which to multi-thread the problem.                                                                                                                                                                                                                                                                                                                                                     	|
-| **disk_age**      	| The age of the disk particles in Gyr, used only if the input file is an N-body model.                                                                                                                                                                                                                                                                                                                                  	|
-| **bulge_age**     	| The age of the bulge particles in Gyr, used only if the input file is an N-body model.                                                                                                                                                                                                                                                                                                                                 	|
-| **disk_Z**        	| The metallicity of the disk particles in units of solar, used only if the input file is an N-body model.                                                                                                                                                                                                                                                                                                               	|
-| **bulge_Z**       	| The metallicity of the bulge particles in units of solar, used only if the input file is an N-body model.                                                                                                                                                                                                                                                                                                              	|
-| **template**      	| The stellar templates from which to derive the SEDs for each stellar particle. Options include `"BC03lr"` (GALEXEV low resolution, Bruzual & Charlot 2003), `"BC03hr"` (GALEXEV high resolution, Bruzual & Charlot 2003) and `"EMILES"` (Vazdekis et al 2016).                                                                                                                                                          	|
-| **write_to_file** 	| Boolean to specify whether the list produced should be written to a ".Rdata" file or output to the environment. Default is TRUE, so that files can be re-observed without having the generate spectra each time.                                                                                                                                                                                                  	|
-| **output**        	| The path at which the output file is written. If not provided, file will be written at the location of the input filename with the addition of "_spectra.Rdata".                                                                                                                                                                                                                                                  	|
-| **overwrite**     	| If true, and the file already exists at the output location, a new file will be written over the old one. Default is FALSE.                                                                                                                                                                                                                                                                                       	|
-| **centre**        	| If simulation file contains all particles cutout from a box (rather than just particles from a single galaxy), you can specify the point around which the view should be centred. Numeric length = 3. Default is NA, in which case the system is centred around the median position of stellar particles.                                                                                                         	|
-| **half_mass**     	| If simulation file contains all particles cutout from a box (rather than just particles from a single galaxy), you can the half-mass value at which the alignment function is run. Numeric length = 1. Default is NA, in which case half the total mass of the supplied simulation data is used.                                                                                                                  	|
-| **sph_spawn_n**   	| Numeric describing the number of gas particles with which to sample the SPH smoothing length. Default is 1, which will not spawn additional gas particles. Increasing this value increases the number of particles used to model the gas distribution. This value may need to be tested for convergence depending on the resolution of the grid used to image the gas properties at the `build_datacube()` stage. 	|
+| `filename`     	| The path to the snapshot file containing the galaxy of interest. Note that this file can be a Gadget binary file or an HDF5 file directly from a simulation. In the case that your simulation outputs data in an alternative format, either see [this example](examples/generating_hdf5) for more information about how to set up an HDF5 file for `SimSpin`, or [file an issue on GitHub](https://github.com/kateharborne/SimSpin/issues/new/choose) to see the inclusion of your format in the `SimSpin` code directly.                                                                                                                                                                                                                                                                                                                                               	|
+| `cores`         	| The number of cores across which to multi-thread the problem.                                                                                                                                                                                                                                                                                                                                                     	|
+| `disk_age`      	| The age of the disk particles in Gyr, used only if the input file is an N-body model.                                                                                                                                                                                                                                                                                                                                  	|
+| `bulge_age`     	| The age of the bulge particles in Gyr, used only if the input file is an N-body model.                                                                                                                                                                                                                                                                                                                                 	|
+| `disk_Z`        	| The metallicity of the disk particles in units of solar, used only if the input file is an N-body model.                                                                                                                                                                                                                                                                                                               	|
+| `bulge_Z`       	| The metallicity of the bulge particles in units of solar, used only if the input file is an N-body model.                                                                                                                                                                                                                                                                                                              	|
+| `template`      	| The stellar templates from which to derive the SEDs for each stellar particle. Options include `"BC03lr"` (GALEXEV low resolution, Bruzual & Charlot 2003), `"BC03hr"` (GALEXEV high resolution, Bruzual & Charlot 2003) and `"EMILES"` (Vazdekis et al 2016). The details of these templates are shown in the [additional information](#notes) below.                                                                                                                                                         	|
+| `write_to_file` 	| Boolean to specify whether the list produced should be written to a ".Rdata" file or output to the environment. Default is TRUE, so that files can be re-observed without having the generate spectra each time.                                                                                                                                                                                                  	|
+| `output`        	| The path at which the output file is written. If not provided, file will be written at the location of the input filename with the addition of "_spectra.Rdata".                                                                                                                                                                                                                                                  	|
+| `overwrite`     	| If true, and the file already exists at the output location, a new file will be written over the old one. Default is FALSE.                                                                                                                                                                                                                                                                                       	|
+| `centre`        	| If simulation file contains all particles cutout from a box (rather than just particles from a single galaxy), you can specify the point around which the view should be centred. Numeric length = 3. Default is NA, in which case the system is centred around the median position of stellar particles.                                                                                                         	|
+| `half_mass`     	| If simulation file contains all particles cutout from a box (rather than just particles from a single galaxy), you can the half-mass value at which the alignment function is run. Numeric length = 1. Default is NA, in which case half the total mass of the supplied simulation data is used.                                                                                                                  	|
+| `sph_spawn_n`   	| Numeric describing the number of gas particles with which to sample the SPH smoothing length. Default is 1, which will not spawn additional gas particles. Increasing this value increases the number of particles used to model the gas distribution. This value may need to be tested for convergence depending on the resolution of the grid used to image the gas properties at the `build_datacube()` stage. 	|
 
 ---
 
@@ -122,7 +122,7 @@ summary(simspin_file)
 # star_part   12   data.frame list   
 # gas_part     0   -none-     NULL   
 # spectra      2   -none-     list   
-# wave      1221   -none-     numeric
+# wave       842   -none-     numeric
 ```
 - `header` is a list that contains details of the file you've just created. This allows you to recreate this file in the future using the same information. 
 ```R
@@ -163,3 +163,28 @@ simspin_file[["wave"]]
 #  [29] ... [1221]
 ```
 
+---
+## Notes
+
+### Spectral Template Choice
+
+Spectral templates provide a grid of modelled spectra for a known stellar population. The grid associates a stellar age and metallicity to each spectrum in the template. These are used throughout integral field spectroscopy to determine the stellar population properties of the observed galaxy.
+
+In SimSpin, we follow this methodology in reverse. As opposed to fitting the spectrum to find the age and metallicity of the underlying stellar population, we use the stellar age and metallicity to assign a spectrum using the chosen template library. While the output is consistent between hydrodynamical and *N*-body models, we discuss the differences in methodology between these inputs below:
+
+- **Hydrodynamical simulations** track the age and metallicity of each stellar particle. We use these parameters to select the spectrum that should be associated with each star. Individual particles are initially binned into groups of age and metallicity with width 20 Myr and 0.1 Z<sub>&#9737;</sub> respectively. Stellar particles that fall within each age-metallicity bin will be associated with a single spectrum. This simplification is made to reduce the number of spectra that  need to be stored and hence optimise memory usage within SimSpin.
+- **N-body models** consider stellar particles as collisionless bulge and disk components, but do not model their the stellar properties of age and metallicity. These properties must be assigned before SimSpin can generate a spectrum.  Of course, the values chosen will change the shape of the associated spectrum and the relative brightness of the individual constituents. Commonly, we assign different age and luminosity values to each population of particles to represent the younger, metal-rich disk and older, metal-poor bulge. This choice is arbitrary and depends on the science in question. To avoid systematic differences, the age and metallicity of all components can be set equal. 
+
+Available spectral templates include: 
+
+| Name     | Age Steps | Age Range (Gyr) | Z Steps | Z Range (Z<sub>&#9737;</sub>)| &lambda; Steps (&#8491;) | &lambda; Range (&#8491;) | 
+|----------|-----------|-----------------|---------|------------------------------|--------------------------|--------------------------|
+| `BC03lr` | 221       | 0 - 20          | 6       | 0.0001 - 0.05                | 842                      | 91 - 20000               |
+| `BC03hr` | 221       | 0 - 20          | 6       | 0.0001 - 0.05                | 6521                     | 91 - 20000               |
+| `EMILES` | 53        | 0.03 - 14       | 12      | 0.0001 - 0.04                | 20356                    | 1680 - 20000             |
+
+---
+
+Now that you've built a SimSpin file, you can go one to set up the observations with a mock telescope...
+
+[Next Step: telescope](telescope.markdown){: .btn .btn-purple }

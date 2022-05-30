@@ -3,7 +3,7 @@ layout: default
 title: telescope
 parent: Documentation
 nav_order: 2
-last_modified_date: "Wed, 30 March 2022 15:57:00 AWST"
+last_modified_date: "Fri, 27 May 2022 15:57:00 AWST"
 ---
 
 # Defining the properties of the telescope
@@ -43,16 +43,16 @@ telescope(type="IFU",                # specify a type or define your own using "
 
 ## Input Parameters
 
-| **type**              | A character string describing the type of telescope you wish to create. Default is `"IFU"`, in which case the telescope properties are described by the input parameters to this function. Other input types include: `"SAMI"`, `"MaNGA"`, `"CALIFA"` and `"MUSE"`. With these, the telescope properties are set to the default parameters specified by the respective instrument.    |
-| **fov**               | A numeric describing the diameter of the field-of-view of the telescope in arcsec.    |
-| **aperture_shape**    | A character string describing the shape of the field-of-view. Options include: `"circular"`, `"hexagonal"`, and `"square"`.   |
-| **wave_range**        | Two numeric parameters describing the beginning and end of the wavelength range visible to the telescope, given in angstrom. Format is expected `c(wave_start, wave_end)`, and errors will be issued if not in this format.   |
-| **wave_centre**       | A numeric parameter describing the centre of the wavelength range in angstrom. If no `wave_centre` is provided, SimSpin assumes that the central wavelength is at the centre of the wavelength range provided above.   |
-| **wave_res**          | A numeric that gives the resolution of the wavelength axis of the telescope in angstrom. For a given `wave_range`, this resolution defines the width of the bins along that range.    |
-| **spatial_res**       |  A numeric that gives the resolution of the spatial axis of the telescope in arcsec. For a given `fov`, this resolution defines the width of the pixels within the observation produced.  |
-| **filter**            | A character string that describes which band to use to calculate luminoisity at the telescope. Options include: `"r"`, `"g"`, `"u"`, `"i"`, and `"z"` and use the SDSS filter bandpass functions to compute the luminosity that would be detected in that band.   |
-| **lsf_fwhm**          | A numeric describing the full-width half-maximum of the Gaussian line-spread-function of the telescope in units of angstrom, i.e. the spectral uncertainty of the underlying spectrograph used in the observation.    |
-| **signal_to_noise**   | A numeric describing the target signal-to-noise ratio at any pixel.   |
+| `type`              | A character string describing the type of telescope you wish to create. Default is `"IFU"`, in which case the telescope properties are described by the input parameters to this function. Other input types include: `"SAMI"`, `"MaNGA"`, `"CALIFA"` and `"MUSE"`. With these, the telescope properties are set to the default parameters specified by the respective instrument.    |
+| `fov`               | A numeric describing the diameter of the field-of-view of the telescope in arcsec.    |
+| `aperture_shape`    | A character string describing the shape of the field-of-view. Options include: `"circular"`, `"hexagonal"`, and `"square"`.   |
+| `wave_range`        | Two numeric parameters describing the beginning and end of the wavelength range visible to the telescope, given in angstrom. Format is expected `c(wave_start, wave_end)`, and errors will be issued if not in this format.   |
+| `wave_centre`       | A numeric parameter describing the centre of the wavelength range in angstrom. If no `wave_centre` is provided, SimSpin assumes that the central wavelength is at the centre of the wavelength range provided above.   |
+| `wave_res`         | A numeric that gives the resolution of the wavelength axis of the telescope in angstrom. For a given `wave_range`, this resolution defines the width of the bins along that range.    |
+| `spatial_res`       |  A numeric that gives the resolution of the spatial axis of the telescope in arcsec. For a given `fov`, this resolution defines the width of the pixels within the observation produced.  |
+| `filter`            | A character string that describes which band to use to calculate luminoisity at the telescope. Options include: `"r"`, `"g"`, `"u"`, `"i"`, and `"z"` and use the SDSS filter bandpass functions to compute the luminosity that would be detected in that band.   |
+| `lsf_fwhm`          | A numeric describing the full-width half-maximum of the Gaussian line-spread-function of the telescope in units of angstrom, i.e. the spectral uncertainty of the underlying spectrograph used in the observation.    |
+| `signal_to_noise`   | A numeric describing the target signal-to-noise ratio at any pixel.   |
 
 ---
 
@@ -120,11 +120,11 @@ scope$type
 scope[["type"]]
 # [1] "IFU"
 ```
-For pre-defined `type` classes, certain parameters cannot be modified:
+For pre-defined `type` classes, certain parameters cannot be modified. Values highlighted in purple below (for example, the field-of-view for a MaNGA telescope) can be selected by adding `fov = 12` to the inputs. 
 
 | *telescope parameter* | *units* | **SAMI** | **MaNGA** | **CALIFA** | **MUSE** | **Hector** |
 | --------------------- | ------- | -------- | --------- | ---------- | -------- | ---------- |
-| `fov` | arcsec | 15 | *n* = 12, 17, 22, 27 or 32 | 74 | *n* < 60 | 30 |
+| `fov` | arcsec | 15 | *n* = 12, 17, 22, 27 or 32 {: .text-purple-000} | 74 | *n* < 60 {: .text-purple-000} | 30 |
 | `aperture_shape` |   | "circular" | "hexagonal" | "hexagonal" | "square" | "hexagonal" |
 | `wave_range` | &#8491;[^1] | 3750 - 5750 | 3600 - 6350 | 3700 – 4750 | 4700.15 - 9351.4 | 3720 - 5910 |
 | `wave_centre` | &#8491;[^1] | 4800 | 4700 | 4225 | 6975 | 4815 |
@@ -134,3 +134,9 @@ For pre-defined `type` classes, certain parameters cannot be modified:
 
 
 [^1]: Wave ranges and central wave lengths are quoted for the blue arm of each spectrograph as this is the wavelength range across which the kinematics are commonly measured. 
+
+---
+
+Now that you've initiallised the telescope, you can move on to describing the strategy of your observing run...
+
+[Next Step: observing_strategy](observing_strategy.markdown){: .btn .btn-purple }
