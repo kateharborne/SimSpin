@@ -93,7 +93,7 @@ In this case, because the input file is an *N*-body model containing both bulge 
 For a hydrodynamical model, the  `spectra` element may have many more entries due to the broader variety in stellar ages and metallicities, but will remain an element of mode `list`. 
 
 Once a file has been produced for a single simulated galaxy, the same file can be used to produce any number of different observations.
-*Bear in mind that the resolution and wavelength range of the spectral templates used to generate the file need to overlap with the resolution and wavelength range of the observing telescope. A **WARNING** will be issued by the code if these do not match.*
+*Bear in mind that the resolution and wavelength range of the spectral templates used to generate the file need to overlap with the resolution and wavelength range of the observing telescope. You can check these parameters for a given template [here](docs/make_simspin_file.markdown#notes).  A **WARNING** will be issued by the code if these do not match.*
 
 ---
 
