@@ -200,15 +200,15 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       observation$LSF_conv = FALSE
     } else {
       observation$LSF_conv = TRUE
-      observation$lsf_sigma = (lsf_fwhm / (2 * sqrt(2*log(2)))) / simspin_data$header$Template_waveres
-      #observation$lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2)))) / simspin_data$header$Template_waveres
+      #observation$lsf_sigma = (lsf_fwhm / (2 * sqrt(2*log(2)))) / simspin_data$header$Template_waveres
+      observation$lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2)))) #/ simspin_data$header$Template_waveres
       # To get to the telescope's LSF, we only need to convolve with a Gaussian the width of the additional
       # difference between the redshifted template and the intrinsic telescope LSF.
 
-      for (spectrum in 1:length(simspin_data$spectra)){
-        convolved_spectrum = .lsf_convolution(observation, simspin_data$spectra[[spectrum]], observation$lsf_sigma)
-        simspin_data$spectra[[spectrum]] = convolved_spectrum
-      } # convolving the intrinsic sectra with the convolution kernel sized for the LSF
+      # for (spectrum in 1:length(simspin_data$spectra)){
+      #   convolved_spectrum = .lsf_convolution(observation, simspin_data$spectra[[spectrum]], observation$lsf_sigma)
+      #   simspin_data$spectra[[spectrum]] = convolved_spectrum
+      # } # convolving the intrinsic sectra with the convolution kernel sized for the LSF
 
     }
 
