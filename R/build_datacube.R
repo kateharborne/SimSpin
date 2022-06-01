@@ -193,16 +193,23 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     spec_res_sigma_sq = ((lsf_fwhm^2) - (lsf_fwhm_temp^2))
 
     if (spec_res_sigma_sq < 0){ # if the lsf is smaller than the wavelength resolution of the spectra
-      warning(cat("WARNING! - Spectral resolution of provided template spectra is lower than the requested telescope spectral resolution.\n"))
-      cat("LSF_telescope = ", observation$lsf_fwhm,  " A < LSF_templates ", lsf_fwhm_temp, " A. \n")
+      warning(cat("WARNING! - Spectral resolution of provided template spectra is greater than the requested telescope spectral resolution.\n"))
+      cat("LSF_telescope when de-redshifted to templates = ", lsf_fwhm,  " A < LSF_templates ", lsf_fwhm_temp, " A. \n")
       cat("No LSF convolution will be applied in this case. \n")
-      cat("Intrinsic LSF of observation = ", lsf_fwhm_temp, " A for comparison with kinematic cubes. \n")
+      #cat("Intrinsic LSF of observation = ", lsf_fwhm_temp, " A for comparison with kinematic cubes. \n")
       observation$LSF_conv = FALSE
     } else {
       observation$LSF_conv = TRUE
-      observation$lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2))))
+      observation$lsf_sigma = (lsf_fwhm / (2 * sqrt(2*log(2)))) / simspin_data$header$Template_waveres
+      #observation$lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2)))) / simspin_data$header$Template_waveres
       # To get to the telescope's LSF, we only need to convolve with a Gaussian the width of the additional
       # difference between the redshifted template and the intrinsic telescope LSF.
+
+      for (spectrum in 1:length(simspin_data$spectra)){
+        convolved_spectrum = .lsf_convolution(observation, simspin_data$spectra[[spectrum]], observation$lsf_sigma)
+        simspin_data$spectra[[spectrum]] = convolved_spectrum
+      } # convolving the intrinsic sectra with the convolution kernel sized for the LSF
+
     }
 
     if (verbose){cat("Generating spectra per spaxel... \n")}

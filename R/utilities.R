@@ -858,11 +858,15 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 # Function to apply LSF to spectra
 .lsf_convolution = function(observation, luminosity, lsf_sigma){
 
-  scaled_sigma = lsf_sigma / observation$wave_res # scaling the size of the gaussian to match the pixel dimensions
-  kernel = stats::dnorm(seq(-scaled_sigma*5,scaled_sigma*5,length.out = 25), mean = 0, sd = scaled_sigma)
-  lsf_gauss = kernel/sum(kernel)
-  lum = stats::convolve(luminosity, lsf_gauss, type="open")
-  end = (length(luminosity) + length(lsf_gauss) - 1) - 12
+  kernel_radius = (4 * lsf_sigma + 0.5)
+  x = seq(-kernel_radius, kernel_radius, length.out = 25)
+  phi_x = exp((-0.5 / (lsf_sigma^2)) * (x^2))
+  phi_x = phi_x / sum(phi_x)
+
+  #kernel = stats::dnorm(seq(-lsf_sigma*5,lsf_sigma*5,length.out = 25), mean = 0, sd = scaled_sigma)
+  #lsf_gauss = kernel/sum(kernel)
+  lum = stats::convolve(luminosity, phi_x, type="open")
+  end = (length(luminosity) + length(phi_x) - 1) - 12
 
   return(lum[13:end])
 }
@@ -938,6 +942,10 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
       intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
         (galaxy_sample$Initial_Mass[p] * 1e10) # reading relavent spectra
 
+#      if (observation$LSF_conv){ # should the intrinsic spectra be degraded for telescope LSF?
+#       intrinsic_spectra = .lsf_convolution(observation=observation, luminosity=intrinsic_spectra, lsf_sigma=observation$lsf_sigma)
+#      }
+
       # pulling wavelengths and using doppler formula to compute the shift in
       #   wavelengths caused by LOS velocity
       wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
@@ -947,10 +955,6 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
       part_lum = stats::approx(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
 
       luminosity = luminosity + part_lum
-    }
-
-    if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-      luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=observation$lsf_sigma)
     }
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
@@ -998,6 +1002,11 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
                        intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
                          (galaxy_sample$Initial_Mass[p] * 1e10) # reading relevant spectra
 
+#                       if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
+#                         intrinsic_spectra = .lsf_convolution(observation=observation, luminosity=intrinsic_spectra,
+#                                                       lsf_sigma=observation$lsf_sigma)
+#                       }
+
                        # pulling wavelengths and using doppler formula to compute the shift in
                        #   wavelengths caused by LOS velocity
                        wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
@@ -1010,10 +1019,6 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 
                      }
 
-                     if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-                       luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
-                                                     lsf_sigma=observation$lsf_sigma)
-                     }
                      if (!is.na(observation$signal_to_noise)){ # should we add noise?
                        luminosity = .add_noise(luminosity, observation$signal_to_noise)
                      }
