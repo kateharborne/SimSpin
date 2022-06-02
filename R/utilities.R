@@ -858,10 +858,10 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 # Function to apply LSF to spectra
 .lsf_convolution = function(observation, luminosity, lsf_sigma){
 
-  lsf_sigma_scaled = lsf_sigma / observation$wave_res
-  kernel_radius = (4 * lsf_sigma_scaled + 0.5)
+  lsf_sigma_scaled = lsf_sigma
+  kernel_radius = (4 * lsf_sigma + 0.5)
   x = seq(-kernel_radius, kernel_radius, length.out = 25)
-  phi_x = exp((-0.5 / (lsf_sigma_scaled^2)) * (x^2))
+  phi_x = exp((-0.5 / (lsf_sigma^2)) * (x^2)) / (lsf_sigma * sqrt(2*pi))
   phi_x = phi_x / sum(phi_x)
 
   #kernel = stats::dnorm(seq(-lsf_sigma*5,lsf_sigma*5,length.out = 25), mean = 0, sd = scaled_sigma)
@@ -958,10 +958,10 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
       luminosity = luminosity + part_lum
     }
 
-    if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-      luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
-                                    lsf_sigma=observation$lsf_sigma)
-    }
+    # if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
+    #   luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
+    #                                 lsf_sigma=observation$lsf_sigma)
+    # }
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
       luminosity = .add_noise(luminosity, observation$signal_to_noise)
@@ -1025,10 +1025,10 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 
                      }
 
-                     if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-                       luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
-                                                     lsf_sigma=observation$lsf_sigma)
-                     }
+                     # if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
+                     #   luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
+                     #                                 lsf_sigma=observation$lsf_sigma)
+                     # }
 
                      if (!is.na(observation$signal_to_noise)){ # should we add noise?
                        luminosity = .add_noise(luminosity, observation$signal_to_noise)
