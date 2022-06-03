@@ -179,7 +179,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     if (observation$wave_res < min(diff(wavelength))){
       warning(cat("WARNING! - Wavelength resolution of provided template spectra at this redshift is too coarse for the requested telescope wavelength resolution.\n"))
       cat("Dlambda_telescope = ", observation$wave_res,  " A < Dlambda_templates ", min(diff(wavelength)), " A. \n")
-      cat("This will cause some interpolation that may make spectral fitting techniques fail.")
+      cat("This will cause some interpolation that may make spectral fitting techniques fail. \n")
       }
 
     # Similarly, the template spectra for each particle have some intrinsic spectral resolution
