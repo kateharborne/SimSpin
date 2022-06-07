@@ -186,7 +186,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     # These vary dependent on the template. If the requested spectral resolution of the telescope
     # is lower than the spectral resolution of the templates, we can't convolve them.
 
-    lsf_fwhm   = observation$lsf_fwhm
+    lsf_fwhm      = observation$lsf_fwhm
     lsf_fwhm_temp = simspin_data$header$Template_LSF * (observation$z + 1)
     # applying a shift to that intrinsic template LSF due to redshift, z
 
