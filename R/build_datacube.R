@@ -194,9 +194,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (spec_res_sigma_sq < 0){ # if the lsf is smaller than the wavelength resolution of the spectra
       warning(cat("WARNING! - Spectral resolution of provided template spectra is greater than the requested telescope spectral resolution.\n"))
-      cat("LSF_telescope when de-redshifted to templates = ", lsf_fwhm,  " A < LSF_templates ", lsf_fwhm_temp, " A. \n")
+      cat("LSF_telescope = ", lsf_fwhm,  " A < LSF_templates (at redshift z) ", lsf_fwhm_temp, " A. \n")
       cat("No LSF convolution will be applied in this case. \n")
-      #cat("Intrinsic LSF of observation = ", lsf_fwhm_temp, " A for comparison with kinematic cubes. \n")
+      cat("Intrinsic LSF of observation = ", lsf_fwhm_temp, " A for comparison with kinematic cubes. \n")
       observation$LSF_conv = FALSE
     } else {
       observation$LSF_conv = TRUE
