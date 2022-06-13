@@ -59,6 +59,15 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              write_to_file=TRUE, output, overwrite = F,
                              centre=NA, half_mass=NA, sph_spawn_n=1){
 
+  header = list("InputFile" = filename,
+                "OutputFile" = NULL,
+                "Type" = character(1),
+                "Template" = character(1),
+                "Template_LSF" = numeric(1),
+                "Template_waveres" = numeric(1),
+                "Origin" = paste0("SimSpin_v", packageVersion("SimSpin")),
+                "Date" = Sys.time())
+
   temp_name = stringr::str_to_upper(template)
 
   if (write_to_file){
@@ -69,14 +78,24 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
                "If you wish to overwrite this file, please specify 'overwrite=T'. \n"))
     }
+    header$OutputFile = output
   }
 
   if(temp_name == "BC03LR" | temp_name == "BC03"){
     temp = SimSpin::BC03lr
+    header$Template = "BC03lr"
+    header$Template_LSF = 3 # as according to Bruzual & Charlot (2003) MNRAS 344, pg 1000-1028
+    header$Template_waveres = min(diff(temp$Wave))
   } else if (temp_name == "BC03HR"){
     temp = SimSpin::BC03hr
+    header$Template = "BC03hr"
+    header$Template_LSF = 3 # as according to Bruzual & Charlot (2003) MNRAS 344, pg 1000-1028
+    header$Template_waveres = min(diff(temp$Wave))
   } else if (temp_name == "EMILES"){
     temp = SimSpin::EMILES
+    header$Template = "EMILES"
+    header$Template_LSF = 2.51 # as according to Vazdekis et al (2016) MNRAS 463, pg 3409-3436
+    header$Template_waveres = min(diff(temp$Wave))
   } else {
     stop(cat("Error: template specified is unavailable.", "\n",
              "Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'"))
@@ -89,6 +108,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   galaxy_data = tryCatch(expr = {.read_gadget(filename)},
                          error = function(e){.read_hdf5(filename, cores)})
+
+  header$Type = galaxy_data$head$Type
 
   Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
 
@@ -208,7 +229,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   }
 
-  simspin_file = list("star_part" = galaxy_data$star_part,
+  simspin_file = list("header"    = header,
+                      "star_part" = galaxy_data$star_part,
                       "gas_part"  = galaxy_data$gas_part,
                       "spectra"   = sed,
                       "wave"      = temp$Wave)

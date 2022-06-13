@@ -835,15 +835,6 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   return(as.vector(ap_region))
 }
 
-.interpolate_spectra = function(shifted_wave, spectra, wave_seq){ # function for interpolating the spectra onto a new grid
-
-  shifted_spectra = data.table::as.data.table(matrix(data=0.0, nrow = length(wave_seq), ncol=dim(shifted_wave)[1]))
-  for(j in 1:dim(shifted_wave)[1]){
-    data.table::set(x = shifted_spectra, i = NULL, j = j, value = stats::approx(x = shifted_wave[j,], y = spectra[[j]], xout = wave_seq, rule=1)[[2]])
-  }
-  return(rowSums(shifted_spectra))
-}
-
 .sum_velocities = function(galaxy_sample, observation){
   vel_diff = function(lum, vy){diff((lum * pnorm(observation$vbin_edges, mean = vy,
                                                      sd = observation$vbin_error)))}
@@ -867,11 +858,13 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 # Function to apply LSF to spectra
 .lsf_convolution = function(observation, luminosity, lsf_sigma){
 
-  scaled_sigma = lsf_sigma / observation$wave_res # scaling the size of the gaussian to match the pixel dimensions
-  kernel = stats::dnorm(seq(-scaled_sigma*5,scaled_sigma*5,length.out = 25), mean = 0, sd = scaled_sigma)
-  lsf_gauss = kernel/sum(kernel)
-  lum = stats::convolve(luminosity, lsf_gauss, type="open")
-  end = (length(luminosity) + length(lsf_gauss) - 1) - 12
+  kernel_radius = (4 * lsf_sigma + 0.5)
+  x = seq(-kernel_radius, kernel_radius, length.out = 25)
+  phi_x = exp((-0.5 / (lsf_sigma^2)) * (x^2)) / (lsf_sigma * sqrt(2*pi))
+  phi_x = phi_x / sum(phi_x)
+
+  lum = stats::convolve(luminosity, phi_x, type="open")
+  end = (length(luminosity) + length(phi_x) - 1) - 12
 
   return(lum[13:end])
 }
@@ -940,22 +933,28 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
     part_map[part_in_spaxel$pixel_pos[i]] = num_part
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
-    intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
-      (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-    # pulling wavelengths and using doppler formula to compute the shift in
-    #   wavelengths caused by LOS velocity
-    wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
-    wave_shift = ((galaxy_sample$vy / .speed_of_light) * wave) + wave
+    luminosity = numeric(length(observation$wave_seq)) # initiallise a spectrum array for this pixel
 
-    # interpolate each shifted wavelength to telescope grid of wavelengths
-    #   and sum to one spectra
-    luminosity = .interpolate_spectra(shifted_wave = wave_shift, spectra = intrinsic_spectra,
-                                      wave_seq = observation$wave_seq)
+    for (p in 1:num_part){
+      intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
+        (galaxy_sample$Initial_Mass[p] * 1e10) # reading relavent spectra
 
-    if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-      luminosity = .lsf_convolution(observation=observation, luminosity=luminosity, lsf_sigma=observation$lsf_sigma)
+      # pulling wavelengths and using doppler formula to compute the shift in
+      #   wavelengths caused by LOS velocity
+      wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
+
+      # interpolate each shifted wavelength to telescope grid of wavelengths
+      #   and sum to one spectra
+      part_lum = stats::approx(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
+
+      luminosity = luminosity + part_lum
     }
+
+    # if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
+    #   luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
+    #                                 lsf_sigma=observation$lsf_sigma)
+    # }
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
       luminosity = .add_noise(luminosity, observation$signal_to_noise)
@@ -995,24 +994,30 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
                      part_map = num_part
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
-                     intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
-                       (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-                     # pulling wavelengths and using doppler formula to compute the shift in
-                     #   wavelengths caused by LOS velocity
-                     wave = matrix(data = rep(wavelength, num_part), nrow = num_part, byrow=T)
-                     wave_shift = ((galaxy_sample$vy / .speed_of_light) * wave) + wave
+                     luminosity = numeric(length(observation$wave_seq)) # initialize a spectrum array for this pixel
 
-                     # interpolate each shifted wavelength to telescope grid of wavelengths
-                     #   and sum to one spectra
-                     luminosity = .interpolate_spectra(shifted_wave = wave_shift,
-                                                       spectra = intrinsic_spectra,
-                                                       wave_seq = observation$wave_seq)
+                     for (p in 1:num_part){
+                       intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
+                         (galaxy_sample$Initial_Mass[p] * 1e10) # reading relevant spectra
 
-                     if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-                       luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
-                                                     lsf_sigma=observation$lsf_sigma)
+                       # pulling wavelengths and using doppler formula to compute the shift in
+                       #   wavelengths caused by LOS velocity
+                       wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
+
+                       # interpolate each shifted wavelength to telescope grid of wavelengths
+                       #   and sum to one spectra
+                       part_lum = stats::approx(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
+
+                       luminosity = luminosity + part_lum
+
                      }
+
+                     # if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
+                     #   luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
+                     #                                 lsf_sigma=observation$lsf_sigma)
+                     # }
+
                      if (!is.na(observation$signal_to_noise)){ # should we add noise?
                        luminosity = .add_noise(luminosity, observation$signal_to_noise)
                      }
@@ -1065,20 +1070,27 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
       galaxy_sample[, luminosity := Mass, ]
 
     } else {
-      intrinsic_spectra = simspin_data$spectra[ , c(galaxy_sample$sed_id), with=FALSE] *
-        (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
 
-      # transform luminosity into flux detected at telescope
-      #    flux in units erg/s/cm^2/Ang
-      for (j in 1:num_part){
-        set(intrinsic_spectra, i=NULL, j = j,
-            value = ((intrinsic_spectra[[j]]*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)))
-        }
+      band_lum = numeric(num_part)
 
-      # computing the r-band luminosity per particle from spectra
-      galaxy_sample[ , luminosity := .bandpass(wave = simspin_data$wave,
-                                               flux = intrinsic_spectra,
-                                               filter = filter), ]
+      for (p in 1:num_part){
+
+        intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
+          (galaxy_sample$Initial_Mass[p] * 1e10) # reading particle spectrum
+
+        # transform luminosity into flux detected at telescope
+        #    flux in units erg/s/cm^2/Ang
+        flux_spectra =
+        (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+
+        # computing the r-band luminosity per particle from spectra
+        band_lum[p] = .bandpass(wave = simspin_data$wave,
+                                  flux = flux_spectra,
+                                  filter = filter)
+      }
+
+      galaxy_sample[ , luminosity := band_lum, ]
+
       }
 
 
@@ -1124,20 +1136,28 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
                        galaxy_sample[, luminosity := Mass, ]
 
                      } else {
-                       intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE] *
-                         (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
-                        # transform luminosity into flux detected at telescope
-                        #    flux in units erg/s/cm^2/Ang
-                       for (j in 1:num_part){
-                         set(intrinsic_spectra, i=NULL, j = j,
-                             value = ((intrinsic_spectra[[j]]*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)))
+
+                       band_lum = numeric(num_part)
+
+                       for (p in 1:num_part){
+                         intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
+                           (galaxy_sample$Initial_Mass[p] * 1e10) # reading relavent spectra
+
+                         # transform luminosity into flux detected at telescope
+                         #    flux in units erg/s/cm^2/Ang
+                         flux_spectra =
+                           (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+
+                         # computing the r-band luminosity per particle from spectra
+                         band_lum[p] = .bandpass(wave = simspin_data$wave,
+                                                 flux = flux_spectra,
+                                                 filter = filter)
+
                        }
-                        # computing the r-band luminosity per particle from spectra
-                       # computing the r-band luminosity per particle from spectra
-                       galaxy_sample[ , luminosity := .bandpass(wave = simspin_data$wave,
-                                                                flux = intrinsic_spectra,
-                                                                filter = filter), ]
-                      }
+
+                       galaxy_sample[ , luminosity := band_lum, ]
+
+                     }
 
                      # adding the "gaussians" of each particle to the velocity bins
                      vel_spec = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
