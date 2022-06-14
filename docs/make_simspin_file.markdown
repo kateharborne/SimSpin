@@ -8,12 +8,12 @@ last_modified_date: "Fri, 27 May 2022 15:57:00 AWST"
 
 # Making the input file for SimSpin
 
-In order to build a data cube with `SimSpin`, we need to construct an input file.
+In order to build a data cube with SimSpin, we need to construct an input file.
 {: .fs-5 .fw-300 .pb-2 }
 
 The purpose of this input file is to prepare all the information of the supplied simulation in a consistent format.
 It also aims to prepare the computationally expensive steps only once (i.e. the generation of spectra for each star).
-Once we have generated a `SimSpin` file, that file can be used as input to `build_datacube` many times. 
+Once we have generated a SimSpin file, that file can be used as input to `build_datacube` many times. 
 {: .fw-300 }
 
 

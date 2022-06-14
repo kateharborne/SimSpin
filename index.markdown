@@ -21,7 +21,7 @@ A package for producing mock observations of particle simulations
 <img align="right" src="assets/images/logo.png" width="175" height="175" />
 {: .pl-4 .pb-1 } 
 
-[`SimSpin`](https://github.com/kateharborne/SimSpin) is an R-package designed to take a simulation of a galaxy and produce a "mock" integral field spectroscopy (IFS) observation.
+[SimSpin](https://github.com/kateharborne/SimSpin) is an R-package designed to take a simulation of a galaxy and produce a "mock" integral field spectroscopy (IFS) observation.
 {: .fs-5 .fw-300 }
 
 This software can be used to produce a synthetic **data cube** - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
