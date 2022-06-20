@@ -44,8 +44,8 @@
 #'telescope = telescope(type="SAMI")
 #'
 
-telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c(3700,5700),
-                     wave_centre, wave_res=1.04, spatial_res=0.5, filter="r", lsf_fwhm=2.65,
+telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(3700,5700),
+                     wave_centre, wave_res=1.04, spatial_res, filter="r", lsf_fwhm=2.65,
                      signal_to_noise = 10, method){
 
   if (!missing(method)){
@@ -112,7 +112,24 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
     }
 
     if(stringr::str_to_upper(type)  == "MANGA"){
+
       spatial_res = 0.5
+
+      if (missing(fov)){
+        fov = 12
+      } else {
+        fov_pos = c(12, 17, 22, 27, 32)
+        if (!fov %in% fov_pos){
+          suggested_fov = fov_pos[which((fov_pos - fov) > 0)[1]]
+          warning(paste0(">>> WARNING! >>> \n
+                         `fov` specified is not an option for telescope type `MaNGA`. \n
+                         `fov` options include 12, 17, 22, 27, or 32. \n
+                         Setting 'fov' to the nearest available option. \n
+                         fov = ", suggested_fov))
+          fov = suggested_fov
+        } # catching any inputs that are not suitable for MaNGA telescope
+      }
+
       output = list(type            = "MaNGA",
                     fov             = fov,
                     aperture_shape  = "hexagonal",
@@ -127,7 +144,35 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
     }
 
     if(stringr::str_to_upper(type)  == "MUSE"){
-      spatial_res = 0.2
+
+      if (missing(spatial_res)){
+        spatial_res = 0.2
+      } else {
+        pos_spatial_res = c(0.025, 0.2)
+        if (!spatial_res %in% pos_spatial_res){
+          spatial_res = 0.2
+          warning(">>> WARNING! >>> \n
+                  `spatial_res` specified is not an option for telescope type `MUSE`. \n
+                  `spatial_res` options include 0.025 (NFM) or 0.2 (WFM). \n
+                  Setting `spatial_res` to the default. \n
+                  spatial_res = 0.2 ")
+
+        }
+      }
+
+      if (missing(fov)){
+        fov = 5
+      } else {
+        if (fov > 60){
+          warning(paste0(">>> WARNING! >>> \n
+                         `fov` specified is not an option for telescope type 'MUSE'. \n
+                         `fov` options must be less than 60. \n
+                         Setting `fov` to the nearest available option. \n
+                         fov = 60"))
+          fov = 60
+        } # catching any inputs that are not suitable for MaNGA telescope
+      }
+
       output = list(type            = "MUSE",
                     fov             = fov,
                     aperture_shape  = "square",
@@ -178,6 +223,9 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
 
     if(stringr::str_to_upper(type)  == "IFU"){
 
+      if (missing(fov)){fov = 15} # setting to the default parameter expected
+      if (missing(spatial_res)){spatial_res = 0.5}
+
       output = list(type            = "IFU",
                     fov             = fov,
                     aperture_shape  = stringr::str_to_lower(aperture_shape),
@@ -190,7 +238,9 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
                     signal_to_noise = signal_to_noise,
                     sbin            = floor(fov / spatial_res))
     }
+
   } else {
+
     if(stringr::str_to_upper(type)  == "SAMI"){
       fov = 15
       spatial_res = 0.5
@@ -209,7 +259,24 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
     }
 
     if(stringr::str_to_upper(type)  == "MANGA"){
+
       spatial_res = 0.5
+
+      if (missing(fov)){
+        fov = 12
+      } else {
+        fov_pos = c(12, 17, 22, 27, 32)
+        if (!fov %in% fov_pos){
+          suggested_fov = fov_pos[which((fov_pos - fov) > 0)[1]]
+          warning(paste0(">>> WARNING! >>> \n
+                         `fov` specified is not an option for telescope type `MaNGA`. \n
+                         `fov` options include 12, 17, 22, 27, or 32. \n
+                         Setting `fov` to the nearest available option. \n
+                         fov = ", suggested_fov))
+          fov = suggested_fov
+        } # catching any inputs that are not suitable for MaNGA telescope
+      }
+
       output = list(type            = "MaNGA",
                     method          = method,
                     fov             = fov,
@@ -225,7 +292,35 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
     }
 
     if(stringr::str_to_upper(type)  == "MUSE"){
-      spatial_res = 0.2
+
+      if (missing(spatial_res)){
+        spatial_res = 0.2
+      } else {
+        pos_spatial_res = c(0.025, 0.2)
+        if (!spatial_res %in% pos_spatial_res){
+          spatial_res = 0.2
+          warning(">>> WARNING! >>> \n
+                  `spatial_res` specified is not an option for telescope type `MUSE`. \n
+                  `spatial_res` options include 0.025 (NFM) or 0.2 (WFM). \n
+                  Setting 'spatial_res' to the default. \n
+                  spatial_res = 0.2 ")
+
+        }
+      }
+
+      if (missing(fov)){
+          fov = 5
+        } else {
+          if (fov > 60){
+            warning(paste0(">>> WARNING! >>> \n
+                         `fov` specified is not an option for telescope type `MUSE`. \n
+                         `fov` options must be less than 60. \n
+                         Setting `fov` to the nearest available option. \n
+                         fov = 60"))
+            fov = 60
+          } # catching any inputs that are not suitable for MaNGA telescope
+        }
+
       output = list(type            = "MUSE",
                     method          = method,
                     fov             = fov,
@@ -278,6 +373,9 @@ telescope = function(type="IFU", fov=15, aperture_shape="circular", wave_range=c
     }
 
     if(stringr::str_to_upper(type)  == "IFU"){
+
+      if (missing(fov)){fov = 15} # setting to the default parameter expected
+      if (missing(spatial_res)){spatial_res = 0.5}
 
       output = list(type            = "IFU",
                     fov             = fov,
