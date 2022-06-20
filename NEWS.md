@@ -1,8 +1,8 @@
-# SimSpin v2.3.0 News
+# SimSpin v2.3.1 News
 
 ### Author: Kate Harborne
 
-### Last edit: 24/05/22
+### Last edit: 20/06/22
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -43,6 +43,7 @@ Below is a table containing a summary of all changes made to SimSpin, since the 
 | 24/05/22 	| *Medium change* Update to `build_datacube()` -                                                                                                                                                                                                                                                                                         	| 2.2.0   	|                                          	|
 |          	| (1) `method` of observation is now specified directly in the `build_datacube` function - rather than within `telescope()`. This means that a given telescope can be specified once, while the type of cube being built can be modified. This is more logical as an inbuilt telescope type now only needs to be specified by "type".    	|         	|                                          	|
 |          	| (2) `output_location` has modified behaviour to allow a user to just specify an output PATH (rather than having to auto-save FITS to the same directory as the input SimSpin file). Documentation updated to reflect this change.                                                                                                      	|         	|                                          	|
-| 13/06/22 	| *Medium change* Update to `build_datacube()` and `make_simspin_file()` -                                                                                                                                                                                                                                                               	| 2.3.0   	|                                          	|
+| 13/06/22 	| *Medium change* Update to `build_datacube()` and `make_simspin_file()` -                                                                                                                                                                                                                                                               	| 2.3.0   	| 62afd85ecd11bfdfb91832d8de49c9abe40eca9f 	|
 |          	| (1) Output SimSpin files now include an additional `header` element describing the code version with which the file was made, the properties and name of the template used to derive particle spectra, and the type of input simulation.                                                                                               	|         	|                                          	|
 |          	| (2) The LSF treatment in `build_datacube` has been modified to account for the fact that the underlying spectral templates have a LSF themselves, and it is only necessary to convolve these up by the mean-square difference between the teescope LSF and the input template.                                                         	|         	|                                          	|
+| 20/06/22 	| *Minor bugfix*. Updating `telescope` class to allow two modes of spatial resolution of the MUSE telescope. This addresses Issue #43. Similarly, we've added the requirement for the MUSE field-of-view to be less than 60" and for MaNGA fov to be from the specific selection of options (12, 17, 22, 27, 32).                        	| 2.3.1   	|                                          	|
