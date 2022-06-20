@@ -18,10 +18,41 @@ test_that("Initial run of telescope() function with default types - SAMI.", {
 
 test_that("Initial run of telescope() function with default types - MaNGA", {
   expect_length(telescope(type="MaNGA"), telescope_length)
+  expect_warning(telescope(type="MaNGA", fov = 15))
+
+  manga = suppressWarnings(telescope(type="MaNGA", fov = 15))
+  expect_true(manga$fov == 17)
+  expect_length(manga, telescope_length)
+  remove(manga)
 })
 
-test_that("Initial run of telescope() function with default types - MaNGA", {
+test_that("Initial run of telescope() function with default types - MUSE", {
   expect_length(telescope(type="MUSE"), telescope_length)
+  expect_length(telescope(type="MUSE", fov = 16), telescope_length)
+  expect_length(telescope(type="MUSE", spatial_res = 0.2), telescope_length)
+  expect_length(telescope(type="MUSE", spatial_res = 0.025), telescope_length)
+  expect_warning(telescope(type="MUSE", spatial_res = 0.1))
+  expect_warning(telescope(type="MUSE", fov = 61))
+
+  # checking that fov is automatically rounded down to 60
+  muse60 = suppressWarnings(telescope(type="MUSE", fov = 61))
+  expect_true(muse60$fov == 60)
+  expect_length(muse60, telescope_length)
+  remove(muse60)
+
+  # checking that spatial res is automatically set to 0.2
+  muse02 = suppressWarnings(telescope(type="MUSE", spatial_res = 0.1))
+  expect_true(muse02$spatial_res == 0.2)
+  expect_length(muse02, telescope_length)
+  remove(muse02)
+
+  # checking that spatial res can be set to NFM
+  museNFM = telescope(type="MUSE", spatial_res = 0.025)
+  expect_true(museNFM$spatial_res == 0.025)
+  expect_length(museNFM, telescope_length)
+  remove(museNFM)
+
+
 })
 
 test_that("Initial run of telescope() function with default types - Hector", {
@@ -103,7 +134,10 @@ test_that("telescope() issues warning when method parameter is given.", {
 
   expect_warning(telescope(type="SAMI", method = "spectral"))
   expect_warning(telescope(type="MaNGA", method = "spectral"))
+  expect_warning(telescope(type="MaNGA", method = "spectral", fov = 15))
   expect_warning(telescope(type="MUSE", method = "spectral"))
+  expect_warning(telescope(type="MUSE", method = "spectral", fov = 61))
+  expect_warning(telescope(type="MUSE", method = "spectral", spatial_res = 0.1))
   expect_warning(telescope(type="Hector", method = "spectral"))
   expect_warning(telescope(type="CALIFA", method = "spectral"))
 })
