@@ -20,10 +20,15 @@ test_that("Initial run of telescope() function with default types - MaNGA", {
   expect_length(telescope(type="MaNGA"), telescope_length)
   expect_warning(telescope(type="MaNGA", fov = 15))
 
-  manga = suppressWarnings(telescope(type="MaNGA", fov = 15))
-  expect_true(manga$fov == 17)
-  expect_length(manga, telescope_length)
-  remove(manga)
+  manga15 = suppressWarnings(telescope(type="MaNGA", fov = 15))
+  expect_true(manga15$fov == 17)
+  expect_length(manga15, telescope_length)
+  remove(manga15)
+
+  manga33 = suppressWarnings(telescope(type="MaNGA", fov = 33))
+  expect_true(manga33$fov == 32)
+  expect_length(manga33, telescope_length)
+  remove(manga33)
 })
 
 test_that("Initial run of telescope() function with default types - MUSE", {

@@ -120,7 +120,11 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
       } else {
         fov_pos = c(12, 17, 22, 27, 32)
         if (!fov %in% fov_pos){
-          suggested_fov = fov_pos[which((fov_pos - fov) > 0)[1]]
+          if (fov > max(fov_pos)){
+            suggested_fov = max(fov_pos)
+          } else {
+            suggested_fov = fov_pos[which((fov_pos - fov) > 0)[1]]
+          }
           warning(paste0(">>> WARNING! >>> \n
                          `fov` specified is not an option for telescope type `MaNGA`. \n
                          `fov` options include 12, 17, 22, 27, or 32. \n
