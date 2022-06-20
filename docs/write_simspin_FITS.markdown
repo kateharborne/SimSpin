@@ -2,7 +2,7 @@
 layout: default
 title: write_simspin_fits
 parent: Documentation
-nav_order: 5
+nav_order: 6
 last_modified_date: "Wed, 16 February 2022 15:57:00 AWST"
 ---
 

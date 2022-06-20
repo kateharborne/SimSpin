@@ -2,7 +2,7 @@
 layout: default
 title: observing_strategy
 parent: Documentation
-nav_order: 3
+nav_order: 4
 last_modified_date: "Fri, 27 May 2022 15:57:00 AWST"
 ---
 

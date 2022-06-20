@@ -2,11 +2,14 @@
 layout: default
 title: build_datacube
 parent: Documentation
-nav_order: 4
+nav_order: 5
 last_modified_date: "Tue, 7 June 2022 15:57:00 AWST"
 ---
 
 # Constructing your data cube
+
+Recent Updates
+{: .label .label-purple } 
 
 Using the `build_datacube` function, we can now make a mock observation of a simulated galaxy. 
 {: .fs-5 .fw-300 .pb-2 }
@@ -17,6 +20,9 @@ The output of this function will be a mock IFS data cube. The details of the obs
 
 [See an example](#example){: .btn .btn-purple }
 [See the source code](https://github.com/kateharborne/SimSpin/blob/bb371d9e4d981d1ebaba3aa07978bb61a2d434f0/R/build_datacube.R#L77){: .btn .btn-purple }
+
+*As of version 2.2.0, the `method` input parameter has been moved directly to the [`build_datacube`](build_datacube.markdown) function. For backwards compatibility, this parameter can still be specified within [`telescope`](telescope.markdown), but a warning will be issued.*
+{: .fw-150 }
 
 ---
 

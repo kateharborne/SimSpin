@@ -2,7 +2,7 @@
 layout: default
 title: telescope
 parent: Documentation
-nav_order: 2
+nav_order: 3
 last_modified_date: "Monday 20 Jun 2022 15:57:00 AWST"
 ---
 
@@ -124,12 +124,12 @@ For pre-defined `type` classes, certain parameters cannot be modified. Values hi
 
 | *telescope parameter* | *units* | **SAMI** | **MaNGA** | **CALIFA** | **MUSE** | **Hector** |
 | --------------------- | ------- | -------- | --------- | ---------- | -------- | ---------- |
-| `fov` | arcsec | 15 | *n* = 12, 17, 22, 27 or 32 | 74 | *n* < 60 | 30 |
+| `fov` | arcsec | 15 | <mark style="background-color: #e3d0fe">*n* = 12, 17, 22, 27 or 32</mark> | 74 | <mark style="background-color: #e3d0fe">*n* < 60</mark> | 30 |
 | `aperture_shape` |   | "circular" | "hexagonal" | "hexagonal" | "square" | "hexagonal" |
 | `wave_range` | &#8491;[^1] | 3750 - 5750 | 3600 - 6350 | 3700 – 4750 | 4700.15 - 9351.4 | 3720 - 5910 |
 | `wave_centre` | &#8491;[^1] | 4800 | 4700 | 4225 | 6975 | 4815 |
 | `wave_res` | &#8491; | 1.04 | 1.04 | 2.7 | 1.25 | 1.60 |
-| `spatial_res` | arcsec/pixel | 0.5 | 0.5 | 1 | 0.2 (WFM) or 0.025 (NFM) | 0.2 |
+| `spatial_res` | arcsec/pixel | 0.5 | 0.5 | 1 | <mark style="background-color: #e3d0fe">0.2 (WFM) or 0.025 (NFM)</mark> | 0.2 |
 | `lsf_fwhm` | &#8491; | 2.65 | 2.85 | 2.7 | 2.51 | 1.3 |
 
 
