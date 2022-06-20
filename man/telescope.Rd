@@ -6,12 +6,12 @@
 \usage{
 telescope(
   type = "IFU",
-  fov = 15,
+  fov,
   aperture_shape = "circular",
   wave_range = c(3700, 5700),
   wave_centre,
   wave_res = 1.04,
-  spatial_res = 0.5,
+  spatial_res,
   filter = "r",
   lsf_fwhm = 2.65,
   signal_to_noise = 10,
