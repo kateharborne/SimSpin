@@ -26,6 +26,20 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   return(sum(wt*(x - xcen)^2, na.rm=T)/sum(wt, na.rm=T))
 } # weighted variance
 
+# A function for fitting a Gaussian Hermit distribution to the LOSVD
+.losvd_fit = function(par, x, wt){
+
+  losvd = rep(x, wt) # recorded losvd
+
+  w = (losvd - par[1])/par[2]
+
+  H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
+  H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
+
+  measured_vlos = (par[5] * exp(-0.5*(w^2))) * (1 + par[3]*H3 + par[4]*H4)
+  return=sum((measured_vlos-losvd)^2)
+}
+
 # A function for combining multiple results from a parallel loop
 .comb <- function(x, ...) {
   lapply(seq_along(x),
