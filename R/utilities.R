@@ -458,6 +458,93 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 
 }
 
+.horizonagn_read_hdf5 = function(data, head, cores){
+
+  head$Time = head$ExpansionFactor
+
+  groups = hdf5r::list.groups(data) # What particle data is present?
+  groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
+
+  if ("PartType0" %in% groups){ # If gas particles are present in the file
+
+    PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+    n_gas_prop = length(PT0_attr)
+    gas = vector("list", n_gas_prop)
+    names(gas) = PT0_attr
+
+    for (i in 1:n_gas_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")
+      hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")
+      gas[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    one_p_flag = FALSE
+    if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
+
+    gas_part = data.table::data.table("ID" = seq(1, length(gas$ParticleIDs)),
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
+                                      "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate,
+                                      "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
+                                      "Temperature" = gas$Temperature,
+                                      "CellSize" = gas$dx*.cm_to_kpc, # gas cell size in kpc
+                                      "Metallicity" = gas$SmoothedMetallicity,
+                                      "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
+                                      "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
+                                      "Oxygen" =  gas$`SmoothedElementAbundance/Oxygen`)
+
+    remove(gas); remove(PT0_attr)
+
+  } else {gas_part=NULL}
+
+  if ("PartType4" %in% groups){
+    PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+    n_star_prop = length(PT4_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT4_attr
+
+    for (i in 1:n_star_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "aexp-scale-exponent")
+      hexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h-scale-exponent")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "CGSConversionFactor")
+      stars[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                                       "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                                       "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
+                                       "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
+
+    ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Metallicity" = stars$SmoothedMetallicity)
+
+    remove(stars); remove(PT4_attr)
+
+  } else {star_part=NULL; ssp=NULL}
+
+  head$Type = "Horizon-AGN"
+
+  return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
+
+
+}
+
 # Function for computing the stellar age from the formation time in parallel
 .SFTtoAge = function(a, cores=1){
   cosdist = function(x) { return (celestial::cosdistTravelTime((1 / x) - 1)); }
