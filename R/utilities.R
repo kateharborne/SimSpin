@@ -114,10 +114,6 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   # Read in all attributes listed in the header
   header_attr = hdf5r::list.attributes(data[["Header"]])
 
-  if(length(header_attr) < 23){gadget2 = T}else{gadget2=F}
-  if(length(header_attr) == 27){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
-  if(length(header_attr) == 23){magneticum = T}else{magneticum=F}
-
   # Create a list to store each variable
   head = vector("list", length(header_attr))
   names(head) = header_attr
@@ -127,10 +123,24 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
     head[[i]] = hdf5r::h5attr(data[["Header"]], paste0(header_attr[i]))
   }
 
+  if(is.null(head$RunLabel)){
+    gadget2 = T
+    eagle=F
+    magneticum = F
+    horizonagn = F
+
+    } else {
+      gadget2=F
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "eagle")){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "magneticum")){magneticum = T}else{magneticum=F}
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "horizon")){horizonagn = T}else{horizonagn = F}
+    }
+
   # Read particle data differently depending on the simulation being read in...
   if (gadget2){output = .gadget2_read_hdf5(data, head)}
   if (eagle){output = .eagle_read_hdf5(data, head, cores)}
   if (magneticum){output = .magneticum_read_hdf5(data, head, cores)}
+  if (horizon_agn){output = .horizonagn_read_hdf5(data, head, cores)}
 
   hdf5r::h5close(data)
 
