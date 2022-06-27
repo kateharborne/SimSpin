@@ -12,8 +12,8 @@ ss_pd_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", pac
 
 ss_gadget_old = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
 ss_gadget   = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
-ss_hdf5     = make_simspin_file(ss_pd_hdf5, write_to_file = FALSE)
-ss_eagle    = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
+ss_hdf5     = make_simspin_file(ss_pd_hdf5, template = "BC03hr", write_to_file = FALSE)
+ss_eagle    = make_simspin_file(ss_pd_eagle, template = "EMILES", write_to_file = FALSE)
 ss_magneticum = make_simspin_file(ss_pd_magneticum, write_to_file = FALSE)
 
 temp_loc = tempdir()
@@ -749,4 +749,54 @@ test_that("Pointing description works effectively", {
   expect_true((centre_index - right_index) == -10)
   expect_true((centre_index - left_index) == 10)
   expect_true(up_index == up_index_deg) # check that pointing is the same if spefified in degrees instead
+})
+
+# Testing that the build_datacbe function will work with old SimSpin files -----
+test_that("Old SimSpin files do not stop the code from working!!!", {
+  ss_gadget_trim = ss_gadget[2:5]
+  ss_hdf5_trim = ss_hdf5[2:5]
+  ss_eagle_trim = ss_eagle[2:5]
+
+  expect_warning(build_datacube(simspin_file = ss_gadget_trim,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
+
+  BC03lr_cube = suppressWarnings(build_datacube(simspin_file = ss_gadget_trim,
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                                verbose = F))
+  expect_length(BC03lr_cube, built_cube_size)
+
+
+  expect_warning(build_datacube(simspin_file = ss_hdf5_trim,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
+
+  BC03hr_cube = suppressWarnings(build_datacube(simspin_file = ss_hdf5_trim,
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                                verbose = F))
+  expect_length(BC03hr_cube, built_cube_size)
+
+  expect_warning(build_datacube(simspin_file = ss_eagle_trim,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
+
+  EMILES_cube = suppressWarnings(build_datacube(simspin_file = ss_eagle_trim,
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                                verbose = F))
+  expect_length(EMILES_cube, built_cube_size)
+
+
+  ss_gadget_trim$wave = ss_gadget_trim$wave[1:840]
+
+  expect_error(build_datacube(simspin_file = ss_gadget_trim,
+                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                              observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                              verbose = F))
+
 })
