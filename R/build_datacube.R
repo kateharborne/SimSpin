@@ -123,6 +123,38 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     simspin_file = paste0("./", object_name)
   }
 
+  if (length(simspin_data) == 4){
+    # if we are working with a simspin file from before v2.3.0
+    simspin_data$header = list("InputFile" = "Unknown",
+                               "OutputFile" = simspin_file,
+                               "Type" = "Unknown",
+                               "Template" = "",
+                               "Template_LSF" = "",
+                               "Template_waveres" = "",
+                               "Origin" = "< SimSpin v2.3.0",
+                               "Date"   = "Unknown")
+
+    if (length(simspin_data$wave) == 1221 | length(simspin_data$wave) == 842 ){
+      simspin_data$header$Template = "BC03lr"
+      simspin_data$header$Template_LSF = 3 # as according to Bruzual & Charlot (2003) MNRAS 344, pg 1000-1028
+      simspin_data$header$Template_waveres = min(diff(simspin_data$wave))
+    } else if (length(simspin_data$wave) == 6900 | length(simspin_data$wave) == 6521 ){
+      simspin_data$header$Template = "BC03hr"
+      simspin_data$header$Template_LSF = 3 # as according to Bruzual & Charlot (2003) MNRAS 344, pg 1000-1028
+      simspin_data$header$Template_waveres = min(diff(simspin_data$wave))
+    } else if (length(simspin_data$wave) == 53689 | length(simspin_data$wave) == 20356 ) {
+      simspin_data$header$Template = "EMILES"
+      simspin_data$header$Template_LSF = 2.51 # as according to Vazdekis et al (2016) MNRAS 463, pg 3409-3436
+      simspin_data$header$Template_waveres = min(diff(simspin_data$wave))
+    } else {
+      stop("Error: Unknown spectral templates with no header information available. \n
+           Please remake your SimSpin file with make_simspin_file > v2.3.0 to use custom templates.")
+    }
+    warning(cat("WARNING! - You are using an old SimSpin file (< v2.3.0). \n"))
+    cat(paste0("Assuming that the ", simspin_data$header$Template, " has been used to build this SimSpin file. \n",
+               "Consider re-making your SimSpin files using the make_simspin_file() function. \n"))
+  }
+
   if (observation$method == "spectral" | observation$method == "velocity"){
     galaxy_data = simspin_data$star_part
   } else if (observation$method == "sf gas"){
