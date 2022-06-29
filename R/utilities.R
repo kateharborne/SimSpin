@@ -844,6 +844,16 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   return(sph_kernel)
 }
 
+.generate_uniform_cell = function(number_of_points, cell_size, cell_centre=rep(0, 3)){
+
+  r = cell_size/2
+  coordinates = sweep(matrix(stats::runif(number_of_points*3, -r, r),
+                             nrow=number_of_points, ncol=3), 2L, cell_centre, "+")
+  return(coordinates)
+
+}
+
+
 # interp_quick function from https://github.com/asgr/ProSpect/blob/master/R/utility.R
 .interp_quick = function(x, params, log=FALSE){
   if(length(x) > 1){stop('x must be scalar!')}
@@ -1367,29 +1377,50 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 
   no_gas = length(gas_part$ID)
 
-  for (each in 1:no_gas){ # for each particle
-    ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
-    part = gas_part[each,]
-    # pull the data relevent to that particle from the original data.frame
+  if (kernel == "cell"){
 
-    rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
-    # distribute that particle randomly across the SPH kernel volume
-    # as a function of smoothing length
-    rand_pos$r = rand_pos$r.h * part$SmoothingLength
-    # use the particle's specific smoothing length to scale the radial
-    # positions of the particle.
-    new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
-    # convert spherical coordinates back into cartesian coords
+    for (each in 1:no_gas){ # for each cell
+      ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
+      part = gas_part[each,]
+      # pull the data relevent to that particle from the original data.frame
 
-    new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
-    new_gas_part$x[ind1:ind2] = part$x+new_xyz[,1]
-    new_gas_part$y[ind1:ind2] = part$y+new_xyz[,2]
-    new_gas_part$z[ind1:ind2] = part$z+new_xyz[,3]
-    new_gas_part$Mass[ind1:ind2] = part$Mass*rand_pos$weight
-    # in the new data.frame of particle properties, assign their
-    # new positions and masses scaled by the kernel weight.
+      rand_pos = .generate_uniform_cell(number_of_points = sph_spawn_n,
+                                        cell_size = part$CellSize,
+                                        cell_centre = c(part$x, part$y, part$z))
+      # distribute particles randomly across the cell volume
+      new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
+      new_gas_part$x[ind1:ind2] = rand_pos[,1]
+      new_gas_part$y[ind1:ind2] = rand_pos[,2]
+      new_gas_part$z[ind1:ind2] = rand_pos[,3]
+      new_gas_part$Mass[ind1:ind2] = part$Mass*(1/sph_spawn_n)
+    }
+
+  } else {
+
+    for (each in 1:no_gas){ # for each particle
+      ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
+      part = gas_part[each,]
+      # pull the data relevent to that particle from the original data.frame
+
+      rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+      # distribute that particle randomly across the SPH kernel volume
+      # as a function of smoothing length
+      rand_pos$r = rand_pos$r.h * part$SmoothingLength
+      # use the particle's specific smoothing length to scale the radial
+      # positions of the particle.
+      new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+      # convert spherical coordinates back into cartesian coords
+
+      new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
+      new_gas_part$x[ind1:ind2] = part$x+new_xyz[,1]
+      new_gas_part$y[ind1:ind2] = part$y+new_xyz[,2]
+      new_gas_part$z[ind1:ind2] = part$z+new_xyz[,3]
+      new_gas_part$Mass[ind1:ind2] = part$Mass*rand_pos$weight
+      # in the new data.frame of particle properties, assign their
+      # new positions and masses scaled by the kernel weight.
+    }
+
   }
-
   return(new_gas_part)
 }
 
@@ -1402,24 +1433,47 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   z = numeric(no_gas); Mass = numeric(no_gas) # initialising
 
   i = integer()
-  output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list())) %dopar% {
 
-                     part = gas_part[i,]
+  if (kernel == "cell"){
+    output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
+                     .init=list(list(), list(), list(), list(), list())) %dopar% {
 
-                     rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
-                     rand_pos$r = rand_pos$r.h * part$SmoothingLength
-                     new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+                       part = gas_part[i,]
 
-                     ID = as.numeric(paste0(part$ID, 1:sph_spawn_n))
-                     x = part$x+new_xyz[,1]
-                     y = part$y+new_xyz[,2]
-                     z = part$z+new_xyz[,3]
-                     Mass = part$Mass*rand_pos$weight
+                       rand_pos = .generate_uniform_cell(number_of_points = sph_spawn_n,
+                                                         cell_size = part$CellSize,
+                                                         cell_centre = c(part$x, part$y, part$z))
 
-                     return(list(ID, x, y, z, Mass))
-                     closeAllConnections()
-                   }
+                       ID = as.numeric(paste0(part$ID, 1:sph_spawn_n))
+                       x = rand_pos[,1]
+                       y = rand_pos[,2]
+                       z = rand_pos[,3]
+                       Mass = part$Mass * (1/sph_spawn_n)
+
+                       return(list(ID, x, y, z, Mass))
+                       closeAllConnections()
+                     }
+
+  } else {
+    output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
+                     .init=list(list(), list(), list(), list(), list())) %dopar% {
+
+                       part = gas_part[i,]
+
+                       rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+                       rand_pos$r = rand_pos$r.h * part$SmoothingLength
+                       new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+
+                       ID = as.numeric(paste0(part$ID, 1:sph_spawn_n))
+                       x = part$x+new_xyz[,1]
+                       y = part$y+new_xyz[,2]
+                       z = part$z+new_xyz[,3]
+                       Mass = part$Mass*rand_pos$weight
+
+                       return(list(ID, x, y, z, Mass))
+                       closeAllConnections()
+                     }
+    }
 
   new_gas_part$ID = as.numeric(unlist(output[[1]]))
   new_gas_part$x = as.numeric(unlist(output[[2]]))
