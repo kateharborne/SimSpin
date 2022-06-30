@@ -140,7 +140,7 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   if (gadget2){output = .gadget2_read_hdf5(data, head)}
   if (eagle){output = .eagle_read_hdf5(data, head, cores)}
   if (magneticum){output = .magneticum_read_hdf5(data, head, cores)}
-  if (horizon_agn){output = .horizonagn_read_hdf5(data, head, cores)}
+  if (horizonagn){output = .horizonagn_read_hdf5(data, head, cores)}
 
   hdf5r::h5close(data)
 
@@ -1004,7 +1004,6 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 # to avoid ProSpect dependency and trimmed for the purpose of these internal functions
 
 .bandpass=function(wave, flux, filter){
-  # flux must be flux_nu, i.e. erg/s / cm^2 / Hz, not erg/s / cm^2 / Ang!
 
   response = filter(wave)
   response[is.na(response)] = 0
@@ -1388,11 +1387,10 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
                                         cell_size = part$CellSize,
                                         cell_centre = c(part$x, part$y, part$z))
       # distribute particles randomly across the cell volume
-      new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
-      new_gas_part$x[ind1:ind2] = rand_pos[,1]
-      new_gas_part$y[ind1:ind2] = rand_pos[,2]
-      new_gas_part$z[ind1:ind2] = rand_pos[,3]
-      new_gas_part$Mass[ind1:ind2] = part$Mass*(1/sph_spawn_n)
+      new_gas_part[ind1:ind2, x := rand_pos[,1],]
+      new_gas_part[ind1:ind2, y := rand_pos[,2],]
+      new_gas_part[ind1:ind2, z := rand_pos[,3],]
+      new_gas_part[ind1:ind2, Mass := part$Mass*(1/sph_spawn_n),]
     }
 
   } else {
@@ -1411,11 +1409,10 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
       new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
       # convert spherical coordinates back into cartesian coords
 
-      new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
-      new_gas_part$x[ind1:ind2] = part$x+new_xyz[,1]
-      new_gas_part$y[ind1:ind2] = part$y+new_xyz[,2]
-      new_gas_part$z[ind1:ind2] = part$z+new_xyz[,3]
-      new_gas_part$Mass[ind1:ind2] = part$Mass*rand_pos$weight
+      new_gas_part[ind1:ind2, x := part$x+new_xyz[,1],]
+      new_gas_part[ind1:ind2, y := part$y+new_xyz[,2],]
+      new_gas_part[ind1:ind2, z := part$z+new_xyz[,3],]
+      new_gas_part[ind1:ind2, Mass := part$Mass*rand_pos$weight,]
       # in the new data.frame of particle properties, assign their
       # new positions and masses scaled by the kernel weight.
     }
@@ -1429,14 +1426,14 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   # Parallel version of the function ".sph_spawn" above.
   doParallel::registerDoParallel(cores)
   no_gas = length(gas_part$ID)
-  ID = numeric(no_gas); x = numeric(no_gas); y = numeric(no_gas)
+  x = numeric(no_gas); y = numeric(no_gas)
   z = numeric(no_gas); Mass = numeric(no_gas) # initialising
 
   i = integer()
 
   if (kernel == "cell"){
     output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                     .init=list(list(), list(), list(), list(), list())) %dopar% {
+                     .init=list(list(), list(), list(), list())) %dopar% {
 
                        part = gas_part[i,]
 
@@ -1444,19 +1441,18 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
                                                          cell_size = part$CellSize,
                                                          cell_centre = c(part$x, part$y, part$z))
 
-                       ID = as.numeric(paste0(part$ID, 1:sph_spawn_n))
                        x = rand_pos[,1]
                        y = rand_pos[,2]
                        z = rand_pos[,3]
                        Mass = part$Mass * (1/sph_spawn_n)
 
-                       return(list(ID, x, y, z, Mass))
+                       return(list(x, y, z, Mass))
                        closeAllConnections()
                      }
 
   } else {
     output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                     .init=list(list(), list(), list(), list(), list())) %dopar% {
+                     .init=list(list(), list(), list(), list())) %dopar% {
 
                        part = gas_part[i,]
 
@@ -1464,22 +1460,20 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
                        rand_pos$r = rand_pos$r.h * part$SmoothingLength
                        new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
 
-                       ID = as.numeric(paste0(part$ID, 1:sph_spawn_n))
                        x = part$x+new_xyz[,1]
                        y = part$y+new_xyz[,2]
                        z = part$z+new_xyz[,3]
                        Mass = part$Mass*rand_pos$weight
 
-                       return(list(ID, x, y, z, Mass))
+                       return(list(x, y, z, Mass))
                        closeAllConnections()
                      }
     }
 
-  new_gas_part$ID = as.numeric(unlist(output[[1]]))
-  new_gas_part$x = as.numeric(unlist(output[[2]]))
-  new_gas_part$y = as.numeric(unlist(output[[3]]))
-  new_gas_part$z = as.numeric(unlist(output[[4]]))
-  new_gas_part$Mass = as.numeric(unlist(output[[5]]))
+  new_gas_part[, x := as.numeric(unlist(output[[1]])),]
+  new_gas_part[, y := as.numeric(unlist(output[[2]])),]
+  new_gas_part[, z := as.numeric(unlist(output[[3]])),]
+  new_gas_part[, Mass := as.numeric(unlist(output[[4]])),]
 
   return(new_gas_part)
 }
