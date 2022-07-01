@@ -193,40 +193,73 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   } else {sed = NULL}
 
-  if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles beacuse we are working with SPH models
+  if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum"){
+    if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles beacuse we are working with SPH models
 
-    gas_part_names = names(galaxy_data$gas_part)
-    new_gas_part = stats::setNames(data.frame(matrix(ncol = length(gas_part_names),
-                                                     nrow = (sph_spawn_n*galaxy_data$head$NumPart_Total[1]))),
-                            gas_part_names) # generate a new DF containing original gas_part names
+      gas_part_names = names(galaxy_data$gas_part)
+      new_gas_part = stats::setNames(data.table::data.table(matrix(0,
+                                                                   ncol = length(gas_part_names),
+                                                                   nrow = (sph_spawn_n*galaxy_data$head$NumPart_Total[1]))),
+                                     gas_part_names) # generate a new DF containing original gas_part names
 
-    new_gas_part$vx = rep(galaxy_data$gas_part$vx, each=sph_spawn_n)
-    new_gas_part$vy = rep(galaxy_data$gas_part$vy, each=sph_spawn_n)
-    new_gas_part$vz = rep(galaxy_data$gas_part$vz, each=sph_spawn_n)
-    new_gas_part$SFR = rep(galaxy_data$gas_part$SFR, each=sph_spawn_n)
-    new_gas_part$Density = rep(galaxy_data$gas_part$Density, each=sph_spawn_n)
-    new_gas_part$Temperature = rep(galaxy_data$gas_part$Temperature, each=sph_spawn_n)
-    new_gas_part$SmoothingLength = 0
-    new_gas_part$Metallicity = rep(galaxy_data$gas_part$Metallicity, each=sph_spawn_n)
-    new_gas_part$Carbon = rep(galaxy_data$gas_part$Carbon, each=sph_spawn_n)
-    new_gas_part$Hydrogen = rep(galaxy_data$gas_part$Hydrogen, each=sph_spawn_n)
-    new_gas_part$Oxygen = rep(galaxy_data$gas_part$Oxygen, each=sph_spawn_n)
+      new_gas_part[, ID := seq(1, galaxy_data$head$NumPart_Total[1]*sph_spawn_n),]
+      new_gas_part[, vx := rep(galaxy_data$gas_part$vx, each=sph_spawn_n),]
+      new_gas_part[, vy := rep(galaxy_data$gas_part$vy, each=sph_spawn_n),]
+      new_gas_part[, vz := rep(galaxy_data$gas_part$vz, each=sph_spawn_n),]
+      new_gas_part[, SFR := rep(galaxy_data$gas_part$SFR, each=sph_spawn_n),]
+      new_gas_part[, Density := rep(galaxy_data$gas_part$Density, each=sph_spawn_n),]
+      new_gas_part[, Temperature := rep(galaxy_data$gas_part$Temperature, each=sph_spawn_n),]
+      new_gas_part[, SmoothingLength := 0,]
+      new_gas_part[, Metallicity := rep(galaxy_data$gas_part$Metallicity, each=sph_spawn_n),]
+      new_gas_part[, Carbon := rep(galaxy_data$gas_part$Carbon, each=sph_spawn_n),]
+      new_gas_part[, Hydrogen := rep(galaxy_data$gas_part$Hydrogen, each=sph_spawn_n),]
+      new_gas_part[, Oxygen := rep(galaxy_data$gas_part$Oxygen, each=sph_spawn_n),]
 
-    kernel = character(1) # choosing the kernel relevent for the
-    if (galaxy_data$head$Type == "EAGLE"){
-      kernel = "WC2"
-    } else if (galaxy_data$head$Type == "Magneticum"){
-      kernel = "WC6"
-    } else {
-      kernel = "WC2"
+      kernel = character(1) # choosing the kernel relevent for the
+      if (galaxy_data$head$Type == "EAGLE"){
+        kernel = "WC2"
+      } else if (galaxy_data$head$Type == "Magneticum"){
+        kernel = "WC6"
+      } else {
+        kernel = "WC2"
+      }
+
+      if (cores > 1){
+        galaxy_data$gas_part  = .sph_spawn_mc(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel, cores)
+      } else {
+        galaxy_data$gas_part  = .sph_spawn(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel)
+      }
+
     }
+  }
 
-    if (cores > 1){
-      galaxy_data$gas_part  = .sph_spawn_mc(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel, cores)
-    } else {
-      galaxy_data$gas_part  = .sph_spawn(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel)
+  if (galaxy_data$head$Type == "Horizon-AGN"){
+    if (sph_spawn_n >= 1){
+
+      gas_part_names = names(galaxy_data$gas_part)
+      new_gas_part = stats::setNames(data.table::data.table(matrix(0, ncol = length(gas_part_names),
+                                                                   nrow = (sph_spawn_n*galaxy_data$head$NumPart_This[1]))),
+                                     gas_part_names) # generate a new DF containing original gas_part names
+
+      new_gas_part[, ID := seq(1, galaxy_data$head$NumPart_This[1]*sph_spawn_n), ]
+      new_gas_part[, vx := rep(galaxy_data$gas_part$vx, each=sph_spawn_n),]
+      new_gas_part[, vy := rep(galaxy_data$gas_part$vy, each=sph_spawn_n),]
+      new_gas_part[, vz := rep(galaxy_data$gas_part$vz, each=sph_spawn_n),]
+      new_gas_part[, SFR := rep(galaxy_data$gas_part$SFR, each=sph_spawn_n),]
+      new_gas_part[, Density := rep(galaxy_data$gas_part$Density, each=sph_spawn_n),]
+      new_gas_part[, Temperature := rep(galaxy_data$gas_part$Temperature, each=sph_spawn_n),]
+      new_gas_part[, CellSize := rep(0, galaxy_data$head$NumPart_This[1]*sph_spawn_n),]
+      new_gas_part[, Metallicity := rep(galaxy_data$gas_part$Metallicity, each=sph_spawn_n),]
+      new_gas_part[, Carbon := rep(galaxy_data$gas_part$Carbon, each=sph_spawn_n),]
+      new_gas_part[, Hydrogen := rep(galaxy_data$gas_part$Hydrogen, each=sph_spawn_n),]
+      new_gas_part[, Oxygen := rep(galaxy_data$gas_part$Oxygen, each=sph_spawn_n),]
+
+      if (cores > 1){
+        galaxy_data$gas_part  = .sph_spawn_mc(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel="cell", cores)
+      } else {
+        galaxy_data$gas_part  = .sph_spawn(galaxy_data$gas_part, new_gas_part, sph_spawn_n, kernel="cell")
+      }
     }
-
   }
 
   simspin_file = list("header"    = header,

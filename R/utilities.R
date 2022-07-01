@@ -14,16 +14,29 @@
 .g_in_kpcMsolkms2 = 4.3009e-6
 
 # globalVariable definitions
-globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity", "luminosity", "sed_id"))
+globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen",
+                  "ID", "Initial_Mass", "Mass", "Metallicity", "luminosity",
+                  "Oxygen", "SFR", "SmoothingLength", "sed_id", "Temperature",
+                  "vx", "vy", "vz", "x", "y", "z"))
 
 # Functions for computing weighted means
 .meanwt = function(x,wt){
-  return(sum(x*wt, na.rm=T)/sum(wt,na.rm=T))
+  if (sum(wt,na.rm=T) == 0){
+    val = 0
+  } else {
+    val = sum(x*wt, na.rm=T)/sum(wt,na.rm=T)
+  }
+  return(val)
 } # weighted mean
 
 .varwt = function(x, wt, xcen){
-  if (missing(xcen)){xcen = .meanwt(x,wt)}
-  return(sum(wt*(x - xcen)^2, na.rm=T)/sum(wt, na.rm=T))
+  if (sum(wt,na.rm=T) == 0){
+    val = 0
+  } else {
+    if (missing(xcen)){xcen = .meanwt(x,wt)}
+    val = sum(wt*(x - xcen)^2, na.rm=T)/sum(wt, na.rm=T)
+  }
+  return(val)
 } # weighted variance
 
 # A function for combining multiple results from a parallel loop
@@ -114,10 +127,6 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   # Read in all attributes listed in the header
   header_attr = hdf5r::list.attributes(data[["Header"]])
 
-  if(length(header_attr) < 23){gadget2 = T}else{gadget2=F}
-  if(length(header_attr) == 27){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
-  if(length(header_attr) == 23){magneticum = T}else{magneticum=F}
-
   # Create a list to store each variable
   head = vector("list", length(header_attr))
   names(head) = header_attr
@@ -127,10 +136,24 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
     head[[i]] = hdf5r::h5attr(data[["Header"]], paste0(header_attr[i]))
   }
 
+  if(is.null(head$RunLabel)){
+    gadget2 = T
+    eagle=F
+    magneticum = F
+    horizonagn = F
+
+    } else {
+      gadget2=F
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "eagle")){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "magneticum")){magneticum = T}else{magneticum=F}
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "horizon")){horizonagn = T}else{horizonagn = F}
+    }
+
   # Read particle data differently depending on the simulation being read in...
   if (gadget2){output = .gadget2_read_hdf5(data, head)}
   if (eagle){output = .eagle_read_hdf5(data, head, cores)}
   if (magneticum){output = .magneticum_read_hdf5(data, head, cores)}
+  if (horizonagn){output = .horizonagn_read_hdf5(data, head, cores)}
 
   hdf5r::h5close(data)
 
@@ -448,6 +471,93 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 
 }
 
+.horizonagn_read_hdf5 = function(data, head, cores){
+
+  head$Time = head$ExpansionFactor
+
+  groups = hdf5r::list.groups(data) # What particle data is present?
+  groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
+
+  if ("PartType0" %in% groups){ # If gas particles are present in the file
+
+    PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+    n_gas_prop = length(PT0_attr)
+    gas = vector("list", n_gas_prop)
+    names(gas) = PT0_attr
+
+    for (i in 1:n_gas_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")
+      hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")
+      gas[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    one_p_flag = FALSE
+    if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
+
+    gas_part = data.table::data.table("ID" = seq(1, length(gas$ParticleIDs)),
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
+                                      "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate,
+                                      "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
+                                      "Temperature" = gas$Temperature,
+                                      "CellSize" = gas$dx*.cm_to_kpc, # gas cell size in kpc
+                                      "Metallicity" = gas$SmoothedMetallicity,
+                                      "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
+                                      "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
+                                      "Oxygen" =  gas$`SmoothedElementAbundance/Oxygen`)
+
+    remove(gas); remove(PT0_attr)
+
+  } else {gas_part=NULL}
+
+  if ("PartType4" %in% groups){
+    PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+    n_star_prop = length(PT4_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT4_attr
+
+    for (i in 1:n_star_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "aexp-scale-exponent")
+      hexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h-scale-exponent")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "CGSConversionFactor")
+      stars[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc}, # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                                       "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                                       "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
+                                       "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
+
+    ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Metallicity" = stars$SmoothedMetallicity)
+
+    remove(stars); remove(PT4_attr)
+
+  } else {star_part=NULL; ssp=NULL}
+
+  head$Type = "Horizon-AGN"
+
+  return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
+
+
+}
+
 # Function for computing the stellar age from the formation time in parallel
 .SFTtoAge = function(a, cores=1){
   cosdist = function(x) { return (celestial::cosdistTravelTime((1 / x) - 1)); }
@@ -747,6 +857,16 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   return(sph_kernel)
 }
 
+.generate_uniform_cell = function(number_of_points, cell_size, cell_centre=rep(0, 3)){
+
+  r = cell_size/2
+  coordinates = sweep(matrix(stats::runif(number_of_points*3, -r, r),
+                             nrow=number_of_points, ncol=3), 2L, cell_centre, "+")
+  return(coordinates)
+
+}
+
+
 # interp_quick function from https://github.com/asgr/ProSpect/blob/master/R/utility.R
 .interp_quick = function(x, params, log=FALSE){
   if(length(x) > 1){stop('x must be scalar!')}
@@ -897,7 +1017,6 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 # to avoid ProSpect dependency and trimmed for the purpose of these internal functions
 
 .bandpass=function(wave, flux, filter){
-  # flux must be flux_nu, i.e. erg/s / cm^2 / Hz, not erg/s / cm^2 / Ang!
 
   response = filter(wave)
   response[is.na(response)] = 0
@@ -1270,29 +1389,48 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 
   no_gas = length(gas_part$ID)
 
-  for (each in 1:no_gas){ # for each particle
-    ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
-    part = gas_part[each,]
-    # pull the data relevent to that particle from the original data.frame
+  if (kernel == "cell"){
 
-    rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
-    # distribute that particle randomly across the SPH kernel volume
-    # as a function of smoothing length
-    rand_pos$r = rand_pos$r.h * part$SmoothingLength
-    # use the particle's specific smoothing length to scale the radial
-    # positions of the particle.
-    new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
-    # convert spherical coordinates back into cartesian coords
+    for (each in 1:no_gas){ # for each cell
+      ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
+      part = gas_part[each,]
+      # pull the data relevent to that particle from the original data.frame
 
-    new_gas_part$ID[ind1:ind2] = as.numeric(paste0(part$ID, 1:sph_spawn_n))
-    new_gas_part$x[ind1:ind2] = part$x+new_xyz[,1]
-    new_gas_part$y[ind1:ind2] = part$y+new_xyz[,2]
-    new_gas_part$z[ind1:ind2] = part$z+new_xyz[,3]
-    new_gas_part$Mass[ind1:ind2] = part$Mass*rand_pos$weight
-    # in the new data.frame of particle properties, assign their
-    # new positions and masses scaled by the kernel weight.
+      rand_pos = .generate_uniform_cell(number_of_points = sph_spawn_n,
+                                        cell_size = part$CellSize,
+                                        cell_centre = c(part$x, part$y, part$z))
+      # distribute particles randomly across the cell volume
+      new_gas_part[ind1:ind2, x := rand_pos[,1],]
+      new_gas_part[ind1:ind2, y := rand_pos[,2],]
+      new_gas_part[ind1:ind2, z := rand_pos[,3],]
+      new_gas_part[ind1:ind2, Mass := part$Mass*(1/sph_spawn_n),]
+    }
+
+  } else {
+
+    for (each in 1:no_gas){ # for each particle
+      ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
+      part = gas_part[each,]
+      # pull the data relevent to that particle from the original data.frame
+
+      rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+      # distribute that particle randomly across the SPH kernel volume
+      # as a function of smoothing length
+      rand_pos$r = rand_pos$r.h * part$SmoothingLength
+      # use the particle's specific smoothing length to scale the radial
+      # positions of the particle.
+      new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+      # convert spherical coordinates back into cartesian coords
+
+      new_gas_part[ind1:ind2, x := part$x+new_xyz[,1],]
+      new_gas_part[ind1:ind2, y := part$y+new_xyz[,2],]
+      new_gas_part[ind1:ind2, z := part$z+new_xyz[,3],]
+      new_gas_part[ind1:ind2, Mass := part$Mass*rand_pos$weight,]
+      # in the new data.frame of particle properties, assign their
+      # new positions and masses scaled by the kernel weight.
+    }
+
   }
-
   return(new_gas_part)
 }
 
@@ -1301,34 +1439,54 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
   # Parallel version of the function ".sph_spawn" above.
   doParallel::registerDoParallel(cores)
   no_gas = length(gas_part$ID)
-  ID = numeric(no_gas); x = numeric(no_gas); y = numeric(no_gas)
+  x = numeric(no_gas); y = numeric(no_gas)
   z = numeric(no_gas); Mass = numeric(no_gas) # initialising
 
   i = integer()
-  output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list())) %dopar% {
 
-                     part = gas_part[i,]
+  if (kernel == "cell"){
+    output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
+                     .init=list(list(), list(), list(), list())) %dopar% {
 
-                     rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
-                     rand_pos$r = rand_pos$r.h * part$SmoothingLength
-                     new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+                       part = gas_part[i,]
 
-                     ID = as.numeric(paste0(part$ID, 1:sph_spawn_n))
-                     x = part$x+new_xyz[,1]
-                     y = part$y+new_xyz[,2]
-                     z = part$z+new_xyz[,3]
-                     Mass = part$Mass*rand_pos$weight
+                       rand_pos = .generate_uniform_cell(number_of_points = sph_spawn_n,
+                                                         cell_size = part$CellSize,
+                                                         cell_centre = c(part$x, part$y, part$z))
 
-                     return(list(ID, x, y, z, Mass))
-                     closeAllConnections()
-                   }
+                       x = rand_pos[,1]
+                       y = rand_pos[,2]
+                       z = rand_pos[,3]
+                       Mass = rep(part$Mass, sph_spawn_n) * (1/sph_spawn_n)
 
-  new_gas_part$ID = as.numeric(unlist(output[[1]]))
-  new_gas_part$x = as.numeric(unlist(output[[2]]))
-  new_gas_part$y = as.numeric(unlist(output[[3]]))
-  new_gas_part$z = as.numeric(unlist(output[[4]]))
-  new_gas_part$Mass = as.numeric(unlist(output[[5]]))
+                       return(list(x, y, z, Mass))
+                       closeAllConnections()
+                     }
+
+  } else {
+    output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
+                     .init=list(list(), list(), list(), list())) %dopar% {
+
+                       part = gas_part[i,]
+
+                       rand_pos = .generate_uniform_sphere(sph_spawn_n, kernel = kernel)
+                       rand_pos$r = rand_pos$r.h * part$SmoothingLength
+                       new_xyz = sphereplot::sph2car(cbind(rand_pos$long, rand_pos$lat, rand_pos$r))
+
+                       x = part$x+new_xyz[,1]
+                       y = part$y+new_xyz[,2]
+                       z = part$z+new_xyz[,3]
+                       Mass = part$Mass*rand_pos$weight
+
+                       return(list(x, y, z, Mass))
+                       closeAllConnections()
+                     }
+    }
+
+  new_gas_part[, x := as.numeric(unlist(output[[1]])),]
+  new_gas_part[, y := as.numeric(unlist(output[[2]])),]
+  new_gas_part[, z := as.numeric(unlist(output[[3]])),]
+  new_gas_part[, Mass := as.numeric(unlist(output[[4]])),]
 
   return(new_gas_part)
 }
