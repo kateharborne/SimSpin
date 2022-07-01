@@ -1,5 +1,5 @@
 ---
-title: "Using SimSpin v2.1.3"
+title: "Using SimSpin v2.3.2"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using SimSpin v2.0.0}

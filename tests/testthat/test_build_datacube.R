@@ -843,3 +843,53 @@ test_that("No NAs or NaNs are included in mock observed images", {
   expect_false(any(is.na(horizon_vel$observed_images$velocity_image)))
   expect_false(any(is.na(horizon_vel$observed_images$dispersion_image)))
 })
+
+# Testing that the build_datacbe function will work with old SimSpin files -----
+test_that("Old SimSpin files do not stop the code from working!!!", {
+  ss_gadget_trim = ss_gadget[2:5]
+  ss_hdf5_trim = ss_hdf5[2:5]
+  ss_eagle_trim = ss_eagle[2:5]
+
+  expect_warning(build_datacube(simspin_file = ss_gadget_trim,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
+
+  BC03lr_cube = suppressWarnings(build_datacube(simspin_file = ss_gadget_trim,
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                                verbose = F))
+  expect_length(BC03lr_cube, built_cube_size)
+
+
+  expect_warning(build_datacube(simspin_file = ss_hdf5_trim,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
+
+  BC03hr_cube = suppressWarnings(build_datacube(simspin_file = ss_hdf5_trim,
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                                verbose = F))
+  expect_length(BC03hr_cube, built_cube_size)
+
+  expect_warning(build_datacube(simspin_file = ss_eagle_trim,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
+
+  EMILES_cube = suppressWarnings(build_datacube(simspin_file = ss_eagle_trim,
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                                verbose = F))
+  expect_length(EMILES_cube, built_cube_size)
+
+
+  ss_gadget_trim$wave = ss_gadget_trim$wave[1:840]
+
+  expect_error(build_datacube(simspin_file = ss_gadget_trim,
+                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                              observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                              verbose = F))
+
+})
