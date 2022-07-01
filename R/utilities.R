@@ -1454,7 +1454,7 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
                        x = rand_pos[,1]
                        y = rand_pos[,2]
                        z = rand_pos[,3]
-                       Mass = part$Mass * (1/sph_spawn_n)
+                       Mass = rep(part$Mass, sph_spawn_n) * (1/sph_spawn_n)
 
                        return(list(x, y, z, Mass))
                        closeAllConnections()
