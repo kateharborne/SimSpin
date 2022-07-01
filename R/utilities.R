@@ -14,7 +14,10 @@
 .g_in_kpcMsolkms2 = 4.3009e-6
 
 # globalVariable definitions
-globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity", "luminosity", "sed_id"))
+globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen",
+                  "ID", "Initial_Mass", "Mass", "Metallicity", "luminosity",
+                  "Oxygen", "SFR", "SmoothingLength", "sed_id", "Temperature",
+                  "vx", "vy", "vz", "x", "y", "z"))
 
 # Functions for computing weighted means
 .meanwt = function(x,wt){
