@@ -18,12 +18,22 @@ globalVariables(c(".N", ":=", "Age", "ID", "Initial_Mass", "Mass", "Metallicity"
 
 # Functions for computing weighted means
 .meanwt = function(x,wt){
-  return(sum(x*wt, na.rm=T)/sum(wt,na.rm=T))
+  if (sum(wt,na.rm=T) == 0){
+    val = 0
+  } else {
+    val = sum(x*wt, na.rm=T)/sum(wt,na.rm=T)
+  }
+  return(val)
 } # weighted mean
 
 .varwt = function(x, wt, xcen){
-  if (missing(xcen)){xcen = .meanwt(x,wt)}
-  return(sum(wt*(x - xcen)^2, na.rm=T)/sum(wt, na.rm=T))
+  if (sum(wt,na.rm=T) == 0){
+    val = 0
+  } else {
+    if (missing(xcen)){xcen = .meanwt(x,wt)}
+    val = sum(wt*(x - xcen)^2, na.rm=T)/sum(wt, na.rm=T)
+  }
+  return(val)
 } # weighted variance
 
 # A function for combining multiple results from a parallel loop
