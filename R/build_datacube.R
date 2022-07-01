@@ -162,6 +162,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # Trimming particles that lie outside the aperture of the telescope
   galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$pixel_region[!is.na(observation$pixel_region)],]
 
+  if (length(galaxy_data$ID) == 0){
+    stop(paste0("Error: There are no simulation particles within the aperture of the telescope. \n
+         Please check that the method, `", method, "` is suitable for your input simulation file. \n
+         Else, consider increasing your aperture size or adjusting the pointing of the telescope."))
+  }
+
   if (verbose){cat("Sorting spaxels... \n")}
 
   # which particles sit in each spaxel?
