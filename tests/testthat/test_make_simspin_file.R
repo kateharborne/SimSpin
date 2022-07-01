@@ -9,6 +9,7 @@ ss_gadget = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin"
 ss_hdf5 = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
 ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 ss_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
+ss_horizon = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", package = "SimSpin")
 
 ss_file_length = 5
 
@@ -39,6 +40,11 @@ test_that("Initial run of each simulation type - Magneticum", {
   expect_true(length(readRDS(paste(temp_loc, "/magneticum_test", sep=""))$gas_part) == 16)
 })
 
+test_that("Initial run of each simulation type - HorizonAGN", {
+  expect_null(make_simspin_file(ss_horizon, output = paste(temp_loc, "/horizon_test", sep="")))
+  expect_length(readRDS(paste(temp_loc, "/horizon_test", sep="")), ss_file_length)
+  expect_true(length(readRDS(paste(temp_loc, "/horizon_test", sep=""))$gas_part) == 16)
+})
 
 # Test that the function fails when the file already exists
 test_that("Error when output file already exists and overwrite = F - Gadget",{
@@ -54,7 +60,11 @@ test_that("Error when output file already exists and overwrite = F - EAGLE",{
 })
 
 test_that("Error when output file already exists and overwrite = F - Magneticum",{
-  expect_error(make_simspin_file(ss_eagle, output = paste(temp_loc, "/magneticum_test", sep="")))
+  expect_error(make_simspin_file(ss_magneticum, output = paste(temp_loc, "/magneticum_test", sep="")))
+})
+
+test_that("Error when output file already exists and overwrite = F - HorizonAGN",{
+  expect_error(make_simspin_file(ss_horizon, output = paste(temp_loc, "/horizon_test", sep="")))
 })
 
 # Test that function can output to environment
@@ -143,11 +153,18 @@ test_that("Test that sph_spawn functionality works", {
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
   expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "/eagle_test", sep=""),
                                 overwrite = T, cores = 2, sph_spawn_n = 10))
-  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "/magneticum_test", sep=""),
+  expect_null(make_simspin_file(ss_magneticum, template = "BC03lr", output = paste(temp_loc, "/magneticum_test", sep=""),
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
-  expect_null(make_simspin_file(ss_magneticum, template = "EMILES", output = paste(temp_loc, "/magneticum_test", sep=""),
+  expect_null(make_simspin_file(ss_magneticum, template = "BC03lr", output = paste(temp_loc, "/magneticum_test", sep=""),
+                                overwrite = T, cores = 2, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_horizon, template = "BC03hr", output = paste(temp_loc, "/horizon_test", sep=""),
+                                overwrite = T, cores = 1, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_horizon, template = "BC03hr", output = paste(temp_loc, "/horizon_test", sep=""),
                                 overwrite = T, cores = 2, sph_spawn_n = 10))
 
+  test_horizon = readRDS(paste(temp_loc, "/horizon_test", sep=""))
+  expect_true(data.table::is.data.table(test_horizon$gas_part))
+  remove(test_horizon)
 })
 
 test_that("Test that sph_spawn errors when N is not an integer", {
@@ -177,28 +194,36 @@ test_that("Testing that the header data works as expected", {
   hdf5 = readRDS(paste(temp_loc, "/hdf5_test", sep=""))
   eagle  = readRDS(paste(temp_loc, "/eagle_test", sep=""))
   magneticum = readRDS(paste(temp_loc, "/magneticum_test", sep=""))
+  horizon    = readRDS(paste(temp_loc, "/horizon_test", sep=""))
 
   expect_equal(gadget$header$Type, "nbody")
   expect_equal(hdf5$header$Type, "nbody")
   expect_equal(eagle$header$Type, "EAGLE")
   expect_equal(magneticum$header$Type, "Magneticum")
+  expect_equal(horizon$header$Type, "Horizon-AGN")
 
   expect_equal(gadget$header$Template, "EMILES")
   expect_equal(hdf5$header$Template, "BC03lr")
   expect_equal(eagle$header$Template, "EMILES")
-  expect_equal(magneticum$header$Template, "EMILES")
+  expect_equal(magneticum$header$Template, "BC03lr")
+  expect_equal(horizon$header$Template, "BC03hr")
 
   expect_equal(gadget$header$Template_LSF, 2.51)
   expect_equal(hdf5$header$Template_LSF, 3)
   expect_equal(eagle$header$Template_LSF, 2.51)
-  expect_equal(magneticum$header$Template_LSF, 2.51)
+  expect_equal(magneticum$header$Template_LSF, 3)
+  expect_equal(horizon$header$Template_LSF, 3)
 
   expect_equal(gadget$header$Template_waveres, eagle$header$Template_waveres)
   expect_equal(hdf5$header$Template_waveres, 1)
   expect_equal(eagle$header$Template_waveres, 0.9)
-  expect_equal(magneticum$header$Template_waveres, eagle$header$Template_waveres)
+  expect_equal(magneticum$header$Template_waveres, 1)
+  expect_equal(horizon$header$Template_waveres, 1)
+
+  remove(gadget, hdf5, eagle, magneticum, horizon)
  })
 
 
 unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", sep=""),
-         paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep="")))
+         paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep=""),
+         paste(temp_loc, "/horizon_test", sep="")))
