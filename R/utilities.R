@@ -1057,7 +1057,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
     for (p in 1:num_part){
       intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-        (galaxy_sample$Initial_Mass[p] * 1e10) # reading relavent spectra
+        (galaxy_sample$Initial_Mass[p] * 1e10) *
+        (simspin_data$header$Template_waveres/observation$wave_res) # reading relavent spectra
 
       # pulling wavelengths and using doppler formula to compute the shift in
       #   wavelengths caused by LOS velocity
@@ -1118,7 +1119,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      for (p in 1:num_part){
                        intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-                         (galaxy_sample$Initial_Mass[p] * 1e10) # reading relevant spectra
+                         (galaxy_sample$Initial_Mass[p] * 1e10) *
+                         (simspin_data$header$Template_waveres/observation$wave_res) # reading relevant spectra
 
                        # pulling wavelengths and using doppler formula to compute the shift in
                        #   wavelengths caused by LOS velocity
@@ -1195,7 +1197,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       for (p in 1:num_part){
 
         intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-          (galaxy_sample$Initial_Mass[p] * 1e10) # reading particle spectrum
+          (galaxy_sample$Initial_Mass[p] * 1e10) *
+          (simspin_data$header$Template_waveres/observation$wave_res) # reading particle spectrum
 
         # transform luminosity into flux detected at telescope
         #    flux in units erg/s/cm^2/Ang
@@ -1260,7 +1263,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                        for (p in 1:num_part){
                          intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-                           (galaxy_sample$Initial_Mass[p] * 1e10) # reading relavent spectra
+                           (galaxy_sample$Initial_Mass[p] * 1e10) *
+                           (simspin_data$header$Template_waveres/observation$wave_res)# reading relavent spectra
 
                          # transform luminosity into flux detected at telescope
                          #    flux in units erg/s/cm^2/Ang
