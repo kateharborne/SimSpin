@@ -231,8 +231,8 @@ unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", 
 test_that("Objects are centered correctly based on the specified central coordinates", {
   expect_error(make_simspin_file(filename = ss_horizon, template = "EMILES", write_to_file = F, centre = c(0,0,0)))
 
-  centre_left  = make_simspin_file(filename = ss_horizon, template = "BC03lr", write_to_file = F, centre = c(12325,72177.97,32388.04))
-  centre_right = make_simspin_file(filename = ss_horizon, template = "BC03lr", write_to_file = F, centre = c(12335,72177.97,32388.04))
+  centre_right = make_simspin_file(filename = ss_horizon, template = "BC03lr", write_to_file = F, centre = c(12328,72177.97,32388.04))
+  centre_left  = make_simspin_file(filename = ss_horizon, template = "BC03lr", write_to_file = F, centre = c(12332,72177.97,32388.04))
 
   # Checking values exist in fields for LEFT
   expect_true(all(!is.na(centre_left$star_part$x)))
@@ -292,7 +292,13 @@ test_that("Objects are centered correctly based on the specified central coordin
   expect_true(all(!is.na(centre_right$gas_part$Oxygen)))
   expect_true(all(!is.na(centre_right$gas_part$Hydrogen)))
 
-  # Expect that the centre of the left is to the left of the centre of the right!
+  galaxy_data = tryCatch(expr = {.read_gadget(ss_horizon)},
+                         error = function(e){.read_hdf5(ss_horizon, cores=1)})
+  galaxy_data_right = .centre_galaxy(galaxy_data, centre=c(12328,72177.97,32388.04)) # centering the galaxy based on stellar particles
+  galaxy_data_left = .centre_galaxy(galaxy_data, centre=c(12332,72177.97,32388.04))
+
   expect_true(median(centre_left$star_part$x) < median(centre_right$star_part$x))
+
+
 })
 
