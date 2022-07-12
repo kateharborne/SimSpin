@@ -29,7 +29,7 @@ test_that("Initial run of each simulation type - HDF5", {
 })
 
 test_that("Initial run of each simulation type - EAGLE", {
-  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "/eagle_test", sep=""), centre = c(0.01,0.02,0.01), half_mass = 1483809589))
+  expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "/eagle_test", sep=""), centre = c(18318,61583,38667), half_mass = 1483809589))
   expect_length(readRDS(paste(temp_loc, "/eagle_test", sep="")), ss_file_length)
   expect_true(length(readRDS(paste(temp_loc, "/eagle_test", sep=""))$gas_part) == 16)
 })
