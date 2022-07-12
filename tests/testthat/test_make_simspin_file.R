@@ -223,7 +223,76 @@ test_that("Testing that the header data works as expected", {
   remove(gadget, hdf5, eagle, magneticum, horizon)
  })
 
-
 unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", sep=""),
          paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep=""),
          paste(temp_loc, "/horizon_test", sep="")))
+
+# Testing that the centre parameter works as expected ------------
+test_that("Objects are centered correctly based on the specified central coordinates", {
+  expect_error(make_simspin_file(filename = ss_horizon, template = "EMILES", write_to_file = F, centre = c(0,0,0)))
+
+  centre_left  = make_simspin_file(filename = ss_horizon, template = "BC03lr", write_to_file = F, centre = c(12325,72177.97,32388.04))
+  centre_right = make_simspin_file(filename = ss_horizon, template = "BC03lr", write_to_file = F, centre = c(12335,72177.97,32388.04))
+
+  # Checking values exist in fields for LEFT
+  expect_true(all(!is.na(centre_left$star_part$x)))
+  expect_true(all(!is.na(centre_left$star_part$y)))
+  expect_true(all(!is.na(centre_left$star_part$z)))
+  expect_true(all(!is.na(centre_left$star_part$vx)))
+  expect_true(all(!is.na(centre_left$star_part$vy)))
+  expect_true(all(!is.na(centre_left$star_part$vz)))
+  expect_true(all(!is.na(centre_left$star_part$Mass)))
+  expect_true(all(!is.na(centre_left$star_part$sed_id)))
+  expect_true(all(!is.na(centre_left$star_part$Metallicity)))
+  expect_true(all(!is.na(centre_left$star_part$Age)))
+  expect_true(all(!is.na(centre_left$star_part$Initial_Mass)))
+
+  expect_true(all(!is.na(centre_left$gas_part$x)))
+  expect_true(all(!is.na(centre_left$gas_part$y)))
+  expect_true(all(!is.na(centre_left$gas_part$z)))
+  expect_true(all(!is.na(centre_left$gas_part$vx)))
+  expect_true(all(!is.na(centre_left$gas_part$vy)))
+  expect_true(all(!is.na(centre_left$gas_part$vz)))
+  expect_true(all(!is.na(centre_left$gas_part$Mass)))
+  expect_true(all(!is.na(centre_left$gas_part$SFR)))
+  expect_true(all(!is.na(centre_left$gas_part$Density)))
+  expect_true(all(!is.na(centre_left$gas_part$Temperature)))
+  expect_true(all(!is.na(centre_left$gas_part$CellSize)))
+  expect_true(all(!is.na(centre_left$gas_part$Metallicity)))
+  expect_true(all(!is.na(centre_left$gas_part$Carbon)))
+  expect_true(all(!is.na(centre_left$gas_part$Oxygen)))
+  expect_true(all(!is.na(centre_left$gas_part$Hydrogen)))
+
+  # Checking values exist in fields for RIGHT
+  expect_true(all(!is.na(centre_right$star_part$x)))
+  expect_true(all(!is.na(centre_right$star_part$y)))
+  expect_true(all(!is.na(centre_right$star_part$z)))
+  expect_true(all(!is.na(centre_right$star_part$vx)))
+  expect_true(all(!is.na(centre_right$star_part$vy)))
+  expect_true(all(!is.na(centre_right$star_part$vz)))
+  expect_true(all(!is.na(centre_right$star_part$Mass)))
+  expect_true(all(!is.na(centre_right$star_part$sed_id)))
+  expect_true(all(!is.na(centre_right$star_part$Metallicity)))
+  expect_true(all(!is.na(centre_right$star_part$Age)))
+  expect_true(all(!is.na(centre_right$star_part$Initial_Mass)))
+
+  expect_true(all(!is.na(centre_right$gas_part$x)))
+  expect_true(all(!is.na(centre_right$gas_part$y)))
+  expect_true(all(!is.na(centre_right$gas_part$z)))
+  expect_true(all(!is.na(centre_right$gas_part$vx)))
+  expect_true(all(!is.na(centre_right$gas_part$vy)))
+  expect_true(all(!is.na(centre_right$gas_part$vz)))
+  expect_true(all(!is.na(centre_right$gas_part$Mass)))
+  expect_true(all(!is.na(centre_right$gas_part$SFR)))
+  expect_true(all(!is.na(centre_right$gas_part$Density)))
+  expect_true(all(!is.na(centre_right$gas_part$Temperature)))
+  expect_true(all(!is.na(centre_right$gas_part$CellSize)))
+  expect_true(all(!is.na(centre_right$gas_part$Metallicity)))
+  expect_true(all(!is.na(centre_right$gas_part$Carbon)))
+  expect_true(all(!is.na(centre_right$gas_part$Oxygen)))
+  expect_true(all(!is.na(centre_right$gas_part$Hydrogen)))
+
+  # Expect that the centre of the left is to the left of the centre of the right!
+  expect_true(median(centre_left$star_part$x) < median(centre_right$star_part$x))
+})
+
