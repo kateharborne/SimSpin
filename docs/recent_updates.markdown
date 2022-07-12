@@ -3,7 +3,7 @@ layout: default
 title: News
 parent: Documentation
 nav_order: 1
-last_modified_date: "Mon, 20 June 2022 15:57:00 AWST"
+last_modified_date: "Tue, 12 July 2022 15:57:00 AWST"
 ---
 
 # News
@@ -16,6 +16,9 @@ The table below gives details of any recent updates made to SimSpin, along with 
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                      	| Version 	| Commit                                   	|
 |----------	|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	|
+| 12/07/22 	| *Minor bugfix*. Update to `build_datacube`. Returning a meaningful error if the requested `centre` position is outside the range of the provided input file. Tests added to ensure behaviour now works as expected.                                                                                                                                                                                                  	| 2.3.4   	|                                          	|
+| 01/07/22 	| *Minor bugfix*. Adding support for ingestion of HorizonAGN data (i.e. AMR code data support). Updates to `make_simspin_file`, `utilities` and tests were implemented. Addresses Issue #42. Also, made observational images consistent with raw images (removing NAs and replacing with 0's).                                                                                                                         	| 2.3.3   	| e4ca02bf3ab482a0fd9a1abd6e2442c0e4a41da4 	|
+| 27/06/22 	| *Minor bugfix*. Updating `build_datacube` to make sure backwards compatibility. If a SimSpin file from versions preceading v2.3.0 are used with the function, it now assumes a header based on the wavelength information. This will also issue a warning to explain and encourage the user to remake their SimSpin file. Errors if custom template is used with no details of LSF or wave_res. Addresses Issue #45. 	| 2.3.2   	| cfdfdbf304df0243efd608539d5087e09a223525 	|
 | 20/06/22 	| *Minor bugfix*. Updating `telescope` class to allow two modes of spatial resolution of the MUSE telescope. This addresses Issue #43. Similarly, we've added the requirement for the MUSE field-of-view to be less than 60" and for MaNGA fov to be from the specific selection of options (12, 17, 22, 27, 32).                        	| 2.3.1   	| dbba3af4c926e9c8c9e2a650d22dee2bf0d0f837 	|
 | 13/06/22 	| *Medium change* Update to `build_datacube()` and `make_simspin_file()` -                                                                                                                                                                                                                                                               	| 2.3.0   	| 62afd85ecd11bfdfb91832d8de49c9abe40eca9f 	|
 |          	| (1) Output SimSpin files now include an additional `header` element describing the code version with which the file was made, the properties and name of the template used to derive particle spectra, and the type of input simulation.                                                                                               	|         	|                                          	|
