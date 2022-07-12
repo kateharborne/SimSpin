@@ -297,7 +297,8 @@ test_that("Objects are centered correctly based on the specified central coordin
   galaxy_data_right = .centre_galaxy(galaxy_data, centre=c(12328,72177.97,32388.04)) # centering the galaxy based on stellar particles
   galaxy_data_left = .centre_galaxy(galaxy_data, centre=c(12332,72177.97,32388.04))
 
-  expect_true(median(centre_left$star_part$x) < median(centre_right$star_part$x))
+  # Need to run without align! This causes variations in the end output.
+  expect_true(median(galaxy_data_left$star_part$x) < median(galaxy_data_right$star_part$x))
 
 
 })
