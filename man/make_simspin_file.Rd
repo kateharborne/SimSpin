@@ -52,12 +52,14 @@ a new file will be written over the old one.}
 \item{centre}{If simulation file contains all particles cutout from a box
 (rather than just particles from a single galaxy), you can specify the point
 around which the view should be centred. Numeric length = 3. Default is NA,
-in which case the system is centred around the median position.}
+in which case the system is centred around the median position. Specified in
+units of kpc.}
 
 \item{half_mass}{If simulation file contains all particles cutout from a box
 (rather than just particles from a single galaxy), you can the half-mass
 value at which the alignment function is run. Numeric length = 1. Default is
-NA, in which case half the total mass of the suplied simulation data is used.}
+NA, in which case half the total mass of the supplied simulation data is
+used. Specified in units of solar mass.}
 
 \item{sph_spawn_n}{Numeric describing the number of gas particles with which
 to sample the SPH smoothing length. Default is 1, which will not spawn

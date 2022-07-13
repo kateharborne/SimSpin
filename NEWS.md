@@ -1,8 +1,8 @@
-# SimSpin v2.3.3 News
+# SimSpin v2.3.4 News
 
 ### Author: Kate Harborne
 
-### Last edit: 01/07/22
+### Last edit: 12/07/22
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -48,4 +48,5 @@ Below is a table containing a summary of all changes made to SimSpin, since the 
 |          	| (2) The LSF treatment in `build_datacube` has been modified to account for the fact that the underlying spectral templates have a LSF themselves, and it is only necessary to convolve these up by the mean-square difference between the teescope LSF and the input template.                                                                                                                                       	|         	|                                          	|
 | 20/06/22 	| *Minor bugfix*. Updating `telescope` class to allow two modes of spatial resolution of the MUSE telescope. This addresses Issue #43. Similarly, we've added the requirement for the MUSE field-of-view to be less than 60" and for MaNGA fov to be from the specific selection of options (12, 17, 22, 27, 32).                                                                                                      	| 2.3.1   	| dbba3af4c926e9c8c9e2a650d22dee2bf0d0f837 	|
 | 27/06/22 	| *Minor bugfix*. Updating `build_datacube` to make sure backwards compatibility. If a SimSpin file from versions preceading v2.3.0 are used with the function, it now assumes a header based on the wavelength information. This will also issue a warning to explain and encourage the user to remake their SimSpin file. Errors if custom template is used with no details of LSF or wave_res. Addresses Issue #45. 	| 2.3.2   	| cfdfdbf304df0243efd608539d5087e09a223525 	|
-| 01/07/22 	| *Minor bugfix*. Adding support for ingestion of HorizonAGN data (i.e. AMR code data support). Updates to `make_simspin_file`, `utilities` and tests were implemented. Addresses Issue #42. Also, made observational images consistent with raw images (removing NAs and replacing with 0's).                                                                                                                         	| 2.3.3   	|                                          	|
+| 01/07/22 	| *Minor bugfix*. Adding support for ingestion of HorizonAGN data (i.e. AMR code data support). Updates to `make_simspin_file`, `utilities` and tests were implemented. Addresses Issue #42. Also, made observational images consistent with raw images (removing NAs and replacing with 0's).                                                                                                                         	| 2.3.3   	| e4ca02bf3ab482a0fd9a1abd6e2442c0e4a41da4 	|
+| 12/07/22 	| *Minor bugfix*. Update to `build_datacube`. Returning a meaningful error if the requested `centre` position is outside the range of the provided input file. Tests added to ensure behaviour now works as expected.                                                                                                                                                                                                  	| 2.3.4   	|                                          	|

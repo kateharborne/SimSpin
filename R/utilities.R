@@ -579,26 +579,40 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     stellar_data = galaxy_data$star_part
     gas_data = galaxy_data$gas_part
 
-    stellar_data$x = stellar_data$x - centre[1]
-    stellar_data$y = stellar_data$y - centre[2]
-    stellar_data$z = stellar_data$z - centre[3]
-    star_r2 = stellar_data$x^2 + stellar_data$y^2 + stellar_data$z^2
-    star_vcen = c(median(stellar_data$vx[star_r2 < 100]), # using the median velocities within
-                  median(stellar_data$vy[star_r2 < 100]), #  10kpc of the galaxy centre to define
-                  median(stellar_data$vz[star_r2 < 100])) #  the central velocity
-    stellar_data$vx = stellar_data$vx - star_vcen[1]
-    stellar_data$vy = stellar_data$vy - star_vcen[2]
-    stellar_data$vz = stellar_data$vz - star_vcen[3]
+    # check that provided centre falls within the range of values within the input file
+    check_bounds = (centre[1] >= min(stellar_data$x) & centre[1] <= max(stellar_data$x) &
+                    centre[2] >= min(stellar_data$y) & centre[2] <= max(stellar_data$y) &
+                    centre[3] >= min(stellar_data$z) & centre[3] <= max(stellar_data$z))
 
-    gas_data$x = gas_data$x - centre[1]
-    gas_data$y = gas_data$y - centre[2]
-    gas_data$z = gas_data$z - centre[3]
-    gas_data$vx = gas_data$vx - star_vcen[1]
-    gas_data$vy = gas_data$vy - star_vcen[2]
-    gas_data$vz = gas_data$vz - star_vcen[3]
+    if (check_bounds){
+      stellar_data$x = stellar_data$x - centre[1]
+      stellar_data$y = stellar_data$y - centre[2]
+      stellar_data$z = stellar_data$z - centre[3]
+      star_r2 = stellar_data$x^2 + stellar_data$y^2 + stellar_data$z^2
+      star_vcen = c(median(stellar_data$vx[star_r2 < 100]), # using the median velocities within
+                    median(stellar_data$vy[star_r2 < 100]), #  10kpc of the galaxy centre to define
+                    median(stellar_data$vz[star_r2 < 100])) #  the central velocity
+      stellar_data$vx = stellar_data$vx - star_vcen[1]
+      stellar_data$vy = stellar_data$vy - star_vcen[2]
+      stellar_data$vz = stellar_data$vz - star_vcen[3]
 
-    galaxy_data$star_part = stellar_data
-    galaxy_data$gas_part = gas_data
+      gas_data$x = gas_data$x - centre[1]
+      gas_data$y = gas_data$y - centre[2]
+      gas_data$z = gas_data$z - centre[3]
+      gas_data$vx = gas_data$vx - star_vcen[1]
+      gas_data$vy = gas_data$vy - star_vcen[2]
+      gas_data$vz = gas_data$vz - star_vcen[3]
+
+      galaxy_data$star_part = stellar_data
+      galaxy_data$gas_part = gas_data
+    } else {
+      stop(paste0("Error: Requested centre is outside the bounds of the region within the input file. \n
+                  Please re-submit with centre specified, c(x,y,z): \n ",
+                  min(stellar_data$x), " <= x <= ", max(stellar_data$x), "\n ",
+                  min(stellar_data$y), " <= y <= ", max(stellar_data$y), "\n ",
+                  min(stellar_data$z), " <= z <= ", max(stellar_data$z), "\n "))
+    }
+
 
   } else if (!is.null(galaxy_data$star_part)){
     stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
