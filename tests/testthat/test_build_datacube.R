@@ -901,10 +901,16 @@ test_that("Flux conservation works as expected", {
   BC03_test = make_simspin_file(filename = ss_pd_gadget, disk_age = 5, disk_Z = 0.004, template = "BC03", write_to_file = F)
   EMILES_test = make_simspin_file(filename = ss_pd_gadget, disk_age = 5, disk_Z = 0.004, template = "EMILES", write_to_file = F)
 
+  BC03_test$spectra = data.table::data.table("V1" = BC03_test$spectra[[1]])
+  BC03_test$star_part$sed_id = rep(1, length(BC03_test$star_part$sed_id))
+  EMILES_test$spectra = data.table::data.table("V1" = EMILES_test$spectra[[1]])
+  EMILES_test$star_part$sed_id = rep(1, length(EMILES_test$star_part$sed_id))
+
   wave_range = c(4400,4800)
   BC03_wave_int = which(BC03_test$wave > wave_range[1] & BC03_test$wave < wave_range[2])
   EMILES_wave_int = which(EMILES_test$wave > wave_range[1] & EMILES_test$wave < wave_range[2])
-  raw_diff_perc = (sum(BC03_test$spectra$V1[BC03_wave_int])/sum(EMILES_test$spectra$V1[EMILES_wave_int]))*100
+  raw_diff_perc = (sum(BC03_test$spectra$V1[BC03_wave_int] * .qdiff(BC03_test$wave)[BC03_wave_int])/
+                     sum(EMILES_test$spectra$V1[EMILES_wave_int] * .qdiff(EMILES_test$wave)[EMILES_wave_int]))*100
 
   magplot(EMILES_test$wave[EMILES_wave_int], EMILES_test$spectra[[1]][EMILES_wave_int], type="l", col = "blue", lwd=2)
   lines(BC03_test$wave[BC03_wave_int], BC03_test$spectra[[1]][BC03_wave_int], col = "red", lwd=2)
@@ -925,6 +931,15 @@ test_that("Flux conservation works as expected", {
   magplot(EMILES_obs$observation$wave_seq[EMILES_obs_range], EMILES_obs$spectral_cube[15,15,][EMILES_obs_range], type="l", col = "blue", lwd=2)
   lines(BC03_obs$observation$wave_seq[BC03_obs_range], BC03_obs$spectral_cube[15,15,][BC03_obs_range], col = "red", lwd=2)
 
-  obs_diff_perc = (sum(BC03_obs$spectral_cube[15,15,BC03_obs_range])/sum(EMILES_obs$spectral_cube[15,15,EMILES_obs_range]))*100
+  obs_diff_perc = matrix(NA, nrow=30, ncol=30)
+  for (a in 1:30){
+    for (b in 1:30){
+      obs_diff_perc[a,b] = (sum(BC03_obs$spectral_cube[a,b,][BC03_obs_range] * .qdiff(BC03_obs$observation$wave_seq[BC03_obs_range]))/
+                              sum(EMILES_obs$spectral_cube[a,b,][EMILES_obs_range] * .qdiff(EMILES_obs$observation$wave_seq[EMILES_obs_range])))*100
+
+    }
+  }
+
+  mean(obs_diff_perc, na.rm=T)
 
 })
