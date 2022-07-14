@@ -893,3 +893,38 @@ test_that("Old SimSpin files do not stop the code from working!!!", {
                               verbose = F))
 
 })
+
+# Testing that flux conservation is effective and works as expected ------------
+
+test_that("Flux conservation works as expected", {
+
+  BC03_test = make_simspin_file(filename = ss_pd_gadget, disk_age = 5, disk_Z = 0.004, template = "BC03", write_to_file = F)
+  EMILES_test = make_simspin_file(filename = ss_pd_gadget, disk_age = 5, disk_Z = 0.004, template = "EMILES", write_to_file = F)
+
+  wave_range = c(4400,4800)
+  BC03_wave_int = which(BC03_test$wave > wave_range[1] & BC03_test$wave < wave_range[2])
+  EMILES_wave_int = which(EMILES_test$wave > wave_range[1] & EMILES_test$wave < wave_range[2])
+  raw_diff_perc = (sum(BC03_test$spectra$V1[BC03_wave_int])/sum(EMILES_test$spectra$V1[EMILES_wave_int]))*100
+
+  magplot(EMILES_test$wave[EMILES_wave_int], EMILES_test$spectra[[1]][EMILES_wave_int], type="l", col = "blue", lwd=2)
+  lines(BC03_test$wave[BC03_wave_int], BC03_test$spectra[[1]][BC03_wave_int], col = "red", lwd=2)
+
+  BC03_obs   = build_datacube(simspin_file = BC03_test,
+                              telescope = telescope(type="IFU", lsf_fwhm = 0, signal_to_noise = NA, wave_res = 1.06),
+                              observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = F),
+                              method = "spectral", write_fits = F)
+
+  EMILES_obs = build_datacube(simspin_file = EMILES_test,
+                              telescope = telescope(type="IFU", lsf_fwhm = 0, signal_to_noise = NA, wave_res = 1.06),
+                              observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = F),
+                              method = "spectral", write_fits = F)
+
+  BC03_obs_range   = which(BC03_obs$observation$wave_seq > wave_range[1] & BC03_obs$observation$wave_seq < wave_range[2])
+  EMILES_obs_range = which(EMILES_obs$observation$wave_seq > wave_range[1] & EMILES_obs$observation$wave_seq < wave_range[2])
+
+  magplot(EMILES_obs$observation$wave_seq[EMILES_obs_range], EMILES_obs$spectral_cube[15,15,][EMILES_obs_range], type="l", col = "blue", lwd=2)
+  lines(BC03_obs$observation$wave_seq[BC03_obs_range], BC03_obs$spectral_cube[15,15,][BC03_obs_range], col = "red", lwd=2)
+
+  obs_diff_perc = (sum(BC03_obs$spectral_cube[15,15,BC03_obs_range])/sum(EMILES_obs$spectral_cube[15,15,EMILES_obs_range]))*100
+
+})

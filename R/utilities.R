@@ -1071,8 +1071,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
     for (p in 1:num_part){
       intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-        (galaxy_sample$Initial_Mass[p] * 1e10) *
-        (simspin_data$header$Template_waveres/observation$wave_res) # reading relavent spectra
+        (galaxy_sample$Initial_Mass[p] * 1e10)
+      # reading particle luminosity in units of Lsol/Ang
 
       # pulling wavelengths and using doppler formula to compute the shift in
       #   wavelengths caused by LOS velocity
@@ -1097,7 +1097,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     # transform luminosity into flux detected at telescope
     #    flux in units erg/s/cm^2/Ang
     spectra[part_in_spaxel$pixel_pos[i],] = (luminosity*.lsol_to_erg) /
-                                                (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+                                                (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
+                                                (1 + observation$z)
     lum_map[part_in_spaxel$pixel_pos[i]] = .bandpass(wave = observation$wave_seq,
                                                      flux = spectra[part_in_spaxel$pixel_pos[i],],
                                                      filter = filter)
@@ -1133,8 +1134,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      for (p in 1:num_part){
                        intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-                         (galaxy_sample$Initial_Mass[p] * 1e10) *
-                         (simspin_data$header$Template_waveres/observation$wave_res) # reading relevant spectra
+                         (galaxy_sample$Initial_Mass[p] * 1e10)
+                       # reading particle luminosity in units of Lsol/Ang
 
                        # pulling wavelengths and using doppler formula to compute the shift in
                        #   wavelengths caused by LOS velocity
@@ -1159,7 +1160,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      # transform luminosity into flux detected at telescope
                      #    flux in units erg/s/cm^2/Ang
-                     spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+                     spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
+                               (1 + observation$z)
                      lum_map = .bandpass(wave = observation$wave_seq,
                                          flux = spectra,
                                          filter = filter)
@@ -1211,18 +1213,21 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       for (p in 1:num_part){
 
         intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-          (galaxy_sample$Initial_Mass[p] * 1e10) *
-          (simspin_data$header$Template_waveres/observation$wave_res) # reading particle spectrum
+          (galaxy_sample$Initial_Mass[p] * 1e10)
+        # reading particle luminosity in units of Lsol/Ang
+
+        lum = stats::approx(x = simspin_data$wave, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
 
         # transform luminosity into flux detected at telescope
         #    flux in units erg/s/cm^2/Ang
         flux_spectra =
-        (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+        (lum*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
+          (1 + observation$z)
 
         # computing the r-band luminosity per particle from spectra
-        band_lum[p] = .bandpass(wave = simspin_data$wave,
-                                  flux = flux_spectra,
-                                  filter = filter)
+        band_lum[p] = .bandpass(wave = observation$wave_seq,
+                                flux = flux_spectra,
+                                filter = filter)
       }
 
       galaxy_sample[ , luminosity := band_lum, ]
@@ -1277,16 +1282,19 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                        for (p in 1:num_part){
                          intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-                           (galaxy_sample$Initial_Mass[p] * 1e10) *
-                           (simspin_data$header$Template_waveres/observation$wave_res)# reading relavent spectra
+                           (galaxy_sample$Initial_Mass[p] * 1e10)
+                         # reading particle luminosity in units of Lsol/Ang
 
+                         lum = stats::approx(x = simspin_data$wave, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
                          # transform luminosity into flux detected at telescope
                          #    flux in units erg/s/cm^2/Ang
                          flux_spectra =
-                           (intrinsic_spectra*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+                           (lum*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
+                           (1 + observation$z)
+
 
                          # computing the r-band luminosity per particle from spectra
-                         band_lum[p] = .bandpass(wave = simspin_data$wave,
+                         band_lum[p] = .bandpass(wave = observation$wave_seq,
                                                  flux = flux_spectra,
                                                  filter = filter)
 
