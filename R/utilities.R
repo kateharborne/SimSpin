@@ -1094,7 +1094,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       new_lum = sum(part_lum * wave_diff_observed)
       # total luminosity integrated in wavelength bins
 
-      scale_frac = new_lum / tot_lum
+      scale_frac = tot_lum / new_lum
       # scaling factor necessary to conserve flux in the new spectrum
 
       luminosity = luminosity + (part_lum*scale_frac)
@@ -1172,7 +1172,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                        new_lum = sum(part_lum * wave_diff_observed)
                        # total luminosity integrated in wavelength bins
 
-                       scale_frac = new_lum / tot_lum
+                       scale_frac = tot_lum / new_lum
                        # scaling factor necessary to conserve flux in the new spectrum
 
                        luminosity = luminosity + (part_lum*scale_frac)
@@ -1256,7 +1256,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
         new_lum = sum(lum * wave_diff_observed)
         # total luminosity integrated in wavelength bins
 
-        scale_frac = new_lum / tot_lum
+        scale_frac = tot_lum / new_lum
         # scaling factor necessary to conserve flux in the new spectrum
 
         # transform luminosity into flux detected at telescope
@@ -1339,7 +1339,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                          new_lum = sum(lum * wave_diff_observed)
                          # total luminosity integrated in wavelength bins
 
-                         scale_frac = new_lum / tot_lum
+                         scale_frac = tot_lum / new_lum
                          # scaling factor necessary to conserve flux in the new spectrum
 
                          flux_spectra =
