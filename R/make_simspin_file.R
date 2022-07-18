@@ -195,8 +195,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   } else {sed = NULL}
 
-  if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" | galaxy_data$head$Type == "HorizonAGN"){
-    if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles beacuse we are working with SPH models
+  if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" | galaxy_data$head$Type == "Horizon-AGN"){
+    if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles because we are working with SPH models
 
       gas_part_names = names(galaxy_data$gas_part)
       new_gas_part = stats::setNames(data.table::data.table(matrix(0,
