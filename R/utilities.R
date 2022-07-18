@@ -474,6 +474,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 .horizonagn_read_hdf5 = function(data, head, cores){
 
   head$Time = head$ExpansionFactor
+  head$NumPart_Total = head$NumPart_This
 
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
@@ -507,7 +508,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "SFR" = gas$StarFormationRate,
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
-                                      "CellSize" = gas$dx*.cm_to_kpc, # gas cell size in kpc
+                                      "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$SmoothedMetallicity,
                                       "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
@@ -836,6 +837,11 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 } # input a radial position, r
   # returns the corresponding kernel weight at that radius
 
+.cubic_spline_m4 = function(r){
+  return((1/pi)*(((1/4) * ((2 - r)^3)) - ((1 - r)^3)))
+} # input a radial position, r
+  # returns the corresponding kernel weight at that radius
+
 .generate_uniform_sphere = function(number_of_points, kernel="WC2"){
 
   # Function for generating random coordinates that
@@ -867,19 +873,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                             "r/h" = sph[,3], "weight" = weights/sum(weights))
 
   }
+  if (kernel == "M4"){
+    weights = .cubic_spline_m4(sph[,3])
+    sph_kernel = data.frame("long" = sph[,1], "lat" = sph[,2],
+                            "r/h" = sph[,3], "weight" = weights/sum(weights))
 
+  }
   return(sph_kernel)
 }
-
-.generate_uniform_cell = function(number_of_points, cell_size, cell_centre=rep(0, 3)){
-
-  r = cell_size/2
-  coordinates = sweep(matrix(stats::runif(number_of_points*3, -r, r),
-                             nrow=number_of_points, ncol=3), 2L, cell_centre, "+")
-  return(coordinates)
-
-}
-
 
 # interp_quick function from https://github.com/asgr/ProSpect/blob/master/R/utility.R
 .interp_quick = function(x, params, log=FALSE){
@@ -1469,25 +1470,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   no_gas = length(gas_part$ID)
 
-  if (kernel == "cell"){
-
-    for (each in 1:no_gas){ # for each cell
-      ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
-      part = gas_part[each,]
-      # pull the data relevent to that particle from the original data.frame
-
-      rand_pos = .generate_uniform_cell(number_of_points = sph_spawn_n,
-                                        cell_size = part$CellSize,
-                                        cell_centre = c(part$x, part$y, part$z))
-      # distribute particles randomly across the cell volume
-      new_gas_part[ind1:ind2, x := rand_pos[,1],]
-      new_gas_part[ind1:ind2, y := rand_pos[,2],]
-      new_gas_part[ind1:ind2, z := rand_pos[,3],]
-      new_gas_part[ind1:ind2, Mass := part$Mass*(1/sph_spawn_n),]
-    }
-
-  } else {
-
     for (each in 1:no_gas){ # for each particle
       ind1 = ((each*sph_spawn_n)-sph_spawn_n)+1; ind2 = (each*sph_spawn_n)
       part = gas_part[each,]
@@ -1510,7 +1492,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       # new positions and masses scaled by the kernel weight.
     }
 
-  }
   return(new_gas_part)
 }
 
@@ -1524,28 +1505,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   i = integer()
 
-  if (kernel == "cell"){
-    output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                     .init=list(list(), list(), list(), list())) %dopar% {
-
-                       part = gas_part[i,]
-
-                       rand_pos = .generate_uniform_cell(number_of_points = sph_spawn_n,
-                                                         cell_size = part$CellSize,
-                                                         cell_centre = c(part$x, part$y, part$z))
-
-                       x = rand_pos[,1]
-                       y = rand_pos[,2]
-                       z = rand_pos[,3]
-                       Mass = rep(part$Mass, sph_spawn_n) * (1/sph_spawn_n)
-
-                       return(list(x, y, z, Mass))
-                       closeAllConnections()
-                     }
-
-  } else {
-    output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                     .init=list(list(), list(), list(), list())) %dopar% {
+  output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
+                   .init=list(list(), list(), list(), list())) %dopar% {
 
                        part = gas_part[i,]
 
@@ -1561,7 +1522,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                        return(list(x, y, z, Mass))
                        closeAllConnections()
                      }
-    }
+
 
   new_gas_part[, x := as.numeric(unlist(output[[1]])),]
   new_gas_part[, y := as.numeric(unlist(output[[2]])),]
