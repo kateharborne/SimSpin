@@ -51,7 +51,7 @@ test_that("HDF5 files can be built - spectral mode", {
   expect_null(hdf5_spectra$observed_images)
 })
 
-test_that("EAGLE files can be built - spectral mode", {
+test_that("EAGLE files can be built - spectral mode and be identical in series and parallel", {
   eagle_spectra = build_datacube(simspin_file = ss_eagle,
                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                  observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
@@ -74,35 +74,37 @@ test_that("EAGLE files can be built - spectral mode", {
 
 })
 
-test_that("Magneticum files can be built - spectral mode", {
+test_that("Magneticum files can be built - spectral mode and be identical in series and parallel", {
   magneticum_spectra = build_datacube(simspin_file = ss_magneticum,
-                                      telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                      telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                       observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
   expect_length(magneticum_spectra, built_cube_size)
   expect_length(magneticum_spectra$raw_images, spectra_raw_images_size)
   expect_null(magneticum_spectra$observed_images)
-})
 
-test_that("Magneticum files can be built in parallel - spectral mode", {
   magneticum_parallel_spectra = build_datacube(simspin_file = ss_magneticum,
-                                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                                cores = 2)
   expect_length(magneticum_parallel_spectra, built_cube_size)
   expect_length(magneticum_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(magneticum_parallel_spectra$observed_images)
+
+  expect_true(all.equal(magneticum_spectra$spectral_cube, magneticum_parallel_spectra$spectral_cube))
+  expect_true(all.equal(magneticum_spectra$raw_images$flux_image, magneticum_parallel_spectra$raw_images$flux_image))
+  expect_true(all.equal(magneticum_spectra$raw_images$velocity_image, magneticum_parallel_spectra$raw_images$velocity_image))
+  expect_true(all.equal(magneticum_spectra$raw_images$dispersion_image, magneticum_parallel_spectra$raw_images$dispersion_image))
+
 })
 
-test_that("HorizonAGN files can be built - spectral mode", {
+test_that("HorizonAGN files can be built - spectral mode and be identical in series and parallel", {
   horizon_spectra = build_datacube(simspin_file = ss_horizon,
                                       telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                       observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
   expect_length(horizon_spectra, built_cube_size)
   expect_length(horizon_spectra$raw_images, spectra_raw_images_size)
   expect_null(horizon_spectra$observed_images)
-})
 
-test_that("HorizonAGN files can be built in parallel - spectral mode", {
   horizon_parallel_spectra = build_datacube(simspin_file = ss_horizon,
                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
@@ -110,6 +112,12 @@ test_that("HorizonAGN files can be built in parallel - spectral mode", {
   expect_length(horizon_parallel_spectra, built_cube_size)
   expect_length(horizon_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(horizon_parallel_spectra$observed_images)
+
+  expect_true(all.equal(horizon_spectra$spectral_cube, horizon_parallel_spectra$spectral_cube))
+  expect_true(all.equal(horizon_spectra$raw_images$flux_image, horizon_parallel_spectra$raw_images$flux_image))
+  expect_true(all.equal(horizon_spectra$raw_images$velocity_image, horizon_parallel_spectra$raw_images$velocity_image))
+  expect_true(all.equal(horizon_spectra$raw_images$dispersion_image, horizon_parallel_spectra$raw_images$dispersion_image))
+
 })
 
 # Testing that build_datacube works in velocity mode ----
@@ -136,42 +144,45 @@ test_that("HDF5 files can be built - velocity mode.", {
 
 })
 
-test_that("EAGLE files can be built - velocity mode.", {
+test_that("EAGLE files can be built - velocity mode and be identical in series and parallel.", {
   eagle_velocity = build_datacube(simspin_file = ss_eagle,
-                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                   method = "velocity")
   expect_length(eagle_velocity, built_cube_size)
   expect_length(eagle_velocity$raw_images, velocity_raw_images_size)
   expect_length(eagle_velocity$observed_images, velocity_observed_images_size)
 
-})
-
-test_that("EAGLE files can be built in parallel - velocity mode.", {
   eagle_parallel_velocity = build_datacube(simspin_file = ss_eagle,
-                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                            observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                            method = "velocity",
                                            cores = 2)
   expect_length(eagle_parallel_velocity, built_cube_size)
   expect_length(eagle_parallel_velocity$raw_images, velocity_raw_images_size)
   expect_length(eagle_parallel_velocity$observed_images, velocity_observed_images_size)
+
+  expect_true(all.equal(eagle_velocity$velocity_cube, eagle_parallel_velocity$velocity_cube))
+  expect_true(all.equal(eagle_velocity$raw_images$flux_image, eagle_parallel_velocity$raw_images$flux_image))
+  expect_true(all.equal(eagle_velocity$raw_images$velocity_image, eagle_parallel_velocity$raw_images$velocity_image))
+  expect_true(all.equal(eagle_velocity$raw_images$dispersion_image, eagle_parallel_velocity$raw_images$dispersion_image))
+  expect_true(all.equal(eagle_velocity$observed_images$flux_image, eagle_parallel_velocity$observed_images$flux_image))
+  expect_true(all.equal(eagle_velocity$observed_images$velocity_image, eagle_parallel_velocity$observed_images$velocity_image))
+  expect_true(all.equal(eagle_velocity$observed_images$dispersion_image, eagle_parallel_velocity$observed_images$dispersion_image))
+
 })
 
-test_that("Magneticum files can be built - velocity mode.", {
+test_that("Magneticum files can be built - velocity mode and be identical in series and parallel.", {
   magneticum_velocity = build_datacube(simspin_file = ss_magneticum,
-                                       telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                       telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                        observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                        method = "velocity")
   expect_length(magneticum_velocity, built_cube_size)
   expect_length(magneticum_velocity$raw_images, velocity_raw_images_size)
   expect_length(magneticum_velocity$observed_images, velocity_observed_images_size)
 
-})
-
-test_that("Magneticum files can be built in parallel - velocity mode.", {
   magneticum_parallel_velocity = build_datacube(simspin_file = ss_magneticum,
-                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                                 observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                                 method = "velocity",
                                                 cores = 2)
@@ -179,22 +190,27 @@ test_that("Magneticum files can be built in parallel - velocity mode.", {
   expect_length(magneticum_parallel_velocity$raw_images, velocity_raw_images_size)
   expect_length(magneticum_parallel_velocity$observed_images, velocity_observed_images_size)
 
+  expect_true(all.equal(magneticum_velocity$velocity_cube, magneticum_parallel_velocity$velocity_cube))
+  expect_true(all.equal(magneticum_velocity$raw_images$flux_image, magneticum_parallel_velocity$raw_images$flux_image))
+  expect_true(all.equal(magneticum_velocity$raw_images$velocity_image, magneticum_parallel_velocity$raw_images$velocity_image))
+  expect_true(all.equal(magneticum_velocity$raw_images$dispersion_image, magneticum_parallel_velocity$raw_images$dispersion_image))
+  expect_true(all.equal(magneticum_velocity$observed_images$flux_image, magneticum_parallel_velocity$observed_images$flux_image))
+  expect_true(all.equal(magneticum_velocity$observed_images$velocity_image, magneticum_parallel_velocity$observed_images$velocity_image))
+  expect_true(all.equal(magneticum_velocity$observed_images$dispersion_image, magneticum_parallel_velocity$observed_images$dispersion_image))
+
 })
 
-test_that("HorizonAGN files can be built - velocity mode.", {
+test_that("HorizonAGN files can be built - velocity mode and be identical in series and parallel.", {
   horizon_velocity = build_datacube(simspin_file = ss_horizon,
-                                       telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                       telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                        observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                        method = "velocity")
   expect_length(horizon_velocity, built_cube_size)
   expect_length(horizon_velocity$raw_images, velocity_raw_images_size)
   expect_length(horizon_velocity$observed_images, velocity_observed_images_size)
 
-})
-
-test_that("HorizonAGN files can be built in parallel - velocity mode.", {
   horizon_parallel_velocity = build_datacube(simspin_file = ss_horizon,
-                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                                 observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                                 method = "velocity",
                                                 cores = 2)
@@ -202,23 +218,29 @@ test_that("HorizonAGN files can be built in parallel - velocity mode.", {
   expect_length(horizon_parallel_velocity$raw_images, velocity_raw_images_size)
   expect_length(horizon_parallel_velocity$observed_images, velocity_observed_images_size)
 
+  expect_true(all.equal(horizon_velocity$velocity_cube, horizon_parallel_velocity$velocity_cube))
+  expect_true(all.equal(horizon_velocity$raw_images$flux_image, horizon_parallel_velocity$raw_images$flux_image))
+  expect_true(all.equal(horizon_velocity$raw_images$velocity_image, horizon_parallel_velocity$raw_images$velocity_image))
+  expect_true(all.equal(horizon_velocity$raw_images$dispersion_image, horizon_parallel_velocity$raw_images$dispersion_image))
+  expect_true(all.equal(horizon_velocity$observed_images$flux_image, horizon_parallel_velocity$observed_images$flux_image))
+  expect_true(all.equal(horizon_velocity$observed_images$velocity_image, horizon_parallel_velocity$observed_images$velocity_image))
+  expect_true(all.equal(horizon_velocity$observed_images$dispersion_image, horizon_parallel_velocity$observed_images$dispersion_image))
+
 })
 
 # Testing that build_datacube works in gas mode ----
 
-test_that("EAGLE files can be built - gas mode.", {
+test_that("EAGLE files can be built - gas mode and be identical in series and parallel.", {
   eagle_gas = build_datacube(simspin_file = ss_eagle,
-                             telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                             telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                              method = "gas")
   expect_length(eagle_gas, built_cube_size)
   expect_length(eagle_gas$raw_images, velocity_raw_images_size)
   expect_length(eagle_gas$observed_images, velocity_observed_images_size)
-})
 
-test_that("EAGLE files can be built in parallel - gas mode.", {
   eagle_parallel_gas = build_datacube(simspin_file = ss_eagle,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method = "gas",
                                cores = 2)
@@ -226,94 +248,144 @@ test_that("EAGLE files can be built in parallel - gas mode.", {
   expect_length(eagle_parallel_gas$raw_images, velocity_raw_images_size)
   expect_length(eagle_parallel_gas$observed_images, velocity_observed_images_size)
 
+  expect_true(all.equal(eagle_gas$velocity_cube, eagle_parallel_gas$velocity_cube))
+  expect_true(all.equal(eagle_gas$raw_images$mass_image, eagle_parallel_gas$raw_images$mass_image))
+  expect_true(all.equal(eagle_gas$raw_images$velocity_image, eagle_parallel_gas$raw_images$velocity_image))
+  expect_true(all.equal(eagle_gas$raw_images$dispersion_image, eagle_parallel_gas$raw_images$dispersion_image))
+  expect_true(all.equal(eagle_gas$raw_images$SFR_image, eagle_parallel_gas$raw_images$SFR_image))
+  expect_true(all.equal(eagle_gas$raw_images$metallicity_image, eagle_parallel_gas$raw_images$metallicity_image))
+  expect_true(all.equal(eagle_gas$raw_images$OH_image, eagle_parallel_gas$raw_images$OH_image))
+  expect_true(all.equal(eagle_gas$observed_images$mass_image, eagle_parallel_gas$observed_images$mass_image))
+  expect_true(all.equal(eagle_gas$observed_images$velocity_image, eagle_parallel_gas$observed_images$velocity_image))
+  expect_true(all.equal(eagle_gas$observed_images$dispersion_image, eagle_parallel_gas$observed_images$dispersion_image))
+
 })
 
-test_that("Magneticum files can be built - gas mode.", {
+test_that("Magneticum files can be built - gas mode and be identical in series and parallel.", {
   magneticum_gas = build_datacube(simspin_file = ss_magneticum,
-                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 0, twist_deg = 90, blur = T),
                                   method = "gas")
   expect_length(magneticum_gas, built_cube_size)
   expect_length(magneticum_gas$raw_images, velocity_raw_images_size)
   expect_length(magneticum_gas$observed_images, velocity_observed_images_size)
-})
 
-test_that("Magneticum files can be built in parallel - gas mode.", {
   magneticum_parallel_gas = build_datacube(simspin_file = ss_magneticum,
-                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 0, twist_deg = 90, blur = T),
                                            method = "gas",
                                            cores = 2)
   expect_length(magneticum_parallel_gas, built_cube_size)
   expect_length(magneticum_parallel_gas$raw_images, velocity_raw_images_size)
   expect_length(magneticum_parallel_gas$observed_images, velocity_observed_images_size)
+
+  expect_true(all.equal(magneticum_gas$velocity_cube, magneticum_parallel_gas$velocity_cube))
+  expect_true(all.equal(magneticum_gas$raw_images$mass_image, magneticum_parallel_gas$raw_images$mass_image))
+  expect_true(all.equal(magneticum_gas$raw_images$velocity_image, magneticum_parallel_gas$raw_images$velocity_image))
+  expect_true(all.equal(magneticum_gas$raw_images$dispersion_image, magneticum_parallel_gas$raw_images$dispersion_image))
+  expect_true(all.equal(magneticum_gas$raw_images$SFR_image, magneticum_parallel_gas$raw_images$SFR_image))
+  expect_true(all.equal(magneticum_gas$raw_images$metallicity_image, magneticum_parallel_gas$raw_images$metallicity_image))
+  expect_true(all.equal(magneticum_gas$raw_images$OH_image, magneticum_parallel_gas$raw_images$OH_image))
+  expect_true(all.equal(magneticum_gas$observed_images$mass_image, magneticum_parallel_gas$observed_images$mass_image))
+  expect_true(all.equal(magneticum_gas$observed_images$velocity_image, magneticum_parallel_gas$observed_images$velocity_image))
+  expect_true(all.equal(magneticum_gas$observed_images$dispersion_image, magneticum_parallel_gas$observed_images$dispersion_image))
+
 })
 
-test_that("HorizonAGN files can be built - gas mode.", {
+test_that("HorizonAGN files can be built - gas mode and be identical in series and parallel.", {
   horizon_gas = build_datacube(simspin_file = ss_horizon,
-                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 0, twist_deg = 90, blur = T),
                                   method = "gas")
   expect_length(horizon_gas, built_cube_size)
   expect_length(horizon_gas$raw_images, velocity_raw_images_size)
   expect_length(horizon_gas$observed_images, velocity_observed_images_size)
-})
 
-test_that("HorizonAGN files can be built in parallel - gas mode.", {
   horizon_parallel_gas = build_datacube(simspin_file = ss_horizon,
-                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 0, twist_deg = 90, blur = T),
                                            method = "gas",
                                            cores = 2)
   expect_length(horizon_parallel_gas, built_cube_size)
   expect_length(horizon_parallel_gas$raw_images, velocity_raw_images_size)
   expect_length(horizon_parallel_gas$observed_images, velocity_observed_images_size)
+
+  expect_true(all.equal(horizon_gas$velocity_cube, horizon_parallel_gas$velocity_cube))
+  expect_true(all.equal(horizon_gas$raw_images$mass_image, horizon_parallel_gas$raw_images$mass_image))
+  expect_true(all.equal(horizon_gas$raw_images$velocity_image, horizon_parallel_gas$raw_images$velocity_image))
+  expect_true(all.equal(horizon_gas$raw_images$dispersion_image, horizon_parallel_gas$raw_images$dispersion_image))
+  expect_true(all.equal(horizon_gas$raw_images$SFR_image, horizon_parallel_gas$raw_images$SFR_image))
+  expect_true(all.equal(horizon_gas$raw_images$metallicity_image, horizon_parallel_gas$raw_images$metallicity_image))
+  expect_true(all.equal(horizon_gas$raw_images$OH_image, horizon_parallel_gas$raw_images$OH_image))
+  expect_true(all.equal(horizon_gas$observed_images$mass_image, horizon_parallel_gas$observed_images$mass_image))
+  expect_true(all.equal(horizon_gas$observed_images$velocity_image, horizon_parallel_gas$observed_images$velocity_image))
+  expect_true(all.equal(horizon_gas$observed_images$dispersion_image, horizon_parallel_gas$observed_images$dispersion_image))
+
 })
 
 # Testing that build_datacube works in sf gas mode ----
 
-test_that("EAGLE files can be built - sf gas mode.", {
+test_that("EAGLE files can be built - sf gas mode and be identical in series and parallel.", {
   eagle_sf_gas = build_datacube(simspin_file = ss_eagle,
-                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                 observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                 method = "sf gas")
   expect_length(eagle_sf_gas, built_cube_size)
   expect_length(eagle_sf_gas$raw_images, velocity_raw_images_size)
   expect_length(eagle_sf_gas$observed_images, velocity_observed_images_size)
-})
 
-test_that("EAGLE files can be built in parallel - sf gas mode.", {
   eagle_parallel_sf_gas = build_datacube(simspin_file = ss_eagle,
-                                         telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                         telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                          observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                          method = "sf gas",
                                          cores = 2)
   expect_length(eagle_parallel_sf_gas, built_cube_size)
   expect_length(eagle_parallel_sf_gas$raw_images, velocity_raw_images_size)
   expect_length(eagle_parallel_sf_gas$observed_images, velocity_observed_images_size)
+
+  expect_true(all.equal(eagle_sf_gas$velocity_cube, eagle_parallel_sf_gas$velocity_cube))
+  expect_true(all.equal(eagle_sf_gas$raw_images$mass_image, eagle_parallel_sf_gas$raw_images$mass_image))
+  expect_true(all.equal(eagle_sf_gas$raw_images$velocity_image, eagle_parallel_sf_gas$raw_images$velocity_image))
+  expect_true(all.equal(eagle_sf_gas$raw_images$dispersion_image, eagle_parallel_sf_gas$raw_images$dispersion_image))
+  expect_true(all.equal(eagle_sf_gas$raw_images$SFR_image, eagle_parallel_sf_gas$raw_images$SFR_image))
+  expect_true(all.equal(eagle_sf_gas$raw_images$metallicity_image, eagle_parallel_sf_gas$raw_images$metallicity_image))
+  expect_true(all.equal(eagle_sf_gas$raw_images$OH_image, eagle_parallel_sf_gas$raw_images$OH_image))
+  expect_true(all.equal(eagle_sf_gas$observed_images$mass_image, eagle_parallel_sf_gas$observed_images$mass_image))
+  expect_true(all.equal(eagle_sf_gas$observed_images$velocity_image, eagle_parallel_sf_gas$observed_images$velocity_image))
+  expect_true(all.equal(eagle_sf_gas$observed_images$dispersion_image, eagle_parallel_sf_gas$observed_images$dispersion_image))
+
 })
 
-test_that("Magneticum files can be built - sf gas mode.", {
+test_that("Magneticum files can be built - sf gas mode and be identical in series and parallel.", {
   magneticum_sf_gas = build_datacube(simspin_file = ss_magneticum,
-                                     telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                     telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                      observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                      method = "sf gas")
 
   expect_length(magneticum_sf_gas, built_cube_size)
   expect_length(magneticum_sf_gas$raw_images, velocity_raw_images_size)
   expect_length(magneticum_sf_gas$observed_images, velocity_observed_images_size)
-})
 
-
-test_that("Magneticum files can be built in parallel - sf gas mode.", {
   magneticum_parallel_sf_gas = build_datacube(simspin_file = ss_magneticum,
-                                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                               method = "sf gas",
                                               cores = 2)
   expect_length(magneticum_parallel_sf_gas, built_cube_size)
   expect_length(magneticum_parallel_sf_gas$raw_images, velocity_raw_images_size)
   expect_length(magneticum_parallel_sf_gas$observed_images, velocity_observed_images_size)
+
+  expect_true(all.equal(magneticum_sf_gas$velocity_cube, magneticum_parallel_sf_gas$velocity_cube))
+  expect_true(all.equal(magneticum_sf_gas$raw_images$mass_image, magneticum_parallel_sf_gas$raw_images$mass_image))
+  expect_true(all.equal(magneticum_sf_gas$raw_images$velocity_image, magneticum_parallel_sf_gas$raw_images$velocity_image))
+  expect_true(all.equal(magneticum_sf_gas$raw_images$dispersion_image, magneticum_parallel_sf_gas$raw_images$dispersion_image))
+  expect_true(all.equal(magneticum_sf_gas$raw_images$SFR_image, magneticum_parallel_sf_gas$raw_images$SFR_image))
+  expect_true(all.equal(magneticum_sf_gas$raw_images$metallicity_image, magneticum_parallel_sf_gas$raw_images$metallicity_image))
+  expect_true(all.equal(magneticum_sf_gas$raw_images$OH_image, magneticum_parallel_sf_gas$raw_images$OH_image))
+  expect_true(all.equal(magneticum_sf_gas$observed_images$mass_image, magneticum_parallel_sf_gas$observed_images$mass_image))
+  expect_true(all.equal(magneticum_sf_gas$observed_images$velocity_image, magneticum_parallel_sf_gas$observed_images$velocity_image))
+  expect_true(all.equal(magneticum_sf_gas$observed_images$dispersion_image, magneticum_parallel_sf_gas$observed_images$dispersion_image))
+
 })
 
 test_that("HorizonAGN files error to be built due to insufficient particle number - sf gas mode.", {
