@@ -507,7 +507,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "SFR" = gas$StarFormationRate,
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
-                                      "SmoothingLength" = 2*(((3/(4*pi))*(gas$Mass*.g_to_msol / gas$Density*.gcm3_to_msolkpc3))^(1/3)), # smoothing length based on mass/density in units of kpc
+                                      "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$SmoothedMetallicity,
                                       "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
@@ -837,7 +837,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   # returns the corresponding kernel weight at that radius
 
 .cubic_spline_m4 = function(r){
-  return((1/pi)*(((1/4) * ((2 - r)^3)) - ((1-r)^3)))
+  return((1/pi)*(((1/4) * ((2 - r)^3)) - ((1 - r)^3)))
 } # input a radial position, r
   # returns the corresponding kernel weight at that radius
 
