@@ -1,8 +1,8 @@
-# SimSpin v2.3.4 News
+# SimSpin v2.3.5 News
 
 ### Author: Kate Harborne
 
-### Last edit: 12/07/22
+### Last edit: 18/07/22
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
