@@ -474,6 +474,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 .horizonagn_read_hdf5 = function(data, head, cores){
 
   head$Time = head$ExpansionFactor
+  head$NumPart_Total = head$NumPart_This
 
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
