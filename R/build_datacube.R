@@ -205,6 +205,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # which particles sit in each spaxel?
   part_in_spaxel = galaxy_data[, list(val=list(ID), .N), by = "pixel_pos"]
 
+  # SPECTRAL mode method =======================================================
   if (observation$method == "spectral"){
 
     # read original wavelengths of the template spectra
@@ -281,6 +282,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   }
 
+  # VELOCITY mode method =======================================================
   if (observation$method == "velocity"){
 
     observation$vbin = ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
@@ -310,7 +312,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images"  = vector(mode = "list", length=3))
+                  "observed_images"  = vector(mode = "list", length=5))
 
     if (mass_flag){ # if mass flag is T, the flux image is really just a mass image
       names(output$raw_images)[which(names(output$raw_images) == "flux_image")] = "mass_image"
@@ -322,16 +324,28 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     } else {
       dims = dim(output$raw_images$velocity_image)
 
-      names(output$observed_images) = c("flux_image", "velocity_image", "dispersion_image") # default calling flux/mass as flux_image
+      names(output$observed_images) = c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image") # default calling flux/mass as flux_image
       output$observed_images$flux_image       = array(0.0, dim = dims[c(1,2)])
       output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
       output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$h3_image         = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$h4_image         = array(0.0, dim = dims[c(1,2)])
 
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
           output$observed_images$flux_image[c,d]       = sum(output$velocity_cube[c,d,])
           output$observed_images$velocity_image[c,d]   = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
           output$observed_images$dispersion_image[c,d] = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], output$observed_images$velocity_image[c,d]))
+          h3h4 = tryCatch({stats::optim(par   = c(0,0),
+                                        fn    = .losvd_fit,
+                                        x     = observation$vbin_seq,
+                                        losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
+                                        vel   = output$observed_images$velocity_image[c,d],
+                                        sig   = output$observed_images$dispersion_image[c,d],
+                                        method="BFGS", control=list(reltol=1e-9))$par},
+                          error = function(e){c(0,0)})
+          output$observed_images$h3_image[c,d]       = h3h4[1]
+          output$observed_images$h4_image[c,d]       = h3h4[2]
         }
       }
 
@@ -344,6 +358,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   }
 
+  # GAS mode method =======================================================
   if (observation$method == "gas" | observation$method == "sf gas"){
 
     observation$vbin = ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
