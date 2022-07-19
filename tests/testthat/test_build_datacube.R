@@ -24,7 +24,7 @@ built_cube_size = 4
 spectra_raw_images_size = 4
 spectra_observed_images_size = NULL
 velocity_raw_images_size = 6
-velocity_observed_images_size = 3
+velocity_observed_images_size = 5
 
 # Testing that build_datacube works in spectral mode ----
 
@@ -482,6 +482,8 @@ test_that("Data cubes can be written to a single files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget.FITS")))
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))) == 8)
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[4]]$keyvalues$EXTNAME == "OBS_VEL")
+  expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[6]]$keyvalues$EXTNAME == "OBS_H3")
+  expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[7]]$keyvalues$EXTNAME == "OBS_H4")
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -543,6 +545,8 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_flux_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_velocity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_h3_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_h4_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_age_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_particle_image.FITS")))
@@ -602,6 +606,8 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_gadget_velocity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_dispersion_image.FITS"),
          paste0(temp_loc, "/ss_gadget_age_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_h3_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_h4_image.FITS"),
          paste0(temp_loc, "/ss_gadget_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_particle_image.FITS"),
 
