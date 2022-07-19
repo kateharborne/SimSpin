@@ -122,8 +122,8 @@ blur_datacube = function(datacube_output){
     blur_output$observed_images$flux_image = blur_flux
     blur_output$observed_images$velocity_image = blur_velocity
     blur_output$observed_images$dispersion_image = blur_dispersion
-    blur_output$observed_images$h3_image = h3_dispersion
-    blur_output$observed_images$h4_image = h4_dispersion
+    blur_output$observed_images$h3_image = blur_h3
+    blur_output$observed_images$h4_image = blur_h4
 
     if ("mass_image" %in% names(blur_output$raw_images)){
       names(blur_output$observed_images)[which(names(blur_output$observed_images) == "flux_image")] = "mass_image"
