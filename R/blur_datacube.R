@@ -81,15 +81,17 @@ blur_datacube = function(datacube_output){
     blur_output = list("velocity_cube"    = blur_cube,
                        "observation"      = observation,
                        "raw_images"       = datacube_output$raw_images,
-                       "observed_images"  = vector(mode = "list", length=3))
+                       "observed_images"  = vector(mode = "list", length=5))
 
-    names(blur_output$observed_images) = c("flux_image", "velocity_image", "dispersion_image")
+    names(blur_output$observed_images) = c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image")
 
     # 2. Recompute the velocity and dispersion images from the blurred cube.
     # Initializing empty arrays
     blur_flux = array(0.0, dim = c(cube_dims[c(1,2)]))
     blur_velocity = array(0.0, dim = c(cube_dims[c(1,2)]))
     blur_dispersion = array(0.0, dim = c(cube_dims[c(1,2)]))
+    blur_h3 = array(0.0, dim = c(cube_dims[c(1,2)]))
+    blur_h4 = array(0.0, dim = c(cube_dims[c(1,2)]))
 
     # Filling array based on blurred cubes
     for (c in 1:cube_dims[1]){
@@ -97,6 +99,16 @@ blur_datacube = function(datacube_output){
         blur_flux[c,d]       = sum(blur_cube[c,d,])
         blur_velocity[c,d]   = .meanwt(observation$vbin_seq, blur_cube[c,d,])
         blur_dispersion[c,d] = sqrt(.varwt(observation$vbin_seq, blur_cube[c,d,], blur_velocity[c,d]))
+        h3h4 = tryCatch({optim(par   = c(0,0),
+                               fn    = .losvd_fit,
+                               x     = observation$vbin_seq,
+                               losvd = (blur_cube[c,d,]/(max(blur_cube[c,d,], na.rm=T))),
+                               vel   = blur_velocity[c,d],
+                               sig   = blur_dispersion[c,d],
+                               method="BFGS", control=list(reltol=1e-9))$par},
+                        error = function(e){c(0,0)})
+        blur_h3[c,d]       = h3h4[1]
+        blur_h4[c,d]       = h3h4[2]
       }
     }
 
@@ -104,10 +116,14 @@ blur_datacube = function(datacube_output){
     blur_flux       = blur_flux * aperture_region
     blur_velocity   = blur_velocity * aperture_region
     blur_dispersion = blur_dispersion * aperture_region
+    blur_h3         = blur_h3 * aperture_region
+    blur_h4         = blur_h4 * aperture_region
 
     blur_output$observed_images$flux_image = blur_flux
     blur_output$observed_images$velocity_image = blur_velocity
     blur_output$observed_images$dispersion_image = blur_dispersion
+    blur_output$observed_images$h3_image = h3_dispersion
+    blur_output$observed_images$h4_image = h4_dispersion
 
     if ("mass_image" %in% names(blur_output$raw_images)){
       names(blur_output$observed_images)[which(names(blur_output$observed_images) == "flux_image")] = "mass_image"
