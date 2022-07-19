@@ -40,18 +40,20 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 } # weighted variance
 
 # A function for fitting a Gaussian Hermit distribution to the LOSVD
-.losvd_fit = function(par, x, wt){
+.losvd_fit = function(par, x, losvd, vel, sig){
 
-  losvd = rep(x, wt) # recorded losvd
+  h3 = par[1]
+  h4 = par[2]
+  k  = 1
 
-  w = (losvd - par[1])/par[2]
-
+  w = (x - vel)/sig
   H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
   H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
 
-  measured_vlos = (par[5] * exp(-0.5*(w^2))) * (1 + par[3]*H3 + par[4]*H4)
+  measured_vlos = (k * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
   return=sum((measured_vlos-losvd)^2)
 }
+
 
 # A function for combining multiple results from a parallel loop
 .comb <- function(x, ...) {
