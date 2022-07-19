@@ -312,7 +312,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images"  = vector(mode = "list", length=3))
+                  "observed_images"  = vector(mode = "list", length=5))
 
     if (mass_flag){ # if mass flag is T, the flux image is really just a mass image
       names(output$raw_images)[which(names(output$raw_images) == "flux_image")] = "mass_image"
