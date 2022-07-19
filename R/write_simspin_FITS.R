@@ -177,6 +177,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   # Writing data to HDUs based on the observation method employed ----
 
+  # SPECTRAL mode method =======================================================
   if (observation$method == "spectral"){
 
     if (split_save){
@@ -271,6 +272,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   }
 
+  # VELOCITY mode method =======================================================
   if (observation$method == "velocity"){
 
     if (split_save){
@@ -325,14 +327,29 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = if("flux_image" %in% names(simspin_datacube$raw_images)){c("FLUX", "OBS_VEL", "OBS_DISP", "RAW_AGE", "RAW_Z", "NPART")}else{c("MASS", "OBS_VEL", "OBS_DISP", "RAW_AGE", "RAW_Z", "NPART")}
-    bunits = if("flux_image" %in% names(simspin_datacube$raw_images)){c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")}else{c("Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")}
-    image_names = if("flux_image" %in% names(simspin_datacube$raw_images)){c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")}else{c("mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")}
+    extnames    = if ("flux_image" %in% names(simspin_datacube$raw_images)){
+                     c("FLUX", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_AGE", "RAW_Z", "NPART")
+                  } else {
+                     c("MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_AGE", "RAW_Z", "NPART")
+                  }
+
+    bunits      = if ("flux_image" %in% names(simspin_datacube$raw_images)){
+                   c("erg/s/cm**2", "km/s", "km/s", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
+                  } else {
+                     c("Msol", "km/s", "km/s", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
+                  }
+
+    image_names = if ("flux_image" %in% names(simspin_datacube$raw_images)){
+                    c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "age_image", "metallicity_image", "particle_image")
+                  } else {
+                    c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "age_image", "metallicity_image", "particle_image")
+                  }
+
     output_image_file_names = paste0(output_dir, "/", output_file_root, "_", image_names, ".FITS")
-    extnum = c(3,4,5,6,7,8)
+    extnum = c(3,4,5,6,7,8,9,10)
 
     if (split_save){ # if writing each image to a seperate file
-      for (i in 1:6){ # for each image in the build_datacube output,
+      for (i in 1:8){ # for each image in the build_datacube output,
 
         # 1. Write the header again to the new file to HDU 1
         Rfits::Rfits_write_header(filename = output_image_file_names[i], keyvalues = header_keyvalues,
@@ -342,7 +359,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
 
-        if (i < 4){ # 2. Write the image to this new file HDU 2
+        if (i < 6){ # 2. Write the image to this new file HDU 2
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = output_image_file_names[i], ext=2,
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
@@ -357,12 +374,12 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
       }
     } else { # if writing all images to the same file
-      for (i in 1:6){ # for each image in the build_datacube output,
+      for (i in 1:8){ # for each image in the build_datacube output,
 
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
 
-        if (i < 4){ # Write each subsequent image to the next HDU
+        if (i < 6){ # Write each subsequent image to the next HDU
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = cube_file_name, ext=extnum[i],
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
@@ -381,6 +398,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   }
 
+  # GAS mode method ============================================================
   if (observation$method == "gas" | observation$method == "sf gas"){
 
     if (split_save){
