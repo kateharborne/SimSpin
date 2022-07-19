@@ -23,8 +23,10 @@ temp_loc = tempdir()
 built_cube_size = 4
 spectra_raw_images_size = 4
 spectra_observed_images_size = NULL
+spectra_number_of_hdu = 6
 velocity_raw_images_size = 6
 velocity_observed_images_size = 5
+velocity_number_of_hdu = 10
 
 # Testing that build_datacube works in spectral mode ----
 
@@ -467,7 +469,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS"))
 
   spectral_fits = Rfits::Rfits_read_all("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS", header = T)
-  expect_true(length(spectral_fits) == 6)
+  expect_true(length(spectral_fits) == spectra_number_of_hdu)
   expect_true(spectral_fits[[2]]$keyvalues$CTYPE3 == "WAVE")
   expect_true(all(dim(spectral_fits[[2]]$imDat) == c(spectral_fits[[2]]$keyvalues$NAXIS1, spectral_fits[[2]]$keyvalues$NAXIS2, spectral_fits[[2]]$keyvalues$NAXIS3)))
   expect_true(spectral_fits[[4]]$keyvalues$EXTNAME == "RAW_VEL")
@@ -480,7 +482,7 @@ test_that("Data cubes can be written to a single files", {
                                split_save=F), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget.FITS")))
-  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))) == 8)
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))) == velocity_number_of_hdu)
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[4]]$keyvalues$EXTNAME == "OBS_VEL")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[6]]$keyvalues$EXTNAME == "OBS_H3")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[7]]$keyvalues$EXTNAME == "OBS_H4")
