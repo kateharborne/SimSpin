@@ -99,13 +99,13 @@ blur_datacube = function(datacube_output){
         blur_flux[c,d]       = sum(blur_cube[c,d,])
         blur_velocity[c,d]   = .meanwt(observation$vbin_seq, blur_cube[c,d,])
         blur_dispersion[c,d] = sqrt(.varwt(observation$vbin_seq, blur_cube[c,d,], blur_velocity[c,d]))
-        h3h4 = tryCatch({optim(par   = c(0,0),
-                               fn    = .losvd_fit,
-                               x     = observation$vbin_seq,
-                               losvd = (blur_cube[c,d,]/(max(blur_cube[c,d,], na.rm=T))),
-                               vel   = blur_velocity[c,d],
-                               sig   = blur_dispersion[c,d],
-                               method="BFGS", control=list(reltol=1e-9))$par},
+        h3h4 = tryCatch({stats::optim(par   = c(0,0),
+                                      fn    = .losvd_fit,
+                                      x     = observation$vbin_seq,
+                                      losvd = (blur_cube[c,d,]/(max(blur_cube[c,d,], na.rm=T))),
+                                      vel   = blur_velocity[c,d],
+                                      sig   = blur_dispersion[c,d],
+                                      method="BFGS", control=list(reltol=1e-9))$par},
                         error = function(e){c(0,0)})
         blur_h3[c,d]       = h3h4[1]
         blur_h4[c,d]       = h3h4[2]
