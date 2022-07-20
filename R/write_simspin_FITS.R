@@ -232,14 +232,14 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("FLUX", "RAW_VEL", "RAW_DISP", "NPART")
+    extnames = c("RAW_FLUX", "RAW_VEL", "RAW_DISP", "NPART")
     bunits = c("erg/s/cm**2", "km/s", "km/s", "Particle number")
     image_names = c("flux_image", "velocity_image", "dispersion_image", "particle_image")
     extnum = c(3,4,5,6)
-    output_image_file_names = paste0(output_dir, "/", output_file_root, "_", image_names, ".FITS")
+    output_image_file_names = paste0(output_dir, "/", output_file_root, "_raw_", image_names, ".FITS")
 
     if (split_save){ # if writing each image to a seperate file
-      for (i in 1:4){ # for each image in the build_datacube output,
+      for (i in 1:length(extnum)){ # for each image in the build_datacube output,
 
         # 1. Write the header again to the new file to HDU 1
         Rfits::Rfits_write_header(filename = output_image_file_names[i], keyvalues = header_keyvalues,
@@ -256,7 +256,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                                  create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
       }
     } else { # if writing all images to the same file
-      for (i in 1:4){ # for each image in the build_datacube output,
+      for (i in 1:length(extnum)){ # for each image in the build_datacube output,
 
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
@@ -328,28 +328,31 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "EXTNAME"="Image extension name")
 
     extnames    = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                     c("FLUX", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_AGE", "RAW_Z", "NPART")
+                     c("OBS_FLUX", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_FLUX", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
                   } else {
-                     c("MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_AGE", "RAW_Z", "NPART")
+                     c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
                   }
 
     bunits      = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                   c("erg/s/cm**2", "km/s", "km/s", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
+                   c("erg/s/cm**2", "km/s", "km/s", "unitless", "unitless", "erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
                   } else {
-                     c("Msol", "km/s", "km/s", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
+                     c("Msol", "km/s", "km/s", "unitless", "unitless", "Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
                   }
 
     image_names = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                    c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "age_image", "metallicity_image", "particle_image")
+                    c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image",
+                      "flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
                   } else {
-                    c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "age_image", "metallicity_image", "particle_image")
+                    c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image",
+                      "mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
                   }
 
-    output_image_file_names = paste0(output_dir, "/", output_file_root, "_", image_names, ".FITS")
-    extnum = c(3,4,5,6,7,8,9,10)
+    rawobs = c("obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw")
+    output_image_file_names = paste0(output_dir, "/", output_file_root, "_", rawobs, "_", image_names, ".FITS")
+    extnum = c(3,4,5,6,7,8,9,10,11,12,13)
 
     if (split_save){ # if writing each image to a seperate file
-      for (i in 1:8){ # for each image in the build_datacube output,
+      for (i in 1:length(extnum)){ # for each image in the build_datacube output,
 
         # 1. Write the header again to the new file to HDU 1
         Rfits::Rfits_write_header(filename = output_image_file_names[i], keyvalues = header_keyvalues,
@@ -374,7 +377,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
       }
     } else { # if writing all images to the same file
-      for (i in 1:8){ # for each image in the build_datacube output,
+      for (i in 1:length(extnum)){ # for each image in the build_datacube output,
 
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
