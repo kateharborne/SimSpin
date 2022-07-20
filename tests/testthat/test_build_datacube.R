@@ -26,7 +26,7 @@ spectra_observed_images_size = NULL
 spectra_number_of_hdu = 6
 velocity_raw_images_size = 6
 velocity_observed_images_size = 5
-velocity_number_of_hdu = 10
+velocity_number_of_hdu = 13
 
 # Testing that build_datacube works in spectral mode ----
 
@@ -526,10 +526,10 @@ test_that("Data cubes can be written to multiple files", {
                                write_fits = T, split_save=T), built_cube_size)
 
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS"))
-  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_flux_image.FITS"))
-  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_velocity_image.FITS"))
-  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_dispersion_image.FITS"))
-  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_particle_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS"))
 
   spectral_fits = Rfits::Rfits_read("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS")
   expect_true(length(spectral_fits) == 2)
@@ -544,14 +544,17 @@ test_that("Data cubes can be written to multiple files", {
                                split_save=T), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_velocity_cube.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_flux_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_velocity_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_dispersion_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_h3_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_h4_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_age_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_metallicity_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_particle_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_flux_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_velocity_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_h3_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_h4_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_age_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_metallicity_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS")))
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -590,28 +593,31 @@ test_that("Data cubes can be written to multiple files", {
                                split_save=T), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_spectral_cube.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_flux_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_velocity_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_dispersion_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_particle_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_flux_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_velocity_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS")))
 
 })
 
 unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
-         "GalaxyID_unknown_inc45deg_seeing2fwhm_flux_image.FITS",
-         "GalaxyID_unknown_inc45deg_seeing2fwhm_velocity_image.FITS",
-         "GalaxyID_unknown_inc45deg_seeing2fwhm_dispersion_image.FITS",
-         "GalaxyID_unknown_inc45deg_seeing2fwhm_particle_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS",
 
          paste0(temp_loc, "/ss_gadget_velocity_cube.FITS"),
-         paste0(temp_loc, "/ss_gadget_flux_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_velocity_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_dispersion_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_age_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_h3_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_h4_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_metallicity_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_particle_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_obs_flux_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_obs_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_obs_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_obs_h3_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_obs_h4_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_age_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_metallicity_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS"),
 
          paste0(temp_loc, "/ss_eagle_gas_velocity_cube.FITS"),
          paste0(temp_loc, "/ss_eagle_mass_image.FITS"),
@@ -630,10 +636,10 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_magenticum_SFR_image.FITS"),
 
          paste0(temp_loc, "/ss_hdf5_spectral_cube.FITS"),
-         paste0(temp_loc, "/ss_hdf5_flux_image.FITS"),
-         paste0(temp_loc, "/ss_hdf5_velocity_image.FITS"),
-         paste0(temp_loc, "/ss_hdf5_dispersion_image.FITS"),
-         paste0(temp_loc, "/ss_hdf5_particle_image.FITS")
+         paste0(temp_loc, "/ss_hdf5_raw_flux_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_raw_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_raw_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS")
          ))
 
 test_that("Mask can be included in FITS files correctly", {
@@ -669,10 +675,10 @@ test_that("Mask can be included in FITS files correctly", {
 
 unlink(c(paste0(temp_loc, "/ss_gadget.FITS"),
          paste0(temp_loc, "/ss_gadget_spectral_cube.FITS"),
-         paste0(temp_loc, "/ss_gadget_flux_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_velocity_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_dispersion_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_particle_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS"),
          paste0(temp_loc, "/ss_gadget_mask.FITS")))
 
 test_that("FITS files will be written with automatic names at directory given by `output_location` if only PATH is specified", {
@@ -683,17 +689,17 @@ test_that("FITS files will be written with automatic names at directory given by
                                output_location = temp_loc), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_flux_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_velocity_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_dispersion_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_particle_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS")))
 })
 
 unlink(c(paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS"),
-         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_flux_image.FITS"),
-         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_velocity_image.FITS"),
-         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_dispersion_image.FITS"),
-         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_particle_image.FITS")))
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS")))
 
 
 # Testing that build_datacube will give warning if the spectra given is low res ----
