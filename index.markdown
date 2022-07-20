@@ -10,7 +10,7 @@ last_modified_date: "Tue, 12 July 2022 13:57:00 AWST"
 # SimSpin v2.3.7 
 {: .fs-9 }
 
-A package for producing mock observations of particle simulations
+A package for producing mock observations of simulations
 {: .fs-6 .fw-300 .mb-3 .lh-tight }
 
 [View on GitHub](https://github.com/kateharborne/SimSpin){: .btn .btn-purple }
@@ -26,16 +26,14 @@ A package for producing mock observations of particle simulations
 
 This software can be used to produce a synthetic **data cube** - i.e. spatial information in projection (*xy*) with spectral or kinematic information along the line-of-sight (*z*). 
 
-A mock data cube can be produced using this package. 
-This is a simple process comprised of three steps:
+A mock data cube can be produced using this package in three simple steps:
 
   1. Read in your particle data and produce the relevant spectra using the [`make_simspin_file`](docs/make_simspin_file) function.
   1. Setup the observation by defining your `telescope` and `observing_strategy`.
   1. Build your data cube using the `build_datacube`.
 
-We incorporate some of the limitations encountered by observers so that more consistent comparisons can be made between observations and theory.
+We incorporate limitations encountered by observers so that more consistent comparisons can be made between observations and theory.
 
-From this data cube, "observables" can be measured using observational pipelines. 
 This package, once installed, is fully documented and tested.
 
 <!-- badges: start -->
