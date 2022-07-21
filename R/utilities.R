@@ -701,14 +701,27 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   if (is.na(half_mass)){
     half_mass = sum(galaxy_data$Mass) / 2
   }
-  ellip_radius = sqrt((x*x) + ((y/p)*(y/p)) + ((z/q)*(z/q)))
 
-  int_order = order(ellip_radius) # get the indicies of the radii in order (low to high)
-  ordered_galaxy_data = galaxy_data[int_order,]
-  cum_mass  = cumsum(ordered_galaxy_data$Mass) # cumulative sum of mass given this order
-  half_mass_ind = which(abs(cum_mass - half_mass) == min(abs(cum_mass - half_mass)))[1] # at what radius does this half-mass now occur?
+  check_bounds = (sum(galaxy_data$Mass) > half_mass) & # check that the total model contains more mass than the requested half-mass
+                  (min(galaxy_data$Mass) < half_mass) # check that the requested half mass is greater than a single particle
 
-  return(ordered_galaxy_data[1:half_mass_ind,])
+  if (check_bounds){
+    ellip_radius = sqrt((x*x) + ((y/p)*(y/p)) + ((z/q)*(z/q)))
+
+    int_order = order(ellip_radius) # get the indicies of the radii in order (low to high)
+    ordered_galaxy_data = galaxy_data[int_order,]
+    cum_mass  = cumsum(ordered_galaxy_data$Mass) # cumulative sum of mass given this order
+    half_mass_ind = which(abs(cum_mass - half_mass) == min(abs(cum_mass - half_mass)))[1] # at what radius does this half-mass now occur?
+
+    return(ordered_galaxy_data[1:half_mass_ind,])
+  } else {
+    stop(paste0("Error: Requested half-mass is outside the range possible within the input simulation. \n",
+         "Minimum mass of particle = ", min(galaxy_data$Mass), "\n",
+         "Maximum mass of simulation = ", sum(galaxy_data$Mass), "\n",
+         "Requested half mass ", half_mass, " is outside this range. \n",
+         "Please resubmit your request with an appropriate value OR with NA for self-fit half-mass."))
+  }
+
 }
 
 .ellipsoid_tensor = function(galaxy_data, p, q){
