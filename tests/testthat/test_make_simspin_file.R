@@ -308,6 +308,28 @@ test_that("Objects are centered correctly based on the specified central coordin
   # Need to run without align! This causes variations in the end output.
   expect_true(median(galaxy_data_left$star_part$x) < median(galaxy_data_right$star_part$x))
 
+})
+
+# Testing that the half_mass parameter works as expected ------------
+test_that("Half-mass parameter can be specified", {
+
+  gadget_default = make_simspin_file(filename = ss_gadget, half_mass = NA, write_to_file = F)
+  total_mass = sum(gadget_default$star_part$Mass)
+  half_mass = (total_mass/2)
+
+  gadget_mass_specified = make_simspin_file(filename = ss_gadget, half_mass = half_mass, write_to_file = F)
+  expect_true(all(gadget_default$star_part$x == gadget_mass_specified$star_part$x))
+  expect_true(all(gadget_default$star_part$y == gadget_mass_specified$star_part$y))
+  expect_true(all(gadget_default$star_part$z == gadget_mass_specified$star_part$z))
 
 })
 
+test_that("Half-mass parameter errors when specified outside of reasonable ranges", {
+
+  gadget_default = make_simspin_file(filename = ss_gadget, half_mass = NA, write_to_file = F)
+  total_mass = sum(gadget_default$star_part$Mass)
+  half_mass = (total_mass/2)
+
+  expect_error(make_simspin_file(filename = ss_gadget, half_mass = (total_mass+1), write_to_file = F))
+  expect_error(make_simspin_file(filename = ss_gadget, half_mass = min(gadget_default$star_part$Mass), write_to_file = F))
+})
