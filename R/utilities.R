@@ -702,25 +702,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     half_mass = sum(galaxy_data$Mass) / 2
   }
 
-  check_bounds = (sum(galaxy_data$Mass) > half_mass) & # check that the total model contains more mass than the requested half-mass
-                  (min(galaxy_data$Mass) < half_mass) # check that the requested half mass is greater than a single particle
+  ellip_radius = sqrt((x*x) + ((y/p)*(y/p)) + ((z/q)*(z/q)))
 
-  if (check_bounds){
-    ellip_radius = sqrt((x*x) + ((y/p)*(y/p)) + ((z/q)*(z/q)))
+  int_order = order(ellip_radius) # get the indicies of the radii in order (low to high)
+  ordered_galaxy_data = galaxy_data[int_order,]
+  cum_mass  = cumsum(ordered_galaxy_data$Mass) # cumulative sum of mass given this order
+  half_mass_ind = which(abs(cum_mass - half_mass) == min(abs(cum_mass - half_mass)))[1] # at what radius does this half-mass now occur?
 
-    int_order = order(ellip_radius) # get the indicies of the radii in order (low to high)
-    ordered_galaxy_data = galaxy_data[int_order,]
-    cum_mass  = cumsum(ordered_galaxy_data$Mass) # cumulative sum of mass given this order
-    half_mass_ind = which(abs(cum_mass - half_mass) == min(abs(cum_mass - half_mass)))[1] # at what radius does this half-mass now occur?
-
-    return(ordered_galaxy_data[1:half_mass_ind,])
-  } else {
-    stop(paste0("Error: Requested half-mass is outside the range possible within the input simulation. \n",
-         "Minimum mass of particle = ", min(galaxy_data$Mass), "\n",
-         "Maximum mass of simulation = ", sum(galaxy_data$Mass), "\n",
-         "Requested half mass ", half_mass, " is outside this range. \n",
-         "Please resubmit your request with an appropriate value OR with NA for self-fit half-mass."))
-  }
+  return(ordered_galaxy_data[1:half_mass_ind,])
 
 }
 
@@ -838,7 +827,22 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
 # Function to align full galaxy based on the stellar particles
 .align_galaxy = function(galaxy_data, half_mass=NA){
+
   if (is.null(galaxy_data$star_part)){ # if there are no stellar particles (just gas), use these
+
+    if(!is.na(half_mass[1])){
+      check_bounds = (sum(galaxy_data$gas_part$Mass) > half_mass) & # check that the total model contains more mass than the requested half-mass
+        (min(galaxy_data$gas_part$Mass) <= half_mass) # check that the requested half mass is greater than a single particle
+
+      if (!check_bounds){
+        stop(paste0("Error: Requested half-mass is outside the range possible within the input simulation. \n",
+                    "Minimum mass of particle = ", min(galaxy_data$gas_part$Mass), "\n",
+                    "Maximum mass of simulation = ", sum(galaxy_data$gas_part$Mass), "\n",
+                    "Requested half mass ", half_mass, " is outside this range. \n",
+                    "Please resubmit your request with an appropriate value OR with NA for self-fit half-mass."))
+      }
+    }
+
     dummy_data = list(star_part = galaxy_data$gas_part,
                       gas_part= galaxy_data$star_part,
                       head = galaxy_data$head,
@@ -850,6 +854,20 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                             head      = dummy$galaxy_data$head,
                             ssp       = dummy$galaxy_data$ssp)
   } else {
+
+    if(!is.na(half_mass[1])){
+      check_bounds = (sum(galaxy_data$star_part$Mass) > half_mass) & # check that the total model contains more mass than the requested half-mass
+                     (min(galaxy_data$star_part$Mass) < half_mass) # check that the requested half mass is greater than a single particle
+
+      if (!check_bounds){
+        stop(paste0("Error: Requested half-mass is outside the range possible within the input simulation. \n",
+                    "Minimum mass of particle = ", min(galaxy_data$star_part$Mass), "\n",
+                    "Maximum mass of simulation = ", sum(galaxy_data$star_part$Mass), "\n",
+                    "Requested half mass ", half_mass, " is outside this range. \n",
+                    "Please resubmit your request with an appropriate value OR with NA for self-fit half-mass."))
+      }
+    }
+
     data = .measure_pqj(galaxy_data, half_mass)
   }
   return(data$galaxy_data)
