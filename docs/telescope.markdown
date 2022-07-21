@@ -34,7 +34,7 @@ telescope(type="IFU",                # specify a type or define your own using "
           wave_centre,               # wave_centre is auto-generated if not supplied
           wave_res=1.04,             # wavelength resolution in angstrom
           spatial_res=0.5,           # spatial resolution in arcsec
-          filter="r",                # luminosities output in this band  
+          filter="g",                # luminosities output in this band  
           lsf_fwhm=2.65,             # spectral uncertainty due to instrument in angstrom
           signal_to_noise = 10)      # target signal-to-noise ratio at any pixel
 ```
