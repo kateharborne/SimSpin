@@ -45,7 +45,7 @@
 #'
 
 telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(3700,5700),
-                     wave_centre, wave_res=1.04, spatial_res, filter="r", lsf_fwhm=2.65,
+                     wave_centre, wave_res=1.04, spatial_res, filter="g", lsf_fwhm=2.65,
                      signal_to_noise = 10, method){
 
   if (!missing(method)){
