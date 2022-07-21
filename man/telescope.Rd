@@ -12,7 +12,7 @@ telescope(
   wave_centre,
   wave_res = 1.04,
   spatial_res,
-  filter = "r",
+  filter = "g",
   lsf_fwhm = 2.65,
   signal_to_noise = 10,
   method

@@ -45,7 +45,7 @@
 #'
 
 telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(3700,5700),
-                     wave_centre, wave_res=1.04, spatial_res, filter="r", lsf_fwhm=2.65,
+                     wave_centre, wave_res=1.04, spatial_res, filter="g", lsf_fwhm=2.65,
                      signal_to_noise = 10, method){
 
   if (!missing(method)){
@@ -396,6 +396,10 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
     }
   }
 
+  if( min(output$filter$wave) > max(output$wave_range) | max(output$filter$wave) < min(output$wave_range) ){
+    stop("Error: Requested filter will not overlap with the telescope wavelength range. \n
+         Please select a different filter or extend your telescope wavelength range.")
+  }
 
   return(output)
 }

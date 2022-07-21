@@ -93,23 +93,29 @@ test_that("Checking case sensitivity #4", {
 # Testing that the telescope() function works with each of the possible default
 #  "filters".
 test_that("Initial run of telescope() function with default filters - r", {
-  expect_length(telescope(type="IFU", filter = "r"), telescope_length)
+  expect_length(telescope(type="IFU", filter = "r", wave_range = c(3000,9000)), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default filters - u", {
-  expect_length(telescope(type="IFU", filter = "u"), telescope_length)
+  expect_length(telescope(type="IFU", filter = "u", wave_range = c(3000,9000)), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default filters - g", {
-  expect_length(telescope(type="IFU", filter = "g"), telescope_length)
+  expect_length(telescope(type="IFU", filter = "g", wave_range = c(3000,9000)), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default filters - i", {
-  expect_length(telescope(type="IFU", filter = "i"), telescope_length)
+  expect_length(telescope(type="IFU", filter = "i", wave_range = c(3000,9000)), telescope_length)
 })
 
 test_that("Initial run of telescope() function with default filters - z", {
-  expect_length(telescope(type="IFU", filter = "z"), telescope_length)
+  expect_length(telescope(type="IFU", filter = "z", wave_range = c(3000,9000)), telescope_length)
+})
+
+test_that("Error when requestedfilter is outside range of wavlengths", {
+  expect_error(telescope(type="IFU", filter = "z", wave_range = c(3000,6000)))
+  expect_error(telescope(type="IFU", filter = "u", wave_range = c(5000,6000)))
+  expect_error(telescope(type="SAMI", filter = "z", wave_range = c(3000,6000)))
 })
 
 # Testing that an error triggers when you give it a range in the wrong format,
