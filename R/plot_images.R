@@ -31,8 +31,9 @@
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
@@ -98,12 +99,13 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
-#'                       method = "velocity", mass_flag=T)
+#'                       method = "velocity", mass_flag=TRUE)
 #' plot_mass(cube$observed_images$mass_image)
 
 plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
@@ -167,8 +169,9 @@ plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
@@ -234,8 +237,9 @@ plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
@@ -302,8 +306,9 @@ plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
@@ -369,8 +374,9 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
@@ -436,8 +442,9 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
@@ -504,8 +511,9 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
@@ -514,10 +522,11 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
 
 plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
                              units = expression("log10(Z/Z"[solar]*")"), main="",
-                             na.color = "white", zlim = NA, legend=T,
+                             na.color = "white", zlim = NA, legend=T, radii = NA,
                              titleshift = -4, labN=5, ...){
 
   met_map = metallicity_image
+  im_dim = dim(met_map)%/%2
   met_val = c(floor(min(met_map, na.rm=T)/2), max(met_map, na.rm=T))
 
   if (all(met_val == 0)){
@@ -531,6 +540,9 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = met_map, zlim = if(is.na(zlim[1])){met_val}else{zlim},
              col = met_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
+  if (!is.na(radii[1])){
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+  }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){met_val}else{zlim}, scale = c(1, 1/20),
               col = met_map_cols, orient = "h", inset = -1/20, labN=labN, title = units,
@@ -568,8 +580,9 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-#'                         package = "SimSpin")
+#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' package = "SimSpin")
+#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 #' cube = build_datacube(simspin_file = ss_gadget,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
