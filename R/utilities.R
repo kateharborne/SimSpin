@@ -15,9 +15,10 @@
 
 # globalVariable definitions
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen",
-                  "ID", "Initial_Mass", "Mass", "Metallicity", "luminosity",
-                  "Oxygen", "SFR", "SmoothingLength", "sed_id", "Temperature",
-                  "vx", "vy", "vz", "x", "y", "z"))
+                  "hcl.colors", "ID", "Initial_Mass", "luminosity", "Mass",
+                  "Metallicity", "Oxygen", "par", "SFR", "SmoothingLength",
+                  "sed_id", "Temperature", "text", "vx", "vy", "vz", "x", "y",
+                  "z"))
 
 # Functions for computing weighted means
 .meanwt = function(x,wt){
