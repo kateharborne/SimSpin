@@ -13,6 +13,7 @@ plot_metallicity(
   na.color = "white",
   zlim = NA,
   legend = T,
+  radii = NA,
   titleshift = -4,
   labN = 5,
   ...
@@ -40,6 +41,9 @@ the minimum and maximum values in the image.}
 \item{legend}{Boolean to determine if the colour bar axis should be printed
 at the bottom of the image. Default is T.}
 
+\item{radii}{list - containing a, b, and ang (if wishing to plot half-mass
+radii ellipse).}
+
 \item{titleshift}{Numeric. Describes the distance between the colour bar and
 the units. Default is -4.}
 
@@ -48,9 +52,6 @@ the colour bar. Default is 5.}
 
 \item{...}{Further variables passed to magimage. See
 \code{\link[magicaxis]{magimage}} for further details.}
-
-\item{radii}{list - containing a, b, and ang (if wishing to plot half-mass
-radii ellipse).}
 }
 \value{
 Returns an image to the plotting window of the input
@@ -61,8 +62,9 @@ A function to produce a plot of the stellar metallicity image produced by
 \code{build_datacube()} with associated colour bar and labels.
 }
 \examples{
-ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-                        package = "SimSpin")
+ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+package = "SimSpin")
+ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 cube = build_datacube(simspin_file = ss_gadget,
                       telescope = telescope(type="SAMI"),
                       observing_strategy = observing_strategy(),

@@ -62,11 +62,12 @@ A function to produce a plot of the mass image produced by
 \code{build_datacube()} with associated colour bar and labels.
 }
 \examples{
-ss_gadget = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata",
-                        package = "SimSpin")
+ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+package = "SimSpin")
+ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
 cube = build_datacube(simspin_file = ss_gadget,
                       telescope = telescope(type="SAMI"),
                       observing_strategy = observing_strategy(),
-                      method = "velocity", mass_flag=T)
+                      method = "velocity", mass_flag=TRUE)
 plot_mass(cube$observed_images$mass_image)
 }
