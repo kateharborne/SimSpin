@@ -12,6 +12,7 @@ LinkingTo: Rcpp
 Depends: R (>= 4.0), foreach
 Imports:
     celestial,
+    cmocean,
     data.table,
     doParallel,
     fields,

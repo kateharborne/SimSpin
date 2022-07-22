@@ -3,6 +3,7 @@ importFrom(Rcpp, evalCpp)
 useDynLib(SimSpin)
 
 importFrom(celestial, "cosdistAngScale", "cosdistTravelTime")
+importFrom(cmocean, "cmocean")
 importFrom(data.table, "transpose", "copy", "data.table", "set", ":=", "as.data.table", "is.data.table")
 importFrom(doParallel, "registerDoParallel")
 importFrom(fields, "image.plot")
