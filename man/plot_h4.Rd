@@ -8,9 +8,7 @@ plot_h4(
   h4_image,
   fig = c(0, 1, 0, 1),
   new = F,
-  units = expression("h"[4] * ", km s"^{
-     -1
- }),
+  units = expression("h"[4]),
   main = "",
   radii = NA,
   na.color = "white",
