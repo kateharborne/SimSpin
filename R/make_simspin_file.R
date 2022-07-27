@@ -244,7 +244,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                       "wave"      = temp$Wave)
 
   if (write_to_file){
-    saveRDS(simspin_file, file = output)
+    saveRDS(simspin_file, file = output, compress = "xz")
     return(message("SimSpin file written to: ", output, "\n"))
   } else {
     return(simspin_file)

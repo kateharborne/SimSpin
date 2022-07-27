@@ -384,7 +384,7 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
 #' plot_h4(cube$observed_images$h4_image)
 
 plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
-                      units = expression("h"[4]*", km s"^{-1}), main="",
+                      units = expression("h"[4]), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
                       titleshift = -4, labN=5, ...){
 
