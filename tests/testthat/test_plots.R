@@ -65,17 +65,18 @@ test_that("Each image type can be plotted for build_datacube images - EAGLE", {
   eagle_cube = build_datacube(simspin_file = ss_eagle,
                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 30, blur = T),
-                              method="velocity",
+                              method="gas",
                               verbose = F)
 
-  expect_invisible(plot_flux(eagle_cube$raw_images$flux_image))
+  expect_invisible(plot_mass(eagle_cube$raw_images$mass_image))
   expect_invisible(plot_velocity(eagle_cube$raw_images$velocity_image))
   expect_invisible(plot_dispersion(eagle_cube$raw_images$dispersion_image))
-  expect_invisible(plot_age(eagle_cube$raw_images$age_image))
+  expect_invisible(plot_SFR(eagle_cube$raw_images$SFR_image))
   expect_invisible(plot_metallicity(eagle_cube$raw_images$metallicity_image))
+  expect_invisible(plot_OH(eagle_cube$raw_images$OH_image))
   expect_invisible(plot_particles(eagle_cube$raw_images$particle_image))
 
-  expect_invisible(plot_flux(eagle_cube$observed_images$flux_image))
+  expect_invisible(plot_mass(eagle_cube$observed_images$mass_image))
   expect_invisible(plot_velocity(eagle_cube$observed_images$velocity_image))
   expect_invisible(plot_dispersion(eagle_cube$observed_images$dispersion_image))
   expect_invisible(plot_h3(eagle_cube$observed_images$h3_image))

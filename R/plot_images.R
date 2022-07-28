@@ -619,6 +619,144 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
 
 }
 
+#' Plotting pretty gas SFR images
+#'
+#' A function to produce a plot of the gas star formation rate image produced by
+#' \code{build_datacube()} with associated colour bar and labels.
+#'
+#' @param SFR_image Numeric array containing the particle per pixel image
+#' @param fig Numeric array of length 4 describing the boundary of the image
+#' @param new Boolean. Should the image be added to the existing plot? Default
+#' is FALSE.
+#' @param units String describing the units of the values contained
+#' in the image.
+#' @param main Image title, default "".
+#' @param radii list - containing a, b, and ang (if wishing to plot half-mass
+#' radii ellipse).
+#' @param na.color String. Colour given to NA values in the image.
+#' @param zlim Numeric array of length 2. Describing the numeric range of
+#' colours in the image. Default is NA, in which the range will be described by
+#' the minimum and maximum values in the image.
+#' @param legend Boolean to determine if the colour bar axis should be printed
+#' at the bottom of the image. Default is T.
+#' @param titleshift Numeric. Describes the distance between the colour bar and
+#' the units. Default is -4.
+#' @param labN Numeric. Describes the minimum number of numeric labels added to
+#' the colour bar. Default is 5.
+#' @param ... Further variables passed to magimage. See
+#' \code{\link[magicaxis]{magimage}} for further details.
+#' @return Returns an image to the plotting window of the input
+#' \code{build_datacube} image.
+#' @examples
+#' ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
+#' package = "SimSpin")
+#' ss_eagle = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
+#' cube = build_datacube(simspin_file = ss_eagle,
+#'                       telescope = telescope(type="SAMI"),
+#'                       observing_strategy = observing_strategy(),
+#'                       method = "gas")
+#' plot_SFR(cube$raw_images$SFR_image)
+
+plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
+                     units = expression("sSFR, M"["sol"]*"/Gyr"), main="", radii = NA,
+                     na.color = "white", zlim = NA, legend=T,
+                     titleshift = -4, labN=5, ...){
+
+  part_map = SFR_image
+  im_dim = dim(part_map)%/%2
+  part_val = c(floor(min(part_map, na.rm=T)/2), max(part_map, na.rm=T))
+
+  if (all(part_val == 0)){
+    stop("Image contains only '0'. No image can be produced in this case. \n
+         Please check your build_datacube function and try again.")
+  }
+
+  part_map_cols = cmocean::cmocean("deep", version = "2.0", start = .1, end=1)(50)
+
+  par(pty="s", fig=fig, xpd=FALSE, ps=12, cex=1, new=new); options(scipen = 1)
+  .image_nan(z = part_map, zlim = if(is.na(zlim[1])){part_val}else{zlim}, col = part_map_cols, na.color = na.color, xaxt="n",
+             yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
+  if (!is.na(radii[1])){
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+  }
+  if (legend){
+    .magcolbar(position = "bottom", range = if(is.na(zlim[1])){part_val}else{zlim}, scale = c(1, 1/20),
+               col = part_map_cols, orient = "h", inset = -1/20, labN=labN, title = units,
+               titleshift = titleshift)
+  }
+
+}
+
+#' Plotting pretty log10(O/H) images
+#'
+#' A function to produce a plot of the gas log10(O/H) image produced by
+#' \code{build_datacube()} with associated colour bar and labels.
+#'
+#' @param OH_image Numeric array containing the metallicity image.
+#' @param fig Numeric array of length 4 describing the boundary of the image
+#' @param new Boolean. Should the image be added to the existing plot? Default
+#' is FALSE.
+#' @param units String describing the units of the values contained
+#' in the image.
+#' @param main Image title, default "".
+#' @param radii list - containing a, b, and ang (if wishing to plot half-mass
+#' radii ellipse).
+#' @param na.color String. Colour given to NA values in the image.
+#' @param zlim Numeric array of length 2. Describing the numeric range of
+#' colours in the image. Default is NA, in which the range will be described by
+#' the minimum and maximum values in the image.
+#' @param legend Boolean to determine if the colour bar axis should be printed
+#' at the bottom of the image. Default is T.
+#' @param titleshift Numeric. Describes the distance between the colour bar and
+#' the units. Default is -4.
+#' @param labN Numeric. Describes the minimum number of numeric labels added to
+#' the colour bar. Default is 5.
+#' @param ... Further variables passed to magimage. See
+#' \code{\link[magicaxis]{magimage}} for further details.
+#' @return Returns an image to the plotting window of the input
+#' \code{build_datacube} image.
+#' @examples
+#' ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
+#' package = "SimSpin")
+#' ss_eagle = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
+#' cube = build_datacube(simspin_file = ss_eagle,
+#'                       telescope = telescope(type="SAMI"),
+#'                       observing_strategy = observing_strategy(),
+#'                       method = "gas")
+#' plot_OH(cube$raw_images$OH_image)
+
+plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
+                    units = expression("log10(O/H) + 12"), main="",
+                    na.color = "white", zlim = NA, legend=T, radii = NA,
+                    titleshift = -4, labN=5, ...){
+
+  met_map = OH_image
+  im_dim = dim(met_map)%/%2
+  met_val = c(floor(min(met_map, na.rm=T)/2), max(met_map, na.rm=T))
+
+  if (all(met_val == 0)){
+    stop("Image contains only '0'. No image can be produced in this case. \n
+         Please check your build_datacube function and try again.")
+  }
+
+  met_map_cols = cmocean::cmocean("dense", version = "2.0", start = .1, end=1)(50)
+
+  par(pty="s", fig=fig, xpd=FALSE, ps=12, cex=1, new=new); options(scipen = 1)
+  .image_nan(z = met_map, zlim = if(is.na(zlim[1])){met_val}else{zlim},
+             col = met_map_cols, na.color = na.color, xaxt="n",
+             yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
+  if (!is.na(radii[1])){
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+  }
+  if (legend){
+    .magcolbar(position = "bottom", range = if(is.na(zlim[1])){met_val}else{zlim}, scale = c(1, 1/20),
+               col = met_map_cols, orient = "h", inset = -1/20, labN=labN, title = units,
+               titleshift = titleshift)
+  }
+
+}
+
+
 .image_nan <- function(z, zlim, col, na.color='gray', ...){
   # Function for plotting an image with NAs as a set colour
   # z        :==: array corresponding to the image to be plotted

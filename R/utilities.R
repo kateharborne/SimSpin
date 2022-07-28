@@ -1442,10 +1442,13 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   SFR_map  = array(data = 0.0, dim = observation$sbin^2)
   Z_map    = array(data = 0.0, dim = observation$sbin^2)
   OH_map   = array(data = 0.0, dim = observation$sbin^2)
+  part_map = array(data=0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
     num_part = part_in_spaxel$N[i] # number of particles in spaxel
+    part_map[part_in_spaxel$pixel_pos[i]] = num_part
+
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
     # adding the "gaussians" of each particle to the velocity bins
@@ -1461,7 +1464,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   }
 
-  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
+  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map))
 }
 
 .gas_velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
@@ -1473,14 +1476,17 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   SFR_map  = array(data = 0.0, dim = observation$sbin^2)
   Z_map    = array(data = 0.0, dim = observation$sbin^2)
   OH_map   = array(data = 0.0, dim = observation$sbin^2)
+  part_map = array(data=0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = part_in_spaxel$N[i]
+                     part_map = num_part
+
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
                      # adding the "gaussians" of each particle to the velocity bins
@@ -1492,7 +1498,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
                      OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
-                     result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map)
+                     result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -1504,8 +1510,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   SFR_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
   Z_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[6]]))
   OH_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[7]]))
+  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[8]]))
 
-  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map))
+  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map))
 
 }
 
