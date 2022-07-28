@@ -382,7 +382,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
       SFR_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
       metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
+      OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("velocity_cube"   = cube,
@@ -400,12 +401,25 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       output$observed_images$mass_image       = array(0.0, dim = dims[c(1,2)])
       output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
       output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$h3_image         = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$h4_image         = array(0.0, dim = dims[c(1,2)])
 
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
           output$observed_images$mass_image[c,d]       = sum(output$velocity_cube[c,d,])
           output$observed_images$velocity_image[c,d]   = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
           output$observed_images$dispersion_image[c,d] = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], output$observed_images$velocity_image[c,d]))
+
+          h3h4 = tryCatch({stats::optim(par   = c(0,0),
+                                        fn    = .losvd_fit,
+                                        x     = observation$vbin_seq,
+                                        losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
+                                        vel   = output$observed_images$velocity_image[c,d],
+                                        sig   = output$observed_images$dispersion_image[c,d],
+                                        method="BFGS", control=list(reltol=1e-9))$par},
+                          error = function(e){c(0,0)})
+          output$observed_images$h3_image[c,d]       = h3h4[1]
+          output$observed_images$h4_image[c,d]       = h3h4[2]
         }
       }
     }
