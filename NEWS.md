@@ -1,4 +1,4 @@
-# SimSpin v2.3.10 News
+# SimSpin v2.3.11 News
 
 ### Author: Kate Harborne
 
