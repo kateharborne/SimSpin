@@ -3,7 +3,7 @@ layout: default
 title: Documentation
 permalink: /docs/documentation
 description: "SimSpin documentation for each function in the package."
-nav_order: 4
+nav_order: 5
 has_children: true
 last_modified_date: "Wed, 30 March 2022 15:55:00 AWST"
 ---
