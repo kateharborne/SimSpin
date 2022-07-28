@@ -62,10 +62,10 @@ A function to produce a plot of the gas log10(O/H) image produced by
 \code{build_datacube()} with associated colour bar and labels.
 }
 \examples{
-ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
 package = "SimSpin")
-ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
-cube = build_datacube(simspin_file = ss_gadget,
+ss_eagle = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
+cube = build_datacube(simspin_file = ss_eagle,
                       telescope = telescope(type="SAMI"),
                       observing_strategy = observing_strategy(),
                       method = "gas")
