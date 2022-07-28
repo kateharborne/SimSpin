@@ -648,10 +648,10 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
 #' package = "SimSpin")
-#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
-#' cube = build_datacube(simspin_file = ss_gadget,
+#' ss_eagle = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
+#' cube = build_datacube(simspin_file = ss_eagle,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
 #'                       method = "gas")
@@ -716,10 +716,10 @@ plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
 #' @return Returns an image to the plotting window of the input
 #' \code{build_datacube} image.
 #' @examples
-#' ss_pd_gadget = system.file("extdata", "SimSpin_example_Gadget",
+#' ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
 #' package = "SimSpin")
-#' ss_gadget = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
-#' cube = build_datacube(simspin_file = ss_gadget,
+#' ss_eagle = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
+#' cube = build_datacube(simspin_file = ss_eagle,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
 #'                       method = "gas")
