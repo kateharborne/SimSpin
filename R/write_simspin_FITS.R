@@ -233,6 +233,14 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                   "num: projected inclination of object in radians about the vertical axis")]
   obs_summary[, "lsf_fwhm" := c(observation$lsf_fwhm,
                   "num: line-spread function of telescope given as full-width half-maximum in Angstrom")]
+
+  if (observation$method == "spectral"){
+    obs_summary[, "LSF_conv" := c(observation$LSF_conv,
+                  "bool: has line spread function convolution been applied?")]
+    obs_summary[, "lsf_sigma" := c(observation$lsf_sigma,
+                  "num: line-spread function of telescope given as a sigma width in Angstrom")]
+  }
+
   obs_summary[, "lum_dist" := c(observation$lum_dist,
                   "num: distance to object in Mpc")]
   obs_summary[, "method" := c(observation$method,
@@ -247,8 +255,15 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                   "num: pixel indicies within the field of view")]
   obs_summary[, "psf_fwhm" := c(observation$psf_fwhm,
                   "num: the full-width half-maximum of the point spread function kernel in arcsec")]
-  obs_summary[, "psf_kernel" := c(if(is.null(observation$psf_kernel)){"NULL"}else{observation$psf_kernel},
-                  "str: the name of the shape of the point spread function kernel")]
+
+  if (is.null(observation$psf_kernel)){
+    obs_summary[, "psf_kernel" := c(as.character("None"),
+                    "num: the point spread function kernel")]
+  } else {
+    obs_summary[, "psf_kernel" := c(paste(as.character(observation$psf_kernel), collapse = ","),
+                    "num: the point spread function kernel")]
+  }
+
   obs_summary[, "sbin" := c(observation$sbin,
                   "num: the number of spatial pixels across the diameter of the field of view")]
   obs_summary[, "sbin_seq" := c(paste(as.character(observation$sbin_seq), collapse = ","),
@@ -269,12 +284,14 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                   "num: the wavelength bin centres in Angstrom")]
   obs_summary[, "wave_edges" := c(paste(as.character(observation$wave_edges), collapse = ","),
                   "num: the wavelength bin edges in Angstrom")]
-  obs_summary[, "vbin" := c(observation$vbin,
-                  "num: the number of velocity bins for a given telescope resolution")]
-  obs_summary[, "vbin_seq" := c(paste(as.character(observation$vbin_seq), collapse = ","),
-                  "num: the velocity bin centres in km/s")]
-  obs_summary[, "vbin_edges" := c(paste(as.character(observation$vbin_edges), collapse = ","),
-                  "num: the velocity bin edges in km/s")]
+  if (observation$method != "spectral"){
+    obs_summary[, "vbin" := c(observation$vbin,
+                              "num: the number of velocity bins for a given telescope resolution")]
+    obs_summary[, "vbin_seq" := c(paste(as.character(observation$vbin_seq), collapse = ","),
+                                  "num: the velocity bin centres in km/s")]
+    obs_summary[, "vbin_edges" := c(paste(as.character(observation$vbin_edges), collapse = ","),
+                                    "num: the velocity bin edges in km/s")]
+  }
   obs_summary[, "vbin_size" := c(observation$vbin_size,
                   "num: the size of each velocity bin in km/s")]
   obs_summary[, "vbin_error" := c(observation$vbin_error,
@@ -564,7 +581,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
     data_keyvalues$CTYPE3 = "GAS_VELO"
     data_keyvalues$CUNIT3 = "km/s"
-    data_keyvalues$CDELT3  = observation$vbin_size
+    data_keyvalues$CDELT3 = observation$vbin_size
     data_keyvalues$CRVAL3 = observation$vbin_seq[1]
 
     Rfits::Rfits_write_cube(data = simspin_cube, filename = cube_file_name, ext=2,
@@ -624,14 +641,15 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("MASS", "OBS_VEL", "OBS_DISP", "RAW_Z", "RAW_OH", "RAW_SFR")
-    bunits = c("Msol", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Msol/year")
-    image_names = c("mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "SFR_image")
-    output_image_file_names = paste0(output_dir, "/", output_file_root, "_", image_names, ".FITS")
-    extnum = c(4,5,6,7,8,9)
+    extnames = c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_Z", "RAW_OH", "RAW_SFR", "NPART")
+    bunits = c("Msol", "km/s", "km/s", "unitless", "unitless", "Msol", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Msol/year", "Particle number")
+    image_names = c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "SFR_image", "particle_image")
+    rawobs = c("obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw", "raw")
+    output_image_file_names = paste0(output_dir, "/", output_file_root, "_", rawobs, "_", image_names, ".FITS")
+    extnum = c(4,5,6,7,8,9,10,11,12,13,14,15)
 
     if (split_save){  # if writing each image to a seperate file
-      for (i in 1:6){ # for each image in the build_datacube output,
+      for (i in 1:length(extnum)){ # for each image in the build_datacube output,
 
         Rfits::Rfits_write_header(filename = output_image_file_names[i], keyvalues = header_keyvalues,
                                   keycomments = header_keycomments, ext=1, create_file = T,
@@ -640,7 +658,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
 
-        if (i < 4){ # write observed mass, velocity and dispersion images to the file
+        if (i < 6){ # write observed mass, velocity and dispersion images to the file
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = output_image_file_names[i], ext=2,
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
@@ -656,13 +674,13 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
       }
 
     } else {  # if writing all images to the same file
-      for (i in 1:6){ # for each image in the build_datacube output,
+      for (i in 1:length(extnum)){ # for each image in the build_datacube output,
 
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
 
         # Write each subsequent image to the next HDU
-        if (i < 4){ # write observed mass, velocity and dispersion images to the file
+        if (i < 6){ # write observed mass, velocity and dispersion images to the file
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = cube_file_name, ext=extnum[i],
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
