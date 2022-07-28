@@ -43,3 +43,8 @@ If you use this code for your research, please make sure to include a citation t
 -   K.E. Harborne, C.Power and A.S.G. Robotham, (2020), ["SIMSPIN - Constructing mock IFS kinematic data cubes"](https://ui.adsabs.harvard.edu/abs/2020PASA...37...16H/abstract), Publications of the Astronomical Society of Australia, Volume 37, article id. e016
 
 -   K.E. Harborne, (2019), ["SimSpin: Kinematic analysis of galaxy simulations"](https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract), Astrophysics Source Code Library, record ascl:1903.006
+
+---
+
+*KH acknowledges the funding support of the Australian Research Council Centre of Excellence for All-Sky Astrophysics in 3 Dimensions (ASTRO3D), through project number CE170100013. This work has been made possible through the Astronomy Data and Computing Services (ADACS) with direct support from Elizabeth Mannering, Felipe Jimenez-Ibarra and Simon O’Toole. This work has also been supported by resources provided by the Pawsey Supercomputing Centre with funding from the Australian Government and the Government of Western Australia*
+{: .fs-3 .fw-300 }
