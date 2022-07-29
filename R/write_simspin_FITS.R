@@ -299,6 +299,12 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
   obs_summary[, "z" := c(observation$z,
                   "num: the redshift distance of the object observed")]
 
+  check = any(is.na(obs_summary[1,]))
+  if (check){
+    id = which(is.na(obs_summary[1,]))
+    obs_summary[1,id] = "None"
+  }
+
   # Writing data to HDUs based on the observation method employed ----
 
   # SPECTRAL mode method =======================================================
