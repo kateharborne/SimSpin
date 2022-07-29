@@ -137,6 +137,14 @@ For pre-defined `type` classes, certain parameters cannot be modified. Values hi
 
 ---
 
+## Notes
+
+### Filter Choice
+
+
+
+---
+
 Now that you've initiallised the telescope, you can move on to describing the strategy of your observing run...
 
 [Next Step: observing_strategy](observing_strategy.markdown){: .btn .btn-purple }
