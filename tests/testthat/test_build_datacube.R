@@ -502,7 +502,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(names(spectral_fits)[ob_table_loc] == "OB_TABLE")
 
   expect_length(build_datacube(simspin_file = ss_gadget,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method="velocity",
                                write_fits = T, output_location = paste0(temp_loc, "/ss_gadget.FITS"),
