@@ -516,8 +516,8 @@ test_that("Data cubes can be written to a single files", {
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS")))[ob_table_loc] == "OB_TABLE")
 
   expect_length(build_datacube(simspin_file = ss_eagle,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               telescope = telescope(type="MUSE", fov = 10, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.27, inc_deg = 60, blur = T, fwhm = 0.6),
                                method="gas",
                                write_fits = T, output_location = paste0(temp_loc, "/ss_eagle.FITS"),
                                split_save=F), built_cube_size)
