@@ -1,8 +1,8 @@
-# SimSpin v2.3.12 News
+# SimSpin v2.3.13 News
 
 ### Author: Kate Harborne
 
-### Last edit: 29/07/22
+### Last edit: 01/08/22
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -18,7 +18,8 @@ All changes are noted in the changelog table below.
 
 | Date     | Summary of change                                                                                                                                                                                                                                                                                                                                                                                                    | Version | Commit                                   |
 |----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|------------------------------------------|
-| 29/07/22 	| *Minor bugfix*. Addressing Issue #59. Making sure any NA values within the `observation` list are re-written as "None" in characters before writing to FITS.                                                                                                                                                                                                                                                         	| 2.3.12  	|                                          	|
+| 01/08/22 	| *Minor bugfix*. Addressing Issue #59 (which was not actually fixed in previous attempt!). Making sure long entries (i.e. wave_seq, vbin_seq or sbin_seq) are never too long to be written to a FITS table. Change to range (i.e. min and max) to remove this as an issue.                                                                                                                                            	| 2.3.13  	|                                          	|
+| 29/07/22 	| *Minor bugfix*. Addressing Issue #59. Making sure any NA values within the `observation` list are re-written as "None" in characters before writing to FITS.                                                                                                                                                                                                                                                         	| 2.3.12  	| 91e8e890e3154169b7bb078e80efe979c006667b 	|
 | 28/07/22 	| *Minor bugfix*.                                                                                                                                                                                                                                                                                                                                                                                                      	| 2.3.11  	| c7114e4727e7eb2396d9af075c85df17b6c950e2 	|
 |          | (1) Update to `write_simspin_FITS`. The `observation` summary output by `build_datacube` was previously never saved to the FITS file output. However, this makes it difficult to reproduce if the only saved output is a FITS file. With this update, the list `observation` is now written to a table in EXTNUM = 3 for all FITS files produced.                                                                    |         |                                          |
 |          | (2) Update to `method = "gas"`. Particle images will now be output when method is `gas`, along with both the raw and observed mass, velocity and dispersion maps. This mode was not updated with the `spectral` and `velocity` modes in v2.3.8 upgrade. This has now been remedied.                                                                                                                                  |         |                                          |
