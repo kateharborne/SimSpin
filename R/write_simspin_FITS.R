@@ -179,131 +179,99 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
   # Need to begin by coercing the values that are arrays into comma seperated
   # character vectors of length 1.
 
-  obs_summary = stats::setNames(data.table::data.table(matrix(NA,
-                                                              ncol = length(observation),
-                                                              nrow = 2)),
-                                names(observation))
-  obs_summary[, "filter":= NULL]
+  obs_summary = stats::setNames(data.table::data.table(matrix("",
+                                                              ncol = 3,
+                                                              nrow = (length(observation)-2))),
+                                c("Name", "Value", "Units"))
 
-  obs_summary[, "ang_size" := c(observation$ang_size,
-                  "num: scale at given distance in kpc/arcsec")]
-  obs_summary[, "aperture_region" := c(paste(as.character(observation$aperture_region), collapse = ","),
-                  "bool: pixels within the aperture")]
-  obs_summary[, "aperture_shape" := c(observation$aperture_shape,
-                  "str: shape of aperture")]
-  obs_summary[, "aperture_size" := c(observation$aperture_size,
-                  "num: field of view diameter width in kpc")]
-  obs_summary[, "date" := c(observation$date,
-                  "str: date and time of mock observation")]
-  obs_summary[, "fov" := c(observation$fov,
-                  "num: field of view diameter in arcsec")]
+  obs_names = names(observation)
+  obs_names = obs_names[-c(which(obs_names %in% c("psf_kernel", "pixel_region")))]
+
+  obs_units = data.table::data.table("ang_size" = "num: scale at given distance in kpc/arcsec",
+                                     "aperture_region" = "bool: pixels within the aperture",
+                                     "aperture_shape" = "str: shape of aperture",
+                                     "aperture_size" = "num: field of view diameter width in kpc",
+                                     "date" = "str: date and time of mock observation",
+                                     "fov" = "num: field of view diameter in arcsec",
+                                     "filter" = "str: filter name",
+                                     "inc_deg" = "num: projected inclination of object in degrees about the horizontal axis",
+                                     "inc_rad" = "num: projected inclination of object in radians about the horizontal axis",
+                                     "twist_deg" = "num: projected inclination of object in degrees about the vertical axis",
+                                     "twist_rad" = "num: projected inclination of object in radians about the vertical axis",
+                                     "lsf_fwhm" = "num: line-spread function of telescope given as full-width half-maximum in Angstrom",
+                                     "LSF_conv" = "bool: has line spread function convolution been applied?",
+                                     "lsf_sigma" = "num: line-spread function of telescope given as a sigma width in Angstrom",
+                                     "lum_dist" = "num: distance to object in Mpc",
+                                     "method" = "str: name of observing method employed",
+                                     "origin" = "str: version of SimSpin used for observing",
+                                     "pointing_kpc" = "num: x-y position of field of view centre relative to object centre in units of kpc",
+                                     "pointing_deg" = "num: x-y position of field of view centre relative to object centre in units of degrees",
+                                     "psf_fwhm" = "num: the full-width half-maximum of the point spread function kernel in arcsec",
+                                     "sbin" =  "num: the number of spatial pixels across the diameter of the field of view",
+                                     "sbin_seq" = "num: the min and max spatial bin centres in kpc",
+                                     "sbin_size" = "num: the size of each pixel in kpc",
+                                     "spatial_res" = "num: the size of each pixel in arcsec",
+                                     "signal_to_noise" = "num: the signal-to-noise ratio for observed spectrum",
+                                     "wave_bin" = "num: the number of wavelength bins for a given telescope",
+                                     "wave_centre" = "num: the central wavelength for a given telescope in Angstrom",
+                                     "wave_res" = "num: the width of each wavelength bin in Angstrom",
+                                     "wave_seq" = "num: the min and max wavelength bin centres in Angstrom",
+                                     "wave_edges" = "num: the wavelength bin edges in Angstrom",
+                                     "vbin" = "num: the number of velocity bins for a given telescope resolution",
+                                     "vbin_seq" = "num: the min and max velocity bin centres in km/s",
+                                     "vbin_edges" = "num: the min and max velocity bin edges in km/s",
+                                     "vbin_size" = "num: the size of each velocity bin in km/s",
+                                     "vbin_error" = "num: the velocity uncertainty given the telescope LSF in km/s",
+                                     "z" = "num: the redshift distance of the object observed")
+
+  if ("vbin_seq" %in% obs_names){
+    observation[["vbin_seq"]] = range(observation[["vbin_seq"]])
+    observation[["vbin_edges"]] = range(observation[["vbin_edges"]])
+  }
+  observation[["wave_seq"]] = range(observation[["wave_seq"]])
+  observation[["wave_edges"]] = range(observation[["wave_edges"]])
+  observation[["sbin_seq"]] = range(observation[["sbin_seq"]])
 
   if (min(range(observation$filter$wave)) == 2980){
-    obs_summary[, "filter_name":= c("u",
-                    "str: filter name")]
+    observation[["filter_name"]] = "u"
   }
   if (min(range(observation$filter$wave)) == 3630){
-    obs_summary[, "filter_name":= c("g",
-                    "str: filter name")]
+    observation[["filter_name"]] = "g"
   }
   if (min(range(observation$filter$wave)) == 5380){
-    obs_summary[, "filter_name":= c("r",
-                    "str: filter name")]
+    observation[["filter_name"]] = "r"
   }
   if (min(range(observation$filter$wave)) == 6430){
-    obs_summary[, "filter_name":= c("i",
-                    "str: filter name")]
+    observation[["filter_name"]] = "i"
   }
   if (min(range(observation$filter$wave)) == 7730){
-    obs_summary[, "filter_name":= c("z",
-                    "str: filter name")]
+    observation[["filter_name"]] = "z"
+  }
+  observation[["filter"]] = observation[["filter_name"]]
+  obs_summary[, "Name":= obs_names]
+
+  for (val in 1:(length(observation)-3)){
+
+    if ( length(observation[[obs_names[val]]]) > 1){
+      rounded_val = signif(observation[[obs_names[val]]], digits = 6)
+      add_value = paste(as.character(rounded_val), collapse = ",")
+    } else {
+      if (is.na(observation[[obs_names[val]]])){
+        add_value = "None"
+      } else {
+        rounded_val = if(is.numeric(observation[[obs_names[val]]])){
+          signif(observation[[obs_names[val]]], digits = 6)
+        } else {
+            observation[[obs_names[val]]]
+          }
+        add_value = as.character(rounded_val)
+      }
+    }
+
+    data.table::set(obs_summary, i =val, j="Value", value=add_value)
+    data.table::set(obs_summary, i =val, j="Units", value=obs_units[[obs_names[val]]])
   }
 
-  obs_summary[, "filter_wave":= c(paste(as.character(observation$filter$wave), collapse = ","),
-                  "num: wavelengths at which the filter operates in Angstrom")]
-  obs_summary[, "filter_response":= c(paste(as.character(observation$filter$response), collapse = ","),
-                  "num: fractional response from filter at a given wavelength")]
-  obs_summary[, "inc_deg" := c(observation$inc_deg,
-                  "num: projected inclination of object in degrees about the horizontal axis")]
-  obs_summary[, "inc_rad" := c(observation$inc_rad,
-                  "num: projected inclination of object in radians about the horizontal axis")]
-  obs_summary[, "twist_deg" := c(observation$twist_deg,
-                  "num: projected inclination of object in degrees about the vertical axis")]
-  obs_summary[, "twist_rad" := c(observation$twist_rad,
-                  "num: projected inclination of object in radians about the vertical axis")]
-  obs_summary[, "lsf_fwhm" := c(observation$lsf_fwhm,
-                  "num: line-spread function of telescope given as full-width half-maximum in Angstrom")]
-
-  if (observation$method == "spectral"){
-    obs_summary[, "LSF_conv" := c(observation$LSF_conv,
-                  "bool: has line spread function convolution been applied?")]
-    obs_summary[, "lsf_sigma" := c(observation$lsf_sigma,
-                  "num: line-spread function of telescope given as a sigma width in Angstrom")]
-  }
-
-  obs_summary[, "lum_dist" := c(observation$lum_dist,
-                  "num: distance to object in Mpc")]
-  obs_summary[, "method" := c(observation$method,
-                  "str: name of observing method employed")]
-  obs_summary[, "origin" := c(observation$origin,
-                  "str: version of SimSpin used for observing")]
-  obs_summary[, "pointing_kpc" := c(paste(as.character(observation$pointing_kpc), collapse = ","),
-                  "num: x-y position of field of view centre relative to object centre in units of kpc")]
-  obs_summary[, "pointing_deg" := c(paste(as.character(observation$pointing_deg), collapse = ","),
-                  "num: x-y position of field of view centre relative to object centre in units of degrees")]
-  obs_summary[, "pixel_region" := c(paste(as.character(observation$pixel_region), collapse = ","),
-                  "num: pixel indicies within the field of view")]
-  obs_summary[, "psf_fwhm" := c(observation$psf_fwhm,
-                  "num: the full-width half-maximum of the point spread function kernel in arcsec")]
-
-  if (is.null(observation$psf_kernel)){
-    obs_summary[, "psf_kernel" := c(as.character("None"),
-                    "num: the point spread function kernel")]
-  } else {
-    obs_summary[, "psf_kernel" := c(paste(as.character(observation$psf_kernel), collapse = ","),
-                    "num: the point spread function kernel")]
-  }
-
-  obs_summary[, "sbin" := c(observation$sbin,
-                  "num: the number of spatial pixels across the diameter of the field of view")]
-  obs_summary[, "sbin_seq" := c(paste(as.character(observation$sbin_seq), collapse = ","),
-                  "num: the spatial bin centres in kpc")]
-  obs_summary[, "sbin_size" := c(observation$sbin_size,
-                  "num: the size of each pixel in kpc")]
-  obs_summary[, "spatial_res" := c(observation$spatial_res,
-                  "num: the size of each pixel in arcsec")]
-  obs_summary[, "signal_to_noise" := c(observation$signal_to_noise,
-                  "num: the signal-to-noise ratio for observed spectrum")]
-  obs_summary[, "wave_bin" := c(observation$wave_bin,
-                  "num: the number of wavelength bins for a given telescope")]
-  obs_summary[, "wave_centre" := c(observation$wave_centre,
-                  "num: the central wavelength for a given telescope in Angstrom")]
-  obs_summary[, "wave_res" := c(observation$wave_res,
-                  "num: the width of each wavelength bin in Angstrom")]
-  obs_summary[, "wave_seq" := c(paste(as.character(observation$wave_seq), collapse = ","),
-                  "num: the wavelength bin centres in Angstrom")]
-  obs_summary[, "wave_edges" := c(paste(as.character(observation$wave_edges), collapse = ","),
-                  "num: the wavelength bin edges in Angstrom")]
-  if (observation$method != "spectral"){
-    obs_summary[, "vbin" := c(observation$vbin,
-                              "num: the number of velocity bins for a given telescope resolution")]
-    obs_summary[, "vbin_seq" := c(paste(as.character(observation$vbin_seq), collapse = ","),
-                                  "num: the velocity bin centres in km/s")]
-    obs_summary[, "vbin_edges" := c(paste(as.character(observation$vbin_edges), collapse = ","),
-                                    "num: the velocity bin edges in km/s")]
-  }
-  obs_summary[, "vbin_size" := c(observation$vbin_size,
-                  "num: the size of each velocity bin in km/s")]
-  obs_summary[, "vbin_error" := c(observation$vbin_error,
-                  "num: the velocity uncertainty given the telescope LSF in km/s")]
-  obs_summary[, "z" := c(observation$z,
-                  "num: the redshift distance of the object observed")]
-
-  check = any(is.na(obs_summary[1,]))
-  if (check){
-    id = which(is.na(obs_summary[1,]))
-    obs_summary[1,id] = "None"
-  }
 
   # Writing data to HDUs based on the observation method employed ----
 
