@@ -3,7 +3,7 @@ layout: default
 title: Basic Usage
 permalink: /basic_usage/
 description: "A walkthrough demonstrating how to generate your first mock observation."
-nav_order: 3
+nav_order: 4
 last_modified_date: "Mon, 30 May 2022 13:57:00 AWST"
 ---
 

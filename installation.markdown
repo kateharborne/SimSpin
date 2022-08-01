@@ -3,7 +3,7 @@ layout: default
 title: Installation
 permalink: /installation/
 description: "How to install SimSpin on your machine."
-nav_order: 2
+nav_order: 3
 last_modified_date: "Wed, 16 February 2022 13:57:00 AWST"
 ---
 
