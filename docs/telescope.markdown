@@ -144,17 +144,17 @@ For pre-defined `type` classes, certain parameters cannot be modified. Values hi
 Recent Updates
 {: .label .label-purple } 
 
-With the changes implemented in the upgrade to v2.3.8, cubes build with `method = "velocity"` will has velocity maps weighted by flux in a given filter band. Similarly, the `flux_image` produced will be the flux in a given filter. 
+With the changes implemented in the upgrade to v2.3.8, cubes built with `method = "velocity"` and `mass_flag = FALSE` will have velocity maps weighted by the observed flux in a given filter band. Similarly, the `flux_image` produced will be the flux in a given filter. 
 
 Below, we show the wavelength coverage for each of the available filters within SimSpin. The filter selected in this function will need to overlap with the wavelength range of the requested telescope. If they do not overlap, SimSpin will issue an error. 
 
-| **Filter Name** | **Wavelength Range, Angstrom** | **Data Shape** | **Description**                                                                                    |
+| **Filter Name** | **Wavelength Range,** &#8491; | **Data Shape** | **Description**                                                                                    |
 |-----------------|--------------------------------|----------------|----------------------------------------------------------------------------------------------------|
-| `filt_u_SDSS`   | 2980 - 4130                    | (47, 2)        | The relative response of the SDSS u-band filter across the relevant wavelength range in Angstroms. |
-| `filt_g_SDSS`   | 3630 - 5830                    | (89, 2)        | The relative response of the SDSS g-band filter across the relevant wavelength range in Angstroms. |
-| `filt_r_SDSS`   | 5380 - 7230                    | (75, 2)        | The relative response of the SDSS r-band filter across the relevant wavelength range in Angstroms. |
-| `filt_i_SDSS`   | 6430 - 8630                    | (89, 2)        | The relative response of the SDSS i-band filter across the relevant wavelength range in Angstroms. |
-| `filt_z_SDSS`   | 7730 - 11230                   | (141, 2)       | The relative response of the SDSS z-band filter across the relevant wavelength range in Angstroms. |
+| `filt_u_SDSS`   | 2980 - 4130                    | (47, 2)        | The relative response of the **SDSS u-band** filter across the relevant wavelength range in Angstroms. |
+| `filt_g_SDSS`   | 3630 - 5830                    | (89, 2)        | The relative response of the **SDSS g-band** filter across the relevant wavelength range in Angstroms. |
+| `filt_r_SDSS`   | 5380 - 7230                    | (75, 2)        | The relative response of the **SDSS r-band** filter across the relevant wavelength range in Angstroms. |
+| `filt_i_SDSS`   | 6430 - 8630                    | (89, 2)        | The relative response of the **SDSS i-band** filter across the relevant wavelength range in Angstroms. |
+| `filt_z_SDSS`   | 7730 - 11230                   | (141, 2)       | The relative response of the **SDSS z-band** filter across the relevant wavelength range in Angstroms. |
 
 ---
 

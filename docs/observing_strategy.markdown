@@ -43,6 +43,27 @@ observing_strategy(dist_z       = 0.05,   # projected distance to galaxy model
 
 ---
 
+## Output Value
+
+The output of `observing_strategy` is a *List* element that will be stored as a variable to the environment. 
+
+The list will contain either 5 or 7 elements, dependent on whether the observation will be blurred for seeing conditions or not:
+
+1. `distance` - A "distance" object that summarises the different distance measures to the projected galaxy. This will include three elements, determined from the one input above:
+    - `z` which describes the projected redshift distance to the simulation.
+    - `Mpc` which describes the physcial luminosity distance in Mpc to the simulation.
+    - `kpc_per_arcsec` which describes the angular distance on the sky given in kpc/arcseconds to the simulation.
+1. `inc_deg` - The projected inclination of the galaxy about the horizontal axis in degrees.
+1. `twist_deg` - The projected inclination (or "twist") of the galaxy about the vertical axis in degrees.
+1. `pointing` - A "pointing" object that summarises the distance between the centre of the telescope field of view and the centre of the galaxy model. This includes two elements determined from the one input above:
+    - `xy_deg` which describes the offset in x and y in units of degrees (for the given projected distance).
+    - `xy_kpc` which describes the offset in x and y in units of kpc. 
+1. `blur` - A boolean that describes whether or not seeing conditions will be applied during the mock cube building process. 
+1. `fwhm` - (*Optional*) If `blur=T`, this value will describe the full-width half-maximum of the point-spread function (PSF) used to blur the resulting data cube. 
+1. `psf` - (*Optional*) If `blur=T`, this value will name the sape of the point-spread function (PSF). Currently, this can be either "Gaussian" or "Moffat". 
+
+---
+
 ## Example
 
 Start by initiallising an observing strategy using the default parameters:
