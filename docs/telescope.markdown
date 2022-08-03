@@ -17,9 +17,6 @@ In order to build a data cube, we need to describe the properties of the telesco
 Using the `telecope` function, a single telescope object is generated with a set number of expected properties. These properties are used with the `observing_strategy` to describe a specific observation. You can fully specify the particulars of your chosen telescope or you can select from a number of inbuilt telescopes designed to mimic current IFS surveys. 
 {: .fw-300 }
 
-[See an example](#example){: .btn .btn-purple }
-[See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/telescope.R#L44){: .btn .btn-purple }
-
 *As of version 2.2.0, the `method` input parameter has been moved directly to the [`build_datacube`](build_datacube.markdown) function. For backwards compatibility, this parameter can still be specified here, but a warning will be issued.*
 {: .fw-150 }
 ---
@@ -39,6 +36,11 @@ telescope(type="IFU",                # specify a type or define your own using "
           signal_to_noise = 10)      # target signal-to-noise ratio at any pixel
 ```
 
+[Input parameters](#input-parameters){: .btn .btn-purple }
+[Output parameters](#output-parameters){: .btn .btn-purple }
+[See an example](#example){: .btn .btn-purple }
+[See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/telescope.R#L44){: .btn .btn-purple }
+
 ---
 
 ## Input Parameters
@@ -56,11 +58,12 @@ telescope(type="IFU",                # specify a type or define your own using "
 
 ---
 
-## Output Value
+## Output Parameters
 
 The output of `telescope` is a *List* element that will be stored as a variable to the environment. 
 
 The list will contain the following 11 elements:
+{: .fw-300 }
 
 1. `type` - *Character* element recording the requested telescope type. Must be one of `"IFU"`, `"SAMI"`, `"MaNGA"`, `"MUSE"` or `"Hector"`.
 
@@ -86,7 +89,7 @@ The list will contain the following 11 elements:
 1. `signal_to_noise` - *Numeric* element describing the maximum signal-to-noise ratio per pixel. 
 
 1. `sbin` - *Numeric* element describing the number of spatial pixels across the diameter of the aperture. 
-
+{: .bg-grey-lt-000 }
 ---
 
 ## Example

@@ -16,10 +16,6 @@ It also aims to prepare the computationally expensive steps only once (i.e. the 
 Once we have generated a SimSpin file, that file can be used as input to `build_datacube` many times. 
 {: .fw-300 }
 
-
-[See an example](#example){: .btn .btn-purple }
-[See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/make_simspin_file.R#L57){: .btn .btn-purple }
-
 ---
 
 The following code shows the default parameters used in the `make_simspin_file` function. Calling the function without specifying anything other than the required input `filename` will produce a SimSpin file saved at the same directory location as the input simulation file with the following defaults. 
@@ -34,6 +30,11 @@ make_simspin_file(filename,                         # REQUIRED input file
                   centre = NA, half_mass = NA,      # alignment choice
                   sph_spawn_n = 1)                  # gas smoothing choice
 ```
+
+[Input parameters](#input-parameters){: .btn .btn-purple }
+[Output parameters](#output-parameters){: .btn .btn-purple }
+[See an example](#example){: .btn .btn-purple }
+[See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/make_simspin_file.R#L57){: .btn .btn-purple }
 
 ---
 
@@ -55,11 +56,12 @@ make_simspin_file(filename,                         # REQUIRED input file
 
 ---
 
-## Output Value
+## Output Parameters
 The output of `make_simspin_file` is a *List* element.
 If `write_to_file = T`, this list will be written to an .Rdata file at the location specified by `output`. Otherwise, it will be written as a variable to the environment.
 
 The list will contain the following 5 elements:
+{: .fw-300 }
 
 1. `header` -  *List* element containing eight labelled properties for data transparency and reproducability.
 
@@ -101,7 +103,7 @@ The list will contain the following 5 elements:
 1. `spectra` - A *data.table* element containing the spectral flux associated with each particle, linked to each particle by the `sed_id` within the `star_part` element. Each row corresponds to the spectrum associated with an individual spectral ID. 
 
 1. `wave` - *Numeric* element containing the wavelengths in angstrom for the spectra in the element above. 
-
+{: .bg-grey-lt-000 }
 ---
 
 ## Example

@@ -14,9 +14,6 @@ In order to build a data cube, we need to describe the conditions in which the o
 Using the ``observing_strategy`` function, a single object is generated to describe the object specific properties such as the projected distance, the projected inclination, the pointing location and the level of seeing. This is used, along with the `telescope` object, to describe the specific observing conditions input to `build_datacube`. 
 {: .fw-300 }
 
-[See an example](#example){: .btn .btn-purple }
-[See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/observing_strategy.R#L56){: .btn .btn-purple }
-
 ---
 
 The following code shows the default parameters used in the `observing_strategy` function. Calling the function without specifying any input will produce an observing strategy object with the following properties:
@@ -28,6 +25,11 @@ observing_strategy(dist_z       = 0.05,   # projected distance to galaxy model
                    pointing_kpc = c(0,0), # pointing of telescope centre relative to galaxy centre
                    blur         = F)      # seeing conditions
 ```
+
+[Input parameters](#input-parameters){: .btn .btn-purple }
+[Output parameters](#output-parameters){: .btn .btn-purple }
+[See an example](#example){: .btn .btn-purple }
+[See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/observing_strategy.R#L56){: .btn .btn-purple }
 
 ---
 
@@ -43,11 +45,12 @@ observing_strategy(dist_z       = 0.05,   # projected distance to galaxy model
 
 ---
 
-## Output Value
+## Output Parameters
 
 The output of `observing_strategy` is a *List* element that will be stored as a variable to the environment. 
 
 The list will contain either 5 or 7 elements, dependent on whether the observation will be blurred for seeing conditions or not:
+{: .fw-300 }
 
 1. `distance` - A "distance" object that summarises the different distance measures to the projected galaxy. This will include three elements, determined from the one input above:
     - `z` which describes the projected redshift distance to the simulation.
@@ -59,9 +62,9 @@ The list will contain either 5 or 7 elements, dependent on whether the observati
     - `xy_deg` which describes the offset in x and y in units of degrees (for the given projected distance).
     - `xy_kpc` which describes the offset in x and y in units of kpc. 
 1. `blur` - A boolean that describes whether or not seeing conditions will be applied during the mock cube building process. 
-1. `fwhm` - (*Optional*) If `blur=T`, this value will describe the full-width half-maximum of the point-spread function (PSF) used to blur the resulting data cube. 
-1. `psf` - (*Optional*) If `blur=T`, this value will name the sape of the point-spread function (PSF). Currently, this can be either "Gaussian" or "Moffat". 
-
+1. `fwhm` - *(Optional)* If `blur=T`, this value will describe the full-width half-maximum of the point-spread function (PSF) used to blur the resulting data cube. 
+1. `psf` - *(Optional)* If `blur=T`, this value will name the sape of the point-spread function (PSF). Currently, this can be either "Gaussian" or "Moffat". 
+{: .bg-grey-lt-000 }
 ---
 
 ## Example
@@ -83,6 +86,22 @@ summary(strategy)
 # pointing  1      Pointing S4     
 # blur      1      -none-   logical
 ``` 
+
+If, instead, we specify `blur = T`, we see and additional two elements added to the list:
+
+```R
+strategy = observing_strategy(blur=T)
+
+summary(strategy)
+#           Length Class    Mode   
+# distance  1      Distance S4     
+# inc_deg   1      -none-   numeric
+# twist_deg 1      -none-   numeric
+# pointing  1      Pointing S4     
+# blur      1      -none-   logical
+# fwhm      1      -none-   numeric
+# psf       1      -none-   character
+```
 
 To inspect individual properties of our observing strategy, use the named elements in one of two ways to achieve the same result:
 
