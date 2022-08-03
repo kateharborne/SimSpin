@@ -1,8 +1,8 @@
-# SimSpin v2.3.13 News
+# SimSpin v2.3.14 News
 
 ### Author: Kate Harborne
 
-### Last edit: 01/08/22
+### Last edit: 03/08/22
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -18,7 +18,8 @@ All changes are noted in the changelog table below.
 
 | Date     | Summary of change                                                                                                                                                                                                                                                                                                                                                                                                    | Version | Commit                                   |
 |----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|------------------------------------------|
-| 01/08/22 	| *Minor bugfix*. Addressing Issue #59 (which was not actually fixed in previous attempt!). Making sure long entries (i.e. wave_seq, vbin_seq or sbin_seq) are never too long to be written to a FITS table. Change to range (i.e. min and max) to remove this as an issue.                                                                                                                                            	| 2.3.13  	|                                          	|
+| 03/08/22 	| *Minor bugfix*. Addressing issue #60. Ensuring that raw images produced for any stellar mode observations (i.e. `method="spectral"` or `method="velocity"`) are consistent. New images added to spectral mode outputs (age and metallicity summaries) and all updated to mass weighted quantities.                                                                                                                   	| 2.3.14  	|                                          	|
+| 01/08/22 	| *Minor bugfix*. Addressing Issue #59 (which was not actually fixed in previous attempt!). Making sure long entries (i.e. wave_seq, vbin_seq or sbin_seq) are never too long to be written to a FITS table. Change to range (i.e. min and max) to remove this as an issue.                                                                                                                                            	| 2.3.13  	| eee7c31c8686a5056ff3419136cb384d40693e50 	|
 | 29/07/22 	| *Minor bugfix*. Addressing Issue #59. Making sure any NA values within the `observation` list are re-written as "None" in characters before writing to FITS.                                                                                                                                                                                                                                                         	| 2.3.12  	| 91e8e890e3154169b7bb078e80efe979c006667b 	|
 | 28/07/22 	| *Minor bugfix*.                                                                                                                                                                                                                                                                                                                                                                                                      	| 2.3.11  	| c7114e4727e7eb2396d9af075c85df17b6c950e2 	|
 |          | (1) Update to `write_simspin_FITS`. The `observation` summary output by `build_datacube` was previously never saved to the FITS file output. However, this makes it difficult to reproduce if the only saved output is a FITS file. With this update, the list `observation` is now written to a table in EXTNUM = 3 for all FITS files produced.                                                                    |         |                                          |
