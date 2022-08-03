@@ -1106,6 +1106,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   vel_los = array(data = 0.0, dim = observation$sbin^2)
   dis_los = array(data = 0.0, dim = observation$sbin^2)
   lum_map = array(data = 0.0, dim = observation$sbin^2)
+  age_map = array(data = 0.0, dim = observation$sbin^2)
+  met_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
@@ -1168,10 +1170,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                                      filter = filter)
     vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
     dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+    age_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
+    met_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
     if (verbose){cat(i, "... ", sep = "")}
   }
-  return(list(spectra, lum_map, vel_los, dis_los, part_map))
+  return(list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 }
 
 .spectral_spaxels_mc = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose, cores){
@@ -1180,6 +1184,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   vel_los = array(data = 0.0, dim = observation$sbin^2)
   dis_los = array(data = 0.0, dim = observation$sbin^2)
   lum_map = array(data = 0.0, dim = observation$sbin^2)
+  age_map = array(data = 0.0, dim = observation$sbin^2)
+  met_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
@@ -1187,7 +1193,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = part_in_spaxel$N[i]
                      part_map = num_part
@@ -1246,8 +1252,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                          filter = filter)
                      vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+                     age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
+                     met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
-                     result = list(spectra, lum_map, vel_los, dis_los, part_map)
+                     result = list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -1256,9 +1264,11 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   lum_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[2]]))
   vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
   dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
-  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
+  age_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
+  met_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[6]]))
+  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[7]]))
 
-  return(list(spectra, lum_map, vel_los, dis_los, part_map))
+  return(list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 }
 
 
@@ -1328,10 +1338,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     # adding the "gaussians" of each particle to the velocity bins
     vel_spec[part_in_spaxel$pixel_pos[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
     lum_map[part_in_spaxel$pixel_pos[i]] = sum(galaxy_sample$luminosity)
-    vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
-    dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
-    age_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
-    met_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
+    vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+    dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+    age_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
+    met_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
     if (verbose){cat(i, "... ", sep = "")}
 
@@ -1410,10 +1420,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      # adding the "gaussians" of each particle to the velocity bins
                      vel_spec = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
                      lum_map = sum(galaxy_sample$luminosity)
-                     vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$luminosity)
-                     dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$luminosity))
-                     age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Initial_Mass)
-                     met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Initial_Mass)
+                     vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+                     dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+                     age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
+                     met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
                      result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map)
                      return(result)
