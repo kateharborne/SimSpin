@@ -1151,11 +1151,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       luminosity = luminosity + (part_lum*scale_frac)
     }
 
-    # if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-    #   luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
-    #                                 lsf_sigma=observation$lsf_sigma)
-    # }
-
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
       luminosity = .add_noise(luminosity, observation$signal_to_noise)
     }
@@ -1233,11 +1228,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                        luminosity = luminosity + (part_lum*scale_frac)
 
                      }
-
-                     # if (observation$LSF_conv){ # should the spectra be degraded for telescope LSF?
-                     #   luminosity = .lsf_convolution(observation=observation, luminosity=luminosity,
-                     #                                 lsf_sigma=observation$lsf_sigma)
-                     # }
 
                      if (!is.na(observation$signal_to_noise)){ # should we add noise?
                        luminosity = .add_noise(luminosity, observation$signal_to_noise)
