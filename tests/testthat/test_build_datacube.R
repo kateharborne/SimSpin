@@ -23,9 +23,9 @@ temp_loc = tempdir()
 built_cube_size = 4
 ob_table_loc = 3
 
-spectra_raw_images_size = 4
+spectra_raw_images_size = 6
 spectra_observed_images_size = NULL
-spectra_number_of_hdu = 7
+spectra_number_of_hdu = 9
 spectral_raw_vel_loc = 5
 
 velocity_raw_images_size = 6
@@ -559,6 +559,8 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS"))
 
   spectral_fits = Rfits::Rfits_read("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS")
@@ -642,6 +644,8 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_flux_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_velocity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_age_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS")))
 
 })
@@ -651,6 +655,8 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS",
 
          paste0(temp_loc, "/ss_gadget_velocity_cube.FITS"),
@@ -702,6 +708,8 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_hdf5_raw_flux_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_velocity_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_raw_age_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_raw_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS")
          ))
 
@@ -742,6 +750,8 @@ unlink(c(paste0(temp_loc, "/ss_gadget.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_age_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS"),
          paste0(temp_loc, "/ss_gadget_mask.FITS")))
 
@@ -757,6 +767,8 @@ test_that("FITS files will be written with automatic names at directory given by
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS")))
 })
 
@@ -765,6 +777,8 @@ unlink(c(paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.F
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS")))
 
 
