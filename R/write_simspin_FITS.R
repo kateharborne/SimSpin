@@ -351,10 +351,10 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("RAW_FLUX", "RAW_VEL", "RAW_DISP", "NPART")
-    bunits = c("erg/s/cm**2", "km/s", "km/s", "Particle number")
-    image_names = c("flux_image", "velocity_image", "dispersion_image", "particle_image")
-    extnum = c(4,5,6,7)
+    extnames = c("RAW_FLUX", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
+    bunits = c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
+    image_names = c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
+    extnum = c(4,5,6,7,8,9)
     output_image_file_names = paste0(output_dir, "/", output_file_root, "_raw_", image_names, ".FITS")
 
     if (split_save){ # if writing each image to a seperate file

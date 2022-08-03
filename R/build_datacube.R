@@ -265,7 +265,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
+      age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("spectral_cube"    = cube,
