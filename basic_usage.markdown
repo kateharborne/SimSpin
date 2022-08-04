@@ -216,17 +216,18 @@ The returned variable will always be a list containing 4 elements:
 #                 Length  Class  Mode   
 # spectral_cube   1731600 -none- numeric
 # observation          33 -none- list   
-# raw_images            3 -none- list   
+# raw_images            5 -none- list   
 # observed_images       0 -none- NULL   
 ```
 
-**add text about the structure of each element in the list**
+For a detailed description of each of these outputs, [see the output parameters in `build_datacube`](docs/build_datacube.markdown#output-parameters).
 
-The overall format of this output will be consistent.
-However, the names of individual elements change to reflect the variety in the requested properties specified by [`telescope`](docs/telescope.markdown) and [`observing_strategy`](docs/observing_strategy.markdown).
+The overall format of this output will be consistent regardless of the inputs of `build_datacube`.
+However, the names of individual elements change to reflect the variety in the requested properties specified by [`telescope`](docs/telescope.markdown) and [`observing_strategy`](docs/observing_strategy.markdown). The method of observation will also modify the length of each element. 
 
 * For example,  `method = 'spectral'` will return a variable `spectral_cube` as its first element; specifying instead `method = 'velocity'` will return a `velocity_cube`.
 * Similarly, if we are working in velocity mode with `mass_flag = T`, the images within the `raw_images` and `observed_images` elements will include an array called `mass_image`, rather than `flux_image`.
+* The `observed_images` element will be `NULL` when a cube is built with `method = 'spectral'`, as observational images must be generated using external software such as pPXF. 
 
 ---
 
