@@ -215,8 +215,8 @@ The returned variable will always be a list containing 4 elements:
 > summary(gadget_cube)
 #                 Length  Class  Mode   
 # spectral_cube   1731600 -none- numeric
-# observation          33 -none- list   
-# raw_images            5 -none- list   
+# observation          34 -none- list   
+# raw_images            6 -none- list   
 # observed_images       0 -none- NULL   
 ```
 
@@ -315,6 +315,8 @@ These details can be used to examine and process the data.
 
 Similar methodology can be used to examine both the 3-dimensional data cubes and the 2-dimensional images contained within sequential HDUs. 
 The only difference is the number of CVAL units (three for cubes versus two for images).
+
+For further examples working with FITS files, check out ["Working with FITS files from SimSpin"](examples/working_with_FITS.markdown) in the examples on the left. 
 
 *These steps can be used to generate a mock observation of a simulated galaxy. In this Basic Usage section, we have run the simplest recipe using the inbuilt defaults of each function. In the next section, we go into details of additional functionality that may be relevant for your work.*
 

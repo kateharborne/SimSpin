@@ -318,3 +318,35 @@ The list will always contain 4 elements, though the contents of this list will c
 ---
 
 ## Example 
+
+Let's begin by running the function with some default parameters. The input simulation is an example galaxy contained within the package that we used in the [`make_simspin_file`](make_simspin_file.markdown#example) example:
+
+```r
+
+# Load a Gadget model...
+simulation_file = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
+# ... use to build a SimSpin file. 
+simspin_gadget  = make_simspin_file(filename = simulation_file,
+                                    write_to_file = FALSE)
+
+# Building a datacube with default parameters 
+cube   = build_datacube(simspin_file = simspin_gadget,
+                        telescope = telescope(),
+                        observing_strategy = observing_strategy(),
+                        method = "spectral")
+
+```
+
+Examining the output produced, we can see that this object contains:
+
+```r
+
+summary(cube)
+#                 Length  Class  Mode   
+# spectral_cube   1731600 -none- numeric
+# observation          34 -none- list   
+# raw_images            6 -none- list   
+# observed_images       0 -none- NULL   
+
+```
+

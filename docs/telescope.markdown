@@ -29,10 +29,10 @@ telescope(type="IFU",                # specify a type or define your own using "
           aperture_shape="circular", 
           wave_range=c(3700,5700),   # in angstrom
           wave_centre,               # wave_centre is auto-generated if not supplied
-          wave_res=1.04,             # wavelength resolution in angstrom
+          wave_res=1.5,              # wavelength resolution in angstrom
           spatial_res=0.5,           # spatial resolution in arcsec
           filter="g",                # luminosities output in this band  
-          lsf_fwhm=2.65,             # spectral uncertainty due to instrument in angstrom
+          lsf_fwhm=3.2,              # spectral uncertainty due to instrument in angstrom
           signal_to_noise = 10)      # target signal-to-noise ratio at any pixel
 ```
 
@@ -123,20 +123,97 @@ scope$type
 scope[["type"]]
 # [1] "IFU"
 ```
-For pre-defined `type` classes, certain parameters cannot be modified. Values highlighted in purple below (for example, the field-of-view for a MaNGA telescope) can be selected by adding `fov = 12` to the inputs. 
+For pre-defined `type` classes, certain parameters cannot be modified. Values highlighted in purple below (for example, the field-of-view for a MaNGA telescope) can be selected by adding additional parameters to the inputs. 
 
 | *telescope parameter* | *units* | **SAMI** | **MaNGA** | **CALIFA** | **MUSE** | **Hector** |
 | --------------------- | ------- | -------- | --------- | ---------- | -------- | ---------- |
-| `fov` | arcsec | 15 | <mark style="background-color: #e3d0fe">*n* = 12, 17, 22, 27 or 32</mark> | 74 | <mark style="background-color: #e3d0fe">*n* < 60</mark> | 30 |
+| `fov` | arcsec | 15 | <mark style="background-color: #e3d0fe"><i>n</i> = 12, 17, 22, 27 or 32</mark> | 74 | <mark style="background-color: #e3d0fe"><i>n</i> < 60</mark> | 30 |
 | `aperture_shape` |   | "circular" | "hexagonal" | "hexagonal" | "square" | "hexagonal" |
-| `wave_range` | &#8491;[^1] | 3750 - 5750 | 3600 - 6350 | 3700 – 4750 | 4700.15 - 9351.4 | 3720 - 5910 |
-| `wave_centre` | &#8491;[^1] | 4800 | 4700 | 4225 | 6975 | 4815 |
+| `wave_range` | &#8491;<sup>1</sup> | 3750 - 5750 | 3600 - 6350 | 3700 – 4750 | 4700.15 - 9351.4 | 3720 - 5910 |
+| `wave_centre` | &#8491;<sup>1</sup> | 4800 | 4700 | 4225 | 6975 | 4815 |
 | `wave_res` | &#8491; | 1.04 | 1.04 | 2.7 | 1.25 | 1.60 |
 | `spatial_res` | arcsec/pixel | 0.5 | 0.5 | 1 | <mark style="background-color: #e3d0fe">0.2 (WFM) or 0.025 (NFM)</mark> | 0.2 |
 | `lsf_fwhm` | &#8491; | 2.65 | 2.85 | 2.7 | 2.51 | 1.3 |
 
+<sup>1</sup> *Wave ranges and central wave lengths are quoted for the blue arm of each spectrograph as this is the wavelength range across which the kinematics are commonly measured.* 
 
-[^1]: Wave ranges and central wave lengths are quoted for the blue arm of each spectrograph as this is the wavelength range across which the kinematics are commonly measured. 
+For example, we can specify a variety of different field-of-views for the MaNGA telescope:
+
+```r
+# MaNGA telescope with 22" field-of-view
+manga_22 = telescope(type="MaNGA", fov = 22)
+
+# MaNGA telescope with 12" field-of-view
+manga_12 = telescope(type="MaNGA", fov = 22)
+
+```
+The field-of-view (and hence the number of spatial bins, `sbin`) in each output list will change, but all other telescope properties remain consistent. We can check this with a verbose little loop:
+
+```r
+for (each in names(manga_12)){ 
+    # for each element in the telescope list
+  if (!all(manga_12[[each]] == manga_22[[each]])){  
+    # if the parameters do not match, let the user know.
+    cat("NOT EQUAL!", each, "\n")
+  } else {
+    # otherwise, all good!
+    cat("EQUAL:", each, "\n") 
+  }
+} 
+
+# EQUAL: type 
+# NOT EQUAL! fov  
+# EQUAL: aperture_shape 
+# EQUAL: wave_range 
+# EQUAL: wave_centre 
+# EQUAL: spatial_res 
+# EQUAL: filter 
+# EQUAL: wave_res 
+# EQUAL: lsf_fwhm 
+# EQUAL: signal_to_noise 
+# NOT EQUAL! sbin 
+
+```
+
+If a parameter is requested that is not compatible with the requested telescope, the code will issue a warning. A telescope object will be produced, but the code will assume a compatible answer by either selecting the closest available option, or replacing with the most common request.
+
+```r
+# Trying to make a MaNGA instrument with an incompatible field-of-view
+manga_15 = telescope(type = "MaNGA", fov = 15)
+
+# Warning message:
+# In telescope(type = "MaNGA", fov = 15) :
+# >>> WARNING! >>> 
+# `fov` specified is not an option for telescope type `MaNGA`. 
+# `fov` options include 12, 17, 22, 27, or 32. 
+# Setting 'fov' to the nearest available option. 
+# fov = 17
+
+# Trying to make a MUSE instrument with an incompatible spatial resolution
+muse_nfm = telescope(type = "MUSE", spatial_res=0.001)
+
+# Warning message:
+# In telescope(type = "MUSE", spatial_res = 0.001) :
+# >>> WARNING! >>> 
+# `spatial_res` specified is not an option for telescope type `MUSE`. 
+# `spatial_res` options include 0.025 (NFM) or 0.2 (WFM). 
+# Setting `spatial_res` to the default. 
+# spatial_res = 0.2 
+
+```
+
+Or, if you request a `filter` whose wavelength range does not overlap with the wavelength range of the telescope, you will also receive an error:
+
+```r
+# Trying to build an instrument with incompatible wave-length coverage and filters
+telescope(type="IFU", wave_range = c(1000,3000), filter = "g")
+
+#  Error in telescope(type = "IFU", wave_range = c(1000, 3000), filter = "g") : 
+#  Error: Requested filter will not overlap with the telescope wavelength range. 
+#         Please select a different filter or extend your telescope wavelength range.
+```
+
+Further notes on filter choice and wavelength range compatibility can be found below. 
 
 ---
 
