@@ -17,8 +17,6 @@ In order to build a data cube, we need to describe the properties of the telesco
 Using the `telecope` function, a single telescope object is generated with a set number of expected properties. These properties are used with the `observing_strategy` to describe a specific observation. You can fully specify the particulars of your chosen telescope or you can select from a number of inbuilt telescopes designed to mimic current IFS surveys. 
 {: .fw-300 }
 
-*As of version 2.2.0, the `method` input parameter has been moved directly to the [`build_datacube`](build_datacube.markdown) function. For backwards compatibility, this parameter can still be specified here, but a warning will be issued.*
-{: .fw-150 }
 ---
 
 The following code shows the default parameters used in the `telescope` function. Calling the function without specifying any input will produce a telescope object with the following properties:
@@ -40,6 +38,9 @@ telescope(type="IFU",                # specify a type or define your own using "
 [Output parameters](#output-parameters){: .btn .btn-purple }
 [See an example](#example){: .btn .btn-purple }
 [See the source code](https://github.com/kateharborne/SimSpin/blob/d020398fb66274443bb2f70ea1fdd8346c4476ae/R/telescope.R#L44){: .btn .btn-purple }
+
+*As of version 2.2.0, the `method` input parameter has been moved directly to the [`build_datacube`](build_datacube.markdown) function. For backwards compatibility, this parameter can still be specified here, but a warning will be issued.*
+{: .fw-150 }
 
 ---
 
