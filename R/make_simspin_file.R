@@ -117,7 +117,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   galaxy_data = .centre_galaxy(galaxy_data, centre) # centering the galaxy based on stellar particles
 
-  galaxy_data = .align_galaxy(galaxy_data, half_mass) # align 3D shape of galaxy
+  if (header$Type != "nbody"){
+    galaxy_data = .align_galaxy(galaxy_data, half_mass) # align 3D shape of galaxy
+  }
 
   if(!"ssp" %in% names(galaxy_data)){ # if the SSP field does not come from the snapshot file, must be working with N-body
 
