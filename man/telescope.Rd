@@ -14,7 +14,7 @@ telescope(
   spatial_res,
   filter = "g",
   lsf_fwhm = 2.65,
-  signal_to_noise = 10,
+  signal_to_noise = NA,
   method
 )
 }
@@ -47,7 +47,8 @@ of individual particles are calculated.}
 line spread function.}
 
 \item{signal_to_noise}{Numeric describing the minimum signal-to-noise ratio per
-angstrom.}
+angstrom. Default is NA, meaning that no noise will be added to the
+observation.}
 
 \item{method}{Providing backward compatibility for \code{method}
 specification. String to describe whether cubes output are "spectral", "gas",
