@@ -31,7 +31,7 @@ telescope(type="IFU",                # specify a type or define your own using "
           spatial_res=0.5,           # spatial resolution in arcsec
           filter="g",                # luminosities output in this band  
           lsf_fwhm=3.2,              # spectral uncertainty due to instrument in angstrom
-          signal_to_noise = 10)      # target signal-to-noise ratio at any pixel
+          signal_to_noise = NA)      # target signal-to-noise ratio, default is no noise
 ```
 
 [Input parameters](#input-parameters){: .btn .btn-purple }
