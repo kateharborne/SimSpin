@@ -30,7 +30,8 @@
 #'@param lsf_fwhm Numeric describing the full-width half-maximum of the Gaussian
 #' line spread function.
 #'@param signal_to_noise Numeric describing the minimum signal-to-noise ratio per
-#' angstrom.
+#' angstrom. Default is NA, meaning that no noise will be added to the
+#' observation.
 #'@param method Providing backward compatibility for \code{method}
 #' specification. String to describe whether cubes output are "spectral", "gas",
 #' "sf gas" or "velocity" (as in SimSpin v1) along the z-axis. Default is
@@ -46,7 +47,7 @@
 
 telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(3700,5700),
                      wave_centre, wave_res=1.04, spatial_res, filter="g", lsf_fwhm=2.65,
-                     signal_to_noise = 10, method){
+                     signal_to_noise = NA, method){
 
   if (!missing(method)){
 

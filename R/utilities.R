@@ -722,15 +722,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   M = array(data = 0.0, dim = c(3,3))
 
-  M[1,1] = sum((galaxy_data$Mass * x * x) / ellip_radius)
-  M[1,2] = sum((galaxy_data$Mass * x * y) / ellip_radius)
-  M[1,3] = sum((galaxy_data$Mass * x * z) / ellip_radius)
+  M[1,1] = sum((galaxy_data$Mass * x * x) / ellip_radius, na.rm = T)
+  M[1,2] = sum((galaxy_data$Mass * x * y) / ellip_radius, na.rm = T)
+  M[1,3] = sum((galaxy_data$Mass * x * z) / ellip_radius, na.rm = T)
   M[2,1] = M[1,2]
-  M[2,2] = sum((galaxy_data$Mass * y * y) / ellip_radius)
-  M[2,3] = sum((galaxy_data$Mass * y * z) / ellip_radius)
+  M[2,2] = sum((galaxy_data$Mass * y * y) / ellip_radius, na.rm = T)
+  M[2,3] = sum((galaxy_data$Mass * y * z) / ellip_radius, na.rm = T)
   M[3,1] = M[1,3]
   M[3,2] = M[2,3]
-  M[3,3] = sum((galaxy_data$Mass * z * z) / ellip_radius)
+  M[3,3] = sum((galaxy_data$Mass * z * z) / ellip_radius, na.rm = T)
 
   return(M)
 }
