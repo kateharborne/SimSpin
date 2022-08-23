@@ -836,9 +836,9 @@ test_that("Repeated spectra are included in intrinsic spectra", {
   galaxy_sample = galaxy_data[particle_IDs,]
 
   intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE]
-  spectra = intrinsic_spectra * (galaxy_sample$Initial_Mass * 1e10) # reading relavent spectra
+  spectra = intrinsic_spectra * (galaxy_sample$Initial_Mass * 1e10) # reading relevant spectra
 
-  expect_true(all(intrinsic_spectra[,c(3),] == simspin_data$spectra[["V2"]]))
+  expect_true(all(intrinsic_spectra[,c(3),] == simspin_data$spectra[[paste0("V", galaxy_sample$sed_id[3])]]))
   expect_equal((intrinsic_spectra[,c(1),] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[,c(1),], tolerance = 0.001)
   expect_equal((intrinsic_spectra[,c(2),] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[,c(2),], tolerance = 0.001)
 })

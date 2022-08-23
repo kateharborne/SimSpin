@@ -313,23 +313,25 @@ test_that("Objects are centered correctly based on the specified central coordin
 # Testing that the half_mass parameter works as expected ------------
 test_that("Half-mass parameter can be specified", {
 
-  gadget_default = make_simspin_file(filename = ss_gadget, half_mass = NA, write_to_file = F)
-  total_mass = sum(gadget_default$star_part$Mass)
+  eagle_default = make_simspin_file(filename = ss_eagle, half_mass = NA, write_to_file = F)
+
+  eagle_hdf5 = .read_hdf5(ss_eagle, cores =1)
+  total_mass = sum(eagle_hdf5$star_part$Mass)
   half_mass = (total_mass/2)
 
-  gadget_mass_specified = make_simspin_file(filename = ss_gadget, half_mass = half_mass, write_to_file = F)
-  expect_true(all(gadget_default$star_part$x == gadget_mass_specified$star_part$x))
-  expect_true(all(gadget_default$star_part$y == gadget_mass_specified$star_part$y))
-  expect_true(all(gadget_default$star_part$z == gadget_mass_specified$star_part$z))
+  eagle_mass_specified = make_simspin_file(filename = ss_eagle, half_mass = half_mass, write_to_file = F)
+  expect_true(all(eagle_default$star_part$x == eagle_mass_specified$star_part$x))
+  expect_true(all(eagle_default$star_part$y == eagle_mass_specified$star_part$y))
+  expect_true(all(eagle_default$star_part$z == eagle_mass_specified$star_part$z))
 
 })
 
 test_that("Half-mass parameter errors when specified outside of reasonable ranges", {
 
-  gadget_default = make_simspin_file(filename = ss_gadget, half_mass = NA, write_to_file = F)
-  total_mass = sum(gadget_default$star_part$Mass)
-  half_mass = (total_mass/2)
+  eagle_default = make_simspin_file(filename = ss_eagle, half_mass = NA, write_to_file = F)
+  eagle_default = .read_hdf5(ss_eagle, cores =1)
+  total_mass = sum(eagle_default$star_part$Mass)
 
-  expect_error(make_simspin_file(filename = ss_gadget, half_mass = (total_mass+1), write_to_file = F))
-  expect_error(make_simspin_file(filename = ss_gadget, half_mass = min(gadget_default$star_part$Mass), write_to_file = F))
+  expect_error(make_simspin_file(filename = ss_eagle, half_mass = (total_mass+1), write_to_file = F))
+  expect_error(make_simspin_file(filename = ss_eagle, half_mass = min(eagle_default$star_part$Mass), write_to_file = F))
 })
