@@ -8,7 +8,7 @@ plot_SFR(
   SFR_image,
   fig = c(0, 1, 0, 1),
   new = F,
-  units = expression("sSFR, M"["sol"] * "/Gyr"),
+  units = expression("SFR, M"["sol"] * "/yr"),
   main = "",
   radii = NA,
   na.color = "white",
