@@ -158,20 +158,24 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (observation$method == "spectral" | observation$method == "velocity"){
     galaxy_data = simspin_data$star_part
     if (length(galaxy_data)==0){
-      stop("Error: No stellar particles exist in this SimSpin file. \n Please specify a different method ('gas' or 'sf gas') and try again. \n")
+      stop(c("Error: No stellar particles exist in this SimSpin file. \n",
+             "Please specify a different method ('gas' or 'sf gas') and try again. \n"))
     }
   } else if (observation$method == "sf gas"){
     galaxy_data = simspin_data$gas_part[simspin_data$gas_part$SFR > 0,]
     if (length(galaxy_data)==0){
-      stop("Error: No star forming gas particles exist in this SimSpin file. \n Please specify a different method ('gas', 'velocity' or 'spectral') and try again. \n")
+      stop(c("Error: No star forming gas particles exist in this SimSpin file. \n",
+             "Please specify a different method ('gas', 'velocity' or 'spectral') and try again. \n"))
     }
   } else if (observation$method == "gas"){
     galaxy_data = simspin_data$gas_part
     if (length(galaxy_data)==0){
-      stop("Error: No gas particles exist in this SimSpin file. \n Please specify a different method ('velocity' or 'spectral') and try again. \n")
+      stop(c("Error: No gas particles exist in this SimSpin file. \n",
+             "Please specify a different method ('velocity' or 'spectral') and try again. \n"))
     }
   } else {
-    stop("Error: Invalid method. \n Please specify observation$method = 'spectral', 'velocity', 'sf gas', or 'gas' and try again. \n")
+    stop(c("Error: Invalid method. \n",
+           "Please specify observation$method = 'spectral', 'velocity', 'sf gas', or 'gas' and try again. \n"))
   }
 
   if (!data.table::is.data.table(galaxy_data)){
@@ -374,8 +378,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     # Check if SimSpin file is prior to version 2.3.15, re-format SFR units
     if (stringr::str_sub(simspin_data$header$Origin, c(stringr::str_locate(Origin, "v")[1]+1)) < "2.3.16"){
-      warning("In SimSpin files built with < v2.3.16, gas star formation rates are stored in g/s. \n
-              Re-formatting to display SFR in units of Msol/yr.")
+      warning(c("In SimSpin files built with < v2.3.16, gas star formation rates are stored in g/s. \n",
+                "Re-formatting to display SFR in units of Msol/yr."))
       galaxy_data$SFR = galaxy_data$SFR*(.g_to_msol/.s_to_yr)
     }
 

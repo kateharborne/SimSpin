@@ -121,8 +121,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     galaxy_data = .align_galaxy(galaxy_data, half_mass) # align 3D shape of galaxy
   } else {
     if (!is.na(half_mass[1])){
-      warning("Input SimSpin file contains an N-body model. \n These models are not aligned by default so input half-mass will not be used for alignment. \n
-              If you wish to align the model at the radius containing `half_mass`, modify the header element `Type` within the SimSpin file. \n")
+      warning(c("Input SimSpin file contains an N-body model. \n",
+                "These models are not aligned by default so input half-mass will not be used for alignment. \n",
+                "If you wish to align the model at the radius containing `half_mass`, modify the header element `Type` within the SimSpin file."))
     }
   }
 
