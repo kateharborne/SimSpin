@@ -335,3 +335,10 @@ test_that("Half-mass parameter errors when specified outside of reasonable range
   expect_error(make_simspin_file(filename = ss_eagle, half_mass = (total_mass+1), write_to_file = F))
   expect_error(make_simspin_file(filename = ss_eagle, half_mass = min(eagle_default$star_part$Mass), write_to_file = F))
 })
+
+# Warning if asking for half-mass with nbody model
+test_that("Warning if asking for half-mass with nbody model", {
+
+  expect_warning(make_simspin_file(ss_gadget, half_mass = 350, write_to_file = F))
+
+})
