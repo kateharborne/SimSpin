@@ -66,7 +66,7 @@ ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSp
 temp_loc = tempdir()
 make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.Rdata", sep=""))
 cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
-                     telescope = telescope(type="SAMI"),
+                     telescope = telescope(type="SAMI", lsf_fwhm = 4, wave_res = 1.6),
                      observing_strategy = observing_strategy())
 write_simspin_FITS(output_file = paste(temp_loc, "cube.FITS", sep=""),
                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
