@@ -74,6 +74,7 @@ observation = function(telescope, observing_strategy, method){
                 aperture_size   = aperture_size,
                 date            = as.character(Sys.time()),
                 fov             = telescope$fov,
+                filter_name     = telescope$filter_name,
                 filter          = telescope$filter,
                 inc_deg         = observing_strategy$inc_deg,
                 inc_rad         = observing_strategy$inc_deg * (pi/180),

@@ -12,6 +12,7 @@
 .gcm3_to_msolkpc3 = 1.477e+31
 .g_constant_cgs = 6.67430e-11
 .g_in_kpcMsolkms2 = 4.3009e-6
+.s_to_yr = 3.171e-8
 
 # globalVariable definitions
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen",
@@ -352,7 +353,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
                                       "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
                                       "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
-                                      "SFR" = gas$StarFormationRate,
+                                      "SFR" = gas$StarFormationRate*(.g_to_msol/.s_to_yr), #SFR in Msol/yr
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
@@ -435,7 +436,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
                                       "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
                                       "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
-                                      "SFR" = gas$StarFormationRate,
+                                      "SFR" = gas$StarFormationRate*(.g_to_msol/.s_to_yr), #SFR in Msol/yr
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
@@ -522,7 +523,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
                                       "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
                                       "Mass" = gas$Mass*.g_to_msol, # Mass in solar masses
-                                      "SFR" = gas$StarFormationRate,
+                                      "SFR" = gas$StarFormationRate*(.g_to_msol/.s_to_yr), #SFR in Msol/yr
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc

@@ -1116,3 +1116,62 @@ test_that("Flux conservation works as expected", {
   expect_true(frac < 1) # fluxes consistent within 1%
 
 })
+
+# Warning is issued when using SimSpin files older than 2.3.16 in method = "gas" mode
+
+test_that("Warning is issued when using SimSpin files older than 2.3.16 in method = 'gas' or 'sf gas' mode", {
+
+  ss_eagle$header$Origin = "SimSpin_v2.3.14"
+
+  expect_warning(build_datacube(simspin_file = ss_eagle,
+                                telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                                observing_strategy = observing_strategy(),
+                                method = "gas"))
+
+  expect_warning(build_datacube(simspin_file = ss_eagle,
+                                telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                                observing_strategy = observing_strategy(),
+                                method = "sf gas"))
+
+})
+
+# Error is given if you try to build an observation with a simspin file that doesn't contain those particles
+test_that("Error is given if you try to build an observation with a simspin file that doesn't contain those particles", {
+
+  ss_eagle_gasonly = list("header"    = ss_eagle$header,
+                          "star_part" = NULL,
+                          "gas_part"  = ss_eagle$gas_part,
+                          "spectra"   = ss_eagle$spectra,
+                          "wave"      = ss_eagle$wave)
+
+  ss_eagle_nsfgasonly = list("header"    = ss_eagle$header,
+                             "star_part" = NULL,
+                             "gas_part"  = ss_eagle$gas_part[ss_eagle$gas_part$SFR == 0,],
+                             "spectra"   = ss_eagle$spectra,
+                             "wave"      = ss_eagle$wave)
+
+  expect_error(build_datacube(simspin_file = ss_eagle_gasonly,
+                              telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                              observing_strategy = observing_strategy(),
+                              method = "velocity"))
+
+  expect_error(build_datacube(simspin_file = ss_eagle_gasonly,
+                              telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                              observing_strategy = observing_strategy(),
+                              method = "spectral"))
+
+  expect_error(build_datacube(simspin_file = ss_gadget,
+                                telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                                observing_strategy = observing_strategy(),
+                                method = "gas"))
+
+  expect_error(build_datacube(simspin_file = ss_gadget,
+                                telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                                observing_strategy = observing_strategy(),
+                                method = "sf gas"))
+
+  expect_error(build_datacube(simspin_file = ss_eagle_nsfgasonly,
+                              telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                              observing_strategy = observing_strategy(),
+                              method = "sf gas"))
+})

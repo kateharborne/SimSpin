@@ -658,7 +658,7 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
 #' plot_SFR(cube$raw_images$SFR_image)
 
 plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
-                     units = expression("sSFR, M"["sol"]*"/Gyr"), main="", radii = NA,
+                     units = expression("SFR, M"["sol"]*"/yr"), main="", radii = NA,
                      na.color = "white", zlim = NA, legend=T,
                      titleshift = -4, labN=5, ...){
 

@@ -83,14 +83,19 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
   }
   if (stringr::str_to_lower(filter) == "r"){
     filter = SimSpin::filt_r_SDSS
+    filter_name = "r_SDSS"
   } else if (stringr::str_to_lower(filter) == "u"){
     filter = SimSpin::filt_u_SDSS
+    filter_name = "u_SDSS"
   } else if (stringr::str_to_lower(filter) == "g"){
     filter = SimSpin::filt_g_SDSS
+    filter_name = "g_SDSS"
   } else if (stringr::str_to_lower(filter) == "i"){
     filter = SimSpin::filt_i_SDSS
+    filter_name = "i_SDSS"
   } else if (stringr::str_to_lower(filter) == "z"){
     filter = SimSpin::filt_z_SDSS
+    filter_name = "z_SDSS"
   } else {
     stop("Error: Invalid filter. \n Please specify filter = 'r', 'u' or 'g', 'i' or 'z' and try again.")
   }
@@ -105,6 +110,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(3750,5750),
                     wave_centre     = 4800,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 1.04,
                     lsf_fwhm        = 2.65,
@@ -141,6 +147,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(3600,6350),
                     wave_centre     = 4700,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 1.04,
                     lsf_fwhm        = 2.85,
@@ -184,6 +191,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(4700.15,9351.4),
                     wave_centre     = 6975,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 1.25,
                     lsf_fwhm        = 2.51,
@@ -201,6 +209,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(3720,5910),
                     wave_centre     = 4815,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 1.6,
                     lsf_fwhm        = 1.3,
@@ -218,6 +227,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(3700,4750),
                     wave_centre     = 4225,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 2.7,
                     lsf_fwhm        = 2.7,
@@ -238,6 +248,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_centre     = wave_centre,
                     wave_res        = wave_res,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     lsf_fwhm        = lsf_fwhm,
                     signal_to_noise = signal_to_noise,
@@ -256,6 +267,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(3750,5750),
                     wave_centre     = 4800,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 1.04,
                     lsf_fwhm        = 2.65,
@@ -289,6 +301,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(3600,6350),
                     wave_centre     = 4700,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 1.04,
                     lsf_fwhm        = 2.85,
@@ -333,6 +346,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(4700.15,9351.4),
                     wave_centre     = 6975,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 1.25,
                     lsf_fwhm        = 2.51,
@@ -351,6 +365,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(3720,5910),
                     wave_centre     = 4815,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 1.6,
                     lsf_fwhm        = 1.3,
@@ -369,6 +384,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_range      = c(3700,4750),
                     wave_centre     = 4225,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     wave_res        = 2.7,
                     lsf_fwhm        = 2.7,
@@ -390,6 +406,7 @@ telescope = function(type="IFU", fov, aperture_shape="circular", wave_range=c(37
                     wave_centre     = wave_centre,
                     wave_res        = wave_res,
                     spatial_res     = spatial_res,
+                    filter_name     = filter_name,
                     filter          = filter,
                     lsf_fwhm        = lsf_fwhm,
                     signal_to_noise = signal_to_noise,
