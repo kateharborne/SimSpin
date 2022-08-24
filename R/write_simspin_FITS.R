@@ -232,20 +232,24 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
   observation[["wave_edges"]] = range(observation[["wave_edges"]])
   observation[["sbin_seq"]] = range(observation[["sbin_seq"]])
 
-  if (min(range(observation$filter$wave)) == 2980){
-    observation[["filter_name"]] = "u"
-  }
-  if (min(range(observation$filter$wave)) == 3630){
-    observation[["filter_name"]] = "g"
-  }
-  if (min(range(observation$filter$wave)) == 5380){
-    observation[["filter_name"]] = "r"
-  }
-  if (min(range(observation$filter$wave)) == 6430){
-    observation[["filter_name"]] = "i"
-  }
-  if (min(range(observation$filter$wave)) == 7730){
-    observation[["filter_name"]] = "z"
+  if ("filter_name" %in% names(observation)){
+    observation[["filter"]] = observation[["filter_name"]]
+  } else {
+    if (min(range(observation$filter$wave)) == 2980){
+      observation[["filter_name"]] = "u"
+    }
+    if (min(range(observation$filter$wave)) == 3630){
+      observation[["filter_name"]] = "g"
+    }
+    if (min(range(observation$filter$wave)) == 5380){
+      observation[["filter_name"]] = "r"
+    }
+    if (min(range(observation$filter$wave)) == 6430){
+      observation[["filter_name"]] = "i"
+    }
+    if (min(range(observation$filter$wave)) == 7730){
+      observation[["filter_name"]] = "z"
+    }
   }
   observation[["filter"]] = observation[["filter_name"]]
   obs_summary[, "Name":= obs_names]
