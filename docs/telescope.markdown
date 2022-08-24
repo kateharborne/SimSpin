@@ -3,7 +3,7 @@ layout: default
 title: telescope
 parent: Documentation
 nav_order: 3
-last_modified_date: "Monday 20 Jun 2022 15:57:00 AWST"
+last_modified_date: "Wed 24 Aug 2022 15:57:00 AWST"
 ---
 
 # Defining the properties of the telescope
@@ -63,7 +63,7 @@ telescope(type="IFU",                # specify a type or define your own using "
 
 The output of `telescope` is a *List* element that will be stored as a variable to the environment. 
 
-The list will contain the following 11 elements:
+The list will contain the following 12 elements:
 {: .fw-300 }
 
 1. `type` - *Character* element recording the requested telescope type. Must be one of `"IFU"`, `"SAMI"`, `"MaNGA"`, `"MUSE"` or `"Hector"`.
@@ -79,6 +79,8 @@ The list will contain the following 11 elements:
 1. `wave_res` - *Numeric* element describing the width of each bin on the wavelength axis in angstrom. 
 
 1. `spatial_res` - *Numeric* element describing the width of each spatial pixel in arcseconds.
+
+1. `filter_name` - A *character* string element describing the name of the filter used. Could be "r_SDSS", "g_SDSS", "u_SDSS", "i_SDSS" or "z_SDSS". 
 
 1. `filter` - A *data.table* element with two columns:
 
