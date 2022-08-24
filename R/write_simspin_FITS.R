@@ -39,7 +39,7 @@
 #'temp_loc = tempdir()
 #'make_simspin_file(ss_eagle, output = paste(temp_loc, "spectra.Rdata", sep=""))
 #'cube = build_datacube(simspin_file = paste(temp_loc, "spectra.Rdata", sep=""),
-#'                      telescope = telescope(type="SAMI"),
+#'                      telescope = telescope(type="SAMI", lsf_fwhm = 4, wave_res = 1.6),
 #'                      observing_strategy = observing_strategy())
 #'write_simspin_FITS(output_file = paste(temp_loc, "cube.FITS", sep=""),
 #'                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
@@ -181,7 +181,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   obs_summary = stats::setNames(data.table::data.table(matrix("",
                                                               ncol = 3,
-                                                              nrow = (length(observation)-2))),
+                                                              nrow = (length(observation)-3))),
                                 c("Name", "Value", "Units"))
 
   obs_names = names(observation)
@@ -252,6 +252,8 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
     }
   }
   observation[["filter"]] = observation[["filter_name"]]
+  obs_names = obs_names[-c(which(obs_names %in% c("filter_name")))]
+
   obs_summary[, "Name":= obs_names]
 
   for (val in 1:(length(observation)-3)){
