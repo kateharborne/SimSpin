@@ -236,19 +236,19 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
     observation[["filter"]] = observation[["filter_name"]]
   } else {
     if (min(range(observation$filter$wave)) == 2980){
-      observation[["filter_name"]] = "u"
+      observation[["filter_name"]] = "u_SDSS"
     }
     if (min(range(observation$filter$wave)) == 3630){
-      observation[["filter_name"]] = "g"
+      observation[["filter_name"]] = "g_SDSS"
     }
     if (min(range(observation$filter$wave)) == 5380){
-      observation[["filter_name"]] = "r"
+      observation[["filter_name"]] = "r_SDSS"
     }
     if (min(range(observation$filter$wave)) == 6430){
-      observation[["filter_name"]] = "i"
+      observation[["filter_name"]] = "i_SDSS"
     }
     if (min(range(observation$filter$wave)) == 7730){
-      observation[["filter_name"]] = "z"
+      observation[["filter_name"]] = "z_SDSS"
     }
   }
   observation[["filter"]] = observation[["filter_name"]]
