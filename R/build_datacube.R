@@ -363,6 +363,13 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # GAS mode method =======================================================
   if (observation$method == "gas" | observation$method == "sf gas"){
 
+    # Check if SimSpin file is prior to version 2.3.15, re-format SFR units
+    if (stringr::str_sub(simspin_data$header$Origin, c(stringr::str_locate(Origin, "v")[1]+1)) < "2.3.16"){
+      warning("In SimSpin files built with < v2.3.16, gas star formation rates are stored in g/s. \n
+              Re-formatting to display SFR in units of Msol/yr.")
+      galaxy_data$SFR = galaxy_data$SFR*(.g_to_msol/.s_to_yr)
+    }
+
     observation$vbin = ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
     if (observation$vbin <= 2){observation$vbin = 3}
 
