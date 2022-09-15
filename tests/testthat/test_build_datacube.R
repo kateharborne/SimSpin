@@ -536,7 +536,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == gas_number_of_hdu)
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 10, spatial_res = 0.25, fov=50),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                write_fits = T, output_location = paste0(temp_loc, "/ss_hdf5.FITS")), built_cube_size)
 
