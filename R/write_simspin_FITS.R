@@ -181,14 +181,13 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   obs_summary = stats::setNames(data.table::data.table(matrix("",
                                                               ncol = 3,
-                                                              nrow = (length(observation)-3))),
+                                                              nrow = (length(observation)-4))),
                                 c("Name", "Value", "Units"))
 
   obs_names = names(observation)
-  obs_names = obs_names[-c(which(obs_names %in% c("psf_kernel", "pixel_region")))]
+  obs_names = obs_names[-c(which(obs_names %in% c("aperture_region","psf_kernel", "pixel_region")))]
 
   obs_units = data.table::data.table("ang_size" = "num: scale at given distance in kpc/arcsec",
-                                     "aperture_region" = "bool: pixels within the aperture",
                                      "aperture_shape" = "str: shape of aperture",
                                      "aperture_size" = "num: field of view diameter width in kpc",
                                      "date" = "str: date and time of mock observation",
@@ -256,7 +255,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
   obs_summary[, "Name":= obs_names]
 
-  for (val in 1:(length(observation)-3)){
+  for (val in 1:(length(observation)-4)){
 
     if ( length(observation[[obs_names[val]]]) > 1){
       rounded_val = signif(observation[[obs_names[val]]], digits = 6)
