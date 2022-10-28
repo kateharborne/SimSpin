@@ -118,7 +118,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                 "z" = pos[extract+2],
                                 "vx" = vel[extract], "vy" = vel[extract+1],
                                 "vz"=vel[extract+2],
-                                "Mass" = masses*1e10)
+                                "Mass" = masses*1e10) # masses in Msol
 
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
               "Time" = Time, "Redshift" = Redshift, # relevent simulation data
@@ -1125,7 +1125,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
     for (p in 1:num_part){
       intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-        (galaxy_sample$Initial_Mass[p] * 1e10)
+        (galaxy_sample$Initial_Mass[p])
       # reading particle luminosity in units of Lsol/Ang
 
       # pulling wavelengths and using doppler formula to compute the shift in
@@ -1202,7 +1202,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      for (p in 1:num_part){
                        intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-                         (galaxy_sample$Initial_Mass[p] * 1e10)
+                         (galaxy_sample$Initial_Mass[p])
                        # reading particle luminosity in units of Lsol/Ang
 
                        # pulling wavelengths and using doppler formula to compute the shift in
@@ -1296,7 +1296,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       for (p in 1:num_part){
 
         intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-          (galaxy_sample$Initial_Mass[p] * 1e10)
+          (galaxy_sample$Initial_Mass[p])
         # reading particle luminosity in units of Lsol/Ang
 
         tot_lum = sum(intrinsic_spectra[wave_seq_int] * wave_diff_intrinsic)
@@ -1376,7 +1376,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                        for (p in 1:num_part){
                          intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-                           (galaxy_sample$Initial_Mass[p] * 1e10)
+                           (galaxy_sample$Initial_Mass[p])
                          # reading particle luminosity in units of Lsol/Ang
 
                          tot_lum = sum(intrinsic_spectra[wave_seq_int] * wave_diff_intrinsic)
