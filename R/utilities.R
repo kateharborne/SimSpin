@@ -1112,7 +1112,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   part_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
-  for (i in 1:(dim(part_in_spaxel)[1])){ # computing the spectra at each occupied spatial pixel position
+  for (i in 1:nrow(part_in_spaxel)){ # computing the spectra at each occupied spatial pixel position
 
     num_part = part_in_spaxel$N[i] # number of particles in spaxel
     part_map[part_in_spaxel$pixel_pos[i]] = num_part
@@ -1133,7 +1133,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
 
       # pulling out the wavelengths that would fall within the telescope range
-      wave_seq_int = which(wave_shift >= min(observation$wave_seq) & wave_shift <= max(observation$wave_seq))
+      wave_seq_int = which(wave_shift >= min(observation$wave_edges) & wave_shift <= max(observation$wave_edges))
       wave_diff_intrinsic = .qdiff(wave_shift[wave_seq_int])
 
       tot_lum = sum(intrinsic_spectra[wave_seq_int] * wave_diff_intrinsic)
@@ -1141,7 +1141,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
       # interpolate each shifted wavelength to telescope grid of wavelengths
       #   and sum to one spectra
-      part_lum = stats::approx(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
+      part_lum = stats::spline(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq)[[2]]
 
       new_lum = sum(part_lum * wave_diff_observed)
       # total luminosity integrated in wavelength bins
@@ -1154,6 +1154,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
       luminosity = .add_noise(luminosity, observation$signal_to_noise)
+    }
+
+    if (observation$LSF_conv){
+      luminosity = .lsf_convolution(observation, luminosity, (observation$lsf_sigma/observation$wave_res))
     }
 
     # transform luminosity into flux detected at telescope
@@ -1218,7 +1222,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                        # interpolate each shifted wavelength to telescope grid of wavelengths
                        #   and sum to one spectra
-                       part_lum = stats::approx(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
+                       part_lum = stats::spline(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq)[[2]]
 
                        new_lum = sum(part_lum * wave_diff_observed)
                        # total luminosity integrated in wavelength bins
@@ -1232,6 +1236,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      if (!is.na(observation$signal_to_noise)){ # should we add noise?
                        luminosity = .add_noise(luminosity, observation$signal_to_noise)
+                     }
+
+                     if (observation$LSF_conv){
+                       luminosity = .lsf_convolution(observation, luminosity, observation$lsf_sigma)
                      }
 
                      # transform luminosity into flux detected at telescope
