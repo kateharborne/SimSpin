@@ -59,7 +59,7 @@ For this basic usage example, we will use the default parameters and one of the 
 simulation_data = system.file("extdata", "SimSpin_example_Gadget", 
                               package = "SimSpin")
                               
-simspin_data    = make_simspin_file(filename = simulation_data, 
+simspin_file    = make_simspin_file(filename = simulation_data, 
                                     disk_age = 5, # ages are assigned in Gyr
                                     bulge_age = 10, 
                                     disk_Z = 0.024, # metallicities are wrt solar 
