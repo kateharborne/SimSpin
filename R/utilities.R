@@ -1,18 +1,22 @@
 # Author: Kate Harborne
 # Date: 27/10/2020
-# Title: Utilities functions (i.e. hidden functions from the user)
+# Title: Utilities functions (i.e. functions hidden from the user)
 
 # Some useful constants:
-.lsol_to_erg    = 3.828e33
-.mpc_to_cm      = 3.08568e+24
-.speed_of_light = 299792.458
-.cm_to_kpc = 3.24078e-22
-.cms_to_kms = 1e-5
-.g_to_msol = 5.02785e-34
-.gcm3_to_msolkpc3 = 1.477e+31
-.g_constant_cgs = 6.67430e-11
-.g_in_kpcMsolkms2 = 4.3009e-6
-.s_to_yr = 3.171e-8
+.lsol_to_erg        = 3.828e33
+.mpc_to_cm          = 3.08568e+24
+.speed_of_light     = 299792.458
+.cm_to_kpc          = 3.24078e-22
+.cms_to_kms         = 1e-5
+.g_to_msol          = 5.02785e-34
+.gcm3_to_msolkpc3   = 1.477e+31
+.g_constant_cgs     = 6.67430e-11
+.g_in_kpcMsolkms2   = 4.3009e-6
+.s_to_yr            = 3.171e-8
+.mass_of_proton     = 1.67262e-24  # grams
+.adiabatic_index    = 5/3          # heat is contained
+.Boltzmann_constant = 1.38066e-16  # cm^2 g s^-2 K-1
+
 
 # globalVariable definitions
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen",
@@ -55,7 +59,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   measured_vlos = (k * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
   return=sum((measured_vlos-losvd)^2)
 }
-
 
 # A function for combining multiple results from a parallel loop
 .comb <- function(x, ...) {
@@ -154,17 +157,20 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     head[[i]] = hdf5r::h5attr(data[["Header"]], paste0(header_attr[i]))
   }
 
+  # default (if header if blank) is a gadget file.
   if(is.null(head$RunLabel)){
     gadget2 = T
-    eagle=F
+    eagle = F
     magneticum = F
     horizonagn = F
+    illustristng = F
 
     } else {
-      gadget2=F
+      gadget2 = F
       if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "eagle")){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
       if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "magneticum")){magneticum = T}else{magneticum=F}
       if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "horizon")){horizonagn = T}else{horizonagn = F}
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "illustristng")){illustristng = T}else{illustristng = F}
     }
 
   # Read particle data differently depending on the simulation being read in...
@@ -172,6 +178,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   if (eagle){output = .eagle_read_hdf5(data, head, cores)}
   if (magneticum){output = .magneticum_read_hdf5(data, head, cores)}
   if (horizonagn){output = .horizonagn_read_hdf5(data, head, cores)}
+  if (illustristng){output = .illustristng_read_hdf5(data, head, cores)}
 
   hdf5r::h5close(data)
 
@@ -574,7 +581,106 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
+}
 
+.illustristng_read_hdf5 = function(data, head, cores){
+
+  head$Time = 1/(1+head$Redshift)
+
+  groups = hdf5r::list.groups(data)                         # What particle data is present?
+  groups = groups[stringr::str_detect(groups, "PartType")]  # Pick out PartTypeX groups
+
+  if ("PartType0" %in% groups){                             # If gas particles are present in the file
+
+    PT0_attr = hdf5r::list.datasets(data[["PartType0"]])    # get list of fields
+    n_gas_prop = length(PT0_attr)                           # how many fields?
+    gas = vector("list", n_gas_prop)                        # make a vector
+    names(gas) = PT0_attr                                   # assign field names to elements
+
+    # loop through the fields,
+    # assign them their conversion factor attributes,
+    # and then convert their data
+    for (i in 1:n_gas_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling")
+      hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs")
+      if (cgs == 0) {cgs = 1}                                                   # converting 0 values to 1
+      gas[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    # check if the Coordinate field has any dimensions
+    one_p_flag = FALSE
+    if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
+
+    gas_part = data.table::data.table("ID" = gas$ParticleIDs,
+                                      "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc},   # Coordinates in kpc
+                                      "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
+                                      "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
+                                      "vx"  = if(one_p_flag){gas$Velocities[1]*.cms_to_kms}else{gas$Velocities[1,]*.cms_to_kms},  # Velocities in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocities[2]*.cms_to_kms}else{gas$Velocities[2,]*.cms_to_kms},
+                                      "vz"  = if(one_p_flag){gas$Velocities[3]*.cms_to_kms}else{gas$Velocities[3,]*.cms_to_kms},
+                                      "Mass" = gas$Masses*.g_to_msol,                                                             # Mass in solar masses
+                                      "SFR" = gas$StarFormationRate*(.g_to_msol/.s_to_yr),                                        # SFR in Msol/yr
+                                      "Density" = gas$Density*.gcm3_to_msolkpc3,                                                  # Density in Msol/kpc^3
+                                      "Temperature" = (.adiabatic_index-1)*(gas$InternalEnergy/.Boltzmann_constant)*(4*.mass_of_proton/(1 + gas$GFM_Metals[1]*(3 + 4*gas$ElectronAbundance))),
+                                      "SmoothingLength" = 2*(((3/(4*pi))*((gas$Masses*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
+                                      "Metallicity" = gas$GFM_Metallicity,
+                                      "Carbon" = gas$GFM_Metals[3],
+                                      "Hydrogen" = gas$GFM_Metals[1],
+                                      "Oxygen" = gas$GFM_Metals[5])
+
+    remove(gas); remove(PT0_attr)
+  } else {gas_part=NULL}
+
+  if ("PartType4" %in% groups){
+
+    PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+    n_star_prop = length(PT4_attr)
+    stars = vector("list", n_star_prop)
+    names(stars) = PT4_attr
+
+    for (i in 1:n_star_prop){
+      aexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "a_scaling")
+      hexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h_scaling")
+      cgs  = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "to_cgs")
+      if (cgs == 0) {cgs = 1}                                                   # converting 0 values to 1
+      stars[[i]] =
+        hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    # check if the Coordinate field has any dimensions
+    one_p_flag = FALSE
+    if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
+
+    star_part = data.table::data.table("ID" = stars$ParticleIDs,
+                                       "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc},  # Coordinates in kpc
+                                       "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
+                                       "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
+                                       "vx"  = if(one_p_flag){stars$Velocities[1]*.cms_to_kms}else{stars$Velocities[1,]*.cms_to_kms}, # Velocities in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocities[2]*.cms_to_kms}else{stars$Velocities[2,]*.cms_to_kms},
+                                       "vz"  = if(one_p_flag){stars$Velocities[3]*.cms_to_kms}else{stars$Velocities[3,]*.cms_to_kms},
+                                       "Mass" = stars$Masses*.g_to_msol,                                                              # Mass in solar masses
+                                       "SFT" = stars$GFM_StellarFormationTime)
+
+    ssp = data.table::data.table("Initial_Mass" = stars$GFM_InitialMass*.g_to_msol,
+                                 "Age" = as.numeric(.SFTtoAge(a = abs(stars$GFM_StellarFormationTime), cores = cores)),
+                                 "Metallicity" = stars$GFM_Metallicity,
+                                 "SFT" = stars$GFM_StellarFormationTime)
+
+    # remove stellar wind particles and drop unneeded SFT columns
+    star_part = star_part[SFT >= 0]
+    star_part = star_part[,SFT:=NULL]
+    ssp = ssp[SFT >= 0]
+    ssp = ssp[,SFT:=NULL]
+
+    remove(stars); remove(PT4_attr)
+
+  } else {star_part=NULL; ssp=NULL}
+
+  head$Type = "Illustris-TNG"
+
+  return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 }
 
 # Function for computing the stellar age from the formation time in parallel
@@ -594,6 +700,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
 # Function to centre all galaxy particles based on stellar particle positions
 .centre_galaxy = function(galaxy_data, centre=NA){
+
   if (!is.na(centre[1])){ # if an external centre is provided, use this to centre positions
     stellar_data = galaxy_data$star_part
     gas_data = galaxy_data$gas_part
@@ -603,14 +710,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                     centre[2] >= min(stellar_data$y) & centre[2] <= max(stellar_data$y) &
                     centre[3] >= min(stellar_data$z) & centre[3] <= max(stellar_data$z))
 
+    # transform coordinates relative to centre point
     if (check_bounds){
       stellar_data$x = stellar_data$x - centre[1]
       stellar_data$y = stellar_data$y - centre[2]
       stellar_data$z = stellar_data$z - centre[3]
       star_r2 = stellar_data$x^2 + stellar_data$y^2 + stellar_data$z^2
       star_vcen = c(median(stellar_data$vx[star_r2 < 100]), # using the median velocities within
-                    median(stellar_data$vy[star_r2 < 100]), #  10kpc of the galaxy centre to define
-                    median(stellar_data$vz[star_r2 < 100])) #  the central velocity
+                    median(stellar_data$vy[star_r2 < 100]), # 10kpc of the galaxy centre to define
+                    median(stellar_data$vz[star_r2 < 100])) # the central velocity
       stellar_data$vx = stellar_data$vx - star_vcen[1]
       stellar_data$vy = stellar_data$vy - star_vcen[2]
       stellar_data$vz = stellar_data$vz - star_vcen[3]
@@ -624,6 +732,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
       galaxy_data$star_part = stellar_data
       galaxy_data$gas_part = gas_data
+
     } else {
       stop(paste0("Error: Requested centre is outside the bounds of the region within the input file. \n
                   Please re-submit with centre specified, c(x,y,z): \n ",
@@ -631,11 +740,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                   min(stellar_data$y), " <= y <= ", max(stellar_data$y), "\n ",
                   min(stellar_data$z), " <= z <= ", max(stellar_data$z), "\n "))
     }
+  }
 
-
-  } else if (!is.null(galaxy_data$star_part)){
+  # what to do when no centre given
+  # (first check data exists)
+  else if (!is.null(galaxy_data$star_part)){
     stellar_data = cen_galaxy(galaxy_data$star_part) # centering and computing medians for stellar particles
     galaxy_data$star_part = data.table::as.data.table(stellar_data$part_data)
+
     if (!is.null(galaxy_data$gas_part)){ # if gas is also present, centering these particles based on stellar medians
       gas_data = galaxy_data$gas_part
       gas_data$x = gas_data$x - stellar_data$xcen
@@ -907,7 +1019,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   r = stats::runif(number_of_points, min = 0, max = 1)^(1/3)
   den = sqrt((xyz[,1]^2) + (xyz[,2]^2) + (xyz[,3]^2))
   xyz_norm = (r*xyz)/den
-  # method for calculating a randomly distibution of n points uniformly
+  # method for calculating a randomly distribution of n points uniformly
   # across a spherical volume
 
   sph = sphereplot::car2sph(xyz_norm) # convert to spherical coordinates
@@ -1262,7 +1374,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   return(list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 }
 
-
 # stellar velocity mode -
 .velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, mass_flag){
 
@@ -1551,6 +1662,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   return(new_gas_part)
 }
 
+# same as above but with multiple cores
 .sph_spawn_mc = function(gas_part, new_gas_part, sph_spawn_n, kernel, cores){
 
   # Parallel version of the function ".sph_spawn" above.
