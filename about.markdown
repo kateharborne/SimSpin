@@ -4,10 +4,10 @@ title: About
 nav_order: 2
 description: "Some background about SimSpin."
 permalink: /about/
-last_modified_date: "Thu, 27 July 2022 13:57:00 AWST"
+last_modified_date: "Wed, 11 January 2023 14:50:00 AWST"
 ---
 
-# SimSpin v2.X.X
+# SimSpin v2.4.1
 {: .fs-9 }
 
 A package for producing mock observations of simulations
@@ -16,7 +16,7 @@ A package for producing mock observations of simulations
 <img align="right" src="/SimSpin/assets/images/logo.png" width="175" height="175" />
 {: .pl-4 .pb-1 } 
 
-SimSpin was written as part of the PhD Thesis "From Particles to Pixels: Using numerical simulations to investigate observable galaxy kinematics" by K.E. Harborne (2020). 
+SimSpin v1.1.0 was written as part of the PhD Thesis "From Particles to Pixels: Using numerical simulations to investigate observable galaxy kinematics" by K.E. Harborne (2020). 
 {: .fs-5 .fw-300 }
 
 This code has since evolved to both construct *kinematic* and *spectral* data cubes, as denoted by the upgrade to version 2.X.X.
@@ -33,6 +33,7 @@ SimSpin has been used for a number of research publications including:
 ---
 
 #### Referencing the code
+{: .fs-4 .pb-4 } 
 
 If you use this code for your research, please make sure to include a citation to the source code paper. This reference will soon be updated for the newer v2.X.X. You can do so using the CITATION.cff file within the GitHub repo, or by including the following within your bibliography:
 {: .fs-5 .fw-300 }
@@ -45,6 +46,28 @@ If you use this code for your research, please make sure to include a citation t
 -   K.E. Harborne, (2019), ["SimSpin: Kinematic analysis of galaxy simulations"](https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract), Astrophysics Source Code Library, record ascl:1903.006
 
 ---
+
+#### SimSpin on the web
+{: .fs-4 }
+
+<img align="right" src="/SimSpin/assets/images/ADACSlogo_LR.png" width="240" height="100" />
+{: .pl-6 .pb-3 } 
+
+In 2022, SimSpin was awarded an Astronomy Data and Computing Services (ADACS) allocation for the development of a web application with the full capability of the code accessible through a graphical user interface. 
+{: .fs-5 .fw-300 }
+
+[Launch the app!](https://simspin.datacentral.org.au/app/){: .btn .btn-purple }
+{: .lh-tight }
+
+<img align="centre" src="/SimSpin/assets/images/simspin_webapp.png" width="600" height="438" />
+{: .pt-4 .pb-1 } 
+
+This interactive tool can be used for visualising galaxy simulations in a browser, enabling the dynamic exploration and visualisation of simulated galaxies and downloading of generated files for offline use.
+
+The application is a React Single Page App communicating asynchronously with a RESTful API to access the SimSpin package. The app allows for instant data exploration via a dedicated viewer, where authenticated users can re-visit previous queries and share results with others. All services (web, db, redis-cache, celery-workers, celery-node, celery-beat) are containerised and managed by docker compose, such that the project is easily re-deployable. The API is fully documented, and comes with an API Schema (adhering to the OpenAPI Specification) to aid users in calling the API from other services.
+
+The SimSpin app removes the barrier of entry for novice astronomers (no R installation required, minimal tool understanding, instant data visualisation), providing an accessible and time-saving tool for simulated galaxy visualisations. 
+
 
 *KH acknowledges the funding support of the Australian Research Council Centre of Excellence for All-Sky Astrophysics in 3 Dimensions (ASTRO3D), through project number CE170100013. This work has been made possible through the Astronomy Data and Computing Services (ADACS) with direct support from Elizabeth Mannering, Felipe Jimenez-Ibarra and Simon O’Toole. This work has also been supported by resources provided by the Pawsey Supercomputing Centre with funding from the Australian Government and the Government of Western Australia*
 {: .fs-3 .fw-300 }

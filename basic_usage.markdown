@@ -43,7 +43,10 @@ We define groups of particles or cells in each simulation according to the conve
 * `PartType5` - boundary/black holes. 
 {: .lh-tight }
 
-This information can be structured in an HDF5 file, with groups containing each of these particle types. Alternatively, SimSpin can also process Gadget binary files (SnapFormat type 1). *If you have any issues with your input simulation file, check out [this page](examples/generating_hdf5.markdown) to check your input file structure.* 
+This information can be structured in an HDF5 file, with groups containing each of these particle types. Alternatively, SimSpin can also process Gadget binary files (SnapFormat type 1).
+
+If you have any issues with your input simulation file, check out [this page](examples/generating_hdf5.markdown) to check your input file structure.
+{: .note }
 
 We begin by running the [`make_simspin_file`](https://kateharborne.github.io/SimSpin/docs/make_simspin_file) function. 
 This will organise the provided data into a consistent format for SimSpin processing and assign SEDs to stellar particles given their individual ages and metallicities. 

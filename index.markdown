@@ -4,7 +4,7 @@ title: Home
 nav_order: 1
 description: "SimSpin is a package for producing mock IFS observations of galaxy simulations."
 permalink: /
-last_modified_date: "Tue, 2nd Aug 2022 13:57:00 AWST"
+last_modified_date: "Friday 28 October 2022 13:57:00 AWST"
 ---
 
 # SimSpin v2.4.1
@@ -29,8 +29,8 @@ This software can be used to produce a synthetic **data cube** - i.e. spatial in
 A mock data cube can be produced in three simple steps:
 
   1. Read in your particle data and produce the relevant spectra using the [`make_simspin_file`](docs/make_simspin_file) function.
-  1. Setup the observation by defining your `telescope` and `observing_strategy`.
-  1. Build your data cube using the `build_datacube`.
+  1. Setup the observation by defining your [`telescope`](docs/telescope.markdown) and [`observing_strategy`](docs/observing_strategy.markdown).
+  1. Build your data cube using the [`build_datacube`](docs/build_datacube.markdown).
 {: .lh-tight }
 
 <img align="centre" src="assets/images/simspin_v2_wo_logo.png" width="600" height="438" />
