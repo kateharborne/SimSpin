@@ -1,5 +1,6 @@
 # Author: Kate Harborne
-# Date: 22/10/2020
+# Co-author: Alice Serene
+# Date: 10/01/2023
 # Title: Testing the make_simspin_file.R code
 #'Reformatting isolated galaxy simulations to contain spectra.
 #'
