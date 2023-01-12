@@ -1,5 +1,6 @@
 # Author: Kate Harborne
-# Date: 27/10/2020
+# Co-author: Alice Serene
+# Date: 10/01/2023
 # Title: Utilities functions (i.e. functions hidden from the user)
 
 # Some useful constants:
