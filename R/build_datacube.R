@@ -80,7 +80,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                           telescope_name="SimSpin",
                           observer_name="Anonymous",
                           split_save=F,
-                          cores=1, mass_flag = F){
+                          cores=1, mass_flag = F,
+                          voronoi_bin=F, vorbin_limit=10){
 
   if (missing(method)){
     if ("method" %in% names(telescope)){
@@ -233,6 +234,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   # which particles sit in each spaxel?
   part_in_spaxel = galaxy_data[, list(val=list(ID), .N), by = "pixel_pos"]
+
+  if (voronoi_bin){ # Are we going to Voronoi bin the images? If yes, to how many particles per pixel?
+    observation$particle_limit = vorbin_limit
+  }
+
 
   # SPECTRAL mode method =======================================================
   if (observation$method == "spectral"){
