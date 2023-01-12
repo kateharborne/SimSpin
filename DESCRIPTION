@@ -1,7 +1,7 @@
 Package: SimSpin
 Type: Package
 Title: SimSpin - A package for the kinematic analysis of galaxy simulations
-Version: 2.4.1
+Version: 2.4.2
 Author: Katherine Harborne
 Co-author: Alice Serene
 Maintainer: <katherine.harborne@icrar.org>
