@@ -96,6 +96,7 @@ test_that("Test that old files can be overwritten", {
                                  overwrite = T))
 })
 
+# Test that the function works on multiple cores
 test_that("Test that function works on multiple cores", {
   expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "/eagle_test", sep=""),
                                 overwrite = T, cores = 2))
@@ -285,6 +286,27 @@ test_that("Testing that the header data works as expected", {
   remove(gadget, hdf5, eagle, magneticum, horizon, illustris)
  })
 
+# Illustris-specific tests -----------------------------------------------------
+# CGS conversion factors that are inherently 0 should be converted to 1
+test_that("CGS conversion values of 0 get converted to 1",{
+  illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
+  expect_true(all(illustris$star_part$Metallicity!=0))
+})
+
+# Stellar wind particles should be removed from the dataset
+# (There are 4 wind particles in the testing set, these should be removed.)
+test_that("Negative stellar wind particles are removed",{
+  illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
+  expect_length(illustris$star_part$Metallicity, 1996)
+})
+
+# Gas temperature should fall within a reasonable range
+test_that("Temperature does not go outside a reasonable range",{
+  illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
+  expect_true(min(illustris$gas_part$Temperature)>8000)
+  expect_true(max(illustris$gas_part$Temperature)<50000000)
+})
+
 unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", sep=""),
          paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep=""),
          paste(temp_loc, "/horizon_test", sep=""), paste(temp_loc, "/illustris_test", sep="")))
@@ -397,4 +419,4 @@ test_that("Warning if asking for half-mass with nbody model", {
 
 })
 
-# temp > floor
+
