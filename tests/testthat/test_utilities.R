@@ -1,4 +1,6 @@
-# Date: 22/10/2020
+# Author: Kate Harborne
+# Co-author: Alice Serene
+# Date: 13/01/2023
 # Title: Testing the utilities.R code
 
 library(testthat)
@@ -7,6 +9,7 @@ context("Testing utilities functions.\n")
 gadget_data = .read_gadget(system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin"))
 hdf5_data   = .read_hdf5(system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin"))
 eagle_data  = .read_hdf5(system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin"))
+#illustris_data = .read_hdf5(system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", package = "SimSpin"))
 
 test_that("Gadget file can be read", {
   expect_length(gadget_data, 3)
@@ -93,7 +96,6 @@ test_that("SED is returned as a list when only one age and metallicity are given
   expect_true(data.table::is.data.table(.spectra(Metallicity = 1e-4, Age = 5, Template = temp, cores = 1)))
 })
 
-
 test_that("Filters and templates can be loaded successfully", {
   BC03lr = SimSpin::BC03lr
   BC03hr = SimSpin::BC03hr
@@ -119,3 +121,4 @@ test_that("Filters and templates can be loaded successfully", {
 test_that("interp_quick fails if given more than a scalar", {
  expect_error(.interp_quick(x = c(1,2,3), params = c(seq(1,10), log = T)))
 })
+
