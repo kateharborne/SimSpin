@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_simspin_file.R
 \name{make_simspin_file}
 \alias{make_simspin_file}
-\title{Reformating isolated galaxy simulations to contain spectra.}
+\title{Reformatting isolated galaxy simulations to contain spectra.}
 \usage{
 make_simspin_file(
   filename,
@@ -29,7 +29,8 @@ make_simspin_file(
 
 \item{bulge_age}{The age of the bulge particles in Gyr.}
 
-\item{disk_Z}{The metallicity of the disk particles in Gyr.}
+\item{disk_Z}{The metallicity of the disk particles as a mass fraction (mass
+of all metal elements above He over the total mass).}
 
 \item{bulge_Z}{The metallicity of the bulge particles in Gyr.}
 
@@ -40,7 +41,7 @@ al, 2016).}
 
 \item{write_to_file}{Boolean to specify whether the list produced should be
 written to a ".Rdata" file or output to the environment. Default is TRUE, so
-that files can be re-observed without having the generate spectra each time.}
+that files can be re-observed without having to generate spectra each time.}
 
 \item{output}{The path at which the output file is written. If not provided,
 file will be written at the location of the input filename with the addition
