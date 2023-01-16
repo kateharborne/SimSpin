@@ -605,6 +605,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling")
       hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling")
       cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs")
+      if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+        aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")
+        hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")
+        cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")
+        if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+          stop("Error: Attributes listed incorrectly. \n
+               Please check that the scaling factors for conversion between comoving and physical coordinates are included in the input file as attributes for each dataset. \n
+               See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#hydrodynamical-simulations for more details.")}
+      }
       if (cgs == 0) {cgs = 1}                                                   # converting 0 values to 1
       gas[[i]] =
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
@@ -645,6 +654,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       aexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "a_scaling")
       hexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h_scaling")
       cgs  = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "to_cgs")
+      if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+        aexp = hdf5r::h5attr(data[[paste0("PartType4/",PT0_attr[i])]], "aexp-scale-exponent")
+        hexp = hdf5r::h5attr(data[[paste0("PartType4/",PT0_attr[i])]], "h-scale-exponent")
+        cgs  = hdf5r::h5attr(data[[paste0("PartType4/",PT0_attr[i])]], "CGSConversionFactor")
+        if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+          stop("Error: Attributes listed incorrectly. \n
+               Please check that the scaling factors for conversion between comoving and physical coordinates are included in the input file as attributes for each dataset. \n
+               See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#hydrodynamical-simulations for more details.")}
+      }
       if (cgs == 0) {cgs = 1}                                                   # converting 0 values to 1
       stars[[i]] =
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
