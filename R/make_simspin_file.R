@@ -1,7 +1,8 @@
 # Author: Kate Harborne
-# Date: 22/10/2020
+# Co-author: Alice Serene
+# Date: 10/01/2023
 # Title: Testing the make_simspin_file.R code
-#'Reformating isolated galaxy simulations to contain spectra.
+#'Reformatting isolated galaxy simulations to contain spectra.
 #'
 #'The purpose of this function is to construct a SimSpin file containing the
 #' mock spectra for each particle contained within the galaxy simulation file.
@@ -16,7 +17,8 @@
 #'@param cores The number of cores across which to multi-thread the problem.
 #'@param disk_age The age of the disk particles in Gyr.
 #'@param bulge_age The age of the bulge particles in Gyr.
-#'@param disk_Z The metallicity of the disk particles in Gyr.
+#'@param disk_Z The metallicity of the disk particles as a mass fraction (mass
+#' of all metal elements above He over the total mass).
 #'@param bulge_Z The metallicity of the bulge particles in Gyr.
 #'@param template The stellar templates from which to derive the SEDs. Options
 #' include "BC03lr" (GALEXEV low resolution, Bruzual & Charlot 2003), "BC03hr"
@@ -24,7 +26,7 @@
 #' al, 2016).
 #'@param write_to_file Boolean to specify whether the list produced should be
 #' written to a ".Rdata" file or output to the environment. Default is TRUE, so
-#' that files can be re-observed without having the generate spectra each time.
+#' that files can be re-observed without having to generate spectra each time.
 #'@param output The path at which the output file is written. If not provided,
 #' file will be written at the location of the input filename with the addition
 #' of "_spectra.Rdata".
@@ -74,7 +76,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   if (write_to_file){
     if (missing(output)){
-    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="")
+    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="") 
+ 
     }
     if (file.exists(output) & !overwrite){
       stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
@@ -109,7 +112,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
   galaxy_data = tryCatch(expr = {.read_gadget(filename)},
-                         error = function(e){.read_hdf5(filename, cores)})
+                         error = function(e){.read_hdf5(filename, cores)})      # run this if first try errors
 
   header$Type = galaxy_data$head$Type
 
@@ -135,7 +138,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                                  "Metallicity"=numeric(n_stars))
     galaxy_data$ssp$Initial_Mass = galaxy_data$star_part$Mass[Npart_sum[2]+1:Npart_sum[4]]/2 # assuming the initial mass is half of the current mass
 
-    if (n_disk > 0 & n_bulge > 0){ # assigning ages and metallities to disk and bulge particles (if present in snap)
+    if (n_disk > 0 & n_bulge > 0){ # assigning ages and metallicities to disk and bulge particles (if present in snap)
       galaxy_data$ssp$Age[1:n_disk] = disk_age
       galaxy_data$ssp$Age[(n_disk+1):n_stars] = bulge_age
       galaxy_data$ssp$Metallicity[1:n_disk] = disk_Z
@@ -203,7 +206,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   } else {sed = NULL}
 
-  if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" | galaxy_data$head$Type == "Horizon-AGN"){
+  if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" | galaxy_data$head$Type == "Horizon-AGN" | galaxy_data$head$Type == "Illustris-TNG"){
     if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles because we are working with SPH models
 
       gas_part_names = names(galaxy_data$gas_part)
@@ -225,12 +228,12 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       new_gas_part[, Hydrogen := rep(galaxy_data$gas_part$Hydrogen, each=sph_spawn_n),]
       new_gas_part[, Oxygen := rep(galaxy_data$gas_part$Oxygen, each=sph_spawn_n),]
 
-      kernel = character(1) # choosing the kernel relevent for the
+      kernel = character(1) # choosing the kernel relevant for the
       if (galaxy_data$head$Type == "EAGLE"){
         kernel = "WC2"
       } else if (galaxy_data$head$Type == "Magneticum"){
         kernel = "WC6"
-      } else if (galaxy_data$head$Type == "HorizonAGN"){
+      } else if (galaxy_data$head$Type == "HorizonAGN" | galaxy_data$head$Type == "Illustris-TNG"){
         kernel = "M4"
       } else {
         kernel = "WC2"
@@ -259,5 +262,3 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   }
 
 }
-
-

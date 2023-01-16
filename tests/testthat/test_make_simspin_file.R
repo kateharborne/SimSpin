@@ -1,21 +1,23 @@
 # Author: Kate Harborne
-# Date: 22/10/2020
+# Co-author: Alice Serene
+# Date: 13/01/2023
 # Title: Testing the make_simspin_file.R code
 
 library(testthat)
 context("Testing make_simspin_file function.\n")
 
-ss_gadget = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
-ss_hdf5 = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
-ss_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+ss_gadget     = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
+ss_hdf5       = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
+ss_eagle      = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 ss_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
-ss_horizon = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", package = "SimSpin")
+ss_horizon    = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", package = "SimSpin")
+ss_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", package = "SimSpin")
 
 ss_file_length = 5
 
 temp_loc = tempdir()
 
-# Test that they the function runs successfully without error
+# Test that the function runs successfully without error
 test_that("Initial run of each simulation type - Gadget.", {
   expect_null(make_simspin_file(ss_gadget, template = "BC03hr", output = paste(temp_loc, "/gadget_test", sep="")))
   expect_length(readRDS(paste(temp_loc, "/gadget_test", sep="")), ss_file_length)
@@ -46,6 +48,12 @@ test_that("Initial run of each simulation type - HorizonAGN", {
   expect_true(length(readRDS(paste(temp_loc, "/horizon_test", sep=""))$gas_part) == 16)
 })
 
+test_that("Initial run of each simulation type - IllustrisTNG", {
+  expect_null(make_simspin_file(ss_illustris, output = paste(temp_loc, "/illustris_test", sep="")))
+  expect_length(readRDS(paste(temp_loc, "/illustris_test", sep="")), ss_file_length)
+  expect_true(length(readRDS(paste(temp_loc, "/illustris_test", sep=""))$gas_part) == 16)
+})
+
 # Test that the function fails when the file already exists
 test_that("Error when output file already exists and overwrite = F - Gadget",{
   expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "/gadget_test", sep="")))
@@ -67,6 +75,10 @@ test_that("Error when output file already exists and overwrite = F - HorizonAGN"
   expect_error(make_simspin_file(ss_horizon, output = paste(temp_loc, "/horizon_test", sep="")))
 })
 
+test_that("Error when output file already exists and overwrite = F - IllustrisTNG",{
+  expect_error(make_simspin_file(ss_illustris, output = paste(temp_loc, "/illustris_test", sep="")))
+})
+
 # Test that function can output to environment
 test_that("Function works to output List to environment", {
   ss_file = make_simspin_file(ss_gadget, write_to_file = FALSE)
@@ -84,6 +96,7 @@ test_that("Test that old files can be overwritten", {
                                  overwrite = T))
 })
 
+# Test that the function works on multiple cores
 test_that("Test that function works on multiple cores", {
   expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "/eagle_test", sep=""),
                                 overwrite = T, cores = 2))
@@ -91,9 +104,10 @@ test_that("Test that function works on multiple cores", {
 
 # Test that none of the output arrays have NAs in
 test_that("Values are successfully associated with variables", {
-  gadget = readRDS(paste(temp_loc, "/gadget_test", sep=""))
-  hdf5   = readRDS(paste(temp_loc, "/hdf5_test", sep=""))
-  eagle  = readRDS(paste(temp_loc, "/eagle_test", sep=""))
+  gadget    = readRDS(paste(temp_loc, "/gadget_test", sep=""))
+  hdf5      = readRDS(paste(temp_loc, "/hdf5_test", sep=""))
+  eagle     = readRDS(paste(temp_loc, "/eagle_test", sep=""))
+  illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
 
   expect_true(all(!is.na(gadget$star_part$x)))
   expect_true(all(!is.na(gadget$star_part$y)))
@@ -145,6 +159,30 @@ test_that("Values are successfully associated with variables", {
   expect_true(all(!is.na(eagle$gas_part$Metallicity)))
   expect_true(all(!is.na(eagle$gas_part$OEOS)))
 
+  expect_true(all(!is.na(illustris$star_part$x)))
+  expect_true(all(!is.na(illustris$star_part$y)))
+  expect_true(all(!is.na(illustris$star_part$z)))
+  expect_true(all(!is.na(illustris$star_part$vx)))
+  expect_true(all(!is.na(illustris$star_part$vy)))
+  expect_true(all(!is.na(illustris$star_part$vz)))
+  expect_true(all(!is.na(illustris$star_part$Mass)))
+  expect_true(all(!is.na(illustris$star_part$sed_id)))
+  expect_true(all(!is.na(illustris$star_part$Metallicity)))
+  expect_true(all(!is.na(illustris$star_part$Age)))
+  expect_true(all(!is.na(illustris$star_part$Initial_Mass)))
+
+  expect_true(all(!is.na(illustris$gas_part$x)))
+  expect_true(all(!is.na(illustris$gas_part$y)))
+  expect_true(all(!is.na(illustris$gas_part$z)))
+  expect_true(all(!is.na(illustris$gas_part$vx)))
+  expect_true(all(!is.na(illustris$gas_part$vy)))
+  expect_true(all(!is.na(illustris$gas_part$vz)))
+  expect_true(all(!is.na(illustris$gas_part$Mass)))
+  expect_true(all(!is.na(illustris$gas_part$SFR)))
+  expect_true(all(!is.na(illustris$gas_part$Density)))
+  expect_true(all(!is.na(illustris$gas_part$Temperature)))
+  expect_true(all(!is.na(illustris$gas_part$Metallicity)))
+  # SmoothingLength, Carbon/Hydrogen/Oxygen?
 })
 
 # Testing the sph_spawn functionality ----
@@ -161,6 +199,10 @@ test_that("Test that sph_spawn functionality works", {
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
   expect_null(make_simspin_file(ss_horizon, template = "BC03hr", output = paste(temp_loc, "/horizon_test", sep=""),
                                 overwrite = T, cores = 2, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_illustris, template = "BC03lr", output = paste(temp_loc, "/illustris_test", sep=""),
+                               overwrite = T, cores = 1, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_illustris, template = "BC03lr", output = paste(temp_loc, "/illustris_test", sep=""),
+                               overwrite = T, cores = 2, sph_spawn_n = 10))
 
   test_horizon = readRDS(paste(temp_loc, "/horizon_test", sep=""))
   expect_true(data.table::is.data.table(test_horizon$gas_part))
@@ -196,44 +238,78 @@ test_that("Test that sph_spawn functionality works on multiple cores - HorizonAG
   expect_length(gas_data_c2$gas_part$ID, 1000)
 })
 
+test_that("Test that sph_spawn functionality works on multiple cores - IllustrisTNG", {
+  gas_data_c1 = make_simspin_file(ss_illustris, template = "BC03", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
+  gas_data_c2 = make_simspin_file(ss_illustris, template = "BC03", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
+  expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
+  expect_length(gas_data_c1$gas_part$ID, 1000) # sph_spawn_n = 10, original file contains 100 gas particles
+  expect_length(gas_data_c2$gas_part$ID, 1000)
+})
+
 # Test that the added header information works as expected ---------------------
 test_that("Testing that the header data works as expected", {
-  gadget = readRDS(paste(temp_loc, "/gadget_test", sep=""))
-  hdf5 = readRDS(paste(temp_loc, "/hdf5_test", sep=""))
-  eagle  = readRDS(paste(temp_loc, "/eagle_test", sep=""))
+  gadget     = readRDS(paste(temp_loc, "/gadget_test", sep=""))
+  hdf5       = readRDS(paste(temp_loc, "/hdf5_test", sep=""))
+  eagle      = readRDS(paste(temp_loc, "/eagle_test", sep=""))
   magneticum = readRDS(paste(temp_loc, "/magneticum_test", sep=""))
   horizon    = readRDS(paste(temp_loc, "/horizon_test", sep=""))
+  illustris  = readRDS(paste(temp_loc, "/illustris_test", sep=""))
 
   expect_equal(gadget$header$Type, "nbody")
   expect_equal(hdf5$header$Type, "nbody")
   expect_equal(eagle$header$Type, "EAGLE")
   expect_equal(magneticum$header$Type, "Magneticum")
   expect_equal(horizon$header$Type, "Horizon-AGN")
+  expect_equal(illustris$header$Type, "Illustris-TNG")
 
   expect_equal(gadget$header$Template, "EMILES")
   expect_equal(hdf5$header$Template, "BC03lr")
   expect_equal(eagle$header$Template, "EMILES")
   expect_equal(magneticum$header$Template, "BC03lr")
   expect_equal(horizon$header$Template, "BC03hr")
+  expect_equal(illustris$header$Template, "BC03lr")                             # correct?
 
   expect_equal(gadget$header$Template_LSF, 2.51)
   expect_equal(hdf5$header$Template_LSF, 3)
   expect_equal(eagle$header$Template_LSF, 2.51)
   expect_equal(magneticum$header$Template_LSF, 3)
   expect_equal(horizon$header$Template_LSF, 3)
+  expect_equal(illustris$header$Template_LSF, 3)                                # 3?
 
   expect_equal(gadget$header$Template_waveres, eagle$header$Template_waveres)
   expect_equal(hdf5$header$Template_waveres, 1)
   expect_equal(eagle$header$Template_waveres, 0.9)
   expect_equal(magneticum$header$Template_waveres, 1)
   expect_equal(horizon$header$Template_waveres, 1)
+  expect_equal(illustris$header$Template_waveres, 1)                            # 1?
 
-  remove(gadget, hdf5, eagle, magneticum, horizon)
+  remove(gadget, hdf5, eagle, magneticum, horizon, illustris)
  })
+
+# Illustris-specific tests -----------------------------------------------------
+# CGS conversion factors that are inherently 0 should be converted to 1
+test_that("CGS conversion values of 0 get converted to 1",{
+  illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
+  expect_true(all(illustris$star_part$Metallicity!=0))
+})
+
+# Stellar wind particles should be removed from the dataset
+# (There are 4 wind particles in the testing set, these should be removed.)
+test_that("Negative stellar wind particles are removed",{
+  illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
+  expect_length(illustris$star_part$Metallicity, 1996)
+})
+
+# Gas temperature should fall within a reasonable range
+test_that("Temperature does not go outside a reasonable range",{
+  illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
+  expect_true(min(illustris$gas_part$Temperature)>8000)
+  expect_true(max(illustris$gas_part$Temperature)<50000000)
+})
 
 unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", sep=""),
          paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep=""),
-         paste(temp_loc, "/horizon_test", sep="")))
+         paste(temp_loc, "/horizon_test", sep=""), paste(temp_loc, "/illustris_test", sep="")))
 
 # Testing that the centre parameter works as expected ------------
 test_that("Objects are centered correctly based on the specified central coordinates", {
@@ -342,3 +418,5 @@ test_that("Warning if asking for half-mass with nbody model", {
   expect_warning(make_simspin_file(ss_gadget, half_mass = 350, write_to_file = F))
 
 })
+
+

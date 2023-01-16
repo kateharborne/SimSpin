@@ -1,22 +1,25 @@
 # Author: Kate Harborne
-# Date: 22/10/2020
+# Co-author: Alice Serene
+# Date: 13/01/2023
 # Title: Testing the build_datacube.R code
 
 library(testthat)
 context("Testing build_datacube function.\n")
 
-ss_pd_gadget   = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
-ss_pd_hdf5  = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
-ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
+ss_pd_gadget     = system.file("extdata", "SimSpin_example_Gadget", package = "SimSpin")
+ss_pd_hdf5       = system.file("extdata", "SimSpin_example_HDF5.hdf5", package = "SimSpin")
+ss_pd_eagle      = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 ss_pd_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
-ss_pd_horizon = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", package = "SimSpin")
+ss_pd_horizon    = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", package = "SimSpin")
+ss_pd_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", package = "SimSpin")
 
 ss_gadget_old = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
-ss_gadget   = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
-ss_hdf5     = make_simspin_file(ss_pd_hdf5, write_to_file = FALSE)
-ss_eagle    = make_simspin_file(ss_pd_eagle, write_to_file = FALSE, template = "EMILES")
+ss_gadget     = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
+ss_hdf5       = make_simspin_file(ss_pd_hdf5, write_to_file = FALSE)
+ss_eagle      = make_simspin_file(ss_pd_eagle, write_to_file = FALSE, template = "EMILES")
 ss_magneticum = make_simspin_file(ss_pd_magneticum, write_to_file = FALSE, template = "BC03hr", sph_spawn_n=10)
 ss_horizon    = make_simspin_file(ss_pd_horizon, write_to_file = FALSE, template = "BC03lr")
+ss_illustris  = make_simspin_file(ss_pd_illustris, write_to_file = FALSE, template = "BC03lr")
 
 temp_loc = tempdir()
 
@@ -133,6 +136,29 @@ test_that("HorizonAGN files can be built - spectral mode and be identical in ser
 
 })
 
+test_that("IllustrisTNG files can be built - spectral mode and be identical in series and parallel", {
+  illustris_spectra = build_datacube(simspin_file = ss_illustris,
+                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
+  expect_length(illustris_spectra, built_cube_size)
+  expect_length(illustris_spectra$raw_images, spectra_raw_images_size)
+  expect_null(illustris_spectra$observed_images)
+
+  illustris_parallel_spectra = build_datacube(simspin_file = ss_illustris,
+                                            telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                            observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                            cores = 2)
+  expect_length(illustris_parallel_spectra, built_cube_size)
+  expect_length(illustris_parallel_spectra$raw_images, spectra_raw_images_size)
+  expect_null(illustris_parallel_spectra$observed_images)
+
+  expect_true(all.equal(illustris_spectra$spectral_cube, illustris_parallel_spectra$spectral_cube))
+  expect_true(all.equal(illustris_spectra$raw_images$flux_image, illustris_parallel_spectra$raw_images$flux_image))
+  expect_true(all.equal(illustris_spectra$raw_images$velocity_image, illustris_parallel_spectra$raw_images$velocity_image))
+  expect_true(all.equal(illustris_spectra$raw_images$dispersion_image, illustris_parallel_spectra$raw_images$dispersion_image))
+
+})
+
 # Testing that build_datacube works in velocity mode ----
 test_that("Gadget files can be built - velocity mode.", {
   gadget_velocity = build_datacube(simspin_file = ss_gadget,
@@ -241,6 +267,34 @@ test_that("HorizonAGN files can be built - velocity mode and be identical in ser
 
 })
 
+test_that("IllustrisTNG files can be built - velocity mode and be identical in series and parallel.", {
+  illustris_velocity = build_datacube(simspin_file = ss_illustris,
+                                    telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                    observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                    method = "velocity")
+  expect_length(illustris_velocity, built_cube_size)
+  expect_length(illustris_velocity$raw_images, velocity_raw_images_size)
+  expect_length(illustris_velocity$observed_images, velocity_observed_images_size)
+
+  illustris_parallel_velocity = build_datacube(simspin_file = ss_illustris,
+                                             telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                             observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                             method = "velocity",
+                                             cores = 2)
+  expect_length(illustris_parallel_velocity, built_cube_size)
+  expect_length(illustris_parallel_velocity$raw_images, velocity_raw_images_size)
+  expect_length(illustris_parallel_velocity$observed_images, velocity_observed_images_size)
+
+  expect_true(all.equal(illustris_velocity$velocity_cube, illustris_parallel_velocity$velocity_cube))
+  expect_true(all.equal(illustris_velocity$raw_images$flux_image, illustris_parallel_velocity$raw_images$flux_image))
+  expect_true(all.equal(illustris_velocity$raw_images$velocity_image, illustris_parallel_velocity$raw_images$velocity_image))
+  expect_true(all.equal(illustris_velocity$raw_images$dispersion_image, illustris_parallel_velocity$raw_images$dispersion_image))
+  expect_true(all.equal(illustris_velocity$observed_images$flux_image, illustris_parallel_velocity$observed_images$flux_image))
+  expect_true(all.equal(illustris_velocity$observed_images$velocity_image, illustris_parallel_velocity$observed_images$velocity_image))
+  expect_true(all.equal(illustris_velocity$observed_images$dispersion_image, illustris_parallel_velocity$observed_images$dispersion_image))
+
+})
+
 # Testing that build_datacube works in gas mode ----
 
 test_that("EAGLE files can be built - gas mode and be identical in series and parallel.", {
@@ -345,6 +399,40 @@ test_that("HorizonAGN files can be built - gas mode and be identical in series a
 
 })
 
+test_that("IllustrisTNG files can be built - gas mode and be identical in series and parallel.", {
+  illustris_gas = build_datacube(simspin_file = ss_illustris,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 0, twist_deg = 90, blur = F),
+                               method = "gas")
+  expect_length(illustris_gas, built_cube_size)
+  expect_length(illustris_gas$raw_images, gas_raw_images_size)
+  expect_length(illustris_gas$observed_images, gas_observed_images_size)
+
+  illustris_parallel_gas = build_datacube(simspin_file = ss_illustris,
+                                        telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                        observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 0, twist_deg = 90, blur = F),
+                                        method = "gas",
+                                        cores = 2)
+  expect_length(illustris_parallel_gas, built_cube_size)
+  expect_length(illustris_parallel_gas$raw_images, gas_raw_images_size)
+  expect_length(illustris_parallel_gas$observed_images, gas_observed_images_size)
+
+  expect_true(all.equal(illustris_gas$velocity_cube, illustris_parallel_gas$velocity_cube))
+  expect_true(all.equal(illustris_gas$raw_images$mass_image, illustris_parallel_gas$raw_images$mass_image))
+  expect_true(all.equal(illustris_gas$raw_images$velocity_image, illustris_parallel_gas$raw_images$velocity_image))
+  expect_true(all.equal(illustris_gas$raw_images$dispersion_image, illustris_parallel_gas$raw_images$dispersion_image))
+  expect_true(all.equal(illustris_gas$raw_images$SFR_image, illustris_parallel_gas$raw_images$SFR_image))
+  expect_true(all.equal(illustris_gas$raw_images$metallicity_image, illustris_parallel_gas$raw_images$metallicity_image))
+  expect_true(all.equal(illustris_gas$raw_images$OH_image, illustris_parallel_gas$raw_images$OH_image))
+  expect_true(all.equal(illustris_gas$raw_images$particle_image, illustris_parallel_gas$raw_images$particle_image))
+  expect_true(all.equal(illustris_gas$observed_images$mass_image, illustris_parallel_gas$observed_images$mass_image))
+  expect_true(all.equal(illustris_gas$observed_images$velocity_image, illustris_parallel_gas$observed_images$velocity_image))
+  expect_true(all.equal(illustris_gas$observed_images$dispersion_image, illustris_parallel_gas$observed_images$dispersion_image))
+  expect_true(all.equal(illustris_gas$observed_images$h3_image, illustris_parallel_gas$observed_images$h3_image))
+  expect_true(all.equal(illustris_gas$observed_images$h4_image, illustris_parallel_gas$observed_images$h4_image))
+
+})
+
 # Testing that build_datacube works in sf gas mode ----
 
 test_that("EAGLE files can be built - sf gas mode and be identical in series and parallel.", {
@@ -418,18 +506,28 @@ test_that("Magneticum files can be built - sf gas mode and be identical in serie
 
 test_that("HorizonAGN files error to be built due to insufficient particle number - sf gas mode.", {
   expect_error(build_datacube(simspin_file = ss_horizon,
-                                     telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                     observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                     method = "sf gas"))
+                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                              method = "sf gas",
+                              cores = 1))
+  expect_error(build_datacube(simspin_file = ss_horizon,
+                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                              method = "sf gas",
+                              cores = 2))
 })
 
-
-test_that("HorizonAGN files error to be built due to insufficient particle number - sf gas mode.", {
-  expect_error(build_datacube(simspin_file = ss_horizon,
-                                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                              method = "sf gas",
-                                              cores = 2))
+test_that("IllustrisTNG files error to be built due to insufficient particle number - sf gas mode.", {
+  expect_error(build_datacube(simspin_file = ss_illustris,
+                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                              method = "sf gas",
+                              cores = 1))
+  expect_error(build_datacube(simspin_file = ss_illustris,
+                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                              method = "sf gas",
+                              cores = 2))
 })
 
 # Testing that build_datacube errors when invalid method given ----
@@ -483,7 +581,6 @@ test_that("Data cubes can be generated using mass rather than luminosity weighti
   expect_false("flux_image" %in% names(eagle_mass$raw_images))
   expect_false("flux_image" %in% names(eagle_mass$observed_images))
   })
-
 
 # Testing that build_datacube works to write to FITS file ----
 test_that("Data cubes can be written to a single files", {
@@ -943,7 +1040,6 @@ test_that("Mass/flux images are different for the same observing conditions.", {
 })
 
 # Testing that the pointing element in build_datacube works effectively --------
-
 test_that("Pointing description works effectively", {
 
   centred_gal = build_datacube(simspin_file = ss_gadget,
@@ -1064,7 +1160,6 @@ test_that("Old SimSpin files do not stop the code from working!!!", {
 })
 
 # Testing that flux conservation is effective and works as expected ------------
-
 test_that("Flux conservation works as expected", {
 
   BC03_test = make_simspin_file(filename = ss_pd_gadget, disk_age = 5, disk_Z = 0.004, template = "BC03", write_to_file = F)
@@ -1118,7 +1213,6 @@ test_that("Flux conservation works as expected", {
 })
 
 # Warning is issued when using SimSpin files older than 2.3.16 in method = "gas" mode
-
 test_that("Warning is issued when using SimSpin files older than 2.3.16 in method = 'gas' or 'sf gas' mode", {
 
   ss_eagle$header$Origin = "SimSpin_v2.3.14"
