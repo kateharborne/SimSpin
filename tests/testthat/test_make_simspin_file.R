@@ -419,4 +419,33 @@ test_that("Warning if asking for half-mass with nbody model", {
 
 })
 
+# Test that we can still mock observe an IllustrisTNG file that has attributes with the original output names
+test_that("An IllustrisTNG file with traditionally named attributes (i.e. aexp-scaling-exponent vs. a_scaling) will process successfully.",{
+  file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), overwrite = T)
+  modified_illustris = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), mode = "r+") # read in the horizonagn file and rename the RubLabel
+  modified_illustris[["PartType0/TestDataset"]] <- numeric(length=100) # rename an the attribute name
+  hdf5r::h5attr(modified_illustris[["PartType0/TestDataset"]], "aexp-scale-exponent") <- 1
+  hdf5r::h5attr(modified_illustris[["PartType0/TestDataset"]], "h-scale-exponent") <- 1
+  hdf5r::h5attr(modified_illustris[["PartType0/TestDataset"]], "CGSConversionFactor") <- 20
+  hdf5r::h5close(modified_illustris) #close
 
+  expect_length(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), write_to_file = F), ss_file_length)
+
+  unlink(paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"))
+})
+
+test_that("A file with wrongly named attributes will error.",{
+  # Testing also that the code errors if the file does not contain the correct attributes.
+  file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), overwrite = T)
+  modified_illustris = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), mode = "r+") # read in the horizonagn file and rename the RubLabel
+  modified_illustris[["PartType0/MisnamedDataset"]] <- numeric(length=100) # rename an the attribute name
+  hdf5r::h5attr(modified_illustris[["PartType0/MisnamedDataset"]], "a_misnamed_attribute") <- 7620
+  hdf5r::h5attr(modified_illustris[["PartType0/MisnamedDataset"]], "h_scaling") <- 0
+  hdf5r::h5attr(modified_illustris[["PartType0/MisnamedDataset"]], "to_cgs") <- 0
+  hdf5r::h5close(modified_illustris) #close
+
+  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), write_to_file = F))
+
+  unlink(paste0(temp_loc, "/SimSpin_example_IllustrisTNG.hdf5"))
+
+})
