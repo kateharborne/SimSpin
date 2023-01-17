@@ -158,6 +158,16 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     head[[i]] = hdf5r::h5attr(data[["Header"]], paste0(header_attr[i]))
   }
 
+  # check for missing header fields
+  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable",
+                       "NumPart_Total")
+
+  if (!all(required_headers %in% names(head))){
+    stop("Error. Missing a required header field. \n
+         One of `BoxSize`, `Redshift`, `HubbleParam`, `MassTable`, or `NumPart_Total` is missing. \n
+         See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
+  }
+
   # default (if header if blank) is a gadget file.
   if(is.null(head$RunLabel)){
     gadget2 = T
@@ -521,7 +531,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 .horizonagn_read_hdf5 = function(data, head, cores){
 
   head$Time = 1/(1+head$Redshift)
-  head$NumPart_Total = head$NumPart_This
 
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
