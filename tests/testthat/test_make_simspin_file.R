@@ -449,3 +449,82 @@ test_that("A file with wrongly named attributes will error.",{
   unlink(paste0(temp_loc, "/SimSpin_example_IllustrisTNG.hdf5"))
 
 })
+
+test_that("An EAGLE file without a SmoothingLength field will error.",{
+  # Testing also that the code errors if the file does not contain the correct attributes.
+  file.copy(from = ss_eagle, to = paste0(temp_loc, "/SimSpin_example_EAGLE_copy.hdf5"), overwrite = T)
+  modified_eagle = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_EAGLE_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+  modified_eagle.part0 <- modified_eagle[["PartType0"]]
+  modified_eagle.part0$link_delete("SmoothingLength")
+  hdf5r::h5close(modified_eagle) #close
+
+  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_EAGLE_copy.hdf5"), write_to_file = F))
+
+  unlink(paste0(temp_loc, "/SimSpin_example_EAGLE_copy.hdf5"))
+})
+
+test_that("A Magneticum file without a Temperature field will error.",{
+  # Testing also that the code errors if the file does not contain the correct attributes.
+  file.copy(from = ss_magneticum, to = paste0(temp_loc, "/SimSpin_example_Magneticum_copy.hdf5"), overwrite = T)
+  modified_mag = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_Magneticum_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+  modified_mag.part0 <- modified_mag[["PartType0"]]
+  modified_mag.part0$link_delete("Temperature")
+  hdf5r::h5close(modified_mag) #close
+
+  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_Magneticum_copy.hdf5"), write_to_file = F))
+
+  unlink(paste0(temp_loc, "/SimSpin_example_Magneticum_copy.hdf5"))
+})
+
+test_that("A HorizonAGN file without a Temperature field will error.",{
+  # Testing also that the code errors if the file does not contain the correct attributes.
+  file.copy(from = ss_horizon, to = paste0(temp_loc, "/SimSpin_example_HorizonAGN_copy.hdf5"), overwrite = T)
+  modified_hoz = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_HorizonAGN_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+  modified_hoz.part0 <- modified_hoz[["PartType0"]]
+  modified_hoz.part0$link_delete("Temperature")
+  hdf5r::h5close(modified_hoz) #close
+
+  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_HorizonAGN_copy.hdf5"), write_to_file = F))
+
+  unlink(paste0(temp_loc, "/SimSpin_example_HorizonAGN_copy.hdf5"))
+})
+
+test_that("A IllustrisTNG file without an ElectronAbundance field will error.",{
+  # Testing also that the code errors if the file does not contain the correct attributes.
+  file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), overwrite = T)
+  modified_ill = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+  modified_ill.part0 <- modified_ill[["PartType0"]]
+  modified_ill.part0$link_delete("ElectronAbundance")
+  hdf5r::h5close(modified_ill) #close
+
+  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), write_to_file = F))
+
+  unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
+})
+
+test_that("A hydro sim will error without neccesary header field.",{
+  # Testing also that the code errors if the file does not contain the correct attributes.
+  file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), overwrite = T)
+  modified_tng = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+  modified_tng.head <- modified_tng[["Header"]]
+  modified_tng.head$attr_delete("Redshift")
+  hdf5r::h5close(modified_tng) #close
+
+  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), write_to_file = F))
+
+  unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
+})
+
+test_that("An HDF5 file for a hydro sim will give warning without neccesary RunLabel header field.",{
+  # Testing also that the code errors if the file does not contain the correct attributes.
+  file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), overwrite = T)
+  modified_tng = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+  modified_tng.head <- modified_tng[["Header"]]
+  modified_tng.head$attr_delete("RunLabel")
+  hdf5r::h5close(modified_tng) #close
+
+  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), write_to_file = F))
+
+  unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
+})
+

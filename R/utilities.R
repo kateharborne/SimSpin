@@ -201,6 +201,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
 
+  if (!("PartType2" %in% groups) &
+      !("PartType3" %in% groups) &
+      ("PartType4" %in% groups)){
+    stop("Error. SimSpin is trying to process the input simulation as an N-body file. \n
+          No stars are present in PartType2 or PartType3, but stars are present in PartType4. These stars will be missed from the output. \n
+          Is this meant to be a Hydrodyanmical model? See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header `RunLabel` for more info.")
+  }
+
   if ("PartType0" %in% groups){ # If gas particles are present in the file
 
     PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
