@@ -3,7 +3,7 @@ layout: default
 title: HDF5 simulation format
 parent: Examples
 nav_order: 1
-last_modified_date: "Tues, 10 January 2022 11:11:00 AWST"
+last_modified_date: "Tues, 17 January 2022 11:11:00 AWST"
 ---
 
 # Make your own HDF5 formatted simulation data 
@@ -123,7 +123,7 @@ If your parameters are already in **physical units**, these values can simply be
 * `h-scale-exponent`    = 0 
 {: .lh-tight }
 
-*It has been noticed that some simulations automatically output CGSConversionFactor as 0 within their HDF5 outputs. This will result in all values read in by SimSpin to become 0. To avoid this, SimSpin will take CGSConversionFactor = 0 and assume this indicates that the values are already in CGS units (i.e. CGSConversionFactor = 1).*
+*It has been noticed that some IllustrisTNG has different names for these conversion factors. SimSpin will automatically accept either the default outputs from IllustrisTNG (`a_scaling`, `h_scaling` and `to_cgs`) or the named parameters above. The `to_cgs` factor output by IllustrisTNG is sometimes 0 within their HDF5 outputs. This will result in all values read in by SimSpin to become 0. To avoid this, SimSpin will take `to_cgs` = 0 and assume this indicates that the values are already in CGS units (i.e. CGSConversionFactor = 1).*
 
 This will then read simply within the current architecture of the code. 
 {: .pb-6 }
@@ -163,7 +163,7 @@ Further properties can be passed into SimSpin without error, but in the case tha
 
 <sup>1</sup> This element of the HDF5 file is a group `ElementAbundance` containing a further three groups (`Carbon`, `Oxygen`, and `Hydrogen`) that contain data tables. 
 
-<sup>2</sup> For EAGLE outputs, these Group names will be prefixed with the name "Smoothed" to indicate that the parameters have been smoothed across the SPH smoothing kernel volume, as this is suggested to be the more appropriate output value to use when working with EAGLE outputs as in [Wiersma et al. 2009](https://ui.adsabs.harvard.edu/abs/2009MNRAS.399..574W/abstract). 
+<sup>2</sup> Some simulations use different default names for individual datasets. For EAGLE outputs, these Group names will be prefixed with the name "Smoothed" to indicate that the parameters have been smoothed across the SPH smoothing kernel volume, as this is suggested to be the more appropriate output value to use when working with EAGLE outputs as in [Wiersma et al. 2009](https://ui.adsabs.harvard.edu/abs/2009MNRAS.399..574W/abstract). In IllustrisTNG, these names will be prefixed with "GFM_". SimSpin is equipped to interpret these fields as intended such that you can choose to use the default field names rather than the ones listed here. 
 
 <sup>3</sup> For *cell*-based codes, the `SmoothingLength` value will not be present in output files. To approximate the variable smoothing of cells across the pixelated image, SimSpin will compute an equivalent `SmoothingLength` for cell-based codes using the `Mass` and `Density` fields. 
 
