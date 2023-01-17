@@ -805,18 +805,23 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   }
 
   if ("GFM_Metallicity" %in% current_names){
-    current_names[which(current_names == "GFM_Metallicity")] <- "Metallcity"
+    current_names[which(current_names == "GFM_Metallicity")] <- "Metallicity"
+    names(particle_list) <- current_names
+  }
+
+  if ("GFM_InitialMass" %in% current_names){
+    current_names[which(current_names == "GFM_InitialMass")] <- "InitialMass"
     names(particle_list) <- current_names
   }
 
   if ("GFM_Metals" %in% current_names){
     id_to_remove = which(current_names == "GFM_Metals")
 
-    particle_list$`ElementAbundance/Carbon` = particle_list$GFM_Metals[3]
-    particle_list$`ElementAbundance/Oxygen` = particle_list$GFM_Metals[5]
-    particle_list$`ElementAbundance/Hydrogen` = particle_list$GFM_Metals[1]
+    particle_list$`ElementAbundance/Carbon` = particle_list$GFM_Metals[3,]
+    particle_list$`ElementAbundance/Oxygen` = particle_list$GFM_Metals[5,]
+    particle_list$`ElementAbundance/Hydrogen` = particle_list$GFM_Metals[1,]
 
-    particle_list = particle_list[[-id_to_remove]]
+    particle_list = particle_list[-id_to_remove]
   }
 
   if (!is.null(nrow(particle_list$Metallicity))){
