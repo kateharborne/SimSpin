@@ -158,6 +158,16 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     head[[i]] = hdf5r::h5attr(data[["Header"]], paste0(header_attr[i]))
   }
 
+  # check for missing header fields
+  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable",
+                       "NumPart_Total")
+
+  if (!all(required_headers %in% names(head))){
+    stop("Error. Missing a required header field. \n
+         One of `BoxSize`, `Redshift`, `HubbleParam`, `MassTable`, or `NumPart_Total` is missing. \n
+         See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
+  }
+
   # default (if header if blank) is a gadget file.
   if(is.null(head$RunLabel)){
     gadget2 = T
@@ -190,6 +200,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
+
+  if (!("PartType2" %in% groups) &
+      !("PartType3" %in% groups) &
+      ("PartType4" %in% groups)){
+    stop("Error. SimSpin is trying to process the input simulation as an N-body file. \n
+          No stars are present in PartType2 or PartType3, but stars are present in PartType4. These stars will be missed from the output. \n
+          Is this meant to be a Hydrodyanmical model? See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header `RunLabel` for more info.")
+  }
 
   if ("PartType0" %in% groups){ # If gas particles are present in the file
 
@@ -350,6 +368,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    gas = .check_names(gas)
+    eagle_gas_names = c("SmoothingLength", "Temperature")
+    if (!all(eagle_gas_names %in% names(gas))){
+      stop("Error. Missing a necessary dataset for EAGLE PartType0. \n
+           Either `SmoothingLength` or `Temperature`. \n
+           See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#parttype0 for more info.")
+    }
+
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
@@ -365,10 +391,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
-                                      "Metallicity" = gas$SmoothedMetallicity,
-                                      "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
-                                      "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
-                                      "Oxygen" = gas$`SmoothedElementAbundance/Oxygen`)
+                                      "Metallicity" = gas$Metallicity,
+                                      "Carbon" = gas$`ElementAbundance/Carbon`,
+                                      "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
+                                      "Oxygen" = gas$`ElementAbundance/Oxygen`)
 
     remove(gas); remove(PT0_attr)
 
@@ -388,6 +414,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    stars = .check_names(stars)
+
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
@@ -402,7 +430,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
                                  "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
-                                 "Metallicity" = stars$SmoothedMetallicity)
+                                 "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
 
@@ -433,6 +461,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    gas = .check_names(gas)
+    magneticum_gas_names = c("SmoothingLength", "Temperature")
+    if (!all(magneticum_gas_names %in% names(gas))){
+      stop("Error. Missing a necessary dataset for Magneticum PartType0. \n
+           Either `SmoothingLength` or `Temperature`. \n
+           See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#parttype0 for more info.")
+    }
+
+
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
@@ -448,10 +485,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
-                                      "Metallicity" = (colSums(gas$Metallicity[2:11,]))/(gas$Mass),
-                                      "Carbon" = gas$Metallicity[2,] / gas$Mass,
-                                      "Hydrogen" = (gas$Mass - colSums(gas$Metallicity)) / gas$Mass,
-                                      "Oxygen" =  gas$Metallicity[4,] / gas$Mass)
+                                      "Metallicity" = gas$Metallicity,
+                                      "Carbon" = gas$`ElementAbundance/Carbon`,
+                                      "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
+                                      "Oxygen" =  gas$`ElementAbundance/Oxygen`)
 
     remove(gas); remove(PT0_attr)
 
@@ -471,6 +508,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    stars = .check_names(stars)
+
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
@@ -485,7 +524,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
                                  "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
-                                 "Metallicity" = (colSums(stars$Metallicity[2:11,]))/(stars$Mass))
+                                 "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
 
@@ -499,8 +538,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
 .horizonagn_read_hdf5 = function(data, head, cores){
 
-  head$Time = head$ExpansionFactor
-  head$NumPart_Total = head$NumPart_This
+  head$Time = 1/(1+head$Redshift)
 
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
@@ -520,6 +558,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    gas = .check_names(gas)
+    horizon_gas_names = c("Temperature")
+    if (!all(horizon_gas_names %in% names(gas))){
+      stop("Error. Missing a necessary dataset for HorizonAGN PartType0. \n
+           Missing `Temperature`. \n
+           See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#parttype0 for more info.")
+    }
+
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
 
@@ -535,10 +581,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
-                                      "Metallicity" = gas$SmoothedMetallicity,
-                                      "Carbon" = gas$`SmoothedElementAbundance/Carbon`,
-                                      "Hydrogen" = gas$`SmoothedElementAbundance/Hydrogen`,
-                                      "Oxygen" =  gas$`SmoothedElementAbundance/Oxygen`)
+                                      "Metallicity" = gas$Metallicity,
+                                      "Carbon" = gas$`ElementAbundance/Carbon`,
+                                      "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
+                                      "Oxygen" =  gas$`ElementAbundance/Oxygen`)
 
     remove(gas); remove(PT0_attr)
 
@@ -558,6 +604,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
+    stars = .check_names(stars)
+
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
@@ -572,7 +620,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
                                  "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
-                                 "Metallicity" = stars$SmoothedMetallicity)
+                                 "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
 
@@ -602,12 +650,35 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     # assign them their conversion factor attributes,
     # and then convert their data
     for (i in 1:n_gas_prop){
-      aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling")
-      hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling")
-      cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs")
+      aexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling")},
+                      error = function(e){NULL})
+      hexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling")},
+                      error = function(e){NULL})
+      cgs  = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs")},
+                      error = function(e){NULL})
+      if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+        aexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")},
+                        error = function(e){NULL})
+        hexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")},
+                        error = function(e){NULL})
+        cgs  = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")},
+                        error = function(e){NULL})
+        if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+          stop("Error: Attributes listed incorrectly. \n
+               Please check that the scaling factors for conversion between comoving and physical coordinates are included in the input file as attributes for each dataset. \n
+               See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#hydrodynamical-simulations for more details.")}
+      }
       if (cgs == 0) {cgs = 1}                                                   # converting 0 values to 1
       gas[[i]] =
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
+    }
+
+    gas = .check_names(gas)
+    illustris_gas_names = c("InternalEnergy", "ElectronAbundance")
+    if (!all(illustris_gas_names %in% names(gas))){
+      stop("Error. Missing a necessary dataset for IllustrisTNG PartType0. \n
+           Missing `InternalEnergy` or `ElectronAbundance`. \n
+           See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#parttype0 for more info.")
     }
 
     # check if the Coordinate field has any dimensions
@@ -618,18 +689,18 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "x"  = if(one_p_flag){gas$Coordinates[1]*.cm_to_kpc}else{gas$Coordinates[1,]*.cm_to_kpc},   # Coordinates in kpc
                                       "y"  = if(one_p_flag){gas$Coordinates[2]*.cm_to_kpc}else{gas$Coordinates[2,]*.cm_to_kpc},
                                       "z"  = if(one_p_flag){gas$Coordinates[3]*.cm_to_kpc}else{gas$Coordinates[3,]*.cm_to_kpc},
-                                      "vx"  = if(one_p_flag){gas$Velocities[1]*.cms_to_kms}else{gas$Velocities[1,]*.cms_to_kms},  # Velocities in km/s
-                                      "vy"  = if(one_p_flag){gas$Velocities[2]*.cms_to_kms}else{gas$Velocities[2,]*.cms_to_kms},
-                                      "vz"  = if(one_p_flag){gas$Velocities[3]*.cms_to_kms}else{gas$Velocities[3,]*.cms_to_kms},
-                                      "Mass" = gas$Masses*.g_to_msol,                                                             # Mass in solar masses
+                                      "vx"  = if(one_p_flag){gas$Velocity[1]*.cms_to_kms}else{gas$Velocity[1,]*.cms_to_kms},  # Velocity in km/s
+                                      "vy"  = if(one_p_flag){gas$Velocity[2]*.cms_to_kms}else{gas$Velocity[2,]*.cms_to_kms},
+                                      "vz"  = if(one_p_flag){gas$Velocity[3]*.cms_to_kms}else{gas$Velocity[3,]*.cms_to_kms},
+                                      "Mass" = gas$Mass*.g_to_msol,                                                             # Mass in solar Mass
                                       "SFR" = gas$StarFormationRate*(.g_to_msol/.s_to_yr),                                        # SFR in Msol/yr
                                       "Density" = gas$Density*.gcm3_to_msolkpc3,                                                  # Density in Msol/kpc^3
-                                      "Temperature" = (.adiabatic_index-1)*(gas$InternalEnergy/.Boltzmann_constant)*(4*.mass_of_proton/(1 + gas$GFM_Metals[1]*(3 + 4*gas$ElectronAbundance))),
-                                      "SmoothingLength" = 2*(((3/(4*pi))*((gas$Masses*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
-                                      "Metallicity" = gas$GFM_Metallicity,
-                                      "Carbon" = gas$GFM_Metals[3],
-                                      "Hydrogen" = gas$GFM_Metals[1],
-                                      "Oxygen" = gas$GFM_Metals[5])
+                                      "Temperature" = (.adiabatic_index-1)*(gas$InternalEnergy/.Boltzmann_constant)*(4*.mass_of_proton/(1 + gas$`ElementAbundance/Hydrogen`*(3 + 4*gas$ElectronAbundance))),
+                                      "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
+                                      "Metallicity" = gas$Metallicity,
+                                      "Carbon" = gas$`ElementAbundance/Carbon`,
+                                      "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
+                                      "Oxygen" = gas$`ElementAbundance/Oxygen`)
 
     remove(gas); remove(PT0_attr)
   } else {gas_part=NULL}
@@ -642,13 +713,30 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     names(stars) = PT4_attr
 
     for (i in 1:n_star_prop){
-      aexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "a_scaling")
-      hexp = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h_scaling")
-      cgs  = hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "to_cgs")
+      aexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "a_scaling")},
+                      error = function(e){NULL})
+      hexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h_scaling")},
+                      error = function(e){NULL})
+      cgs  = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "to_cgs")},
+                      error = function(e){NULL})
+      if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+        aexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "aexp-scale-exponent")},
+                        error = function(e){NULL})
+        hexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "h-scale-exponent")},
+                        error = function(e){NULL})
+        cgs  = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType4/",PT4_attr[i])]], "CGSConversionFactor")},
+                        error = function(e){NULL})
+        if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+          stop("Error: Attributes listed incorrectly. \n
+               Please check that the scaling factors for conversion between comoving and physical coordinates are included in the input file as attributes for each dataset. \n
+               See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#hydrodynamical-simulations for more details.")}
+      }
       if (cgs == 0) {cgs = 1}                                                   # converting 0 values to 1
       stars[[i]] =
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
+
+    stars = .check_names(stars)
 
     # check if the Coordinate field has any dimensions
     one_p_flag = FALSE
@@ -658,16 +746,16 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                        "x"  = if(one_p_flag){stars$Coordinates[1]*.cm_to_kpc}else{stars$Coordinates[1,]*.cm_to_kpc},  # Coordinates in kpc
                                        "y"  = if(one_p_flag){stars$Coordinates[2]*.cm_to_kpc}else{stars$Coordinates[2,]*.cm_to_kpc},
                                        "z"  = if(one_p_flag){stars$Coordinates[3]*.cm_to_kpc}else{stars$Coordinates[3,]*.cm_to_kpc},
-                                       "vx"  = if(one_p_flag){stars$Velocities[1]*.cms_to_kms}else{stars$Velocities[1,]*.cms_to_kms}, # Velocities in km/s
-                                       "vy"  = if(one_p_flag){stars$Velocities[2]*.cms_to_kms}else{stars$Velocities[2,]*.cms_to_kms},
-                                       "vz"  = if(one_p_flag){stars$Velocities[3]*.cms_to_kms}else{stars$Velocities[3,]*.cms_to_kms},
-                                       "Mass" = stars$Masses*.g_to_msol,                                                              # Mass in solar masses
-                                       "SFT" = stars$GFM_StellarFormationTime)
+                                       "vx"  = if(one_p_flag){stars$Velocity[1]*.cms_to_kms}else{stars$Velocity[1,]*.cms_to_kms}, # Velocity in km/s
+                                       "vy"  = if(one_p_flag){stars$Velocity[2]*.cms_to_kms}else{stars$Velocity[2,]*.cms_to_kms},
+                                       "vz"  = if(one_p_flag){stars$Velocity[3]*.cms_to_kms}else{stars$Velocity[3,]*.cms_to_kms},
+                                       "Mass" = stars$Mass*.g_to_msol,                                                              # Mass in solar Mass
+                                       "SFT" = stars$StellarFormationTime)
 
-    ssp = data.table::data.table("Initial_Mass" = stars$GFM_InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = abs(stars$GFM_StellarFormationTime), cores = cores)),
-                                 "Metallicity" = stars$GFM_Metallicity,
-                                 "SFT" = stars$GFM_StellarFormationTime)
+    ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
+                                 "Age" = as.numeric(.SFTtoAge(a = abs(stars$StellarFormationTime), cores = cores)),
+                                 "Metallicity" = stars$Metallicity,
+                                 "SFT" = stars$StellarFormationTime)
 
     # remove stellar wind particles and drop unneeded SFT columns
     star_part = star_part[SFT >= 0]
@@ -683,6 +771,98 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 }
+
+# Function to check existing names in a data set and convert if necessary
+.check_names = function(particle_list){
+
+  current_names = names(particle_list)
+
+  if ("SmoothedMetallicity" %in% current_names){
+    current_names[which(current_names == "SmoothedMetallicity")] <- "Metallicity"
+    names(particle_list) <- current_names
+  }
+
+  if ("SmoothedElementAbundance/Hydrogen" %in% current_names){
+    current_names[which(current_names == "SmoothedElementAbundance/Hydrogen")] <- "ElementAbundance/Hydrogen"
+    names(particle_list) <- current_names
+  }
+
+  if ("SmoothedElementAbundance/Oxygen" %in% current_names){
+    current_names[which(current_names == "SmoothedElementAbundance/Oxygen")] <- "ElementAbundance/Oxygen"
+    names(particle_list) <- current_names
+  }
+
+  if ("SmoothedElementAbundance/Carbon" %in% current_names){
+    current_names[which(current_names == "SmoothedElementAbundance/Carbon")] <- "ElementAbundance/Carbon"
+    names(particle_list) <- current_names
+  }
+
+  if ("Velocities" %in% current_names){
+    current_names[which(current_names == "Velocities")] <- "Velocity"
+    names(particle_list) <- current_names
+  }
+
+  if ("Masses" %in% current_names){
+    current_names[which(current_names == "Masses")] <- "Mass"
+    names(particle_list) <- current_names
+  }
+
+  if ("GFM_StellarFormationTime" %in% current_names){
+    current_names[which(current_names == "GFM_StellarFormationTime")] <- "StellarFormationTime"
+    names(particle_list) <- current_names
+  }
+
+  if ("GFM_Metallicity" %in% current_names){
+    current_names[which(current_names == "GFM_Metallicity")] <- "Metallicity"
+    names(particle_list) <- current_names
+  }
+
+  if ("GFM_InitialMass" %in% current_names){
+    current_names[which(current_names == "GFM_InitialMass")] <- "InitialMass"
+    names(particle_list) <- current_names
+  }
+
+  if ("GFM_Metals" %in% current_names){
+    id_to_remove = which(current_names == "GFM_Metals")
+
+    particle_list$`ElementAbundance/Carbon` = particle_list$GFM_Metals[3,]
+    particle_list$`ElementAbundance/Oxygen` = particle_list$GFM_Metals[5,]
+    particle_list$`ElementAbundance/Hydrogen` = particle_list$GFM_Metals[1,]
+
+    particle_list = particle_list[-id_to_remove]
+  }
+
+  if (!is.null(nrow(particle_list$Metallicity))){
+    Metallicity = (colSums(particle_list$Metallicity[2:11,]))/(particle_list$Mass)
+    Carbon      = particle_list$Metallicity[2,] / particle_list$Mass
+    Hydrogen    = (particle_list$Mass - colSums(particle_list$Metallicity)) / particle_list$Mass
+    Oxygen      = particle_list$Metallicity[4,] / particle_list$Mass
+
+    particle_list$Metallicity = Metallicity
+    particle_list$`ElementAbundance/Carbon` = Carbon
+    particle_list$`ElementAbundance/Oxygen` = Hydrogen
+    particle_list$`ElementAbundance/Hydrogen` = Oxygen
+
+  }
+
+  expected_names_gas = c("Coordinates", "Density", "Mass", "ParticleIDs",
+                         "ElementAbundance/Carbon", "ElementAbundance/Oxygen",
+                         "ElementAbundance/Hydrogen", "Metallicity",
+                         "StarFormationRate", "Velocity")
+
+  expected_names_stars = c("Coordinates", "InitialMass", "Mass", "ParticleIDs",
+                         "Metallicity", "StellarFormationTime", "Velocity")
+
+  if (!all(expected_names_gas %in% names(particle_list)) &
+      !all(expected_names_stars %in% names(particle_list))){
+    stop("Error. A key dataset is missing that is necessary for processing. \n
+          Please check https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#hydrodynamical-simulations for an expected list. \n")
+  }
+
+  return(particle_list)
+
+}
+
 
 # Function for computing the stellar age from the formation time in parallel
 .SFTtoAge = function(a, cores=1){
