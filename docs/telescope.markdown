@@ -147,7 +147,7 @@ For example, we can specify a variety of different field-of-views for the MaNGA 
 manga_22 = telescope(type="MaNGA", fov = 22)
 
 # MaNGA telescope with 12" field-of-view
-manga_12 = telescope(type="MaNGA", fov = 22)
+manga_12 = telescope(type="MaNGA", fov = 12)
 
 ```
 The field-of-view (and hence the number of spatial bins, `sbin`) in each output list will change, but all other telescope properties remain consistent. We can check this with a verbose little loop:
