@@ -19,7 +19,8 @@
 #'@param bulge_age The age of the bulge particles in Gyr.
 #'@param disk_Z The metallicity of the disk particles as a mass fraction (mass
 #' of all metal elements above He over the total mass).
-#'@param bulge_Z The metallicity of the bulge particles in Gyr.
+#'@param bulge_Z The metallicity of the bulge particles as a mass fraction (mass
+#' of all metal elements above He over the total mass).
 #'@param template The stellar templates from which to derive the SEDs. Options
 #' include "BC03lr" (GALEXEV low resolution, Bruzual & Charlot 2003), "BC03hr"
 #' (GALEXEV high resolution, Bruzual & Charlot 2003) or "EMILES" (Vazdekis et

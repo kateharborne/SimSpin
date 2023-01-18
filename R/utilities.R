@@ -22,7 +22,7 @@
 # globalVariable definitions
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen",
                   "hcl.colors", "ID", "Initial_Mass", "luminosity", "Mass",
-                  "Metallicity", "Oxygen", "par", "SFR", "SmoothingLength",
+                  "Metallicity", "Oxygen", "par", "SFR", "SFT", "SmoothingLength",
                   "sed_id", "Temperature", "text", "vx", "vy", "vz", "x", "y",
                   "z"))
 
@@ -142,7 +142,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 # Functions for reading in HDF5 files
-.read_hdf5   = function(f, cores=1){
+.read_hdf5 = function(f, cores=1){
 
   data = hdf5r::h5file(f, mode="r")
 
