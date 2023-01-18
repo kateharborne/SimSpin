@@ -98,7 +98,8 @@ callouts:
     title: Note
     color: purple
 
-
+# For copy button on code
+enable_copy_code_button: true
 
 # Exclude from processing.
 # The following items will not be processed, by default.
