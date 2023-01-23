@@ -528,3 +528,10 @@ test_that("An HDF5 file for a hydro sim will give warning without neccesary RunL
   unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
 })
 
+test_that("A galaxy with a star with age of 0 will NOT raise an error.", {
+
+
+
+
+})
+
