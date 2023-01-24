@@ -76,8 +76,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   if (write_to_file){
     if (missing(output)){
-    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="") 
- 
+    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="")
+
     }
     if (file.exists(output) & !overwrite){
       stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
@@ -204,6 +204,12 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
     sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
 
+    if (any(is.na(sed))){
+      stop("Error: An input StellarFormationTime or Metallicity is non-standard in the input simulation file (i.e. the
+           ages or metallicities fall outside of the rates allowed for your chosen set of template spectra). \n
+           Please check your input file and try again.")
+    }
+
   } else {sed = NULL}
 
   if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" | galaxy_data$head$Type == "Horizon-AGN" | galaxy_data$head$Type == "Illustris-TNG"){
@@ -247,6 +253,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
     }
   }
+
+
 
   simspin_file = list("header"    = header,
                       "star_part" = galaxy_data$star_part,
