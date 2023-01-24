@@ -76,8 +76,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   if (write_to_file){
     if (missing(output)){
-    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="") 
- 
+    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="")
     }
     if (file.exists(output) & !overwrite){
       stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
