@@ -530,6 +530,8 @@ test_that("An HDF5 file for a hydro sim will give warning without neccesary RunL
 
 test_that("A galaxy with a star with age of 0 will NOT raise an error.", {
   # Testing that we can build a SimSpin file if we have a particle with Age = 0
+  built_cube_size = 4
+
   file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), overwrite = T)
   modified_age = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
 
@@ -558,4 +560,5 @@ test_that("A galaxy with a star with age of 0 will NOT raise an error.", {
 
   unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
 })
+
 

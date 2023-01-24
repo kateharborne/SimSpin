@@ -204,12 +204,6 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
     sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
 
-    if (any(is.na(sed))){
-      stop("Error: An input StellarFormationTime or Metallicity is non-standard in the input simulation file (i.e. the
-           ages or metallicities fall outside of the rates allowed for your chosen set of template spectra). \n
-           Please check your input file and try again.")
-    }
-
   } else {sed = NULL}
 
   if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" | galaxy_data$head$Type == "Horizon-AGN" | galaxy_data$head$Type == "Illustris-TNG"){
