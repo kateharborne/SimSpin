@@ -537,7 +537,7 @@ test_that("A galaxy with a star with age of 0 will NOT raise an error.", {
   aexp = hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "a_scaling")
   h = hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "h_scaling")
   cgs  = hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "to_cgs")
-  sft[1] = 0
+  sft[1] = 1
 
   modified_age[["PartType4/"]]$link_delete("GFM_StellarFormationTime")
 
