@@ -562,3 +562,37 @@ test_that("A galaxy with a star with age of 0 will NOT raise an error.", {
 })
 
 
+test_that("A galaxy with a star with a very small age will NOT raise an error.", {
+  # Testing that we can build a SimSpin file if we have a particle with Age = 0
+  built_cube_size = 4
+
+  file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), overwrite = T)
+  modified_age = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+
+  sft = hdf5r::readDataSet(modified_age[["PartType4/GFM_StellarFormationTime"]])
+  aexp = hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "a_scaling")
+  h = hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "h_scaling")
+  cgs  = hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "to_cgs")
+  sft[1] = 0.99999999999
+
+  modified_age[["PartType4/"]]$link_delete("GFM_StellarFormationTime")
+
+  modified_age[["PartType4/GFM_StellarFormationTime"]] = sft
+  hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "a_scaling") = aexp
+  hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "h_scaling") = h
+  hdf5r::h5attr(modified_age[["PartType4/GFM_StellarFormationTime"]], "to_cgs") = cgs
+
+  hdf5r::h5close(modified_age)
+
+  ss_file = make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), write_to_file = F)
+
+  expect_length(ss_file, ss_file_length)
+  expect_length(build_datacube(simspin_file = ss_file,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               method = "velocity"), built_cube_size)
+
+  unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
+})
+
+
