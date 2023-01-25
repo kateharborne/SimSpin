@@ -19,11 +19,11 @@ An S4 class to represent the telescope pointing relative to the galaxy centre
 }
 \section{Functions}{
 \itemize{
-\item \code{xy_deg()}: Query the xy_deg of a Pointing object
+\item \code{xy_deg}: Query the xy_deg of a Pointing object
 
-\item \code{xy_kpc()}: Query the xy_kpc of a Pointing object
-
+\item \code{xy_kpc}: Query the xy_kpc of a Pointing object
 }}
+
 \section{Slots}{
 
 \describe{
