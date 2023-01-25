@@ -32,7 +32,8 @@ make_simspin_file(
 \item{disk_Z}{The metallicity of the disk particles as a mass fraction (mass
 of all metal elements above He over the total mass).}
 
-\item{bulge_Z}{The metallicity of the bulge particles in Gyr.}
+\item{bulge_Z}{The metallicity of the bulge particles as a mass fraction (mass
+of all metal elements above He over the total mass).}
 
 \item{template}{The stellar templates from which to derive the SEDs. Options
 include "BC03lr" (GALEXEV low resolution, Bruzual & Charlot 2003), "BC03hr"

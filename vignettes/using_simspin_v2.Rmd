@@ -399,7 +399,7 @@ png(file="SAMI_cube_phys%02d.png", width=456, height=500)
 for (i in 1:25){
   image_nan(z = asinh(sub_cube[,,i]), zlim = flux_val, col = grey((0:1000)/1000), na.color = "white", xaxt="n",
           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
-  legend("topleft", inset=c(-0.01,0.01), parse(text=sprintf('lambda == %s',sub_wave[i])), bty="n")
+  legend("topleft", inset=c(-0.01,0.01), paste0('λ = ',sub_wave[i]), text.col = "white", bty="n")
 }
 dev.off()
 

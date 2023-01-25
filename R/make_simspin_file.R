@@ -19,7 +19,8 @@
 #'@param bulge_age The age of the bulge particles in Gyr.
 #'@param disk_Z The metallicity of the disk particles as a mass fraction (mass
 #' of all metal elements above He over the total mass).
-#'@param bulge_Z The metallicity of the bulge particles in Gyr.
+#'@param bulge_Z The metallicity of the bulge particles as a mass fraction (mass
+#' of all metal elements above He over the total mass).
 #'@param template The stellar templates from which to derive the SEDs. Options
 #' include "BC03lr" (GALEXEV low resolution, Bruzual & Charlot 2003), "BC03hr"
 #' (GALEXEV high resolution, Bruzual & Charlot 2003) or "EMILES" (Vazdekis et
@@ -76,8 +77,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   if (write_to_file){
     if (missing(output)){
-    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="") 
- 
+    output = paste(sub('\\..*', '', filename), "_", temp_name, ".Rdata", sep="")
     }
     if (file.exists(output) & !overwrite){
       stop(cat("FileExists Error:: SimSpin file already exists at: ", output, "\n",
@@ -177,6 +177,10 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   # now binning stellar particles based on their A/Z position
   if (length(unique(galaxy_data$ssp$Age)) > 2){ # if not an N-body simulation
+
+    # reassign any age==0 particles to have a small non-zero age
+    galaxy_data$ssp$Age[galaxy_data$ssp$Age==0] = 1e-9
+
     age_grid = 10^(seq(log10(min(galaxy_data$ssp$Age))-0.02, log10(max(galaxy_data$ssp$Age))+0.02, by = 0.02))
     Z_grid   = 10^(seq(log10(min(galaxy_data$ssp$Metallicity))-0.1, log10(max(galaxy_data$ssp$Metallicity))+0.1, by = 0.1))
 
@@ -247,6 +251,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
     }
   }
+
+
 
   simspin_file = list("header"    = header,
                       "star_part" = galaxy_data$star_part,

@@ -26,6 +26,8 @@ A dataset containing the grid of spectral templates for a stellar population
 with a given stellar age and metallicity. At each age/metallicity bin, a
 template spectrum is given in units of solar luminoisities per angstrom for
 1 solar mass of star formation. Values are given at a series of wavelengths,
-contained within the dataset.
+contained within the dataset. Note that while the first age bin is a
+template for Age = 0 stars, we have re-labelled this bin with a non-zero small
+number to avoid log errors.
 }
 \keyword{datasets}
