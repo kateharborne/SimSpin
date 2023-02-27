@@ -58,6 +58,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   return=sum((measured_vlos-losvd)^2)
 }
 
+.losvd_out = function(x, vel, sig, h3, h4){
+  k=1
+  w = (x - vel)/sig
+  H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
+  H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
+
+  measured_vlos = (k * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
+  return=measured_vlos
+}
 
 # A function for combining multiple results from a parallel loop
 .comb <- function(x, ...) {
