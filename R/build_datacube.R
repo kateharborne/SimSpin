@@ -344,18 +344,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
           output$observed_images$flux_image[c,d]       = sum(output$velocity_cube[c,d,])
-          output$observed_images$velocity_image[c,d]   = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
-          output$observed_images$dispersion_image[c,d] = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], output$observed_images$velocity_image[c,d]))
-          h3h4 = tryCatch({stats::optim(par   = c(0,0),
+          kin   = tryCatch({stats::optim(par   = c(100,200,0,0),
                                         fn    = .losvd_fit,
                                         x     = observation$vbin_seq,
                                         losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                        vel   = output$observed_images$velocity_image[c,d],
-                                        sig   = output$observed_images$dispersion_image[c,d],
                                         method="BFGS", control=list(reltol=1e-9))$par},
-                          error = function(e){c(0,0)})
-          output$observed_images$h3_image[c,d]       = h3h4[1]
-          output$observed_images$h4_image[c,d]       = h3h4[2]
+                          error = function(e){c(0,0,0,0)})
+
+          output$observed_images$velocity_image[c,d]   = kin[1]
+          output$observed_images$dispersion_image[c,d] = kin[2]
+          output$observed_images$h3_image[c,d]       = kin[3]
+          output$observed_images$h4_image[c,d]       = kin[4]
         }
       }
 
@@ -424,19 +423,18 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
           output$observed_images$mass_image[c,d]       = sum(output$velocity_cube[c,d,])
-          output$observed_images$velocity_image[c,d]   = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
-          output$observed_images$dispersion_image[c,d] = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], output$observed_images$velocity_image[c,d]))
 
-          h3h4 = tryCatch({stats::optim(par   = c(0,0),
+          kin  = tryCatch({stats::optim(par   = c(100,200,0,0),
                                         fn    = .losvd_fit,
                                         x     = observation$vbin_seq,
                                         losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                        vel   = output$observed_images$velocity_image[c,d],
-                                        sig   = output$observed_images$dispersion_image[c,d],
                                         method="BFGS", control=list(reltol=1e-9))$par},
-                          error = function(e){c(0,0)})
-          output$observed_images$h3_image[c,d]       = h3h4[1]
-          output$observed_images$h4_image[c,d]       = h3h4[2]
+                          error = function(e){c(0,0,0,0)})
+
+          output$observed_images$velocity_image[c,d]   = kin[1]
+          output$observed_images$dispersion_image[c,d] = kin[2]
+          output$observed_images$h3_image[c,d]       = kin[3]
+          output$observed_images$h4_image[c,d]       = kin[4]
         }
       }
     }
