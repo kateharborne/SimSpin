@@ -32,14 +32,14 @@ spectra_number_of_hdu = 9
 spectral_raw_vel_loc = 5
 
 velocity_raw_images_size = 6
-velocity_observed_images_size = 5
+velocity_observed_images_size = 6
 velocity_number_of_hdu = 14
 velocity_obs_vel_loc = 5
 velocity_obs_h3_loc = 7
 velocity_obs_h4_loc = 8
 
 gas_raw_images_size = 7
-gas_observed_images_size = 5
+gas_observed_images_size = 6
 gas_number_of_hdu = 15
 
 # Testing that build_datacube works in spectral mode ----

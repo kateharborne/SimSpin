@@ -81,7 +81,7 @@ blur_datacube = function(datacube_output){
     blur_output = list("velocity_cube"    = blur_cube,
                        "observation"      = observation,
                        "raw_images"       = datacube_output$raw_images,
-                       "observed_images"  = vector(mode = "list", length=5))
+                       "observed_images"  = vector(mode = "list", length=6))
 
     names(blur_output$observed_images) = c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals")
 
