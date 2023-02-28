@@ -356,8 +356,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
           output$observed_images$dispersion_image[c,d] = kin[2]
           output$observed_images$h3_image[c,d]         = kin[3]
           output$observed_images$h4_image[c,d]         = kin[4]
-          output$observed_images$residuals[c,d]        = max(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
-                                                                   output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ))
+          output$observed_images$residuals[c,d]        = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
+                                                                   output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
         }
       }
 
@@ -439,8 +439,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
           output$observed_images$dispersion_image[c,d] = kin[2]
           output$observed_images$h3_image[c,d]       = kin[3]
           output$observed_images$h4_image[c,d]       = kin[4]
-          output$observed_images$residuals[c,d]      = max(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
-                                                                output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ))
+          output$observed_images$residuals[c,d]      = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
+                                                                output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
 
         }
       }
