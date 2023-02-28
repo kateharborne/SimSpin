@@ -108,8 +108,8 @@ blur_datacube = function(datacube_output){
         blur_dispersion[c,d] = kin[2]
         blur_h3[c,d]       = kin[3]
         blur_h4[c,d]       = kin[4]
-        blur_residuals[c,d] = max(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
-                                        blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T)) ))
+        blur_residuals[c,d] = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
+                                        blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
       }
     }
 
