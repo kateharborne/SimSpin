@@ -1,7 +1,7 @@
 Package: SimSpin
 Type: Package
 Title: SimSpin - A package for the kinematic analysis of galaxy simulations
-Version: 2.4.5
+Version: 2.4.5b
 Author: Katherine Harborne
 Maintainer: <katherine.harborne@icrar.org>
 Description: The purpose of this package is to provide a set of tools to "observe" simulations of galaxies as if you were an observer using an integral field unit (IFU). The galaxy model can be observed at a chosen inclination and an IFU observation can be produced in a selection of different spatial shapes (square, circular, and hexagonal) to account for the variety of CCD arrangements used by current telescopes. This data cube can be used to calculate the value an observer would measure for the spin parameter compared to the value that is measured directly from the simulation.
