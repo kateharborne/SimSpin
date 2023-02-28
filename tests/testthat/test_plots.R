@@ -36,7 +36,7 @@ test_that("Each image type can be plotted for build_datacube images - Gadget", {
   expect_invisible(plot_dispersion(gadget_cube$observed_images$dispersion_image))
   expect_invisible(plot_h3(gadget_cube$observed_images$h3_image))
   expect_invisible(plot_h4(gadget_cube$observed_images$h4_image))
-
+  expect_invisible(plot_age(gadget_cube$observed_images$residuals, main = "Residuals"))
 })
 
 test_that("Each image type can be plotted for build_datacube images - HDF5", {
