@@ -1458,7 +1458,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     }
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      luminosity = .add_noise(luminosity, observation$signal_to_noise)
+      luminosity = .add_noise(luminosity, observation$signal_to_noise*num_part)
     }
 
     if (observation$LSF_conv){
@@ -1540,7 +1540,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      }
 
                      if (!is.na(observation$signal_to_noise)){ # should we add noise?
-                       luminosity = .add_noise(luminosity, observation$signal_to_noise)
+                       luminosity = .add_noise(luminosity, observation$signal_to_noise*num_part)
                      }
 
                      if (observation$LSF_conv){
