@@ -1163,9 +1163,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       luminosity = luminosity + (part_lum*scale_frac)
     }
 
-    if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      luminosity = .add_noise(luminosity, (observation$signal_to_noise*sqrt(num_part)))
-    }
+    #if (!is.na(observation$signal_to_noise)){ # should we add noise?
+    #  luminosity = .add_noise(luminosity, (observation$signal_to_noise*sqrt(num_part)))
+    #}
 
     if (observation$LSF_conv){
       luminosity = .lsf_convolution(observation, luminosity, (observation$lsf_sigma/observation$wave_res))
@@ -1245,9 +1245,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      }
 
-                     if (!is.na(observation$signal_to_noise)){ # should we add noise?
-                       luminosity = .add_noise(luminosity, observation$signal_to_noise*num_part)
-                     }
+                     #if (!is.na(observation$signal_to_noise)){ # should we add noise?
+                     #  luminosity = .add_noise(luminosity, observation$signal_to_noise*num_part)
+                     #}
 
                      if (observation$LSF_conv){
                        luminosity = .lsf_convolution(observation, luminosity, observation$lsf_sigma)
