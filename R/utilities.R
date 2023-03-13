@@ -1369,11 +1369,25 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 # Function to add noise
-.add_noise = function(luminosity, S2N){
-  noise_level = min(luminosity) / S2N
-  noise = stats::rpois(length(luminosity), lambda = noise_level)
-  noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
+.add_noise = function(cube, S2N){
+  S2N[is.infinite(S2N)] = 0 # removing infinite noise where particles per pixel = 0
+  noisey_cube = cube
+  for (i in 1:nrow(S2N)){
+    for (j in 1:ncol(S2N)){
+      if (S2N[i,j]!=0){
+        noise = (stats::rnorm(length(cube[i,j,]), mean = 0, sd=1))*S2N[i,j]
+        noisey_cube[i,j,] = cube[i,j,] + (cube[i,j,]*noise)
+      }
+    }
+  }
+  return(noisey_cube)
 }
+
+# .add_noise = function(luminosity, S2N){
+#   noise_level = min(luminosity) / S2N
+#   noise = stats::rpois(length(luminosity), lambda = noise_level)
+#   noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
+# }
 
 # Function to generate a Gaussian kernel
 .gaussian_kernel = function(m, n, sigma){
