@@ -98,29 +98,17 @@ blur_datacube = function(datacube_output){
     for (c in 1:cube_dims[1]){
       for (d in 1:cube_dims[2]){
         blur_flux[c,d]       = sum(blur_cube[c,d,])
-
-        kin1   = tryCatch({stats::optim(par   = c(100,200),
-                                        fn    = .losvd_fit_gaussian,
-                                        x     = observation$vbin_seq,
-                                        losvd = (blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T))),
-                                        method="BFGS", control=list(reltol=1e-9))$par},
-                          error = function(e){c(0,0)})
-        blur_velocity[c,d]   = kin1[1]
-        blur_dispersion[c,d] = kin1[2]
-
-        kin2   = tryCatch({stats::optim(par   = c(0,0),
-                                        fn    = .losvd_fit_gausshermite,
-                                        x     = observation$vbin_seq,
-                                        vel   = kin1[1],
-                                        sig   = kin1[2],
-                                        losvd = (blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T))),
-                                        method="BFGS", control=list(reltol=1e-9))$par},
-                          error = function(e){c(0,0)})
-
-
-        blur_h3[c,d]       = kin2[1]
-        blur_h4[c,d]       = kin2[2]
-        blur_residuals[c,d] = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin1[1], sig=kin1[2], h3=kin2[1], h4=kin2[2]) -
+        kin   = tryCatch({stats::optim(par   = c(100,200,0,0),
+                                       fn    = .losvd_fit,
+                                       x     = observation$vbin_seq,
+                                       losvd = (blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T))),
+                                       method="BFGS", control=list(reltol=1e-9))$par},
+                         error = function(e){c(0,0,0,0)})
+        blur_velocity[c,d] = kin[1]
+        blur_dispersion[c,d] = kin[2]
+        blur_h3[c,d]       = kin[3]
+        blur_h4[c,d]       = kin[4]
+        blur_residuals[c,d] = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
                                         blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
       }
     }
