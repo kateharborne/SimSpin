@@ -252,7 +252,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       observation$LSF_conv = FALSE
     } else {
       observation$LSF_conv = TRUE
-      observation$lsf_sigma = (sqrt(spec_res_fwhm_sq) / (2 * sqrt(2*log(2)))) #/ (simspin_data$header$Template_waveres * (1 + observation$z))
+      observation$lsf_sigma = (sqrt(spec_res_fwhm_sq) / (2 * sqrt(2*log(2))) / observation$wave_res) #/ (simspin_data$header$Template_waveres * (1 + observation$z))
       # To get to the telescope's LSF, we only need to convolve with a Gaussian the width of the additional
       # difference between the redshifted template and the intrinsic telescope LSF.
       # This is the scaled for the wavelength pixel size at redshift "z".
