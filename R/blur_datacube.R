@@ -98,7 +98,10 @@ blur_datacube = function(datacube_output){
     for (c in 1:cube_dims[1]){
       for (d in 1:cube_dims[2]){
         blur_flux[c,d]       = sum(blur_cube[c,d,])
-        kin   = tryCatch({stats::optim(par   = c(100,200,0,0),
+        vel_ini = .meanwt(observation$vbin_seq, blur_output$velocity_cube[c,d,])
+        sd_ini  = sqrt(.varwt(observation$vbin_seq, blur_output$velocity_cube[c,d,], vel_ini))
+
+        kin   = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
                                        fn    = .losvd_fit,
                                        x     = observation$vbin_seq,
                                        losvd = (blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T))),
