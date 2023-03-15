@@ -1449,7 +1449,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
       # pulling wavelengths and using doppler formula to compute the shift in
       #   wavelengths caused by LOS velocity
-      wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
+      wave_shift = wavelength * exp((galaxy_sample$vy[p] / .speed_of_light))#((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
 
       # pulling out the wavelengths that would fall within the telescope range
       wave_seq_int = which(wave_shift >= min(observation$wave_edges) & wave_shift <= max(observation$wave_edges))
@@ -1530,7 +1530,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                        # pulling wavelengths and using doppler formula to compute the shift in
                        #   wavelengths caused by LOS velocity
-                       wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
+                       wave_shift = wavelength * exp((galaxy_sample$vy[p] / .speed_of_light))#((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
 
                        # pulling out the wavelengths that would fall within the telescope range
                        wave_seq_int = which(wave_shift >= min(observation$wave_seq) & wave_shift <= max(observation$wave_seq))
