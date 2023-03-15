@@ -350,7 +350,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
           output$observed_images$flux_image[c,d] = sum(output$velocity_cube[c,d,])
-          kin   = tryCatch({stats::optim(par   = c(100,200,0,0),
+          vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+          sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
+
+          kin   = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
                                          fn    = .losvd_fit,
                                          x     = observation$vbin_seq,
                                          losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
@@ -432,8 +435,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
           output$observed_images$mass_image[c,d]       = sum(output$velocity_cube[c,d,])
+          vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+          sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
 
-          kin  = tryCatch({stats::optim(par   = c(100,200,0,0),
+          kin  = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
                                         fn    = .losvd_fit,
                                         x     = observation$vbin_seq,
                                         losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
