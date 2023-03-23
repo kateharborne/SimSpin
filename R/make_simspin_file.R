@@ -67,6 +67,13 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                 "Template" = character(1),
                 "Template_LSF" = numeric(1),
                 "Template_waveres" = numeric(1),
+                "Centre" = centre,
+                "HalfMass" = half_mass,
+                "TotalStellarMass" = numeric(1),
+                "TotalGasMass" = numeric(1),
+                "Alignment" = "Default",
+                "Npart" = numeric(1),
+                "SmoothingN" = sph_spawn_n,
                 "Origin" = paste0("SimSpin_v", packageVersion("SimSpin")),
                 "Date" = Sys.time())
 
@@ -115,11 +122,17 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   Npart_sum = cumsum(galaxy_data$head$Npart) # Particle indices of each type
 
+  header$Npart = sum(galaxy_data$head$Npart, na.rm=T)
+
   galaxy_data = .centre_galaxy(galaxy_data, centre) # centering the galaxy based on stellar particles
 
   if (header$Type != "nbody"){
+    if (!is.na(half_mass)){ # if a half mass is requested, this alignment is specified by the user
+      header$Alignment = "Specified"
+    }
     galaxy_data = .align_galaxy(galaxy_data, half_mass) # align 3D shape of galaxy
   } else {
+    header$Alignment = "None"
     if (!is.na(half_mass[1])){
       warning(c("Input SimSpin file contains an N-body model. \n",
                 "These models are not aligned by default so input half-mass will not be used for alignment. \n",
@@ -244,6 +257,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
     }
   }
+
+  header$TotalStellarMass = sum(galaxy_data$star_part$Mass, na.rm=T)
+  header$TotalGasMass = sum(galaxy_data$gas_part$Mass, na.rm=T)
 
   simspin_file = list("header"    = header,
                       "star_part" = galaxy_data$star_part,
