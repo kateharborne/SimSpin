@@ -13,7 +13,13 @@ In 2022, SimSpin was awarded development time with [Astronomy Data and Computing
 [Launch the app!](https://simspin.datacentral.org.au/app/){: .btn .btn-purple }
 {: .lh-tight }
 
-You can access the API directly, however, and run commands from Python using the example below. 
+Using the API, it is possible to run SimSpin from Python. In the example below, we take you through the process of building and downloading a mock observation.
 {: .fs-5 .fw-300 .pb-2 }
 ---
+
+To begin, we need to use the `requests` package for Python3. If you do not already have this pacakge installed, you can get it using the line below:
+
+```Python
+pip install requests
+```
 

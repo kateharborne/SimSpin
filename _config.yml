@@ -98,6 +98,9 @@ callouts:
     title: Note
     color: purple
 
+# Color scheme supports "light" (default) and "dark"
+color_scheme: legacy_light
+
 # For copy button on code
 enable_copy_code_button: true
 
