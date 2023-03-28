@@ -3,7 +3,7 @@ layout: default
 title: build_datacube
 parent: Documentation
 nav_order: 5
-last_modified_date: "Tue, 7 June 2022 15:57:00 AWST"
+last_modified_date: "Tue, 28 March 2023 15:57:00 AWST"
 ---
 
 # Constructing your data cube
@@ -346,11 +346,17 @@ summary(cube)
 
 *   `spectral_cube` is the main output from the function. This contains a 3D array with spatial coordinates in *xy* and wavelength coordinates in the *z* coordinate (which is why the *Length* = 30 *x*-spatial bins x 30 *y*-spatial bins  x 1924 *z*-wavelength bins = 1731600 elements).  
 
-    **IMAGE of spectral cube**
+    <figure>
+    <img align="centre" src="/SimSpin/assets/images/build_datacube_spectral.png" width="660" height="495" />
+    </figure>
+    {: .d-inline-block .flex-justify-around }
 
     Note that, if `method = "velocity"`, this element would be called `velocity_cube` and would contain line-of-sight velocity distributions along the *z* coordinate instead of wavelength information.
     
-    **IMAGE of velocity cube**
+    <figure>
+    <img align="centre" src="/SimSpin/assets/images/build_datacube_velocity.png" width="660" height="495" />
+    </figure>
+    {: .d-inline-block .flex-justify-around }
 
 *   `observation` is the summary of the code. It contains information about how the observation has been constructed, such as the telescope parameters, the simulation parameters, the code version and run date. The full list output contains 34 different descriptors. These can be browsed [above](#output-parameters). 
 
