@@ -1349,7 +1349,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   kernel_radius = (4 * lsf_sigma + 0.5)
   x = seq(-kernel_radius, kernel_radius, length.out = 25)
-  phi_x = exp((-0.5 / (lsf_sigma^2)) * (x^2)) / (lsf_sigma * sqrt(2*pi))
+  #phi_x = exp((-0.5 / (lsf_sigma^2)) * (x^2)) / (lsf_sigma * sqrt(2*pi))
+  phi_x = exp((-0.5 * (x^2)) / (lsf_sigma))
   phi_x = phi_x / sum(phi_x)
 
   lum = stats::convolve(luminosity, phi_x, type="open")
