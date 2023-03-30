@@ -178,7 +178,7 @@ names(cube$OBS_VEL)
 # [9] "history"     "nkey"        "filename"    "ext"         "extname"     "WCSref"     
 ```
 
-<img align="centre" src="/SimSpin/assets/images/kinematic_writeFITS.jpeg" width="888" height="300" />
+<img align="centre" src="/SimSpin/assets/images/kinematic_writeFITS.jpeg" width="444" height="100" />
 {: .pt-4 .pb-1 } 
 
 This is but a limited example to demonstrate how to save the output to a FITS file and then interact with the saved data. 

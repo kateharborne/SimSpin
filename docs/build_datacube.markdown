@@ -43,8 +43,8 @@ build_datacube(simspin_file,                     # REQUIRED input SimSpin file
 [See an example](#example){: .btn .btn-purple }
 [See the source code](https://github.com/kateharborne/SimSpin/blob/bb371d9e4d981d1ebaba3aa07978bb61a2d434f0/R/build_datacube.R#L77){: .btn .btn-purple }
 
-*As of version 2.2.0, the `method` input parameter has been moved directly to the [`build_datacube`](build_datacube.markdown) function. For backwards compatibility, this parameter can still be specified within [`telescope`](telescope.markdown), but a warning will be issued.*
-{: .fw-150 }
+As of version 2.2.0, the `method` input parameter has been moved directly to the [`build_datacube`](build_datacube.markdown) function. For backwards compatibility, this parameter can still be specified within [`telescope`](telescope.markdown), but a warning will be issued.
+{: .note }
 ---
 
 ## Input Parameters

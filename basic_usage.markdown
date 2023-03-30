@@ -385,7 +385,7 @@ wavelength_range = as.numeric(stringr::str_split(string = cube$OB_TABLE$Value[26
 wavelength_seq   = seq(wavelength_range[1], wavelength_range[2], by = as.numeric(cube$OB_TABLE$Value[25])) 
 
 # examining the central spaxel of the output spectral cube:
-magicaxis::magplot(wavelength_seq, cube$DATA[["imDat"]][15,15,], type="l", col = "purple", lwd =2, xlab = "Wavelength, Angstroms", ylab = "r-band Luminosity, CGS")
+magicaxis::magplot(wavelength_seq, cube$DATA[["imDat"]][15,15,], type="l", col = "purple", lwd =2, xlab = "Wavelength, Angstroms", ylab = "Luminosity, CGS")
 
 # plotting the flux image saved to the cube:
 plot_flux(cube$RAW_FLUX$imDat)
