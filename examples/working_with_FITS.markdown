@@ -29,6 +29,7 @@ In each example, we will provide a quick description of how the file has been ma
 
 Let's use another example file from the SimSpin package to build a spectral datacube and save to FITS. 
 This time, we'll use an example file from the hydrodynamical simulation EAGLE. 
+{: .fs-5 .fw-300 .pb-2 }
 
 ```R
 # Load a model...
@@ -44,7 +45,7 @@ cube   = build_datacube(simspin_file = simspin_eagle,
                         observing_strategy = observing_strategy(),
                         method = "spectral",
                         write_fits = T, 
-                        output_location = "SimSpin_example_EAGLE.FITS",  
+                        output_location = "SimSpin_spectral_example_EAGLE.FITS",  
                         object_name = "SimSpin_example_EAGLE",
                         telescope_name = "SimSpin",
                         observer_name = "Anonymous",
@@ -58,7 +59,7 @@ There are many other tools for inspecting FITS files written in other languages,
 
 ```R
 library(Rfits)
-cube = Rfits_read_all("SimSpin_example_EAGLE.FITS")
+cube = Rfits_read_all("SimSpin_spectral_example_EAGLE.FITS")
 summary(cube)
 
 #          Length  Class        Mode
@@ -167,8 +168,110 @@ magicaxis::magplot(wavelength_seq, cube$DATA[["imDat"]][15,15,], type="l", col =
 
 ## Kinematic FITS files
 
+In this example, we will build a kinematic cube and plot the observed line-of-sight velocity distribution (LOSVD) using the information conatined within the extension header, rather than the associated observation `OB_TABLE`.
+{: .fs-5 .fw-300 .pb-2 }
 
+First, let's build another cube. 
 
+```R
+# Building a kinematic datacube with default parameters using the same SimSpin file
+cube   = build_datacube(simspin_file = simspin_eagle,
+                        telescope = telescope(),
+                        observing_strategy = observing_strategy(),
+                        method = "velocity",
+                        write_fits = T, 
+                        output_location = "SimSpin_velocity_example_EAGLE.FITS",  
+                        object_name = "SimSpin_example_EAGLE",
+                        telescope_name = "SimSpin",
+                        observer_name = "Anonymous",
+                        split_save = F)
+
+library(Rfits)
+cube = Rfits_read_all("SimSpin_velocity_example_EAGLE.FITS")
+summary(cube)
+
+#          Length Class        Mode
+#             9   Rfits_header list
+# DATA     9900   Rfits_cube   list
+# OB_TABLE    3   Rfits_table  list
+# OBS_FLUX  900   Rfits_image  list
+# OBS_VEL   900   Rfits_image  list
+# OBS_DISP  900   Rfits_image  list
+# OBS_H3    900   Rfits_image  list
+# OBS_H4    900   Rfits_image  list
+# RAW_FLUX  900   Rfits_image  list
+# RAW_VEL   900   Rfits_image  list
+# RAW_DISP  900   Rfits_image  list
+# RAW_AGE   900   Rfits_image  list
+# RAW_Z     900   Rfits_image  list
+# NPART     900   Rfits_image  list
+
+```
+Because we have built a velocity cube this time, the output list has several additional images output, the `observed_images` produced by the code fitting the observed LOSVD, including `OBS_FLUX`, `OBS_VEL`, `OBS_DISP`, `OBS_H3` and `OBS_H4`. 
+
+In this case, the `DATA` Rfits cube is smaller due to the reduced number of velocity channels (in comparison to the wavelength range of a given telescope) i.e. 30 x 30 spatial planes by 11 velocity planes = 9900.
+
+Reading in this velocity cube, we can examine the axes of the cube in order to plot the LOSVD using the keyvalues within the Rfits cube.
+
+```R
+velocity_cube = cube[["DATA"]]$imDat # The kinematic data cube is stored in the first HDU 
+                                     #  (can also be accessed cube$imDat).
+
+header = cube[["DATA"]]$keyvalues    # The keyvalues header of the file gives everything 
+                                     #  you need to assign values to the cube axes.
+
+spatial_range = header$CRVAL1 + (seq(header$CRPIX1, header$NAXIS1)*header$CDELT1)
+                                     # We use the first or second inputs to the axDat to describe
+                                     #  the spatial axes of the cube. As the aperture is square, 
+                                     #  the first and second inputs give the same answer.
+
+velocity_range = header$CRVAL3 + (seq(header$CRPIX3, header$NAXIS3)*header$CDELT3)
+                                     # Because the velocity is the third axis of the cube, we use 
+                                     #  the third element in the axDat element to define the velocity
+                                     #  range. 
+```
+
+The elements of the `keyvalues` header are defined in the table below:
+
+|  `CRPIX`  |  The pixel index at which values are defined. Default (1,1,1).     |
+|  `CRVAL`  |  The value associated with the `CRPIX` pixel.                      |
+|  `CDELT`  |  The difference in value between each pixel.                       |
+|  `NAXIS`  |  The dimensions of the cube (number of pixels along each axis).    |
+|  `CTYPE`  |  The name that defines each dimension of the cube.                 |
+|  `CUNIT`  |  The units for each dimension of the cube.                         |
+
+We can then use these axes to plot and fit the observed LOSVD:
+
+```R
+
+losvd_fit = function(par, x, losvd){
+
+  vel = par[1]
+  sig = par[2]
+  h3  = par[3]
+  h4  = par[4]
+
+  w = (x - vel)/sig
+  H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
+  H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
+
+  measured_vlos = ((1/(sig * sqrt(2*pi))) * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
+  return=sum((measured_vlos-losvd)^2)
+}
+
+losvd = function(x, vel, sig, h3, h4){
+  w = (x - vel)/sig
+  H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
+  H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
+
+  measured_vlos = ((1/(sig * sqrt(2*pi))) * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
+  return(measured_vlos)
+}
+
+library(magicaxis)
+magplot(velocity_range, velocity_cube[15,15,], xlab = "Velocity[LOS], km/s", type="p", pch=16)
+
+```
 
 
 ---
