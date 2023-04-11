@@ -104,6 +104,8 @@ color_scheme: legacy_light
 # For copy button on code
 enable_copy_code_button: true
 
+math: mathjax
+
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to

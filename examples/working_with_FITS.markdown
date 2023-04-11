@@ -39,7 +39,7 @@ simspin_eagle  = make_simspin_file(filename = simulation_file,
                                    template = "EMILES",
                                    write_to_file = FALSE)
 
-# Building a datacube with default parameters 
+# Building a datacube with default spectral parameters 
 cube   = build_datacube(simspin_file = simspin_eagle,
                         telescope = telescope(),
                         observing_strategy = observing_strategy(),
@@ -168,7 +168,7 @@ magicaxis::magplot(wavelength_seq, cube$DATA[["imDat"]][15,15,], type="l", col =
 
 ## Kinematic FITS files
 
-In this example, we will build a kinematic cube and plot the observed line-of-sight velocity distribution (LOSVD) using the information conatined within the extension header, rather than the associated observation `OB_TABLE`.
+In this example, we will build a kinematic cube and plot the observed line-of-sight velocity distribution (LOSVD) using the information contained within the extension header, rather than the associated observation `OB_TABLE`.
 {: .fs-5 .fw-300 .pb-2 }
 
 First, let's build another cube. 
@@ -191,25 +191,25 @@ cube = Rfits_read_all("SimSpin_velocity_example_EAGLE.FITS")
 summary(cube)
 
 #          Length Class        Mode
-#             9   Rfits_header list
-# DATA     9900   Rfits_cube   list
-# OB_TABLE    3   Rfits_table  list
-# OBS_FLUX  900   Rfits_image  list
-# OBS_VEL   900   Rfits_image  list
-# OBS_DISP  900   Rfits_image  list
-# OBS_H3    900   Rfits_image  list
-# OBS_H4    900   Rfits_image  list
-# RAW_FLUX  900   Rfits_image  list
-# RAW_VEL   900   Rfits_image  list
-# RAW_DISP  900   Rfits_image  list
-# RAW_AGE   900   Rfits_image  list
-# RAW_Z     900   Rfits_image  list
-# NPART     900   Rfits_image  list
+#              9  Rfits_header list
+# DATA     27000  Rfits_cube   list
+# OB_TABLE     3  Rfits_table  list
+# OBS_FLUX   900  Rfits_image  list
+# OBS_VEL    900  Rfits_image  list
+# OBS_DISP   900  Rfits_image  list
+# OBS_H3     900  Rfits_image  list
+# OBS_H4     900  Rfits_image  list
+# RAW_FLUX   900  Rfits_image  list
+# RAW_VEL    900  Rfits_image  list
+# RAW_DISP   900  Rfits_image  list
+# RAW_AGE    900  Rfits_image  list
+# RAW_Z      900  Rfits_image  list
+# NPART      900  Rfits_image  list
 
 ```
 Because we have built a velocity cube this time, the output list has several additional images output, the `observed_images` produced by the code fitting the observed LOSVD, including `OBS_FLUX`, `OBS_VEL`, `OBS_DISP`, `OBS_H3` and `OBS_H4`. 
 
-In this case, the `DATA` Rfits cube is smaller due to the reduced number of velocity channels (in comparison to the wavelength range of a given telescope) i.e. 30 x 30 spatial planes by 11 velocity planes = 9900.
+In this case, the `DATA` Rfits cube is smaller due to the reduced number of velocity channels (in comparison to the wavelength range of a given telescope) i.e. 30 x 30 spatial planes by 30 velocity planes = 27000.
 
 Reading in this velocity cube, we can examine the axes of the cube in order to plot the LOSVD using the keyvalues within the Rfits cube.
 
@@ -240,40 +240,156 @@ The elements of the `keyvalues` header are defined in the table below:
 |  `CTYPE`  |  The name that defines each dimension of the cube.                 |
 |  `CUNIT`  |  The units for each dimension of the cube.                         |
 
-We can then use these axes to plot and fit the observed LOSVD:
+We can then use these axes to plot and fit the observed LOSVD.
 
 ```R
-
+# Defining a function to fit the observed line-of-sight velocity distribution:
 losvd_fit = function(par, x, losvd){
-
+  
   vel = par[1]
   sig = par[2]
   h3  = par[3]
   h4  = par[4]
-
+  
   w = (x - vel)/sig
   H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
   H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
-
-  measured_vlos = ((1/(sig * sqrt(2*pi))) * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
+  
+  measured_vlos = (exp(-0.5*(w^2)) * (1 + (h3*H3) + (h4*H4)))
   return=sum((measured_vlos-losvd)^2)
 }
+
+# Then, a function to generate this function given a range of supplied 
+#  velocities and the parameters of the Gauss-Hermite fit. 
 
 losvd = function(x, vel, sig, h3, h4){
   w = (x - vel)/sig
   H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
   H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
-
-  measured_vlos = ((1/(sig * sqrt(2*pi))) * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
+  
+  measured_vlos = (exp(-0.5*(w^2)) * (1 + (h3*H3) + (h4*H4)))
   return(measured_vlos)
 }
 
+# Fitting the LOSVD at the central pixel of the observed velocity cube:
+losvd_obs = stats::optim(par   = c(0,100,0,0),
+                         fn    = losvd_fit,
+                         x     = velocity_range,
+                         losvd = (velocity_cube[15,15,]/(max(velocity_cube[15,15,], na.rm=T))),
+                         method="BFGS")$par
+
+# Plotting the observed LOSVD and given fit:
 library(magicaxis)
-magplot(velocity_range, velocity_cube[15,15,], xlab = "Velocity[LOS], km/s", type="p", pch=16)
+magplot(velocity_range, velocity_cube[15,15,]/(max(velocity_cube[15,15,])), 
+        xlab = expression("Velocity"[LOS]*", km/s"), type="p", pch=16)
+lines(velocity_range, 
+      losvd(velocity_range, 
+            vel = losvd_obs[1], 
+            sig = losvd_obs[2], 
+            h3 = losvd_obs[3], 
+            h4 = losvd_obs[4]),
+      col = "purple", lwd = 2)
 
 ```
 
+<img align="centre" src="/SimSpin/assets/images/LOSVD_cube_pixel.png" height="150" />
+{: .pt-4 .pb-1 } 
+
+The returned LOSVD parameters give us a line-of-sight velocity of 52 km/s at the galaxy centre, and a dispersion of 148 km/s. The same approach is followed for every pixel in the cube, using the flux-weighted LOS velocity and dispersions as priors on the `losvd_fit` function within the SimSpin code.
 
 ---
 
 ## Gas FITS files
+
+Finally, we will demonstrate the output kinematic cube produced through mock observations of the gas component of the galaxy model.
+{: .fs-5 .fw-300 .pb-2 }
+
+Let's build our final cube.
+
+```R
+# Building a datacube using the gas method
+cube   = build_datacube(simspin_file = simspin_eagle,
+                        telescope = telescope(),
+                        observing_strategy = observing_strategy(),
+                        method = "gas",
+                        write_fits = T, 
+                        output_location = "SimSpin_gas_example_EAGLE.FITS",  
+                        object_name = "SimSpin_example_EAGLE",
+                        telescope_name = "SimSpin",
+                        observer_name = "Anonymous",
+                        split_save = F)
+```
+
+In this example, we examine *all* of the gas particles in the model. If specifying `method = "sf gas"`, we could limit this to only gas that meets a given star formation threshold, such as having met the equation of state criterion of that simulation, or a given temperature cut. 
+{: .note }  
+
+```R
+library(Rfits)
+cube = Rfits_read_all("SimSpin_gas_example_EAGLE.FITS")
+summary(cube)
+
+#          Length Class        Mode
+#              9  Rfits_header list
+# DATA     14400  Rfits_cube   list
+# OB_TABLE     3  Rfits_table  list
+# OBS_MASS   900  Rfits_image  list
+# OBS_VEL    900  Rfits_image  list
+# OBS_DISP   900  Rfits_image  list
+# OBS_H3     900  Rfits_image  list
+# OBS_H4     900  Rfits_image  list
+# RAW_MASS   900  Rfits_image  list
+# RAW_VEL    900  Rfits_image  list
+# RAW_DISP   900  Rfits_image  list
+# RAW_Z      900  Rfits_image  list
+# RAW_OH     900  Rfits_image  list
+# RAW_SFR    900  Rfits_image  list
+# NPART      900  Rfits_image  list
+```
+
+These gas cubes are very similar in structure to the kinematic cubes produced in the example above. Each `DATA` cube contains spatial information in the x-y plane (30 x 30) and velocity information as we proceed depth-wise (i.e. 30 x 30 x 16 = 14400). Following the methodology from the kinematic example above, you could produce a very similar fitted LOSVD for a single pixel.
+
+Instead, let's examine a few of the maps included within the observation. There are several new HDU extensions, in comparison to the stellar kinematic cubes. 
+
+```R
+# Masking out pixels conatining no gas particles. 
+mask = cube$NPART$imDat
+mask[mask == 0] = NA
+
+# Using the `fig` and `new` parameters, we can add multiple 
+#  panels to a single plot.
+
+# Plotting the observed gas mass per pixel
+plot_mass(cube$OBS_MASS$imDat*mask, 
+          fig = c(0,0.25,0,1), 
+          labN = 1, titleshift = -8)
+
+# Plotting the mean gas metallicity per pixel
+plot_metallicity(cube$RAW_Z$imDat*mask, 
+                 fig = c(0.25,0.5,0,1), 
+                 labN = 1, titleshift = -8, new=T)
+
+# Plotting the mean, instantaneous star formation rate (SFR) mass per pixel
+plot_SFR(cube$RAW_SFR$imDat*mask, 
+          fig = c(0.5,0.75,0,1), 
+          labN = 1, titleshift = -8, new=T)
+
+# Plotting the mean chemical abundance - oxygen over hydrogen - per pixel
+plot_OH(cube$RAW_OH$imDat*mask, 
+        fig = c(0.75,1,0,1), 
+        labN = 1, titleshift = -8, new=T)
+
+```
+<img align="centre" src="/SimSpin/assets/images/FITS_gas_maps.png" height="100" />
+{: .pt-4 .pb-1 } 
+
+There is a relatively sparse distribution of gas in comparision the stellar distribution, but this is simply due to the construction of the example files contained within the SimSpin package. 
+
+We can see that there is a number of raw images to summarise the properties of the underlying gas, including the raw particle kinematics, the metallicity, the instantaneous star-formation rate and the chemical abundance given by `log10(O/H) + 12`. These raw images will not include the effects of seeing in their output. 
+
+---
+
+Having demonstrated how to interact with a variety of different FITS files and their default outputs, we invite you to try these examples for yourself. 
+
+If you have any questions about anything discussed above, or suggestions about how to improve the code or example, please raise an issue using GitHub using the button below. Else, happy observing!
+
+[Raise an issue](https://github.com/kateharborne/SimSpin/issues/new/choose){: .btn .btn-purple }
