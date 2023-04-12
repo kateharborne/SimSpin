@@ -38,7 +38,7 @@ Suggests:
     knitr,
     rmarkdown
 Remotes:
-    asgr/Rfits@HeaderExt,
+    asgr/Rfits@master,
     ICRAR/ProFit@master
 VignetteBuilder: knitr
 LazyDataCompression: xz
