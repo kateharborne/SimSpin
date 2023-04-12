@@ -300,7 +300,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # VELOCITY mode method =======================================================
   if (observation$method == "velocity"){
 
-    observation$vbin = ceiling((log(max(observation$wave_seq)-min(observation$wave_seq)) * .speed_of_light)/observation$vbin_size) # the number of velocity bins in the cube
+    observation$vbin = 5*ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
     if (observation$vbin <= 2){observation$vbin = 3}
 
     observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
@@ -388,7 +388,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       galaxy_data$SFR = galaxy_data$SFR*(.g_to_msol/.s_to_yr)
     }
 
-    observation$vbin = ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
+    observation$vbin = 5*ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
     if (observation$vbin <= 2){observation$vbin = 3}
 
     observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
