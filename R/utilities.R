@@ -1053,10 +1053,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 # Function to apply LSF to spectra
 .lsf_convolution = function(observation, luminosity, lsf_sigma){
 
-  kernel_radius = (4 * lsf_sigma + 0.5)
-  x = seq(-kernel_radius, kernel_radius, length.out = 25)
+  #kernel_radius = (4 * lsf_sigma + 0.5)
+  #x = seq(-kernel_radius, kernel_radius, by=observation$wave_res)
+  x = seq(-(observation$wave_res*12), (observation$wave_res*12), by=observation$wave_res)
+  #x = seq(-kernel_radius, kernel_radius, length.out = 25)
   #phi_x = exp((-0.5 / (lsf_sigma^2)) * (x^2)) / (lsf_sigma * sqrt(2*pi))
-  phi_x = exp((-0.5 * (x^2)) / (lsf_sigma))
+  phi_x = exp((-0.5 * (x^2)) / (lsf_sigma^2))
   phi_x = phi_x / sum(phi_x)
 
   lum = stats::convolve(luminosity, phi_x, type="open")
@@ -1183,7 +1185,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     #}
 
     if (observation$LSF_conv){
-      luminosity = .lsf_convolution(observation, luminosity, (observation$lsf_sigma/observation$wave_res))
+      luminosity = .lsf_convolution(observation, luminosity, observation$lsf_sigma)
     }
 
     # transform luminosity into flux detected at telescope
