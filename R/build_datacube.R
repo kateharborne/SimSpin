@@ -324,6 +324,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
       )
 
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      output = .add_noise(cube,
+                          sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
+    }
+
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
@@ -412,6 +417,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
       particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
       )
+
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      output = .add_noise(cube,
+                          sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
+    }
 
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
