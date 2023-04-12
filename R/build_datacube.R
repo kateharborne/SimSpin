@@ -420,7 +420,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
       output = .add_noise(cube,
-                          sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
+                          sqrt(max(raw_images$mass_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$mass_image)))
     }
 
     output = list("velocity_cube"   = cube,
