@@ -1325,8 +1325,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 .sum_velocities = function(galaxy_sample, observation){
-  vel_diff = function(lum, vy){diff((lum * pnorm(observation$vbin_edges, mean = vy,
-                                                     sd = observation$vbin_error)))}
+  vel_diff = function(lum, vy){diff((lum * pnorm(observation$vbin_edges, mean = vy, sd = 0)))}
 
   bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy)
 
@@ -1335,8 +1334,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 .sum_gas_velocities = function(galaxy_sample, observation){
-  vel_diff = function(mass, vy){diff((mass * pnorm(observation$vbin_edges, mean = vy,
-                                                     sd = observation$vbin_error)))}
+  vel_diff = function(mass, vy){diff((mass * pnorm(observation$vbin_edges, mean = vy, sd = 0)))}
 
   bins = mapply(vel_diff, galaxy_sample$Mass, galaxy_sample$vy)
 
