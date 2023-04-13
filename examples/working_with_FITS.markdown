@@ -33,7 +33,7 @@ This time, we'll use an example file from the hydrodynamical simulation EAGLE.
 
 ```R
 # Load a model...
-simulation_file = system.file("extdata", "SimSpin_example_EAGLE", package = "SimSpin")
+simulation_file = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin")
 # ... use to build a SimSpin file. 
 simspin_eagle  = make_simspin_file(filename = simulation_file,
                                    template = "EMILES",
