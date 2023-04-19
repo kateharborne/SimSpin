@@ -33,14 +33,16 @@ spectral_raw_vel_loc = 5
 
 velocity_raw_images_size = 6
 velocity_observed_images_size = 6
-velocity_number_of_hdu = 14
+velocity_number_of_hdu = 15
 velocity_obs_vel_loc = 5
 velocity_obs_h3_loc = 7
 velocity_obs_h4_loc = 8
+velocity_obs_res_loc = 9
 
 gas_raw_images_size = 7
 gas_observed_images_size = 6
-gas_number_of_hdu = 15
+gas_number_of_hdu = 16
+gas_obs_res_loc = 9
 
 # Testing that build_datacube works in spectral mode ----
 
@@ -610,6 +612,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_vel_loc]]$keyvalues$EXTNAME == "OBS_VEL")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_h3_loc]]$keyvalues$EXTNAME == "OBS_H3")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_h4_loc]]$keyvalues$EXTNAME == "OBS_H4")
+  expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS")))[ob_table_loc] == "OB_TABLE")
 
   expect_length(build_datacube(simspin_file = ss_eagle,
@@ -631,6 +634,7 @@ test_that("Data cubes can be written to a single files", {
 
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum.FITS")))
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == gas_number_of_hdu)
+  expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 10, spatial_res = 0.25, fov=50),
