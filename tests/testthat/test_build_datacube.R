@@ -1273,3 +1273,16 @@ test_that("Error is given if you try to build an observation with a simspin file
                               observing_strategy = observing_strategy(),
                               method = "sf gas"))
 })
+
+# Test that the LOSVD reaches zero at all spatial bins either end of the velocity scale
+test_that("The LOSVD is fully sampled by the velocity bins at all spaxels", {
+
+  eagle_velocity = build_datacube(simspin_file = ss_eagle,
+                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                  observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                  method = "velocity")
+
+  expect_equal(sum(eagle_velocity$velocity_cube[,,1]) + sum(eagle_velocity$velocity_cube[,,eagle_velocity$observation$vbin]), 0)
+
+})
+
