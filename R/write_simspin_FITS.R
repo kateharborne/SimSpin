@@ -484,10 +484,10 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                   }
 
     image_names = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                    c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residual_image",
+                    c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals",
                       "flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
                   } else {
-                    c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residual_image",
+                    c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals",
                       "mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
                   }
 
@@ -506,7 +506,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
 
-        if (i < 6){ # 2. Write the image to this new file HDU 2
+        if (i < 7){ # 2. Write the image to this new file HDU 2
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = output_image_file_names[i], ext=2,
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
@@ -526,7 +526,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
 
-        if (i < 6){ # Write each subsequent image to the next HDU
+        if (i < 7){ # Write each subsequent image to the next HDU
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = cube_file_name, ext=extnum[i],
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
@@ -622,7 +622,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
 
     extnames = c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RESIDUAL", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_Z", "RAW_OH", "RAW_SFR", "NPART")
     bunits = c("Msol", "km/s", "km/s", "unitless", "unitless", "percentage", "Msol", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Msol/year", "Particle number")
-    image_names = c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residual_image", "mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "SFR_image", "particle_image")
+    image_names = c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals", "mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "SFR_image", "particle_image")
     rawobs = c("obs", "obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw", "raw")
     output_image_file_names = paste0(output_dir, "/", output_file_root, "_", rawobs, "_", image_names, ".FITS")
     extnum = c(4,5,6,7,8,9,10,11,12,13,14,15,16)
@@ -637,7 +637,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
         image_keyvalues$BUNIT = bunits[i]
         image_keyvalues$EXTNAME = extnames[i]
 
-        if (i < 6){ # write observed mass, velocity and dispersion images to the file
+        if (i < 7){ # write observed mass, velocity and dispersion images to the file
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = output_image_file_names[i], ext=2,
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
@@ -659,7 +659,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
         image_keyvalues$EXTNAME = extnames[i]
 
         # Write each subsequent image to the next HDU
-        if (i < 6){ # write observed mass, velocity and dispersion images to the file
+        if (i < 7){ # write observed mass, velocity and dispersion images to the file
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = cube_file_name, ext=extnum[i],
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
