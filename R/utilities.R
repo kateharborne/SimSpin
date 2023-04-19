@@ -47,10 +47,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 } # weighted variance
 
 # A function for fitting a Gaussian Hermit distribution to the LOSVD
-.losvd_fit = function(par, x, losvd, vel, sig){
+.losvd_fit = function(par, x, losvd){
 
-  h3 = par[1]
-  h4 = par[2]
+  vel = par[1]
+  sig = par[2]
+  h3 = par[3]
+  h4 = par[4]
   k  = 1
 
   w = (x - vel)/sig
@@ -59,6 +61,16 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   measured_vlos = (k * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
   return=sum((measured_vlos-losvd)^2)
+}
+
+.losvd_out = function(x, vel, sig, h3, h4){
+  k=1
+  w = (x - vel)/sig
+  H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
+  H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
+
+  measured_vlos = (k * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
+  return=measured_vlos
 }
 
 # A function for combining multiple results from a parallel loop
@@ -1313,8 +1325,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 .sum_velocities = function(galaxy_sample, observation){
-  vel_diff = function(lum, vy){diff((lum * pnorm(observation$vbin_edges, mean = vy,
-                                                     sd = observation$vbin_error)))}
+  vel_diff = function(lum, vy){diff((lum * pnorm(observation$vbin_edges, mean = vy, sd = 0)))}
 
   bins = mapply(vel_diff, galaxy_sample$luminosity, galaxy_sample$vy)
 
@@ -1323,8 +1334,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 .sum_gas_velocities = function(galaxy_sample, observation){
-  vel_diff = function(mass, vy){diff((mass * pnorm(observation$vbin_edges, mean = vy,
-                                                     sd = observation$vbin_error)))}
+  vel_diff = function(mass, vy){diff((mass * pnorm(observation$vbin_edges, mean = vy, sd = 0)))}
 
   bins = mapply(vel_diff, galaxy_sample$Mass, galaxy_sample$vy)
 
@@ -1335,9 +1345,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 # Function to apply LSF to spectra
 .lsf_convolution = function(observation, luminosity, lsf_sigma){
 
-  kernel_radius = (4 * lsf_sigma + 0.5)
-  x = seq(-kernel_radius, kernel_radius, length.out = 25)
-  phi_x = exp((-0.5 / (lsf_sigma^2)) * (x^2)) / (lsf_sigma * sqrt(2*pi))
+  #kernel_radius = (4 * lsf_sigma + 0.5)
+  #x = seq(-kernel_radius, kernel_radius, by=observation$wave_res)
+  x = seq(-(observation$wave_res*12), (observation$wave_res*12), by=observation$wave_res)
+  #x = seq(-kernel_radius, kernel_radius, length.out = 25)
+  #phi_x = exp((-0.5 / (lsf_sigma^2)) * (x^2)) / (lsf_sigma * sqrt(2*pi))
+  phi_x = exp((-0.5 * (x^2)) / (lsf_sigma^2))
   phi_x = phi_x / sum(phi_x)
 
   lum = stats::convolve(luminosity, phi_x, type="open")
@@ -1347,11 +1360,25 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 # Function to add noise
-.add_noise = function(luminosity, S2N){
-  noise_level = min(luminosity) / S2N
-  noise = stats::rpois(length(luminosity), lambda = noise_level)
-  noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
+.add_noise = function(cube, S2N){
+  S2N[is.infinite(S2N)] = 0 # removing infinite noise where particles per pixel = 0
+  noisey_cube = cube
+  for (i in 1:nrow(S2N)){
+    for (j in 1:ncol(S2N)){
+      if (S2N[i,j]!=0){
+        noise = (stats::rnorm(length(cube[i,j,]), mean = 0, sd=1))*S2N[i,j]
+        noisey_cube[i,j,] = cube[i,j,] + (cube[i,j,]*noise)
+      }
+    }
+  }
+  return(noisey_cube)
 }
+
+# .add_noise = function(luminosity, S2N){
+#   noise_level = min(luminosity) / S2N
+#   noise = stats::rpois(length(luminosity), lambda = noise_level)
+#   noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
+# }
 
 # Function to generate a Gaussian kernel
 .gaussian_kernel = function(m, n, sigma){
@@ -1405,7 +1432,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   part_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
-  for (i in 1:(dim(part_in_spaxel)[1])){ # computing the spectra at each occupied spatial pixel position
+  for (i in 1:nrow(part_in_spaxel)){ # computing the spectra at each occupied spatial pixel position
 
     num_part = part_in_spaxel$N[i] # number of particles in spaxel
     part_map[part_in_spaxel$pixel_pos[i]] = num_part
@@ -1423,10 +1450,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
       # pulling wavelengths and using doppler formula to compute the shift in
       #   wavelengths caused by LOS velocity
-      wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
+      wave_shift = wavelength * exp((galaxy_sample$vy[p] / .speed_of_light))#((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
 
       # pulling out the wavelengths that would fall within the telescope range
-      wave_seq_int = which(wave_shift >= min(observation$wave_seq) & wave_shift <= max(observation$wave_seq))
+      wave_seq_int = which(wave_shift >= min(observation$wave_edges) & wave_shift <= max(observation$wave_edges))
       wave_diff_intrinsic = .qdiff(wave_shift[wave_seq_int])
 
       tot_lum = sum(intrinsic_spectra[wave_seq_int] * wave_diff_intrinsic)
@@ -1434,7 +1461,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
       # interpolate each shifted wavelength to telescope grid of wavelengths
       #   and sum to one spectra
-      part_lum = stats::approx(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
+      part_lum = stats::spline(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq)[[2]]
 
       new_lum = sum(part_lum * wave_diff_observed)
       # total luminosity integrated in wavelength bins
@@ -1445,8 +1472,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       luminosity = luminosity + (part_lum*scale_frac)
     }
 
-    if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      luminosity = .add_noise(luminosity, observation$signal_to_noise)
+    #if (!is.na(observation$signal_to_noise)){ # should we add noise?
+    #  luminosity = .add_noise(luminosity, (observation$signal_to_noise*sqrt(num_part)))
+    #}
+
+    if (observation$LSF_conv){
+      luminosity = .lsf_convolution(observation, luminosity, observation$lsf_sigma)
     }
 
     # transform luminosity into flux detected at telescope
@@ -1500,7 +1531,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                        # pulling wavelengths and using doppler formula to compute the shift in
                        #   wavelengths caused by LOS velocity
-                       wave_shift = ((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
+                       wave_shift = wavelength * exp((galaxy_sample$vy[p] / .speed_of_light))#((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
 
                        # pulling out the wavelengths that would fall within the telescope range
                        wave_seq_int = which(wave_shift >= min(observation$wave_seq) & wave_shift <= max(observation$wave_seq))
@@ -1511,7 +1542,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                        # interpolate each shifted wavelength to telescope grid of wavelengths
                        #   and sum to one spectra
-                       part_lum = stats::approx(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
+                       part_lum = stats::spline(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq)[[2]]
 
                        new_lum = sum(part_lum * wave_diff_observed)
                        # total luminosity integrated in wavelength bins
@@ -1523,8 +1554,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      }
 
-                     if (!is.na(observation$signal_to_noise)){ # should we add noise?
-                       luminosity = .add_noise(luminosity, observation$signal_to_noise)
+                     #if (!is.na(observation$signal_to_noise)){ # should we add noise?
+                     #  luminosity = .add_noise(luminosity, observation$signal_to_noise*num_part)
+                     #}
+
+                     if (observation$LSF_conv){
+                       luminosity = .lsf_convolution(observation, luminosity, observation$lsf_sigma)
                      }
 
                      # transform luminosity into flux detected at telescope

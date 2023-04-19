@@ -242,9 +242,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     lsf_fwhm_temp = simspin_data$header$Template_LSF * (observation$z + 1)
     # applying a shift to that intrinsic template LSF due to redshift, z
 
-    spec_res_sigma_sq = ((lsf_fwhm^2) - (lsf_fwhm_temp^2))
+    spec_res_fwhm_sq = ((lsf_fwhm^2) - (lsf_fwhm_temp^2))
 
-    if (spec_res_sigma_sq < 0){ # if the lsf is smaller than the wavelength resolution of the spectra
+    if (spec_res_fwhm_sq < 0){ # if the lsf is smaller than the wavelength resolution of the spectra
       warning(cat("WARNING! - Spectral resolution of provided template spectra is greater than the requested telescope spectral resolution.\n"))
       cat("LSF_telescope = ", lsf_fwhm,  " A < LSF_templates (at redshift z) ", lsf_fwhm_temp, " A. \n")
       cat("No LSF convolution will be applied in this case. \n")
@@ -252,15 +252,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       observation$LSF_conv = FALSE
     } else {
       observation$LSF_conv = TRUE
-      observation$lsf_sigma = (sqrt(spec_res_sigma_sq) / (2 * sqrt(2*log(2)))) / (simspin_data$header$Template_waveres * (1 + observation$z))
+      observation$lsf_sigma = (sqrt(spec_res_fwhm_sq) / (2 * sqrt(2*log(2))) / observation$wave_res) #/ (simspin_data$header$Template_waveres * (1 + observation$z))
       # To get to the telescope's LSF, we only need to convolve with a Gaussian the width of the additional
       # difference between the redshifted template and the intrinsic telescope LSF.
       # This is the scaled for the wavelength pixel size at redshift "z".
-
-      for (spectrum in 1:length(simspin_data$spectra)){
-         convolved_spectrum = .lsf_convolution(observation, simspin_data$spectra[[spectrum]], observation$lsf_sigma)
-         simspin_data$spectra[[spectrum]] = convolved_spectrum
-      } # convolving the intrinsic spectra with the convolution kernel sized for the LSF
 
     }
 
@@ -283,6 +278,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
       )
 
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      output = .add_noise(cube,
+                          sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
+    }
+
     output = list("spectral_cube"    = cube,
                   "observation"      = observation,
                   "raw_images"       = raw_images,
@@ -300,7 +300,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # VELOCITY mode method =======================================================
   if (observation$method == "velocity"){
 
-    observation$vbin = ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
+    observation$vbin = 5*ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
     if (observation$vbin <= 2){observation$vbin = 3}
 
     observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
@@ -324,10 +324,15 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
       )
 
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      output = .add_noise(cube,
+                          sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
+    }
+
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images"  = vector(mode = "list", length=5))
+                  "observed_images"  = vector(mode = "list", length=6))
 
     if (mass_flag){ # if mass flag is T, the flux image is really just a mass image
       names(output$raw_images)[which(names(output$raw_images) == "flux_image")] = "mass_image"
@@ -339,28 +344,33 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     } else {
       dims = dim(output$raw_images$velocity_image)
 
-      names(output$observed_images) = c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image") # default calling flux/mass as flux_image
+      names(output$observed_images) = c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals") # default calling flux/mass as flux_image
       output$observed_images$flux_image       = array(0.0, dim = dims[c(1,2)])
       output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
       output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
       output$observed_images$h3_image         = array(0.0, dim = dims[c(1,2)])
       output$observed_images$h4_image         = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$residuals        = array(0.0, dim = dims[c(1,2)])
 
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
-          output$observed_images$flux_image[c,d]       = sum(output$velocity_cube[c,d,])
-          output$observed_images$velocity_image[c,d]   = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
-          output$observed_images$dispersion_image[c,d] = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], output$observed_images$velocity_image[c,d]))
-          h3h4 = tryCatch({stats::optim(par   = c(0,0),
-                                        fn    = .losvd_fit,
-                                        x     = observation$vbin_seq,
-                                        losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                        vel   = output$observed_images$velocity_image[c,d],
-                                        sig   = output$observed_images$dispersion_image[c,d],
-                                        method="BFGS", control=list(reltol=1e-9))$par},
-                          error = function(e){c(0,0)})
-          output$observed_images$h3_image[c,d]       = h3h4[1]
-          output$observed_images$h4_image[c,d]       = h3h4[2]
+          output$observed_images$flux_image[c,d] = sum(output$velocity_cube[c,d,])
+          vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+          sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
+
+          kin   = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
+                                         fn    = .losvd_fit,
+                                         x     = observation$vbin_seq,
+                                         losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
+                                         method="BFGS", control=list(reltol=1e-9))$par},
+                          error = function(e){c(0,0,0,0)})
+
+          output$observed_images$velocity_image[c,d]   = kin[1]
+          output$observed_images$dispersion_image[c,d] = kin[2]
+          output$observed_images$h3_image[c,d]         = kin[3]
+          output$observed_images$h4_image[c,d]         = kin[4]
+          output$observed_images$residuals[c,d]        = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
+                                                                   output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
         }
       }
 
@@ -383,7 +393,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       galaxy_data$SFR = galaxy_data$SFR*(.g_to_msol/.s_to_yr)
     }
 
-    observation$vbin = ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
+    observation$vbin = 5*ceiling((max(abs(galaxy_data$vy))*2) / observation$vbin_size) # the number of velocity bins in the cube
     if (observation$vbin <= 2){observation$vbin = 3}
 
     observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
@@ -408,10 +418,15 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
       )
 
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      output = .add_noise(cube,
+                          sqrt(max(raw_images$mass_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$mass_image)))
+    }
+
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images" = vector(mode = "list", length=3))
+                  "observed_images" = vector(mode = "list", length=6))
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -419,29 +434,34 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     } else {
       dims = dim(output$raw_images$velocity_image)
 
-      names(output$observed_images) = c("mass_image", "velocity_image", "dispersion_image")
+      names(output$observed_images) = c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals")
       output$observed_images$mass_image       = array(0.0, dim = dims[c(1,2)])
       output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
       output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
       output$observed_images$h3_image         = array(0.0, dim = dims[c(1,2)])
       output$observed_images$h4_image         = array(0.0, dim = dims[c(1,2)])
+      output$observed_images$residuals        = array(0.0, dim = dims[c(1,2)])
 
       for (c in 1:dims[1]){
         for (d in 1:dims[2]){
           output$observed_images$mass_image[c,d]       = sum(output$velocity_cube[c,d,])
-          output$observed_images$velocity_image[c,d]   = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
-          output$observed_images$dispersion_image[c,d] = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], output$observed_images$velocity_image[c,d]))
+          vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+          sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
 
-          h3h4 = tryCatch({stats::optim(par   = c(0,0),
+          kin  = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
                                         fn    = .losvd_fit,
                                         x     = observation$vbin_seq,
                                         losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                        vel   = output$observed_images$velocity_image[c,d],
-                                        sig   = output$observed_images$dispersion_image[c,d],
                                         method="BFGS", control=list(reltol=1e-9))$par},
-                          error = function(e){c(0,0)})
-          output$observed_images$h3_image[c,d]       = h3h4[1]
-          output$observed_images$h4_image[c,d]       = h3h4[2]
+                          error = function(e){c(0,0,0,0)})
+
+          output$observed_images$velocity_image[c,d]   = kin[1]
+          output$observed_images$dispersion_image[c,d] = kin[2]
+          output$observed_images$h3_image[c,d]       = kin[3]
+          output$observed_images$h4_image[c,d]       = kin[4]
+          output$observed_images$residuals[c,d]      = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
+                                                                output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
+
         }
       }
     }
