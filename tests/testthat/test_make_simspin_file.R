@@ -14,6 +14,7 @@ ss_horizon    = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", packag
 ss_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", package = "SimSpin")
 
 ss_file_length = 5
+ss_file_header_length = 15
 
 temp_loc = tempdir()
 
@@ -595,4 +596,45 @@ test_that("A galaxy with a star with a very small age will NOT raise an error.",
   unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
 })
 
+# Testing that the added header parameters are included in the new headers
+test_that("Expect header information in each of the built simspin files.", {
+  gadget_ss_file     = make_simspin_file(ss_gadget, template = "BC03hr", write_to_file = F)
+  hdf5_ss_file       = make_simspin_file(ss_hdf5, template = "BC03lr", write_to_file = F)
+  eagle_ss_file      = make_simspin_file(ss_eagle, template = "BC03hr", write_to_file = F, centre = c(18316,61583,38667))
+  magneticum_ss_file = make_simspin_file(ss_magneticum, template = "EMILES", write_to_file = F, half_mass = 1007671144)
+  horizon_ss_file    = make_simspin_file(ss_horizon, template = "BC03hr", write_to_file = F, sph_spawn_n = 3)
+  illustris_ss_file  = make_simspin_file(ss_illustris, template = "BC03lr", write_to_file = F)
+
+  expect_equal(gadget_ss_file$header$Centre, NA)
+  expect_equal(gadget_ss_file$header$HalfMass, NA)
+  expect_equal(gadget_ss_file$header$SmoothingN, 1)
+  expect_equal(length(names(gadget_ss_file$header)), ss_file_header_length)
+
+  expect_equal(hdf5_ss_file$header$Centre, NA)
+  expect_equal(hdf5_ss_file$header$HalfMass, NA)
+  expect_equal(hdf5_ss_file$header$SmoothingN, 1)
+  expect_equal(length(names(hdf5_ss_file$header)), ss_file_header_length)
+
+  expect_equal(eagle_ss_file$header$Centre, c(18316,61583,38667))
+  expect_equal(eagle_ss_file$header$HalfMass, NA)
+  expect_equal(eagle_ss_file$header$SmoothingN, 1)
+  expect_equal(length(names(eagle_ss_file$header)), ss_file_header_length)
+
+  expect_equal(magneticum_ss_file$header$Centre, NA)
+  expect_equal(magneticum_ss_file$header$HalfMass, 1007671144)
+  expect_equal(magneticum_ss_file$header$SmoothingN, 1)
+  expect_equal(magneticum_ss_file$header$Alignment, "Specified")
+  expect_equal(length(names(magneticum_ss_file$header)), ss_file_header_length)
+
+  expect_equal(horizon_ss_file$header$Centre, NA)
+  expect_equal(horizon_ss_file$header$HalfMass, NA)
+  expect_equal(horizon_ss_file$header$SmoothingN, 3)
+  expect_equal(length(names(horizon_ss_file$header)), ss_file_header_length)
+
+  expect_equal(illustris_ss_file$header$Centre, NA)
+  expect_equal(illustris_ss_file$header$HalfMass, NA)
+  expect_equal(illustris_ss_file$header$SmoothingN, 1)
+  expect_equal(length(names(illustris_ss_file$header)), ss_file_header_length)
+
+})
 
