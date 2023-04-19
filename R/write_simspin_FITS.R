@@ -472,28 +472,28 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "EXTNAME"="Image extension name")
 
     extnames    = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                     c("OBS_FLUX", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_FLUX", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
+                     c("OBS_FLUX", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RESIDUAL", "RAW_FLUX", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
                   } else {
-                     c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
+                     c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RESIDUAL", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
                   }
 
     bunits      = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                   c("erg/s/cm**2", "km/s", "km/s", "unitless", "unitless", "erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
+                   c("erg/s/cm**2", "km/s", "km/s", "unitless", "unitless", "percentage", "erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number", "percentage")
                   } else {
-                     c("Msol", "km/s", "km/s", "unitless", "unitless", "Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
+                     c("Msol", "km/s", "km/s", "unitless", "unitless", "percentage", "Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
                   }
 
     image_names = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                    c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image",
+                    c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residual_image",
                       "flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
                   } else {
-                    c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image",
+                    c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residual_image",
                       "mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
                   }
 
-    rawobs = c("obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw")
+    rawobs = c("obs", "obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw")
     output_image_file_names = paste0(output_dir, "/", output_file_root, "_", rawobs, "_", image_names, ".FITS")
-    extnum = c(4,5,6,7,8,9,10,11,12,13,14)
+    extnum = c(4,5,6,7,8,9,10,11,12,13,14,15)
 
     if (split_save){ # if writing each image to a seperate file
       for (i in 1:length(extnum)){ # for each image in the build_datacube output,
@@ -620,12 +620,12 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_Z", "RAW_OH", "RAW_SFR", "NPART")
-    bunits = c("Msol", "km/s", "km/s", "unitless", "unitless", "Msol", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Msol/year", "Particle number")
-    image_names = c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "SFR_image", "particle_image")
-    rawobs = c("obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw", "raw")
+    extnames = c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RESIDUAL", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_Z", "RAW_OH", "RAW_SFR", "NPART")
+    bunits = c("Msol", "km/s", "km/s", "unitless", "unitless", "percentage", "Msol", "km/s", "km/s", "log10(Z/Z_solar)", "log10(O/H)+12", "Msol/year", "Particle number")
+    image_names = c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residual_image", "mass_image", "velocity_image", "dispersion_image", "metallicity_image", "OH_image", "SFR_image", "particle_image")
+    rawobs = c("obs", "obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw", "raw")
     output_image_file_names = paste0(output_dir, "/", output_file_root, "_", rawobs, "_", image_names, ".FITS")
-    extnum = c(4,5,6,7,8,9,10,11,12,13,14,15)
+    extnum = c(4,5,6,7,8,9,10,11,12,13,14,15,16)
 
     if (split_save){  # if writing each image to a seperate file
       for (i in 1:length(extnum)){ # for each image in the build_datacube output,
