@@ -1477,9 +1477,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     spectra[part_in_spaxel$pixel_pos[i],] = (luminosity*.lsol_to_erg) /
                                                 (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
                                                 (1 + observation$z)
-    lum_map[part_in_spaxel$pixel_pos[i]] = .bandpass(wave = observation$wave_seq,
-                                                     flux = spectra[part_in_spaxel$pixel_pos[i],],
-                                                     filter = filter)
+    lum_map[part_in_spaxel$pixel_pos[i]] = sum(spectra[part_in_spaxel$pixel_pos[i],], na.rm=T)
+                                           #.bandpass(wave = observation$wave_seq,
+                                           #          flux = spectra[part_in_spaxel$pixel_pos[i],],
+                                           #          filter = filter)
     vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
     dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
     age_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
@@ -1546,21 +1547,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      }
 
-                     #if (!is.na(observation$signal_to_noise)){ # should we add noise?
-                     #  luminosity = .add_noise(luminosity, observation$signal_to_noise*num_part)
-                     #}
-
-                     if (observation$LSF_conv){
-                       luminosity = .lsf_convolution(observation, luminosity, observation$lsf_sigma)
-                     }
-
                      # transform luminosity into flux detected at telescope
                      #    flux in units erg/s/cm^2/Ang
                      spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
                                (1 + observation$z)
-                     lum_map = .bandpass(wave = observation$wave_seq,
-                                         flux = spectra,
-                                         filter = filter)
+                     lum_map = sum(spectra, na.rm = T)
+                               #.bandpass(wave = observation$wave_seq,
+                               #          flux = spectra,
+                               #          filter = filter)
                      vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
                      age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
