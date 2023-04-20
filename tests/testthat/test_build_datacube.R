@@ -58,6 +58,7 @@ test_that("Gadget files can be built - spectral mode", {
   expect_length(gadget_spectra, built_cube_size)
   expect_length(gadget_spectra$raw_images, spectra_raw_images_size)
   expect_null(gadget_spectra$observed_images)
+  expect_false(is.null(gadget_spectra$variance_cube))
 })
 
 test_that("HDF5 files can be built - spectral mode", {
@@ -76,6 +77,7 @@ test_that("EAGLE files can be built - spectral mode and be identical in series a
   expect_length(eagle_spectra, built_cube_size)
   expect_length(eagle_spectra$raw_images, spectra_raw_images_size)
   expect_null(eagle_spectra$observed_images)
+  expect_null(eagle_spectra$variance_cube)
 
   eagle_parallel_spectra = build_datacube(simspin_file = ss_eagle,
                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
@@ -84,6 +86,7 @@ test_that("EAGLE files can be built - spectral mode and be identical in series a
   expect_length(eagle_parallel_spectra, built_cube_size)
   expect_length(eagle_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(eagle_parallel_spectra$observed_images)
+  expect_null(eagle_parallel_spectra$variance_cube)
 
   expect_true(all.equal(eagle_spectra$spectral_cube, eagle_parallel_spectra$spectral_cube))
   expect_true(all.equal(eagle_spectra$raw_images$flux_image, eagle_parallel_spectra$raw_images$flux_image))
@@ -99,6 +102,7 @@ test_that("Magneticum files can be built - spectral mode and be identical in ser
   expect_length(magneticum_spectra, built_cube_size)
   expect_length(magneticum_spectra$raw_images, spectra_raw_images_size)
   expect_null(magneticum_spectra$observed_images)
+  expect_null(magneticum_spectra$variance_cube)
 
   magneticum_parallel_spectra = build_datacube(simspin_file = ss_magneticum,
                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
