@@ -1374,12 +1374,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   return(noisey_cube)
 }
 
-# .add_noise = function(luminosity, S2N){
-#   noise_level = min(luminosity) / S2N
-#   noise = stats::rpois(length(luminosity), lambda = noise_level)
-#   noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
-# }
-
 # Function to generate a Gaussian kernel
 .gaussian_kernel = function(m, n, sigma){
   dim = pracma::meshgrid(-((m-1)/2):((m-1)/2), -((n-1)/2):((n-1)/2))
