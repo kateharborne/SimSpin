@@ -305,6 +305,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                 (observation$signal_to_noise*sqrt(raw_images$flux_image)))
       output$spectral_cube = output$spectral_cube + noise_cube
       output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube[is.infinite(output$variance_cube)] = 0
     }
 
     if (verbose){cat("Done! \n")}
@@ -349,12 +350,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      output = .add_noise(cube,
-                          sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
-    }
-
-    if (mass_flag){ # if mass flag is T, the flux image is really just a mass image
-      names(output$raw_images)[which(names(output$raw_images) == "flux_image")] = "mass_image"
+      noise_cube = array(data = 0, dim = dim(output$spectral_cube))
+      noise_cube = .add_noise(output$velocity_cube,
+                              sqrt(max(raw_images$flux_image, na.rm=T))/
+                                (observation$signal_to_noise*sqrt(raw_images$flux_image)))
+      output$velocity_cube = output$velocity_cube + noise_cube
     }
 
     dims = dim(output$raw_images$velocity_image)
@@ -390,13 +390,13 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
 
     if (mass_flag){ # if mass flag is T, renaming the flux image as mass image
+      names(output$raw_images)[which(names(output$raw_images) == "flux_image")] = "mass_image"
       names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
     }
-  }
 
     if (verbose){cat("Done! \n")}
 
-}
+  }
 
   # GAS mode method =======================================================
   if (observation$method == "gas" | observation$method == "sf gas"){
