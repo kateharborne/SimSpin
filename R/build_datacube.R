@@ -248,15 +248,13 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       warning(cat("WARNING! - Spectral resolution of provided template spectra is greater than the requested telescope spectral resolution.\n"))
       cat("LSF_telescope = ", lsf_fwhm,  " A < LSF_templates (at redshift z) ", lsf_fwhm_temp, " A. \n")
       cat("No LSF convolution will be applied in this case. \n")
-      cat("Intrinsic LSF of observation = ", lsf_fwhm_temp, " A for comparison with kinematic cubes. \n")
       observation$LSF_conv = FALSE
     } else {
       observation$LSF_conv = TRUE
-      observation$lsf_sigma = (sqrt(spec_res_fwhm_sq) / (2 * sqrt(2*log(2))) / observation$wave_res) #/ (simspin_data$header$Template_waveres * (1 + observation$z))
+      observation$lsf_sigma = (sqrt(spec_res_fwhm_sq) / (2 * sqrt(2*log(2))) / observation$wave_res)
       # To get to the telescope's LSF, we only need to convolve with a Gaussian the width of the additional
       # difference between the redshifted template and the intrinsic telescope LSF.
-      # This is the scaled for the wavelength pixel size at redshift "z".
-
+      # This is the scaled for the wavelength pixel size of the observation.
     }
 
     if (verbose){cat("Generating spectra per spaxel... \n")}
@@ -278,7 +276,18 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
       )
 
+    if (observation$psf_fwhm > 0){
+      if (verbose){cat("Convolving cube with PSF... \n")    }
+      output = blur_datacube(output) # apply psf convolution to each cube plane
+    }
+
+    if (observation$LSF_conv){
+      if (verbose){cat("Convolving spectra with LSF... \n")    }
+      output = .lsf_convolution(observation, output, observation$lsf_sigma)
+    }
+
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      if (verbose){cat("Adding noise... \n")    }
       output = .add_noise(cube,
                           sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
     }
@@ -287,11 +296,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                   "observation"      = observation,
                   "raw_images"       = raw_images,
                   "observed_images"  = NULL)
-
-    if (observation$psf_fwhm > 0){
-      if (verbose){cat("Convolving cube with PSF... \n")    }
-      output = blur_datacube(output) # apply psf convolution to each cube plane
-    }
 
     if (verbose){cat("Done! \n")}
 
