@@ -23,8 +23,7 @@ ss_illustris  = make_simspin_file(ss_pd_illustris, write_to_file = FALSE, templa
 
 temp_loc = tempdir()
 
-built_cube_size = 4
-built_cube_spectral_noise_size = 5
+built_cube_size = 5
 ob_table_loc = 3
 
 spectra_raw_images_size = 6
@@ -56,14 +55,14 @@ test_that("Gadget files can be built - spectral mode", {
                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                   verbose = T)
-  expect_length(gadget_spectra, built_cube_spectral_noise_size)
+  expect_length(gadget_spectra, built_cube_size)
   expect_length(gadget_spectra$raw_images, spectra_raw_images_size)
   expect_null(gadget_spectra$observed_images)
 })
 
 test_that("HDF5 files can be built - spectral mode", {
   hdf5_spectra = build_datacube(simspin_file = ss_hdf5,
-                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                 observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
   expect_length(hdf5_spectra, built_cube_size)
   expect_length(hdf5_spectra$raw_images, spectra_raw_images_size)
@@ -95,17 +94,17 @@ test_that("EAGLE files can be built - spectral mode and be identical in series a
 
 test_that("Magneticum files can be built - spectral mode and be identical in series and parallel", {
   magneticum_spectra = build_datacube(simspin_file = ss_magneticum,
-                                      telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                                      telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                       observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
-  expect_length(magneticum_spectra, built_cube_spectral_noise_size)
+  expect_length(magneticum_spectra, built_cube_size)
   expect_length(magneticum_spectra$raw_images, spectra_raw_images_size)
   expect_null(magneticum_spectra$observed_images)
 
   magneticum_parallel_spectra = build_datacube(simspin_file = ss_magneticum,
-                                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                                cores = 2)
-  expect_length(magneticum_parallel_spectra, built_cube_spectral_noise_size)
+  expect_length(magneticum_parallel_spectra, built_cube_size)
   expect_length(magneticum_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(magneticum_parallel_spectra$observed_images)
 
@@ -120,7 +119,7 @@ test_that("HorizonAGN files can be built - spectral mode and be identical in ser
   horizon_spectra = build_datacube(simspin_file = ss_horizon,
                                       telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                       observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
-  expect_length(horizon_spectra, built_cube_spectral_noise_size)
+  expect_length(horizon_spectra, built_cube_size)
   expect_length(horizon_spectra$raw_images, spectra_raw_images_size)
   expect_null(horizon_spectra$observed_images)
 
@@ -128,7 +127,7 @@ test_that("HorizonAGN files can be built - spectral mode and be identical in ser
                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                                cores = 2)
-  expect_length(horizon_parallel_spectra, built_cube_spectral_noise_size)
+  expect_length(horizon_parallel_spectra, built_cube_size)
   expect_length(horizon_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(horizon_parallel_spectra$observed_images)
 
@@ -143,7 +142,7 @@ test_that("IllustrisTNG files can be built - spectral mode and be identical in s
   illustris_spectra = build_datacube(simspin_file = ss_illustris,
                                    telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                    observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
-  expect_length(illustris_spectra, built_cube_spectral_noise_size)
+  expect_length(illustris_spectra, built_cube_size)
   expect_length(illustris_spectra$raw_images, spectra_raw_images_size)
   expect_null(illustris_spectra$observed_images)
 
@@ -151,7 +150,7 @@ test_that("IllustrisTNG files can be built - spectral mode and be identical in s
                                             telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                             observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                             cores = 2)
-  expect_length(illustris_parallel_spectra, built_cube_spectral_noise_size)
+  expect_length(illustris_parallel_spectra, built_cube_size)
   expect_length(illustris_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(illustris_parallel_spectra$observed_images)
 

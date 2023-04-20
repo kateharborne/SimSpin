@@ -279,7 +279,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     output = list("spectral_cube"    = cube,
                   "observation"      = observation,
                   "raw_images"       = raw_images,
-                  "observed_images"  = NULL)
+                  "observed_images"  = NULL,
+                  "variance_cube"    = NULL)
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -300,12 +301,15 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
       if (verbose){cat("Adding noise... \n")    }
       noise_cube = array(data = 0, dim = dim(output$spectral_cube))
+      output$variance_cube = noise_cube # initialising empty arrays
+
       noise_cube = .add_noise(output$spectral_cube,
                               sqrt(max(raw_images$flux_image, na.rm=T))/
                                 (observation$signal_to_noise*sqrt(raw_images$flux_image)))
       output$spectral_cube = output$spectral_cube + noise_cube
       output$variance_cube = 1/(noise_cube)^2
       output$variance_cube[is.infinite(output$variance_cube)] = 0
+      remove(noise_cube)
     }
 
     if (verbose){cat("Done! \n")}
@@ -342,7 +346,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images"  = vector(mode = "list", length=6))
+                  "observed_images"  = vector(mode = "list", length=6),
+                  "variance_cube"    = NULL)
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -350,11 +355,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      noise_cube = array(data = 0, dim = dim(output$spectral_cube))
+      if (verbose){cat("Adding noise... \n")    }
+      noise_cube = array(data = 0, dim = dim(output$velocity_cube))
+      output$variance_cube = noise_cube # initialising empty arrays
+
       noise_cube = .add_noise(output$velocity_cube,
                               sqrt(max(raw_images$flux_image, na.rm=T))/
                                 (observation$signal_to_noise*sqrt(raw_images$flux_image)))
       output$velocity_cube = output$velocity_cube + noise_cube
+      output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube[is.infinite(output$variance_cube)] = 0
+      remove(noise_cube)
     }
 
     dims = dim(output$raw_images$velocity_image)
@@ -436,7 +447,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images" = vector(mode = "list", length=6))
+                  "observed_images" = vector(mode = "list", length=6),
+                  "variance_cube"   = NULL)
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -444,8 +456,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
 
     if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      output = .add_noise(cube,
-                          sqrt(max(raw_images$mass_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$mass_image)))
+      if (verbose){cat("Adding noise... \n")    }
+      noise_cube = array(data = 0, dim = dim(output$velocity_cube))
+      output$variance_cube = noise_cube # initialising empty arrays
+
+      noise_cube = .add_noise(output$velocity_cube,
+                              sqrt(max(raw_images$flux_image, na.rm=T))/
+                                (observation$signal_to_noise*sqrt(raw_images$flux_image)))
+      output$velocity_cube = output$velocity_cube + noise_cube
+      output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube[is.infinite(output$variance_cube)] = 0
+      remove(noise_cube)
     }
 
     dims = dim(output$raw_images$velocity_image)
