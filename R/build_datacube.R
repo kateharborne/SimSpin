@@ -336,18 +336,27 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
     raw_images = list(
       flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
-      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
-      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
+      velocity_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      age_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = output[[9]], dim = c(observation$sbin, observation$sbin))
+      )
+    observed_images = list(
+      flux_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      residual = array(0.0, dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images"  = vector(mode = "list", length=6),
-                  "variance_cube"    = NULL)
+                  "observed_images" = observed_images,
+                  "variance_cube"   = NULL)
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
@@ -373,17 +382,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     dims = dim(output$raw_images$velocity_image)
 
-    names(output$observed_images) = c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals") # default calling flux/mass as flux_image
-    output$observed_images$flux_image       = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$h3_image         = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$h4_image         = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$residuals        = array(0.0, dim = dims[c(1,2)])
-
     for (c in 1:dims[1]){
       for (d in 1:dims[2]){
-        output$observed_images$flux_image[c,d] = sum(output$velocity_cube[c,d,])
         vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
         sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
 
@@ -446,11 +446,19 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
       particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
       )
+    observed_images = list(
+      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      residual = array(0.0, dim = c(observation$sbin, observation$sbin))
+    )
 
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images" = vector(mode = "list", length=6),
+                  "observed_images" = observed_images,
                   "variance_cube"   = NULL)
 
     if (observation$psf_fwhm > 0){
@@ -477,17 +485,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     dims = dim(output$raw_images$velocity_image)
 
-    names(output$observed_images) = c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals")
-    output$observed_images$mass_image       = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$h3_image         = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$h4_image         = array(0.0, dim = dims[c(1,2)])
-    output$observed_images$residuals        = array(0.0, dim = dims[c(1,2)])
-
     for (c in 1:dims[1]){
       for (d in 1:dims[2]){
-        output$observed_images$mass_image[c,d]       = sum(output$velocity_cube[c,d,])
         vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
         sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
 
@@ -507,6 +506,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
       }
     }
+
+    names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
 
     if (verbose){cat("Done! \n")}
 
