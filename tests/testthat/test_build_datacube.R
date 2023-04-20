@@ -1290,3 +1290,48 @@ test_that("The LOSVD is fully sampled by the velocity bins at all spaxels", {
 
 })
 
+test_that("Noise increases as expected in velocity cubes", {
+
+  gadget_velocity_nonoise = build_datacube(simspin_file = ss_gadget,
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                           method = "velocity")
+
+  gadget_velocity_sn30    = build_datacube(simspin_file = ss_gadget,
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                           method = "velocity")
+
+  gadget_velocity_sn5     = build_datacube(simspin_file = ss_gadget,
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 5),
+                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                           method = "velocity")
+
+  expect_true(sd(gadget_velocity_nonoise$observed_images$flux_image) < sd(gadget_velocity_sn30$observed_images$flux_image))
+  expect_true(sd(gadget_velocity_nonoise$observed_images$flux_image) < sd(gadget_velocity_sn5$observed_images$flux_image))
+  expect_true(sd(gadget_velocity_sn30$observed_images$flux_image) < sd(gadget_velocity_sn5$observed_images$flux_image))
+
+})
+
+test_that("Noise increases as expected in spectral cubes", {
+
+  gadget_spectra_nonoise = build_datacube(simspin_file = ss_gadget,
+                                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                          observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                          method = "spectral")
+
+  gadget_spectra_sn30    = build_datacube(simspin_file = ss_gadget,
+                                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                                          observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                          method = "spectral")
+
+  gadget_spectra_sn5     = build_datacube(simspin_file = ss_gadget,
+                                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 5),
+                                          observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                          method = "spectral")
+
+  expect_true(sd(gadget_spectra_nonoise$spectral_cube[15,15,]) < sd(gadget_spectra_sn30$spectral_cube[15,15,]))
+  expect_true(sd(gadget_spectra_nonoise$spectral_cube[15,15,]) < sd(gadget_spectra_sn5$spectral_cube[15,15,]))
+  expect_true(sd(gadget_spectra_sn30$spectral_cube[15,15,]) < sd(gadget_spectra_sn5$spectral_cube[15,15,]))
+
+})
