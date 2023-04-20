@@ -56,7 +56,8 @@ blur_datacube = function(datacube_output){
     blur_output = list("spectral_cube"    = blur_cube,
                        "observation"      = observation,
                        "raw_images"       = datacube_output$raw_images,
-                       "observed_images"  = NULL)
+                       "observed_images"  = NULL,
+                       "variance_cube"    = NULL)
   }
 
   if ("velocity_cube" %in% names(datacube_output)){
@@ -81,7 +82,8 @@ blur_datacube = function(datacube_output){
     blur_output = list("velocity_cube"    = blur_cube,
                        "observation"      = observation,
                        "raw_images"       = datacube_output$raw_images,
-                       "observed_images"  = vector(mode = "list", length=6))
+                       "observed_images"  = vector(mode = "list", length=6),
+                       "variance_cube"    = NULL)
 
   }
 
