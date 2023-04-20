@@ -78,11 +78,16 @@ blur_datacube = function(datacube_output){
       blur_cube[,,spatial_plane] = ProFit::profitBruteConv(cube[,,spatial_plane], observation$psf_kernel) * aperture_region
     }
 
+    # 2. Blurring the observed flux map
+    blur_image = array(data = 0.0, dim = cube_dims[c(1,2)])
+    blur_image = ProFit::profitBruteConv(datacube_output$observed_images$flux_image, observation$psf_kernel) * aperture_region
+    datacube_output$observed_images$flux_image = blur_image
+
     # Returning output in same format as input
     blur_output = list("velocity_cube"    = blur_cube,
                        "observation"      = observation,
                        "raw_images"       = datacube_output$raw_images,
-                       "observed_images"  = vector(mode = "list", length=6),
+                       "observed_images"  = datacube_output$observed_images,
                        "variance_cube"    = NULL)
 
   }
