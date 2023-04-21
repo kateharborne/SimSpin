@@ -408,7 +408,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     }
 
     if (mass_flag){ # if mass flag is T, renaming the flux image as mass image
-      names(output$raw_images)[which(names(output$raw_images) == "flux_image")] = "mass_image"
+      output$raw_images = output$raw_images[-which(names(output$raw_images) == "flux_image")]
       names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
     }
 
