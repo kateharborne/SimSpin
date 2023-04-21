@@ -371,7 +371,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       noise_cube = .add_noise(output$velocity_cube,
                               sqrt(max(raw_images$flux_image, na.rm=T))/
                                 (observation$signal_to_noise*sqrt(raw_images$flux_image)))
+      noise_image = output$observed_images$flux_image*(rowSums(noise_cube, dims=2)/rowSums(output$velocity_cube, dims=2))
+
       output$velocity_cube = output$velocity_cube + noise_cube
+      output$observed_images$flux_image = output$observed_images$flux_image + noise_image
+
       if (any(output$velocity_cube<0)){
         output$velocity_cube[which(output$velocity_cube<0)] = 0
       } # removing negative values introduced at the edges of the LOSVD
@@ -474,7 +478,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       noise_cube = .add_noise(output$velocity_cube,
                               sqrt(max(raw_images$mass_image, na.rm=T))/
                                 (observation$signal_to_noise*sqrt(raw_images$mass_image)))
+      noise_image = output$observed_images$flux_image*(rowSums(noise_cube, dims=2)/rowSums(output$velocity_cube, dims=2))
+
       output$velocity_cube = output$velocity_cube + noise_cube
+      output$observed_images$flux_image = output$observed_images$flux_image + noise_image
+
       if (any(output$velocity_cube<0)){
         output$velocity_cube[which(output$velocity_cube<0)] = 0
       } # removing negative values introduced at the edges of the LOSVD
