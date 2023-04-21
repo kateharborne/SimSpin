@@ -349,7 +349,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
-      residual = array(0.0, dim = c(observation$sbin, observation$sbin))
+      residuals = array(0.0, dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("velocity_cube"   = cube,
@@ -456,7 +456,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
-      residual = array(0.0, dim = c(observation$sbin, observation$sbin))
+      residuals = array(0.0, dim = c(observation$sbin, observation$sbin))
     )
 
     output = list("velocity_cube"   = cube,

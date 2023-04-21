@@ -70,7 +70,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
 
   measured_vlos = (k * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
-  return=measured_vlos
+  return(measured_vlos)
 }
 
 # A function for combining multiple results from a parallel loop
@@ -1599,7 +1599,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     } else {
 
       band_lum = numeric(num_part)
-      lum = numeric(num_part)
+      full_lum = numeric(num_part)
       wave_seq_int = which(simspin_data$wave >= min(observation$wave_seq) & simspin_data$wave <= max(observation$wave_seq))
       wave_diff_intrinsic = .qdiff(simspin_data$wave[wave_seq_int])
       wave_diff_observed  = .qdiff(observation$wave_seq)
@@ -1632,10 +1632,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                 filter = filter)
 
         # computing the total luminosity measured from the spectrum
-        lum[p] = sum(flux_spectra)
+        full_lum[p] = sum(flux_spectra)
       }
 
-      galaxy_sample[ , luminosity := lum, ]
+      galaxy_sample[ , luminosity := full_lum, ]
       galaxy_sample[ , band_lum := band_lum, ]
 
     }
@@ -1690,6 +1690,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      } else {
 
                        band_lum = numeric(num_part)
+                       full_lum = numeric(num_part)
                        wave_seq_int = which(simspin_data$wave >= min(observation$wave_seq) & simspin_data$wave <= max(observation$wave_seq))
                        wave_diff_intrinsic = .qdiff(simspin_data$wave[wave_seq_int])
                        wave_diff_observed  = .qdiff(observation$wave_seq)
@@ -1721,11 +1722,11 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                          band_lum[p] = .bandpass(wave = observation$wave_seq,
                                                  flux = flux_spectra,
                                                  filter = filter)
-                         lum[p] = sum(flux_spectra)
+                         full_lum[p] = sum(flux_spectra)
 
                        }
 
-                       galaxy_sample[ , luminosity := lum, ]
+                       galaxy_sample[ , luminosity := full_lum, ]
                        galaxy_sample[ , band_lum := band_lum, ]
 
                      }
