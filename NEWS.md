@@ -1,6 +1,6 @@
-# SimSpin v2.4.5 News
+# SimSpin v2.4.6 News
 
-### Last edit: 18/04/23
+### Last edit: 23/04/23
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -16,7 +16,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 18/04/23 | Updating the methodology for method = "velocity" (details below) and fixing dependencies (resolving the Rfits and ProFit versions clash). Added header information to the SimSpin file made such that the whole file can be recreated using the information in the file rather than having to retain the code used to build the file. | 2.4.5 | | Kate Harborne |
+| 23/04/23 | Fixing the noise implementation in methods spectral and velocity. Adding inverse variance cubes to the output when a S/N value is specified. Incorporating tests to check proper incorporation and behaviour. | 2.4.6 | | Kate Harborne |
+| 18/04/23 | Updating the methodology for method = "velocity" (details below) and fixing dependencies (resolving the Rfits and ProFit versions clash). Added header information to the SimSpin file made such that the whole file can be recreated using the information in the file rather than having to retain the code used to build the file. | 2.4.5 | cdf5522fb6040b7a5fdcf5ea4a54df7e576f57d5 | Kate Harborne |
 |          | 1. Modified the Gauss-Hermite fitting function to use the mean and standard deviation of the LOSVD as priors on the fit, but reporting the observed velocity and dispersion as those returned by the fit Gauss-Hermite along with h3 and h4. | | | |
 |          | 2. Added measure of the residual between the best fit Gauss-Hermite and the true LOSVD at the velocity scale of the observing telescope. This is now returned to the user as an image in `observed_images$residual`. | | | |
 |          | 3. Increased the number of velocity channels per velocity cube to extend well beyond (5 times the maximum range - previously just the maximum range) the range of LOS velocities in each simulation. This is done such that we fully sample the LOSVD for the fastest and slowest particles and fit returns a successful value. Velocity channel definition is now consistent with pPXF (i.e. min(diff(log(wavelength_sequence))) * .speed_of_light). | | | | 
