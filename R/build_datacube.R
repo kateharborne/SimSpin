@@ -248,15 +248,13 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       warning(cat("WARNING! - Spectral resolution of provided template spectra is greater than the requested telescope spectral resolution.\n"))
       cat("LSF_telescope = ", lsf_fwhm,  " A < LSF_templates (at redshift z) ", lsf_fwhm_temp, " A. \n")
       cat("No LSF convolution will be applied in this case. \n")
-      cat("Intrinsic LSF of observation = ", lsf_fwhm_temp, " A for comparison with kinematic cubes. \n")
       observation$LSF_conv = FALSE
     } else {
       observation$LSF_conv = TRUE
-      observation$lsf_sigma = (sqrt(spec_res_fwhm_sq) / (2 * sqrt(2*log(2))) / observation$wave_res) #/ (simspin_data$header$Template_waveres * (1 + observation$z))
+      observation$lsf_sigma = (sqrt(spec_res_fwhm_sq) / (2 * sqrt(2*log(2))) / observation$wave_res)
       # To get to the telescope's LSF, we only need to convolve with a Gaussian the width of the additional
       # difference between the redshifted template and the intrinsic telescope LSF.
-      # This is the scaled for the wavelength pixel size at redshift "z".
-
+      # This is the scaled for the wavelength pixel size of the observation.
     }
 
     if (verbose){cat("Generating spectra per spaxel... \n")}
@@ -278,19 +276,40 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
       )
 
-    if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      output = .add_noise(cube,
-                          sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
-    }
-
     output = list("spectral_cube"    = cube,
                   "observation"      = observation,
                   "raw_images"       = raw_images,
-                  "observed_images"  = NULL)
+                  "observed_images"  = NULL,
+                  "variance_cube"    = NULL)
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
       output = blur_datacube(output) # apply psf convolution to each cube plane
+    }
+
+    if (observation$LSF_conv){
+      if (verbose){cat("Convolving spectra with LSF... \n")    }
+      for (a in 1:dim(output$spectral_cube)[1]){
+        for (b in 1:dim(output$spectral_cube)[2]){
+          output$spectral_cube[a,b,] = .lsf_convolution(observation,
+                                                        output$spectral_cube[a,b,],
+                                                        observation$lsf_sigma)
+        }
+      }
+    }
+
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      if (verbose){cat("Adding noise... \n")    }
+      noise_cube = array(data = 0, dim = dim(output$spectral_cube))
+      output$variance_cube = noise_cube # initialising empty arrays
+
+      noise_cube = .add_noise(output$spectral_cube,
+                              sqrt(max(raw_images$flux_image, na.rm=T))/
+                                (observation$signal_to_noise*sqrt(raw_images$flux_image)))
+      output$spectral_cube = output$spectral_cube + noise_cube
+      output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube[is.infinite(output$variance_cube)] = 0
+      remove(noise_cube)
     }
 
     if (verbose){cat("Done! \n")}
@@ -317,66 +336,80 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
     raw_images = list(
       flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
-      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
-      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
+      velocity_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      age_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = output[[9]], dim = c(observation$sbin, observation$sbin))
       )
-
-    if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      output = .add_noise(cube,
-                          sqrt(max(raw_images$flux_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$flux_image)))
-    }
+    observed_images = list(
+      flux_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      residuals = array(0.0, dim = c(observation$sbin, observation$sbin))
+      )
 
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images"  = vector(mode = "list", length=6))
-
-    if (mass_flag){ # if mass flag is T, the flux image is really just a mass image
-      names(output$raw_images)[which(names(output$raw_images) == "flux_image")] = "mass_image"
-    }
+                  "observed_images" = observed_images,
+                  "variance_cube"   = NULL)
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
       output = blur_datacube(output) # apply psf convolution to each cube plane
-    } else {
-      dims = dim(output$raw_images$velocity_image)
+    }
 
-      names(output$observed_images) = c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals") # default calling flux/mass as flux_image
-      output$observed_images$flux_image       = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$h3_image         = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$h4_image         = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$residuals        = array(0.0, dim = dims[c(1,2)])
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      if (verbose){cat("Adding noise... \n")    }
+      noise_cube = array(data = 0, dim = dim(output$velocity_cube))
+      output$variance_cube = noise_cube # initialising empty arrays
 
-      for (c in 1:dims[1]){
-        for (d in 1:dims[2]){
-          output$observed_images$flux_image[c,d] = sum(output$velocity_cube[c,d,])
-          vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
-          sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
+      noise_cube = .add_noise(output$velocity_cube,
+                              sqrt(max(raw_images$flux_image, na.rm=T))/
+                                (observation$signal_to_noise*sqrt(raw_images$flux_image)))
+      noise_image = output$observed_images$flux_image*(rowSums(noise_cube, dims=2)/rowSums(output$velocity_cube, dims=2))
 
-          kin   = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
-                                         fn    = .losvd_fit,
-                                         x     = observation$vbin_seq,
-                                         losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                         method="BFGS", control=list(reltol=1e-9))$par},
-                          error = function(e){c(0,0,0,0)})
+      output$velocity_cube = output$velocity_cube + noise_cube
+      output$observed_images$flux_image = output$observed_images$flux_image + noise_image
 
-          output$observed_images$velocity_image[c,d]   = kin[1]
-          output$observed_images$dispersion_image[c,d] = kin[2]
-          output$observed_images$h3_image[c,d]         = kin[3]
-          output$observed_images$h4_image[c,d]         = kin[4]
-          output$observed_images$residuals[c,d]        = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
-                                                                   output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
-        }
+      if (any(output$velocity_cube<0)){
+        output$velocity_cube[which(output$velocity_cube<0)] = 0
+      } # removing negative values introduced at the edges of the LOSVD
+      output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube[is.infinite(output$variance_cube)] = 0
+      remove(noise_cube)
+    }
+
+    dims = dim(output$raw_images$velocity_image)
+
+    for (c in 1:dims[1]){
+      for (d in 1:dims[2]){
+        vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+        sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
+
+        kin   = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
+                                       fn    = .losvd_fit,
+                                       x     = observation$vbin_seq,
+                                       losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
+                                       method="BFGS", control=list(reltol=1e-9))$par},
+                        error = function(e){c(0,0,0,0)})
+
+        output$observed_images$velocity_image[c,d]   = kin[1]
+        output$observed_images$dispersion_image[c,d] = kin[2]
+        output$observed_images$h3_image[c,d]         = kin[3]
+        output$observed_images$h4_image[c,d]         = kin[4]
+        output$observed_images$residuals[c,d]        = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
+                                                                 output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
       }
+    }
 
-      if (mass_flag){ # if mass flag is T, renaming the flux image as mass image
-        names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
-      }
+    if (mass_flag){ # if mass flag is T, renaming the flux image as mass image
+      output$raw_images = output$raw_images[-which(names(output$raw_images) == "flux_image")]
+      names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
     }
 
     if (verbose){cat("Done! \n")}
@@ -417,54 +450,72 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
       particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
       )
-
-    if (!is.na(observation$signal_to_noise)){ # should we add noise?
-      output = .add_noise(cube,
-                          sqrt(max(raw_images$mass_image, na.rm=T))/(observation$signal_to_noise*sqrt(raw_images$mass_image)))
-    }
+    observed_images = list(
+      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      residuals = array(0.0, dim = c(observation$sbin, observation$sbin))
+    )
 
     output = list("velocity_cube"   = cube,
                   "observation"     = observation,
                   "raw_images"      = raw_images,
-                  "observed_images" = vector(mode = "list", length=6))
+                  "observed_images" = observed_images,
+                  "variance_cube"   = NULL)
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
       output = blur_datacube(output) # apply psf convolution to each cube plane
-    } else {
-      dims = dim(output$raw_images$velocity_image)
+    }
 
-      names(output$observed_images) = c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals")
-      output$observed_images$mass_image       = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$velocity_image   = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$dispersion_image = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$h3_image         = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$h4_image         = array(0.0, dim = dims[c(1,2)])
-      output$observed_images$residuals        = array(0.0, dim = dims[c(1,2)])
+    if (!is.na(observation$signal_to_noise)){ # should we add noise?
+      if (verbose){cat("Adding noise... \n")    }
+      noise_cube = array(data = 0, dim = dim(output$velocity_cube))
+      output$variance_cube = noise_cube # initialising empty arrays
 
-      for (c in 1:dims[1]){
-        for (d in 1:dims[2]){
-          output$observed_images$mass_image[c,d]       = sum(output$velocity_cube[c,d,])
-          vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
-          sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
+      noise_cube = .add_noise(output$velocity_cube,
+                              sqrt(max(raw_images$mass_image, na.rm=T))/
+                                (observation$signal_to_noise*sqrt(raw_images$mass_image)))
+      noise_image = output$observed_images$flux_image*(rowSums(noise_cube, dims=2)/rowSums(output$velocity_cube, dims=2))
 
-          kin  = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
-                                        fn    = .losvd_fit,
-                                        x     = observation$vbin_seq,
-                                        losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                        method="BFGS", control=list(reltol=1e-9))$par},
-                          error = function(e){c(0,0,0,0)})
+      output$velocity_cube = output$velocity_cube + noise_cube
+      output$observed_images$flux_image = output$observed_images$flux_image + noise_image
 
-          output$observed_images$velocity_image[c,d]   = kin[1]
-          output$observed_images$dispersion_image[c,d] = kin[2]
-          output$observed_images$h3_image[c,d]       = kin[3]
-          output$observed_images$h4_image[c,d]       = kin[4]
-          output$observed_images$residuals[c,d]      = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
-                                                                output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
+      if (any(output$velocity_cube<0)){
+        output$velocity_cube[which(output$velocity_cube<0)] = 0
+      } # removing negative values introduced at the edges of the LOSVD
+      output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube[is.infinite(output$variance_cube)] = 0
+      remove(noise_cube)
+    }
 
-        }
+    dims = dim(output$raw_images$velocity_image)
+
+    for (c in 1:dims[1]){
+      for (d in 1:dims[2]){
+        vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+        sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
+
+        kin  = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
+                                      fn    = .losvd_fit,
+                                      x     = observation$vbin_seq,
+                                      losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
+                                      method="BFGS", control=list(reltol=1e-9))$par},
+                        error = function(e){c(0,0,0,0)})
+
+        output$observed_images$velocity_image[c,d]   = kin[1]
+        output$observed_images$dispersion_image[c,d] = kin[2]
+        output$observed_images$h3_image[c,d]       = kin[3]
+        output$observed_images$h4_image[c,d]       = kin[4]
+        output$observed_images$residuals[c,d]      = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
+                                                              output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
+
       }
     }
+
+    names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
 
     if (verbose){cat("Done! \n")}
 

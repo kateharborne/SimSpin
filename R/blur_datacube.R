@@ -56,7 +56,8 @@ blur_datacube = function(datacube_output){
     blur_output = list("spectral_cube"    = blur_cube,
                        "observation"      = observation,
                        "raw_images"       = datacube_output$raw_images,
-                       "observed_images"  = NULL)
+                       "observed_images"  = NULL,
+                       "variance_cube"    = NULL)
   }
 
   if ("velocity_cube" %in% names(datacube_output)){
@@ -77,63 +78,18 @@ blur_datacube = function(datacube_output){
       blur_cube[,,spatial_plane] = ProFit::profitBruteConv(cube[,,spatial_plane], observation$psf_kernel) * aperture_region
     }
 
+    # 2. Blurring the observed flux map
+    blur_image = array(data = 0.0, dim = cube_dims[c(1,2)])
+    blur_image = ProFit::profitBruteConv(datacube_output$observed_images$flux_image, observation$psf_kernel) * aperture_region
+    datacube_output$observed_images$flux_image = blur_image
+
     # Returning output in same format as input
     blur_output = list("velocity_cube"    = blur_cube,
                        "observation"      = observation,
                        "raw_images"       = datacube_output$raw_images,
-                       "observed_images"  = vector(mode = "list", length=6))
+                       "observed_images"  = datacube_output$observed_images,
+                       "variance_cube"    = NULL)
 
-    names(blur_output$observed_images) = c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals")
-
-    # 2. Recompute the velocity and dispersion images from the blurred cube.
-    # Initializing empty arrays
-    blur_flux = array(0.0, dim = c(cube_dims[c(1,2)]))
-    blur_velocity = array(0.0, dim = c(cube_dims[c(1,2)]))
-    blur_dispersion = array(0.0, dim = c(cube_dims[c(1,2)]))
-    blur_h3 = array(0.0, dim = c(cube_dims[c(1,2)]))
-    blur_h4 = array(0.0, dim = c(cube_dims[c(1,2)]))
-    blur_residuals = array(0.0, dim = c(cube_dims[c(1,2)]))
-
-    # Filling array based on blurred cubes
-    for (c in 1:cube_dims[1]){
-      for (d in 1:cube_dims[2]){
-        blur_flux[c,d]       = sum(blur_cube[c,d,])
-        vel_ini = .meanwt(observation$vbin_seq, blur_output$velocity_cube[c,d,])
-        sd_ini  = sqrt(.varwt(observation$vbin_seq, blur_output$velocity_cube[c,d,], vel_ini))
-
-        kin   = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
-                                       fn    = .losvd_fit,
-                                       x     = observation$vbin_seq,
-                                       losvd = (blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T))),
-                                       method="BFGS", control=list(reltol=1e-9))$par},
-                         error = function(e){c(0,0,0,0)})
-        blur_velocity[c,d] = kin[1]
-        blur_dispersion[c,d] = kin[2]
-        blur_h3[c,d]       = kin[3]
-        blur_h4[c,d]       = kin[4]
-        blur_residuals[c,d] = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
-                                        blur_output$velocity_cube[c,d,]/(max(blur_output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
-      }
-    }
-
-    # Trimming any data blurred out of the aperture region
-    blur_flux       = blur_flux * aperture_region
-    blur_velocity   = blur_velocity * aperture_region
-    blur_dispersion = blur_dispersion * aperture_region
-    blur_h3         = blur_h3 * aperture_region
-    blur_h4         = blur_h4 * aperture_region
-    blur_residuals  = blur_residuals * aperture_region
-
-    blur_output$observed_images$flux_image = blur_flux
-    blur_output$observed_images$velocity_image = blur_velocity
-    blur_output$observed_images$dispersion_image = blur_dispersion
-    blur_output$observed_images$h3_image = blur_h3
-    blur_output$observed_images$h4_image = blur_h4
-    blur_output$observed_images$residuals = blur_residuals
-
-    if ("mass_image" %in% names(blur_output$raw_images)){
-      names(blur_output$observed_images)[which(names(blur_output$observed_images) == "flux_image")] = "mass_image"
-    }
   }
 
   return(blur_output)

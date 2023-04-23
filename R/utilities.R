@@ -70,7 +70,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
 
   measured_vlos = (k * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
-  return=measured_vlos
+  return(measured_vlos)
 }
 
 # A function for combining multiple results from a parallel loop
@@ -1367,18 +1367,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     for (j in 1:ncol(S2N)){
       if (S2N[i,j]!=0){
         noise = (stats::rnorm(length(cube[i,j,]), mean = 0, sd=1))*S2N[i,j]
-        noisey_cube[i,j,] = cube[i,j,] + (cube[i,j,]*noise)
+        noisey_cube[i,j,] = cube[i,j,]*noise # to be added to the cube
       }
     }
   }
   return(noisey_cube)
 }
-
-# .add_noise = function(luminosity, S2N){
-#   noise_level = min(luminosity) / S2N
-#   noise = stats::rpois(length(luminosity), lambda = noise_level)
-#   noisey_lum = luminosity + (stats::rnorm(length(luminosity), mean = 0, sd=1) * noise)
-# }
 
 # Function to generate a Gaussian kernel
 .gaussian_kernel = function(m, n, sigma){
@@ -1450,7 +1444,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
       # pulling wavelengths and using doppler formula to compute the shift in
       #   wavelengths caused by LOS velocity
-      wave_shift = wavelength * exp((galaxy_sample$vy[p] / .speed_of_light))#((galaxy_sample$vy[p] / .speed_of_light) * wavelength) + wavelength
+      wave_shift = wavelength * exp((galaxy_sample$vy[p] / .speed_of_light))
 
       # pulling out the wavelengths that would fall within the telescope range
       wave_seq_int = which(wave_shift >= min(observation$wave_edges) & wave_shift <= max(observation$wave_edges))
@@ -1472,22 +1466,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       luminosity = luminosity + (part_lum*scale_frac)
     }
 
-    #if (!is.na(observation$signal_to_noise)){ # should we add noise?
-    #  luminosity = .add_noise(luminosity, (observation$signal_to_noise*sqrt(num_part)))
-    #}
-
-    if (observation$LSF_conv){
-      luminosity = .lsf_convolution(observation, luminosity, observation$lsf_sigma)
-    }
-
     # transform luminosity into flux detected at telescope
     #    flux in units erg/s/cm^2/Ang
     spectra[part_in_spaxel$pixel_pos[i],] = (luminosity*.lsol_to_erg) /
                                                 (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
                                                 (1 + observation$z)
-    lum_map[part_in_spaxel$pixel_pos[i]] = .bandpass(wave = observation$wave_seq,
-                                                     flux = spectra[part_in_spaxel$pixel_pos[i],],
-                                                     filter = filter)
+    lum_map[part_in_spaxel$pixel_pos[i]] = sum(spectra[part_in_spaxel$pixel_pos[i],], na.rm=T)
+                                           #.bandpass(wave = observation$wave_seq,
+                                           #          flux = spectra[part_in_spaxel$pixel_pos[i],],
+                                           #          filter = filter)
     vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
     dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
     age_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
@@ -1554,21 +1541,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                      }
 
-                     #if (!is.na(observation$signal_to_noise)){ # should we add noise?
-                     #  luminosity = .add_noise(luminosity, observation$signal_to_noise*num_part)
-                     #}
-
-                     if (observation$LSF_conv){
-                       luminosity = .lsf_convolution(observation, luminosity, observation$lsf_sigma)
-                     }
-
                      # transform luminosity into flux detected at telescope
                      #    flux in units erg/s/cm^2/Ang
                      spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
                                (1 + observation$z)
-                     lum_map = .bandpass(wave = observation$wave_seq,
-                                         flux = spectra,
-                                         filter = filter)
+                     lum_map = sum(spectra, na.rm = T)
+                               #.bandpass(wave = observation$wave_seq,
+                               #          flux = spectra,
+                               #          filter = filter)
                      vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
                      age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
@@ -1599,6 +1579,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   lum_map  = array(data = 0.0, dim = observation$sbin^2)
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
+  mass_map = array(data = 0.0, dim = observation$sbin^2)
+  band_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
@@ -1612,10 +1594,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     if (mass_flag){
 
       galaxy_sample[, luminosity := Mass, ]
+      galaxy_sample[, band_lum := Mass, ]
 
     } else {
 
       band_lum = numeric(num_part)
+      full_lum = numeric(num_part)
       wave_seq_int = which(simspin_data$wave >= min(observation$wave_seq) & simspin_data$wave <= max(observation$wave_seq))
       wave_diff_intrinsic = .qdiff(simspin_data$wave[wave_seq_int])
       wave_diff_observed  = .qdiff(observation$wave_seq)
@@ -1646,26 +1630,32 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
         band_lum[p] = .bandpass(wave = observation$wave_seq,
                                 flux = flux_spectra,
                                 filter = filter)
+
+        # computing the total luminosity measured from the spectrum
+        full_lum[p] = sum(flux_spectra)
       }
 
-      galaxy_sample[ , luminosity := band_lum, ]
+      galaxy_sample[ , luminosity := full_lum, ]
+      galaxy_sample[ , band_lum := band_lum, ]
 
-      }
+    }
 
 
     # adding the "gaussians" of each particle to the velocity bins
     vel_spec[part_in_spaxel$pixel_pos[i],] = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
-    lum_map[part_in_spaxel$pixel_pos[i]] = sum(galaxy_sample$luminosity)
-    vel_los[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
-    dis_los[part_in_spaxel$pixel_pos[i]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-    age_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
-    met_map[part_in_spaxel$pixel_pos[i]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
+    lum_map[part_in_spaxel$pixel_pos[i]]   = sum(galaxy_sample$luminosity)
+    band_map[part_in_spaxel$pixel_pos[i]]  = sum(galaxy_sample$band_lum)
+    vel_los[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
+    dis_los[part_in_spaxel$pixel_pos[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
+    age_map[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
+    met_map[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
+    mass_map[part_in_spaxel$pixel_pos[i]]  = sum(galaxy_sample$Mass)
 
     if (verbose){cat(i, "... ", sep = "")}
 
   }
 
-  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map))
+  return(list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map))
 }
 
 .velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores, mass_flag){
@@ -1674,8 +1664,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   vel_los  = array(data = 0.0, dim = observation$sbin^2)
   dis_los  = array(data = 0.0, dim = observation$sbin^2)
   lum_map  = array(data = 0.0, dim = observation$sbin^2)
+  band_map = array(data = 0.0, dim = observation$sbin^2)
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
+  mass_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
@@ -1683,7 +1675,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = part_in_spaxel$N[i]
                      part_map = num_part
@@ -1693,10 +1685,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      if (mass_flag){
 
                        galaxy_sample[, luminosity := Mass, ]
+                       galaxy_sample[, band_lum := Mass, ]
 
                      } else {
 
                        band_lum = numeric(num_part)
+                       full_lum = numeric(num_part)
                        wave_seq_int = which(simspin_data$wave >= min(observation$wave_seq) & simspin_data$wave <= max(observation$wave_seq))
                        wave_diff_intrinsic = .qdiff(simspin_data$wave[wave_seq_int])
                        wave_diff_observed  = .qdiff(observation$wave_seq)
@@ -1728,35 +1722,41 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                          band_lum[p] = .bandpass(wave = observation$wave_seq,
                                                  flux = flux_spectra,
                                                  filter = filter)
+                         full_lum[p] = sum(flux_spectra)
 
                        }
 
-                       galaxy_sample[ , luminosity := band_lum, ]
+                       galaxy_sample[ , luminosity := full_lum, ]
+                       galaxy_sample[ , band_lum := band_lum, ]
 
                      }
 
                      # adding the "gaussians" of each particle to the velocity bins
                      vel_spec = .sum_velocities(galaxy_sample = galaxy_sample, observation = observation)
                      lum_map = sum(galaxy_sample$luminosity)
+                     band_map = sum(galaxy_sample$band_lum)
                      vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
                      age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
                      met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
+                     mass_map = sum(galaxy_sample$Mass)
 
-                     result = list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map)
+                     result = list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map)
                      return(result)
                      closeAllConnections()
                    }
 
   vel_spec[part_in_spaxel$pixel_pos,] = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
   lum_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[2]]))
-  vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
-  dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
-  age_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
-  met_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[6]]))
-  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[7]]))
+  band_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[3]]))
+  vel_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[4]]))
+  dis_los[part_in_spaxel$pixel_pos] = matrix(unlist(output[[5]]))
+  age_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[6]]))
+  met_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[7]]))
+  mass_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[8]]))
+  part_map[part_in_spaxel$pixel_pos] = matrix(unlist(output[[9]]))
 
-  return(list(vel_spec, lum_map, vel_los, dis_los, age_map, met_map, part_map))
+  return(list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map))
 
 }
 

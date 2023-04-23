@@ -23,25 +23,37 @@ ss_illustris  = make_simspin_file(ss_pd_illustris, write_to_file = FALSE, templa
 
 temp_loc = tempdir()
 
-built_cube_size = 4
+built_cube_size = 5
 ob_table_loc = 3
+variance_loc_spectral = 10
 
 spectra_raw_images_size = 6
 spectra_observed_images_size = NULL
-spectra_number_of_hdu = 9
+spectra_number_of_hdu_sntrue = 10
+spectra_number_of_hdu_snfalse = 9
 spectral_raw_vel_loc = 5
 
-velocity_raw_images_size = 6
+velocity_raw_images_size_massflagfalse = 7
+velocity_raw_images_size_massflagtrue = 6
 velocity_observed_images_size = 6
-velocity_number_of_hdu = 15
+
+velocity_number_of_hdu_massflagtrue_sntrue = 16
+velocity_number_of_hdu_massflagfalse_sntrue = 17
+velocity_number_of_hdu_massflagtrue_snfalse = 15
+velocity_number_of_hdu_massflagfalse_snfalse = 16
 velocity_obs_vel_loc = 5
 velocity_obs_h3_loc = 7
 velocity_obs_h4_loc = 8
 velocity_obs_res_loc = 9
+velocity_raw_mass_loc_massflagtrue = 10
+velocity_raw_mass_loc_massflagfalse = 11
+velocity_variance_loc_massflagtrue = 16
+velocity_variance_loc_massflagfalse = 17
 
 gas_raw_images_size = 7
 gas_observed_images_size = 6
-gas_number_of_hdu = 16
+gas_number_of_hdu_snfalse = 16
+gas_number_of_hdu_sntrue = 17
 gas_obs_res_loc = 9
 
 # Testing that build_datacube works in spectral mode ----
@@ -52,12 +64,13 @@ test_that("Gadget files can be built - spectral mode", {
                                 observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                 verbose = F))
   gadget_spectra = build_datacube(simspin_file = ss_gadget,
-                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                   verbose = T)
   expect_length(gadget_spectra, built_cube_size)
   expect_length(gadget_spectra$raw_images, spectra_raw_images_size)
   expect_null(gadget_spectra$observed_images)
+  expect_false(is.null(gadget_spectra$variance_cube))
 })
 
 test_that("HDF5 files can be built - spectral mode", {
@@ -76,6 +89,7 @@ test_that("EAGLE files can be built - spectral mode and be identical in series a
   expect_length(eagle_spectra, built_cube_size)
   expect_length(eagle_spectra$raw_images, spectra_raw_images_size)
   expect_null(eagle_spectra$observed_images)
+  expect_null(eagle_spectra$variance_cube)
 
   eagle_parallel_spectra = build_datacube(simspin_file = ss_eagle,
                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
@@ -84,6 +98,7 @@ test_that("EAGLE files can be built - spectral mode and be identical in series a
   expect_length(eagle_parallel_spectra, built_cube_size)
   expect_length(eagle_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(eagle_parallel_spectra$observed_images)
+  expect_null(eagle_parallel_spectra$variance_cube)
 
   expect_true(all.equal(eagle_spectra$spectral_cube, eagle_parallel_spectra$spectral_cube))
   expect_true(all.equal(eagle_spectra$raw_images$flux_image, eagle_parallel_spectra$raw_images$flux_image))
@@ -99,6 +114,7 @@ test_that("Magneticum files can be built - spectral mode and be identical in ser
   expect_length(magneticum_spectra, built_cube_size)
   expect_length(magneticum_spectra$raw_images, spectra_raw_images_size)
   expect_null(magneticum_spectra$observed_images)
+  expect_null(magneticum_spectra$variance_cube)
 
   magneticum_parallel_spectra = build_datacube(simspin_file = ss_magneticum,
                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
@@ -169,7 +185,7 @@ test_that("Gadget files can be built - velocity mode.", {
                                    method = "velocity",
                                    verbose = T)
   expect_length(gadget_velocity, built_cube_size)
-  expect_length(gadget_velocity$raw_images, velocity_raw_images_size)
+  expect_length(gadget_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(gadget_velocity$observed_images, velocity_observed_images_size)
 
 })
@@ -180,7 +196,7 @@ test_that("HDF5 files can be built - velocity mode.", {
                                  observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                  method = "velocity")
   expect_length(hdf5_velocity, built_cube_size)
-  expect_length(hdf5_velocity$raw_images, velocity_raw_images_size)
+  expect_length(hdf5_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(hdf5_velocity$observed_images, velocity_observed_images_size)
 
 })
@@ -191,7 +207,7 @@ test_that("EAGLE files can be built - velocity mode and be identical in series a
                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                   method = "velocity")
   expect_length(eagle_velocity, built_cube_size)
-  expect_length(eagle_velocity$raw_images, velocity_raw_images_size)
+  expect_length(eagle_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(eagle_velocity$observed_images, velocity_observed_images_size)
 
   eagle_parallel_velocity = build_datacube(simspin_file = ss_eagle,
@@ -200,7 +216,7 @@ test_that("EAGLE files can be built - velocity mode and be identical in series a
                                            method = "velocity",
                                            cores = 2)
   expect_length(eagle_parallel_velocity, built_cube_size)
-  expect_length(eagle_parallel_velocity$raw_images, velocity_raw_images_size)
+  expect_length(eagle_parallel_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(eagle_parallel_velocity$observed_images, velocity_observed_images_size)
 
   expect_true(all.equal(eagle_velocity$velocity_cube, eagle_parallel_velocity$velocity_cube))
@@ -219,7 +235,7 @@ test_that("Magneticum files can be built - velocity mode and be identical in ser
                                        observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                        method = "velocity")
   expect_length(magneticum_velocity, built_cube_size)
-  expect_length(magneticum_velocity$raw_images, velocity_raw_images_size)
+  expect_length(magneticum_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(magneticum_velocity$observed_images, velocity_observed_images_size)
 
   magneticum_parallel_velocity = build_datacube(simspin_file = ss_magneticum,
@@ -228,7 +244,7 @@ test_that("Magneticum files can be built - velocity mode and be identical in ser
                                                 method = "velocity",
                                                 cores = 2)
   expect_length(magneticum_parallel_velocity, built_cube_size)
-  expect_length(magneticum_parallel_velocity$raw_images, velocity_raw_images_size)
+  expect_length(magneticum_parallel_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(magneticum_parallel_velocity$observed_images, velocity_observed_images_size)
 
   expect_true(all.equal(magneticum_velocity$velocity_cube, magneticum_parallel_velocity$velocity_cube))
@@ -247,7 +263,7 @@ test_that("HorizonAGN files can be built - velocity mode and be identical in ser
                                        observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                        method = "velocity")
   expect_length(horizon_velocity, built_cube_size)
-  expect_length(horizon_velocity$raw_images, velocity_raw_images_size)
+  expect_length(horizon_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(horizon_velocity$observed_images, velocity_observed_images_size)
 
   horizon_parallel_velocity = build_datacube(simspin_file = ss_horizon,
@@ -256,7 +272,7 @@ test_that("HorizonAGN files can be built - velocity mode and be identical in ser
                                                 method = "velocity",
                                                 cores = 2)
   expect_length(horizon_parallel_velocity, built_cube_size)
-  expect_length(horizon_parallel_velocity$raw_images, velocity_raw_images_size)
+  expect_length(horizon_parallel_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(horizon_parallel_velocity$observed_images, velocity_observed_images_size)
 
   expect_true(all.equal(horizon_velocity$velocity_cube, horizon_parallel_velocity$velocity_cube))
@@ -273,18 +289,18 @@ test_that("IllustrisTNG files can be built - velocity mode and be identical in s
   illustris_velocity = build_datacube(simspin_file = ss_illustris,
                                     telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                     observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                    method = "velocity")
+                                    method = "velocity", mass_flag = T)
   expect_length(illustris_velocity, built_cube_size)
-  expect_length(illustris_velocity$raw_images, velocity_raw_images_size)
+  expect_length(illustris_velocity$raw_images, velocity_raw_images_size_massflagtrue)
   expect_length(illustris_velocity$observed_images, velocity_observed_images_size)
 
   illustris_parallel_velocity = build_datacube(simspin_file = ss_illustris,
                                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                             method = "velocity",
+                                             method = "velocity", mass_flag = T,
                                              cores = 2)
   expect_length(illustris_parallel_velocity, built_cube_size)
-  expect_length(illustris_parallel_velocity$raw_images, velocity_raw_images_size)
+  expect_length(illustris_parallel_velocity$raw_images, velocity_raw_images_size_massflagtrue)
   expect_length(illustris_parallel_velocity$observed_images, velocity_observed_images_size)
 
   expect_true(all.equal(illustris_velocity$velocity_cube, illustris_parallel_velocity$velocity_cube))
@@ -587,6 +603,20 @@ test_that("Data cubes can be generated using mass rather than luminosity weighti
 # Testing that build_datacube works to write to FITS file ----
 test_that("Data cubes can be written to a single files", {
   expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               write_fits = T), built_cube_size)
+
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS"))
+
+  spectral_fits = Rfits::Rfits_read_all("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS", header = T)
+  expect_true(length(spectral_fits) == spectra_number_of_hdu_snfalse)
+  expect_true(spectral_fits[[2]]$keyvalues$CTYPE3 == "WAVE")
+  expect_true(all(dim(spectral_fits[[2]]$imDat) == c(spectral_fits[[2]]$keyvalues$NAXIS1, spectral_fits[[2]]$keyvalues$NAXIS2, spectral_fits[[2]]$keyvalues$NAXIS3)))
+  expect_true(spectral_fits[[spectral_raw_vel_loc]]$keyvalues$EXTNAME == "RAW_VEL")
+  expect_true(names(spectral_fits)[ob_table_loc] == "OB_TABLE")
+
+  expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                write_fits = T), built_cube_size)
@@ -594,11 +624,12 @@ test_that("Data cubes can be written to a single files", {
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS"))
 
   spectral_fits = Rfits::Rfits_read_all("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS", header = T)
-  expect_true(length(spectral_fits) == spectra_number_of_hdu)
+  expect_true(length(spectral_fits) == spectra_number_of_hdu_sntrue)
   expect_true(spectral_fits[[2]]$keyvalues$CTYPE3 == "WAVE")
   expect_true(all(dim(spectral_fits[[2]]$imDat) == c(spectral_fits[[2]]$keyvalues$NAXIS1, spectral_fits[[2]]$keyvalues$NAXIS2, spectral_fits[[2]]$keyvalues$NAXIS3)))
   expect_true(spectral_fits[[spectral_raw_vel_loc]]$keyvalues$EXTNAME == "RAW_VEL")
   expect_true(names(spectral_fits)[ob_table_loc] == "OB_TABLE")
+  expect_true(names(spectral_fits)[variance_loc_spectral] == "STAT")
 
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
@@ -608,12 +639,49 @@ test_that("Data cubes can be written to a single files", {
                                split_save=F), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget.FITS")))
-  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))) == velocity_number_of_hdu)
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))) == velocity_number_of_hdu_massflagfalse_snfalse)
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_vel_loc]]$keyvalues$EXTNAME == "OBS_VEL")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_h3_loc]]$keyvalues$EXTNAME == "OBS_H3")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_h4_loc]]$keyvalues$EXTNAME == "OBS_H4")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS")))[ob_table_loc] == "OB_TABLE")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS")))[velocity_raw_mass_loc_massflagfalse] == "RAW_MASS")
+
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               method="velocity", mass_flag = T,
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_gadget_mft.FITS"),
+                               split_save=F), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mft.FITS")))
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS"))) == velocity_number_of_hdu_massflagtrue_sntrue)
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS")))[velocity_raw_mass_loc_massflagtrue] == "RAW_MASS")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS")))[velocity_variance_loc_massflagtrue] == "STAT")
+
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               method="velocity", mass_flag = F,
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_gadget_mff_snt.FITS"),
+                               split_save=F), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mff_snt.FITS")))
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mff_snt.FITS"))) == velocity_number_of_hdu_massflagfalse_sntrue)
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mff_snt.FITS")))[velocity_raw_mass_loc_massflagfalse] == "RAW_MASS")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mff_snt.FITS")))[velocity_variance_loc_massflagfalse] == "STAT")
+
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               method="velocity", mass_flag = T,
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_gadget_mft_snf.FITS"),
+                               split_save=F), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mft_snf.FITS")))
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf.FITS"))) == velocity_number_of_hdu_massflagtrue_snfalse)
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf.FITS")))[velocity_raw_mass_loc_massflagtrue] == "RAW_MASS")
+  expect_true(is.na(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf.FITS")))[velocity_variance_loc_massflagtrue] == "STAT"))
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="MUSE", fov = 10, signal_to_noise = NA),
@@ -623,17 +691,27 @@ test_that("Data cubes can be written to a single files", {
                                split_save=F), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_eagle.FITS")))
-  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_eagle.FITS"))) == gas_number_of_hdu)
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_eagle.FITS"))) == gas_number_of_hdu_snfalse)
+
+  expect_length(build_datacube(simspin_file = ss_eagle,
+                               telescope = telescope(type="MUSE", fov = 10, signal_to_noise = 30),
+                               observing_strategy = observing_strategy(dist_z = 0.27, inc_deg = 60, blur = T, fwhm = 0.6),
+                               method="gas",
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_eagle_snt.FITS"),
+                               split_save=F), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_eagle_snt.FITS")))
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_eagle_snt.FITS"))) == gas_number_of_hdu_sntrue)
 
   expect_length(build_datacube(simspin_file = ss_magneticum,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method="sf gas",
                                write_fits = T, output_location = paste0(temp_loc, "/ss_magneticum.FITS"),
                                split_save=F), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum.FITS")))
-  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == gas_number_of_hdu)
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == gas_number_of_hdu_snfalse)
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
@@ -645,7 +723,11 @@ test_that("Data cubes can be written to a single files", {
 
 unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS",
          paste0(temp_loc, "/ss_gadget.FITS"),
+         paste0(temp_loc, "/ss_gadget_mft.FITS"),
+         paste0(temp_loc, "/ss_gadget_mff_snt.FITS"),
+         paste0(temp_loc, "/ss_gadget_mft_snf.FITS"),
          paste0(temp_loc, "/ss_eagle.FITS"),
+         paste0(temp_loc, "/ss_eagle_snt.FITS"),
          paste0(temp_loc, "/ss_magenticum.FITS"),
          paste0(temp_loc, "/ss_hdf5.FITS")))
 
@@ -663,6 +745,7 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_inv_variance_cube.FITS"))
 
   spectral_fits = Rfits::Rfits_read("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS")
   expect_true(length(spectral_fits) == 2)
@@ -689,6 +772,7 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_age_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_inv_variance_cube.FITS")))
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -711,6 +795,7 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_eagle_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_eagle_raw_SFR_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_eagle_raw_particle_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_eagle_inv_variance_cube.FITS")))
 
   expect_length(build_datacube(simspin_file = ss_magneticum,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -733,9 +818,10 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum_raw_SFR_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum_raw_particle_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_magneticum_inv_variance_cube.FITS")))
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                write_fits = T, output_location = paste0(temp_loc, "/ss_hdf5.FITS"),
                                split_save=T), built_cube_size)
@@ -748,6 +834,7 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_age_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS")))
+  expect_false(file.exists(paste0(temp_loc, "/ss_hdf5_inv_variance_cube.FITS")))
 
 })
 
@@ -759,6 +846,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_inv_variance_cube.FITS",
 
          paste0(temp_loc, "/ss_gadget_velocity_cube.FITS"),
          paste0(temp_loc, "/ss_gadget_observation_summary.FITS"),
@@ -773,6 +861,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_gadget_raw_age_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_inv_variance_cube.FITS"),
 
          paste0(temp_loc, "/ss_eagle_gas_velocity_cube.FITS"),
          paste0(temp_loc, "/ss_eagle_observation_summary.FITS"),
@@ -788,6 +877,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_eagle_raw_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_eagle_raw_SFR_image.FITS"),
          paste0(temp_loc, "/ss_eagle_raw_particle_image.FITS"),
+         paste0(temp_loc, "/ss_eagle_inv_variance_cube.FITS"),
 
          paste0(temp_loc, "/ss_magenticum_gas_velocity_cube.FITS"),
          paste0(temp_loc, "/ss_magenticum_observation_summary.FITS"),
@@ -803,6 +893,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_magneticum_raw_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_magneticum_raw_SFR_image.FITS"),
          paste0(temp_loc, "/ss_magneticum_raw_particle_image.FITS"),
+         paste0(temp_loc, "/ss_magneticum_inv_variance_cube.FITS"),
 
          paste0(temp_loc, "/ss_hdf5_spectral_cube.FITS"),
          paste0(temp_loc, "/ss_hdf5_observation_summary.FITS"),
@@ -832,8 +923,8 @@ test_that("Mask can be included in FITS files correctly", {
 
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget.FITS")))
   fits_w_mask = Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))
-  expect_true(length(fits_w_mask) == (spectra_number_of_hdu+1))
-  expect_true(fits_w_mask[[(spectra_number_of_hdu+1)]]$keyvalues$EXTNAME == "MASK")
+  expect_true(length(fits_w_mask) == (spectra_number_of_hdu_sntrue+1))
+  expect_true(fits_w_mask[[(spectra_number_of_hdu_sntrue+1)]]$keyvalues$EXTNAME == "MASK")
 
   write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
                      simspin_datacube = cube, split_save = T,
@@ -1286,3 +1377,48 @@ test_that("The LOSVD is fully sampled by the velocity bins at all spaxels", {
 
 })
 
+test_that("Noise increases as expected in velocity cubes", {
+
+  gadget_velocity_nonoise = build_datacube(simspin_file = ss_gadget,
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                           method = "velocity")
+
+  gadget_velocity_sn30    = build_datacube(simspin_file = ss_gadget,
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                           method = "velocity")
+
+  gadget_velocity_sn5     = build_datacube(simspin_file = ss_gadget,
+                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 5),
+                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                           method = "velocity")
+
+  expect_true(sd(gadget_velocity_nonoise$observed_images$flux_image,na.rm = T) < sd(gadget_velocity_sn30$observed_images$flux_image,na.rm = T))
+  expect_true(sd(gadget_velocity_nonoise$observed_images$flux_image,na.rm = T) < sd(gadget_velocity_sn5$observed_images$flux_image,na.rm = T))
+  expect_true(sd(gadget_velocity_sn30$observed_images$flux_image,na.rm = T) < sd(gadget_velocity_sn5$observed_images$flux_image,na.rm = T))
+
+})
+
+test_that("Noise increases as expected in spectral cubes", {
+
+  gadget_spectra_nonoise = build_datacube(simspin_file = ss_gadget,
+                                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                          observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                          method = "spectral")
+
+  gadget_spectra_sn30    = build_datacube(simspin_file = ss_gadget,
+                                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                                          observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                          method = "spectral")
+
+  gadget_spectra_sn5     = build_datacube(simspin_file = ss_gadget,
+                                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 5),
+                                          observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                          method = "spectral")
+
+  expect_true(sd(gadget_spectra_nonoise$spectral_cube[15,15,]) < sd(gadget_spectra_sn30$spectral_cube[15,15,]))
+  expect_true(sd(gadget_spectra_nonoise$spectral_cube[15,15,]) < sd(gadget_spectra_sn5$spectral_cube[15,15,]))
+  expect_true(sd(gadget_spectra_sn30$spectral_cube[15,15,]) < sd(gadget_spectra_sn5$spectral_cube[15,15,]))
+
+})
