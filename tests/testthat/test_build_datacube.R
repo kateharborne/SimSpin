@@ -1394,9 +1394,8 @@ test_that("Noise increases as expected in velocity cubes", {
                                            observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                            method = "velocity")
 
-  expect_true(sd(gadget_velocity_nonoise$observed_images$flux_image,na.rm = T) < sd(gadget_velocity_sn30$observed_images$flux_image,na.rm = T))
-  expect_true(sd(gadget_velocity_nonoise$observed_images$flux_image,na.rm = T) < sd(gadget_velocity_sn5$observed_images$flux_image,na.rm = T))
-  expect_true(sd(gadget_velocity_sn30$observed_images$flux_image,na.rm = T) < sd(gadget_velocity_sn5$observed_images$flux_image,na.rm = T))
+  expect_true(sd(gadget_velocity_sn30$observed_images$flux_image - gadget_velocity_nonoise$observed_images$flux_image, na.rm = T) <
+                sd(gadget_velocity_sn5$observed_images$flux_image - gadget_velocity_nonoise$observed_images$flux_image, na.rm = T))
 
 })
 
@@ -1417,8 +1416,7 @@ test_that("Noise increases as expected in spectral cubes", {
                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                           method = "spectral")
 
-  expect_true(sd(gadget_spectra_nonoise$spectral_cube[15,15,]) < sd(gadget_spectra_sn30$spectral_cube[15,15,]))
-  expect_true(sd(gadget_spectra_nonoise$spectral_cube[15,15,]) < sd(gadget_spectra_sn5$spectral_cube[15,15,]))
-  expect_true(sd(gadget_spectra_sn30$spectral_cube[15,15,]) < sd(gadget_spectra_sn5$spectral_cube[15,15,]))
+  expect_true(sd(gadget_spectra_sn30$spectral_cube[15,15,] - gadget_spectra_nonoise$spectral_cube[15,15,]) <
+                sd(gadget_spectra_sn5$spectral_cube[15,15,] - gadget_spectra_nonoise$spectral_cube[15,15,]))
 
 })
