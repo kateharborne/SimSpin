@@ -1361,13 +1361,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
 # Function to add noise
 .add_noise = function(cube, S2N){
-  S2N[is.infinite(S2N)] = 0 # removing infinite noise where particles per pixel = 0
-  noisey_cube = cube
-  for (i in 1:nrow(S2N)){
-    for (j in 1:ncol(S2N)){
-      if (S2N[i,j]!=0){
-        noise = (stats::rnorm(length(cube[i,j,]), mean = 0, sd=1))*S2N[i,j]
-        noisey_cube[i,j,] = cube[i,j,]*noise # to be added to the cube
+  Fl_spectrum = colSums(cube, dim = 2)
+  noisey_cube = array(data=0, dim=dim(cube))
+  for (i in 1:(dim(noisey_cube)[1])){
+    for (j in 1:(dim(noisey_cube)[2])){
+      if (all(cube[i,j,] != 0)){
+        dFoverF = sqrt(Fl_spectrum)/(S2N*sqrt(cube[i,j,]))
+        noisey_cube[i,j,] = (stats::rnorm(length(cube[i,j,]), mean = 0, sd=1))*dFoverF*cube[i,j,]
+        # to be added to the cube
       }
     }
   }

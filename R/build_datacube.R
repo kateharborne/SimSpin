@@ -302,10 +302,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       if (verbose){cat("Adding noise... \n")    }
       noise_cube = array(data = 0, dim = dim(output$spectral_cube))
       output$variance_cube = noise_cube # initialising empty arrays
-
       noise_cube = .add_noise(output$spectral_cube,
-                              sqrt(max(raw_images$flux_image, na.rm=T))/
-                                (observation$signal_to_noise*sqrt(raw_images$flux_image)))
+                              observation$signal_to_noise)
       output$spectral_cube = output$spectral_cube + noise_cube
       output$variance_cube = 1/(noise_cube)^2
       output$variance_cube[is.infinite(output$variance_cube)] = 0
@@ -369,8 +367,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       output$variance_cube = noise_cube # initialising empty arrays
 
       noise_cube = .add_noise(output$velocity_cube,
-                              sqrt(max(raw_images$flux_image, na.rm=T))/
-                                (observation$signal_to_noise*sqrt(raw_images$flux_image)))
+                              observation$signal_to_noise)
       noise_image = output$observed_images$flux_image*(rowSums(noise_cube, dims=2)/rowSums(output$velocity_cube, dims=2))
 
       output$velocity_cube = output$velocity_cube + noise_cube
@@ -476,8 +473,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       output$variance_cube = noise_cube # initialising empty arrays
 
       noise_cube = .add_noise(output$velocity_cube,
-                              sqrt(max(raw_images$mass_image, na.rm=T))/
-                                (observation$signal_to_noise*sqrt(raw_images$mass_image)))
+                              observation$signal_to_noise)
       noise_image = output$observed_images$flux_image*(rowSums(noise_cube, dims=2)/rowSums(output$velocity_cube, dims=2))
 
       output$velocity_cube = output$velocity_cube + noise_cube
