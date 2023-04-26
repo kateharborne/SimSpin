@@ -115,7 +115,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                             "PI-COI"="PI-COI name.", "OBSERVER"="Name of observer.",
                             "REDSHIFT"="Observed redshift.",
                             "PIPEFILE"="Filename of data product",
-                            "BUNIT"="Angstrom",
+                            "BUNIT"="units of values in image or cube",
                             "ARCFILE"="Archive File Name",
                             "DATAMD5"="MD5 checksum",
                             "OBJECT"="Original target.")
@@ -156,7 +156,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                           "HDUCLAS2"="this extension contains the data itself",
                           "ERRDATA"="pointer to the variance extension",
                           "OBJECT"="simulation and galaxy ID number",
-                          "BUNIT"="Angstrom",
+                          "BUNIT"="units of values in image or cube",
                           "CRPIX1"="Pixel coordinate of reference point",
                           "CRPIX2"="Pixel coordinate of reference point",
                           "CDELT1"="Coordinate transformation matrix element",
@@ -397,6 +397,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
     if (!is.na(observation$signal_to_noise)){
       # Adding variance cube to FITS file ----
       data_keyvalues$EXTNAME = "STAT"
+      data_keyvalues$BUNIT = "1**40 (erg/s/cm**2)**-2"
 
       if (split_save){
         stat_summary_file_name = paste0(output_dir, "/", output_file_root, "_inv_variance_cube.FITS")
@@ -405,13 +406,13 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                                   keyvalues = header_keyvalues,
                                   keycomments = header_keycomments, ext=1, create_file = T,
                                   overwrite_file = TRUE)
-        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube,
+        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube/1e40,
                                 filename = stat_summary_file_name, ext=2,
                                 keyvalues = data_keyvalues, keycomments = data_keycomments,
                                 create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
       } else {
-        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube,
+        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube/1e40,
                                 filename = cube_file_name, ext=(max(extnum)+1),
                                 keyvalues = data_keyvalues,
                                 keycomments = data_keycomments,
@@ -581,7 +582,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
     if (!is.na(observation$signal_to_noise)){
       # Adding variance cube to FITS file ----
       data_keyvalues$EXTNAME = "STAT"
-
+      data_keyvalues$BUNIT   = "1**40 (erg/s/cm**2)**-2"
       if (split_save){
         stat_summary_file_name = paste0(output_dir, "/", output_file_root, "_inv_variance_cube.FITS")
 
@@ -589,13 +590,13 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                                   keyvalues = header_keyvalues,
                                   keycomments = header_keycomments, ext=1, create_file = T,
                                   overwrite_file = TRUE)
-        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube,
+        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube/1e40,
                                 filename = stat_summary_file_name, ext=2,
                                 keyvalues = data_keyvalues, keycomments = data_keycomments,
                                 create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
       } else {
-        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube,
+        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube/1e40,
                                 filename = cube_file_name, ext=(max(extnum)+1),
                                 keyvalues = data_keyvalues,
                                 keycomments = data_keycomments,
@@ -738,6 +739,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
     if (!is.na(observation$signal_to_noise)){
       # Adding variance cube to FITS file ----
       data_keyvalues$EXTNAME = "STAT"
+      data_keyvalues$BUNIT   = "1**40 (erg/s/cm**2)**-2"
 
       if (split_save){
         stat_summary_file_name = paste0(output_dir, "/", output_file_root, "_inv_variance_cube.FITS")
@@ -746,13 +748,13 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                                   keyvalues = header_keyvalues,
                                   keycomments = header_keycomments, ext=1, create_file = T,
                                   overwrite_file = TRUE)
-        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube,
+        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube/1e40,
                                 filename = stat_summary_file_name, ext=2,
                                 keyvalues = data_keyvalues, keycomments = data_keycomments,
                                 create_ext = TRUE, create_file = FALSE, overwrite_file = FALSE)
 
       } else {
-        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube,
+        Rfits::Rfits_write_cube(data = simspin_datacube$variance_cube/1e40,
                                 filename = cube_file_name, ext=(max(extnum)+1),
                                 keyvalues = data_keyvalues,
                                 keycomments = data_keycomments,
