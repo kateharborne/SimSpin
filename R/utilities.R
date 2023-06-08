@@ -1784,7 +1784,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     mass_map[part_in_spaxel$pixel_pos[i]]  = sum(galaxy_sample$Mass)
     vel_los[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
     dis_los[part_in_spaxel$pixel_pos[i]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-    SFR_map[part_in_spaxel$pixel_pos[i]]   = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
+    SFR_map[part_in_spaxel$pixel_pos[i]]   = sum(galaxy_sample$SFR)
     Z_map[part_in_spaxel$pixel_pos[i]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
     OH_map[part_in_spaxel$pixel_pos[i]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
@@ -1822,7 +1822,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      mass_map = sum(galaxy_sample$Mass)
                      vel_los  = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los  = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-                     SFR_map  = .meanwt(galaxy_sample$SFR, galaxy_sample$Mass)
+                     SFR_map  = sum(galaxy_sample$SFR)
                      Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
                      OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
