@@ -10,6 +10,8 @@
 .cm_to_kpc          = 3.24078e-22
 .cms_to_kms         = 1e-5
 .g_to_msol          = 5.02785e-34
+.gcm1_to_msolkm1    = 5.02785e-29
+.gcm3_to_msolkm3    = 5.02785e-28
 .gcm3_to_msolkpc3   = 1.477e+31
 .g_constant_cgs     = 6.67430e-11
 .g_in_kpcMsolkms2   = 4.3009e-6
@@ -381,10 +383,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     }
 
     gas = .check_names(gas)
-    eagle_gas_names = c("SmoothingLength", "Temperature")
+    eagle_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(eagle_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for EAGLE PartType0. \n
-           Either `SmoothingLength` or `Temperature`. \n
+           Either `SmoothingLength`, `Temperature`, or `InternalEnergy`. \n
            See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#parttype0 for more info.")
     }
 
@@ -403,6 +405,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
+                                      "ThermalDispersion" = (gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1),
                                       "Metallicity" = gas$Metallicity,
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
@@ -474,10 +477,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     }
 
     gas = .check_names(gas)
-    magneticum_gas_names = c("SmoothingLength", "Temperature")
+    magneticum_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(magneticum_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for Magneticum PartType0. \n
-           Either `SmoothingLength` or `Temperature`. \n
+           Either `SmoothingLength`, `Temperature` or `InternalEnergy`. \n
            See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#parttype0 for more info.")
     }
 
@@ -497,6 +500,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
+                                      "ThermalDispersion" = (gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1),
                                       "Metallicity" = gas$Metallicity,
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
@@ -571,10 +575,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     }
 
     gas = .check_names(gas)
-    horizon_gas_names = c("Temperature")
+    horizon_gas_names = c("Temperature", "Pressure")
     if (!all(horizon_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for HorizonAGN PartType0. \n
-           Missing `Temperature`. \n
+           Missing `Temperature` or `Pressure`. \n
            See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#parttype0 for more info.")
     }
 
@@ -592,6 +596,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "SFR" = gas$StarFormationRate*(.g_to_msol/.s_to_yr), #SFR in Msol/yr
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
+                                      "ThermalDispersion" = sqrt((gas$Pressure*.gcm1_to_msolkm1)/(gas$Density*.gcm3_to_msolkm3)),
+                                      "Pressure" = gas$Pressure*.gcm1_to_msolkpc1, # Pressure in Msol/kpc/s^2
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$Metallicity,
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
@@ -708,6 +714,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "SFR" = gas$StarFormationRate*(.g_to_msol/.s_to_yr),                                        # SFR in Msol/yr
                                       "Density" = gas$Density*.gcm3_to_msolkpc3,                                                  # Density in Msol/kpc^3
                                       "Temperature" = (.adiabatic_index-1)*(gas$InternalEnergy/.Boltzmann_constant)*(4*.mass_of_proton/(1 + gas$`ElementAbundance/Hydrogen`*(3 + 4*gas$ElectronAbundance))),
+                                      "ThermalDispersion" = (gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1),
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$Metallicity,
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
