@@ -1871,6 +1871,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       new_gas_part[ind1:ind2, y := part$y+new_xyz[,2],]
       new_gas_part[ind1:ind2, z := part$z+new_xyz[,3],]
       new_gas_part[ind1:ind2, Mass := part$Mass*rand_pos$weight,]
+      new_gas_part[ind1:ind2, SFR := part$SFR*rand_pos$weight,]
       # in the new data.frame of particle properties, assign their
       # new positions and masses scaled by the kernel weight.
     }
@@ -1890,7 +1891,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   i = integer()
 
   output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list())) %dopar% {
 
                        part = gas_part[i,]
 
@@ -1902,8 +1903,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                        y = part$y+new_xyz[,2]
                        z = part$z+new_xyz[,3]
                        Mass = part$Mass*rand_pos$weight
+                       SFR  = part$SFR*rand_pos$weight
 
-                       return(list(x, y, z, Mass))
+                       return(list(x, y, z, Mass, SFR))
                        closeAllConnections()
                      }
 
@@ -1912,6 +1914,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   new_gas_part[, y := as.numeric(unlist(output[[2]])),]
   new_gas_part[, z := as.numeric(unlist(output[[3]])),]
   new_gas_part[, Mass := as.numeric(unlist(output[[4]])),]
+  new_gas_part[, SFR := as.numeric(unlist(output[[5]])),]
 
   return(new_gas_part)
 }
