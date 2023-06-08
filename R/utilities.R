@@ -405,11 +405,13 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
-                                      "ThermalDispersion" = (gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1),
+                                      "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "Metallicity" = gas$Metallicity,
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" = gas$`ElementAbundance/Oxygen`)
+
+    gas_part$ThermalDispersion[gas_part$Temperature <= 1e4] = 11
 
     remove(gas); remove(PT0_attr)
 
@@ -500,11 +502,13 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
-                                      "ThermalDispersion" = (gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1),
+                                      "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "Metallicity" = gas$Metallicity,
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" =  gas$`ElementAbundance/Oxygen`)
+
+    gas_part$ThermalDispersion[gas_part$Temperature <= 1e4] = 11
 
     remove(gas); remove(PT0_attr)
 
@@ -603,6 +607,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" =  gas$`ElementAbundance/Oxygen`)
+
+    gas_part$ThermalDispersion[gas_part$Temperature <= 1e4] = 11
 
     remove(gas); remove(PT0_attr)
 
@@ -714,14 +720,17 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "SFR" = gas$StarFormationRate*(.g_to_msol/.s_to_yr),                                        # SFR in Msol/yr
                                       "Density" = gas$Density*.gcm3_to_msolkpc3,                                                  # Density in Msol/kpc^3
                                       "Temperature" = (.adiabatic_index-1)*(gas$InternalEnergy/.Boltzmann_constant)*(4*.mass_of_proton/(1 + gas$`ElementAbundance/Hydrogen`*(3 + 4*gas$ElectronAbundance))),
-                                      "ThermalDispersion" = (gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1),
+                                      "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$Metallicity,
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" = gas$`ElementAbundance/Oxygen`)
 
+    gas_part$ThermalDispersion[gas_part$Temperature <= 1e4] = 11
+
     remove(gas); remove(PT0_attr)
+
   } else {gas_part=NULL}
 
   if ("PartType4" %in% groups){
