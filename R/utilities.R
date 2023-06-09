@@ -601,7 +601,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                                       "Density" = gas$Density*.gcm3_to_msolkpc3, # Density in Msol/kpc^3
                                       "Temperature" = gas$Temperature,
                                       "ThermalDispersion" = sqrt((gas$Pressure*.gcm1_to_msolkm1)/(gas$Density*.gcm3_to_msolkm3)),
-                                      "Pressure" = gas$Pressure*.gcm1_to_msolkpc1, # Pressure in Msol/kpc/s^2
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$Metallicity,
                                       "Carbon" = gas$`ElementAbundance/Carbon`,
@@ -1888,6 +1887,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       new_gas_part[ind1:ind2, z := part$z+new_xyz[,3],]
       new_gas_part[ind1:ind2, Mass := part$Mass*rand_pos$weight,]
       new_gas_part[ind1:ind2, SFR := part$SFR*rand_pos$weight,]
+      new_gas_part[ind1:ind2, Density := part$Density*rand_pos$weight,]
+      new_gas_part[ind1:ind2, Temperature := part$Temperature*rand_pos$weight,]
+      new_gas_part[ind1:ind2, ThermalDispersion := part$ThermalDispersion*rand_pos$weight,]
       # in the new data.frame of particle properties, assign their
       # new positions and masses scaled by the kernel weight.
     }
@@ -1907,7 +1909,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   i = integer()
 
   output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                        part = gas_part[i,]
 
@@ -1920,8 +1922,11 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                        z = part$z+new_xyz[,3]
                        Mass = part$Mass*rand_pos$weight
                        SFR  = part$SFR*rand_pos$weight
+                       Density = part$Density*rand_pos$weight
+                       Temperature = part$Temperature*rand_pos$weight
+                       ThermalDispersion = part$ThermalDispersion*rand_pos$weight
 
-                       return(list(x, y, z, Mass, SFR))
+                       return(list(x, y, z, Mass, SFR, Density, Temperature, ThermalDispersion))
                        closeAllConnections()
                      }
 
@@ -1931,6 +1936,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   new_gas_part[, z := as.numeric(unlist(output[[3]])),]
   new_gas_part[, Mass := as.numeric(unlist(output[[4]])),]
   new_gas_part[, SFR := as.numeric(unlist(output[[5]])),]
+  new_gas_part[, Density := as.numeric(unlist(output[[6]])),]
+  new_gas_part[, Temperature := as.numeric(unlist(output[[7]])),]
+  new_gas_part[, ThermalDispersion := as.numeric(unlist(output[[8]])),]
 
   return(new_gas_part)
 }
