@@ -35,25 +35,25 @@ test_that("Initial run of each simulation type - HDF5", {
 test_that("Initial run of each simulation type - EAGLE", {
   expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "/eagle_test", sep=""), centre = c(18318,61583,38667), half_mass = 1483809589))
   expect_length(readRDS(paste(temp_loc, "/eagle_test", sep="")), ss_file_length)
-  expect_true(length(readRDS(paste(temp_loc, "/eagle_test", sep=""))$gas_part) == 16)
+  expect_true(length(readRDS(paste(temp_loc, "/eagle_test", sep=""))$gas_part) == 17)
 })
 
 test_that("Initial run of each simulation type - Magneticum", {
   expect_null(make_simspin_file(ss_magneticum, output = paste(temp_loc, "/magneticum_test", sep="")))
   expect_length(readRDS(paste(temp_loc, "/magneticum_test", sep="")), ss_file_length)
-  expect_true(length(readRDS(paste(temp_loc, "/magneticum_test", sep=""))$gas_part) == 16)
+  expect_true(length(readRDS(paste(temp_loc, "/magneticum_test", sep=""))$gas_part) == 17)
 })
 
 test_that("Initial run of each simulation type - HorizonAGN", {
   expect_null(make_simspin_file(ss_horizon, output = paste(temp_loc, "/horizon_test", sep="")))
   expect_length(readRDS(paste(temp_loc, "/horizon_test", sep="")), ss_file_length)
-  expect_true(length(readRDS(paste(temp_loc, "/horizon_test", sep=""))$gas_part) == 16)
+  expect_true(length(readRDS(paste(temp_loc, "/horizon_test", sep=""))$gas_part) == 17)
 })
 
 test_that("Initial run of each simulation type - IllustrisTNG", {
   expect_null(make_simspin_file(ss_illustris, output = paste(temp_loc, "/illustris_test", sep="")))
   expect_length(readRDS(paste(temp_loc, "/illustris_test", sep="")), ss_file_length)
-  expect_true(length(readRDS(paste(temp_loc, "/illustris_test", sep=""))$gas_part) == 16)
+  expect_true(length(readRDS(paste(temp_loc, "/illustris_test", sep=""))$gas_part) == 17)
 })
 
 # Test that the function fails when the file already exists
