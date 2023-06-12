@@ -34,26 +34,45 @@ test_that("Initial run of each simulation type - HDF5", {
 
 test_that("Initial run of each simulation type - EAGLE", {
   expect_null(make_simspin_file(ss_eagle, output = paste(temp_loc, "/eagle_test", sep=""), centre = c(18318,61583,38667), half_mass = 1483809589))
-  expect_length(readRDS(paste(temp_loc, "/eagle_test", sep="")), ss_file_length)
-  expect_true(length(readRDS(paste(temp_loc, "/eagle_test", sep=""))$gas_part) == 17)
+
+  EAGLE = readRDS(paste(temp_loc, "/eagle_test", sep=""))
+  expect_length(EAGLE, ss_file_length)
+  expect_true(length(EAGLE$gas_part) == 17)
+  expect_false(any(is.na(EAGLE$gas_part$ThermalDispersion)))
+  expect_true(all(EAGLE$gas_part$ThermalDispersion[EAGLE$gas_part$Temperature < 1e4] == (11/sqrt(3))))
 })
 
 test_that("Initial run of each simulation type - Magneticum", {
   expect_null(make_simspin_file(ss_magneticum, output = paste(temp_loc, "/magneticum_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "/magneticum_test", sep="")), ss_file_length)
-  expect_true(length(readRDS(paste(temp_loc, "/magneticum_test", sep=""))$gas_part) == 17)
+
+  magneticum = readRDS(paste(temp_loc, "/magneticum_test", sep=""))
+  expect_length(magneticum, ss_file_length)
+  expect_true(length(magneticum$gas_part) == 17)
+  expect_false(any(is.na(magneticum$gas_part$ThermalDispersion)))
+  expect_true(all(magneticum$gas_part$ThermalDispersion[magneticum$gas_part$Temperature < 1e4] == (11/sqrt(3))))
+
 })
 
 test_that("Initial run of each simulation type - HorizonAGN", {
   expect_null(make_simspin_file(ss_horizon, output = paste(temp_loc, "/horizon_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "/horizon_test", sep="")), ss_file_length)
-  expect_true(length(readRDS(paste(temp_loc, "/horizon_test", sep=""))$gas_part) == 17)
+
+  HAGN = readRDS(paste(temp_loc, "/horizon_test", sep=""))
+  expect_length(HAGN, ss_file_length)
+  expect_true(length(HAGN$gas_part) == 17)
+  expect_false(any(is.na(HAGN$gas_part$ThermalDispersion)))
+  expect_true(all(HAGN$gas_part$ThermalDispersion[HAGN$gas_part$Temperature < 1e4] == (11/sqrt(3))))
+
 })
 
 test_that("Initial run of each simulation type - IllustrisTNG", {
   expect_null(make_simspin_file(ss_illustris, output = paste(temp_loc, "/illustris_test", sep="")))
-  expect_length(readRDS(paste(temp_loc, "/illustris_test", sep="")), ss_file_length)
-  expect_true(length(readRDS(paste(temp_loc, "/illustris_test", sep=""))$gas_part) == 17)
+
+  TNG = readRDS(paste(temp_loc, "/illustris_test", sep=""))
+  expect_length(TNG, ss_file_length)
+  expect_true(length(TNG$gas_part) == 17)
+  expect_false(any(is.na(TNG$gas_part$ThermalDispersion)))
+  expect_true(all(TNG$gas_part$ThermalDispersion[TNG$gas_part$Temperature < 1e4] == (11/sqrt(3))))
+
 })
 
 # Test that the function fails when the file already exists
@@ -636,4 +655,5 @@ test_that("Expect header information in each of the built simspin files.", {
   expect_equal(length(names(illustris_ss_file$header)), ss_file_header_length)
 
 })
+
 
