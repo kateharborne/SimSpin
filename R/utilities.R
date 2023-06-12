@@ -1889,7 +1889,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       new_gas_part[ind1:ind2, SFR := part$SFR*rand_pos$weight,]
       new_gas_part[ind1:ind2, Density := part$Density*rand_pos$weight,]
       new_gas_part[ind1:ind2, Temperature := part$Temperature*rand_pos$weight,]
-      new_gas_part[ind1:ind2, ThermalDispersion := part$ThermalDispersion*rand_pos$weight,]
+      new_gas_part[ind1:ind2, ThermalDispersion := sqrt((part$ThermalDispersion^2)*rand_pos$weight),]
       # in the new data.frame of particle properties, assign their
       # new positions and masses scaled by the kernel weight.
     }
@@ -1924,7 +1924,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                        SFR  = part$SFR*rand_pos$weight
                        Density = part$Density*rand_pos$weight
                        Temperature = part$Temperature*rand_pos$weight
-                       ThermalDispersion = part$ThermalDispersion*rand_pos$weight
+                       ThermalDispersion = sqrt((part$ThermalDispersion^2)*rand_pos$weight)
 
                        return(list(x, y, z, Mass, SFR, Density, Temperature, ThermalDispersion))
                        closeAllConnections()
