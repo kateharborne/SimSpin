@@ -1420,3 +1420,34 @@ test_that("Noise increases as expected in spectral cubes", {
                 sd(gadget_spectra_sn5$spectral_cube[15,15,] - gadget_spectra_nonoise$spectral_cube[15,15,]))
 
 })
+
+# Testing that spawning conserves different properties -----------------------
+test_that("Gas spawning creates even images despite different n-values",{
+
+  ss_eagle_500  = make_simspin_file(ss_pd_eagle, write_to_file = FALSE,
+                                       template = "BC03lr", sph_spawn_n = 500)
+
+  ss_eagle_100 = ss_illustris  = make_simspin_file(ss_pd_eagle,
+                                                       write_to_file = FALSE,
+                                                       template = "BC03lr",
+                                                       sph_spawn_n = 100)
+
+  n500 =  build_datacube(simspin_file = ss_eagle_500,
+                        telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA, fov = 25),
+                        observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 45, blur = F),
+                        method = "gas")
+
+  n100 = build_datacube(simspin_file = ss_eagle_100,
+                        telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA, fov = 25),
+                        observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 45, blur = F),
+                        method = "gas")
+
+
+  mask100 = n100$raw_images$particle_image; mask100[mask100 >= 1] = 1; mask100[mask100!=1]=NA
+  mask500 = n500$raw_images$particle_image; mask500[mask500 >= 1] = 1; mask500[mask500!=1]=NA
+
+  expect_true(sum(n500$raw_images$mass_image*mask500, na.rm=T) == sum(n100$raw_images$mass_image*mask100, na.rm=T))
+  expect_true(sum(n500$raw_images$SFR_image) == sum(n100$raw_images$SFR_image))
+
+})
+
