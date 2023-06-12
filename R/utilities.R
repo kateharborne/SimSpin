@@ -25,7 +25,7 @@
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen",
                   "hcl.colors", "ID", "Initial_Mass", "luminosity", "Mass",
                   "Metallicity", "Oxygen", "par", "SFR", "SFT", "SmoothingLength",
-                  "sed_id", "Temperature", "text", "vx", "vy", "vz", "x", "y",
+                  "sed_id", "Temperature", "ThermalDispersion", "text", "vx", "vy", "vz", "x", "y",
                   "z"))
 
 # Functions for computing weighted means
@@ -1909,7 +1909,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   i = integer()
 
   output = foreach(i = 1:no_gas, .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                        part = gas_part[i,]
 
