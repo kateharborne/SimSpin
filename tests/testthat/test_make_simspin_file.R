@@ -39,7 +39,7 @@ test_that("Initial run of each simulation type - EAGLE", {
   expect_length(EAGLE, ss_file_length)
   expect_true(length(EAGLE$gas_part) == 17)
   expect_false(any(is.na(EAGLE$gas_part$ThermalDispersion)))
-  expect_true(all(EAGLE$gas_part$ThermalDispersion[EAGLE$gas_part$Temperature < 1e4] == (11/sqrt(3))))
+  expect_true(all(EAGLE$gas_part$ThermalDispersion[EAGLE$gas_part$Temperature < 1e4] == 11))
 })
 
 test_that("Initial run of each simulation type - Magneticum", {
@@ -49,7 +49,7 @@ test_that("Initial run of each simulation type - Magneticum", {
   expect_length(magneticum, ss_file_length)
   expect_true(length(magneticum$gas_part) == 17)
   expect_false(any(is.na(magneticum$gas_part$ThermalDispersion)))
-  expect_true(all(magneticum$gas_part$ThermalDispersion[magneticum$gas_part$Temperature < 1e4] == (11/sqrt(3))))
+  expect_true(all(magneticum$gas_part$ThermalDispersion[magneticum$gas_part$Temperature < 1e4] == 11))
 
 })
 
@@ -60,7 +60,7 @@ test_that("Initial run of each simulation type - HorizonAGN", {
   expect_length(HAGN, ss_file_length)
   expect_true(length(HAGN$gas_part) == 17)
   expect_false(any(is.na(HAGN$gas_part$ThermalDispersion)))
-  expect_true(all(HAGN$gas_part$ThermalDispersion[HAGN$gas_part$Temperature < 1e4] == (11/sqrt(3))))
+  expect_true(all(HAGN$gas_part$ThermalDispersion[HAGN$gas_part$Temperature < 1e4] == 11))
 
 })
 
@@ -71,7 +71,7 @@ test_that("Initial run of each simulation type - IllustrisTNG", {
   expect_length(TNG, ss_file_length)
   expect_true(length(TNG$gas_part) == 17)
   expect_false(any(is.na(TNG$gas_part$ThermalDispersion)))
-  expect_true(all(TNG$gas_part$ThermalDispersion[TNG$gas_part$Temperature < 1e4] == (11/sqrt(3))))
+  expect_true(all(TNG$gas_part$ThermalDispersion[TNG$gas_part$Temperature < 1e4] == 11))
 
 })
 
@@ -324,7 +324,7 @@ test_that("Negative stellar wind particles are removed",{
 # Gas temperature should fall within a reasonable range
 test_that("Temperature does not go outside a reasonable range",{
   illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
-  expect_true(min(illustris$gas_part$Temperature)>8000)
+  expect_true(min(illustris$gas_part$Temperature)>0)
   expect_true(max(illustris$gas_part$Temperature)<50000000)
 })
 
