@@ -479,7 +479,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       output$variance_cube = noise_cube # initialising empty arrays
 
       noise_cube = .add_noise(output$velocity_cube,
-                              sqrt(min(raw_images$mass_image[raw_images$particle_image >=
+                              sqrt(sum(raw_images$mass_image[raw_images$particle_image >=
                                                                median(raw_images$particle_image, na.rm=T)], na.rm=T))/
                                 (observation$signal_to_noise*sqrt(raw_images$mass_image)))
       noise_image = output$observed_images$flux_image*(rowSums(noise_cube, dims=2)/rowSums(output$velocity_cube, dims=2))
