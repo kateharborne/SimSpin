@@ -154,7 +154,8 @@ These are further elaborated in the connected footnotes.
 | `SmoothingLength` <sup>3</sup>         | N<sub>gas</sub>     | SPH smoothing kernel radius (SPH simulations only)        |
 | `StarFormationRate` &#9733;            | N<sub>gas</sub>     | Instantaneous star formation rate                         |
 | `Temperature`<sup>4</sup>              | N<sub>gas</sub>     | Temperature.                                              |
-| `InternalEnergy`<sup>4</sup>           | N<sub>gas</sub>     | Internal thermal energy per unit mass for each gas *cell*.|
+| `Pressure`<sup>4, 5</sup>                 | N<sub>gas</sub>     | Gas pressure.                                              |
+| `InternalEnergy`<sup>4, 5</sup>           | N<sub>gas</sub>     | Internal thermal energy per unit mass for each gas *cell*.|
 | `ElectronAbundance`<sup>4</sup>        | N<sub>gas</sub>     | Fractional electron number density with respect to the total hydrogen number density. |
 | `Velocity`  &#9733;                    | N<sub>gas</sub> x 3 | The (vx, vy, vz) coordinates of each particle/cell.       |
 
@@ -167,7 +168,9 @@ Further properties can be passed into SimSpin without error, but in the case tha
 
 <sup>3</sup> For *cell*-based codes, the `SmoothingLength` value will not be present in output files. To approximate the variable smoothing of cells across the pixelated image, SimSpin will compute an equivalent `SmoothingLength` for cell-based codes using the `Mass` and `Density` fields. 
 
-<sup>4</sup> For *cell*-based gas simulations, the temperature for each cell can be approximated using the `InternalEnergy` and `ElectronAbundance` properties. In this case, the `Temperature` Group is not required as long as the `InternalEnergy` and `ElectronAbundance` Groups are present. Equally, the `InternalEnergy` and `ElectronAbundance` Groups are not required if `Temperature` is already present. We note here that **caution should be taken when using output gas temperatures for the simulations** as there are cooling floors employed in most hydrodynamical simulations that cause an artificial lower temperture limit. This is particularly important for low density and low temperature gas, as well as star-forming gas.  
+<sup>4</sup> For *cell*-based gas simulations, the temperature for each cell can be approximated using the `InternalEnergy` and `ElectronAbundance` properties. In this case, the `Temperature` Group is not required as long as the `InternalEnergy` and `ElectronAbundance` Groups are present. Equally, the  `ElectronAbundance` Group is not required if `Temperature` is already present. We note here that **caution should be taken when using output gas temperatures for the simulations** as there are cooling floors employed in most hydrodynamical simulations that cause an artificial lower temperture limit. This is particularly important for low density and low temperature gas, as well as star-forming gas.  
+
+<sup>5</sup> Gas within a simulation has a thermal contribution to the observable velocity dispersion that must be included to give a realistic representation of the true gas dispersion. To quantify the thermal contribution to this, we use $\sigma_{\text{thermal}}^2 =  P / \rho =  u (1 - \gamma)$, where the thermal dispersion contribution can be computed using either the pressure and denisty, or the internal energy. For particles with temperature below the cooling floor of the simulation, this vlaue is fixed to an isotropic thermal value of 11 km/s. 
  
 
 #### PartType4
