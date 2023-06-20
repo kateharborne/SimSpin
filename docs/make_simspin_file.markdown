@@ -95,6 +95,7 @@ The list will contain the following 5 elements:
     | `Density` | the density of the gas within the simulation given in solar masses per kpc^3. |
     | `Temperature` | the temperature of that gas particle in K. |
     | `SmoothingLength` | the size of the the SPH smoothing kernel in kpc. |
+    | `ThermalDispersion` | the dispersion of each gas particle due to the thermal motion in km/s |
     | `Metallicity` | the smoothed gas mass of elements heavier than Helium divided by the mass of the particle. |
     | `Carbon` | the fraction of carbon within the particle, given as a fraction of its total mass. |
     | `Hydrogen` | the fraction of hydrogen within the particle, given as a fraction of its total mass. |
