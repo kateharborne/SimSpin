@@ -4,7 +4,7 @@ title: About
 nav_order: 2
 description: "Some background about SimSpin."
 permalink: /about/
-last_modified_date: "Wed, 11 January 2023 14:50:00 AWST"
+last_modified_date: "Tue, 20 June 2023 14:50:00 AWST"
 ---
 
 # SimSpin v2.4.x
