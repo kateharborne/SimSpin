@@ -3,7 +3,7 @@ layout: default
 title: News
 parent: Documentation
 nav_order: 1
-last_modified_date: "Tues, 17 Jan 2023 15:57:00 AWST"
+last_modified_date: "Tues, 20 June 2023 15:57:00 AWST"
 ---
 
 # News
@@ -16,6 +16,15 @@ The table below gives details of any recent updates made to SimSpin, along with 
 
 | Date | Summary of Change | Version | Commit | Author |
 |------|-------------------|---------|--------|--------|
+| 15/06/23 | Updating the noise implementation for `build_datacube` using the median flux pixel to scale the level of noise such that the S/N does not go extreme towards the peak flux or minimum flux in the image. | 2.4.10 | | Kate Harborne |
+| 13/06/23 | Adding the thermal dispersion component to the observed gas maps. | 2.4.9 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/d3e0675a80a0036da3e372344e40bf979ad9ffa7) | Kate Harborne |
+| 09/06/23 | Fixing the SFR maps produced in method = `gas` or `sf gas` mode. Previous values returned were mass-weighted mean SFR along the line-of-sight, now adjusted to give the sum of spawned fraction SFR along the LOS. | 2.4.8 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/e1a6dd49d0aa74510c27aba5ccfeac8ab8a5e920) | Kate Harborne | 
+| 26/04/23 | Inverse variance cubes have large values that do not save to FITS successfully. Dividing by 1e40 to remove this issue and incorporating this with the units. Also modifying S/N description to give the MINIMUM S/N in the image, not the maximum. | 2.4.7 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/fb904cd302cc6b8edda2032bb68fa8cd6b233f8a) | Kate Harborne |
+| 23/04/23 | Fixing the noise implementation in methods spectral and velocity. Adding inverse variance cubes to the output when a S/N value is specified. Incorporating tests to check proper incorporation and behaviour. | 2.4.6 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/8eef4e6dea8f9901b83ced8f2b43cee1438fe034) | Kate Harborne |
+| 18/04/23 | Updating the methodology for method = "velocity" (details below) and fixing dependencies (resolving the Rfits and ProFit versions clash). Added header information to the SimSpin file made such that the whole file can be recreated using the information in the file rather than having to retain the code used to build the file. | 2.4.5 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/cdf5522fb6040b7a5fdcf5ea4a54df7e576f57d5) | Kate Harborne |
+|          | 1. Modified the Gauss-Hermite fitting function to use the mean and standard deviation of the LOSVD as priors on the fit, but reporting the observed velocity and dispersion as those returned by the fit Gauss-Hermite along with h3 and h4. | | | |
+|          | 2. Added measure of the residual between the best fit Gauss-Hermite and the true LOSVD at the velocity scale of the observing telescope. This is now returned to the user as an image in `observed_images$residual`. | | | |
+|          | 3. Increased the number of velocity channels per velocity cube to extend well beyond (5 times the maximum range - previously just the maximum range) the range of LOS velocities in each simulation. This is done such that we fully sample the LOSVD for the fastest and slowest particles and fit returns a successful value. Velocity channel definition is now consistent with pPXF (i.e. min(diff(log(wavelength_sequence))) * .speed_of_light). | | | |
 | 25/01/23 | *Bug fix.* Addressing issues #76 and #77. When working with the BC03 templates, the first AgeBin was labeled 0 Gyr. This was causing a problematic log10() age bin when gridding up the templates to match to the stellar ages within the model such that any stars that fell into this bin were associated with spectra of NA's. This was not clear until testing with IllustrisTNG galaxies that have very young stars in the outputs. Now fixed by setting low age bins to non-zero values (i.e. 0 Gyr -> 1e-9 Gyr). Tests and documentation updated for these changes. | 2.4.4 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/956405f2c9528809bbaee759e125bc8526b0060f) | Alice Serene & Kate Harborne |
 | 17/01/23 | *Bug fix.* Addressing issue #12. When a hydrodynamical simulation HDF5 is input without a `RunLabel` in the header, the file is processed like an N-body model (often meaning that no stellar particles are read in.) Catches added to stop the code with meaningful error if this is the case. Further interpretation added for named datasets in Hydro default names rather than expected. | 2.4.3 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/44b703304efde31d08fd8e857f986fc93879b3ee) | Kate Harborne |
 | 16/01/23 | **New feature!** Update to add support for IllustrisTNG. Updates to `make_simspin_file`, `utilities`, and tests were implemented. | 2.4.2 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/5fb9ad5803f26bc1dad81f9818dff24225f4e1d0)| Alice Serene |
