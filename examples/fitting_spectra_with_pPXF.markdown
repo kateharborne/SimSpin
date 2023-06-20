@@ -64,7 +64,8 @@ simspin_eagle  = make_simspin_file(filename = simulation_file,
 cube   = build_datacube(simspin_file = simspin_eagle,
                         telescope = telescope(lsf_fwhm=3.6, 
                                               fov=10, 
-                                              aperture_shape="hexagonal"),
+                                              aperture_shape="hexagonal",
+                                              signal_to_noise = 30),
                         observing_strategy = observing_strategy(),
                         method = "spectral",
                         write_fits = T, 
@@ -152,7 +153,11 @@ hdu = fits.open(f"{file_input}")
 
 cube     = hdu["DATA"].data    # accessing the spectral datacube within the file
 head_obs = hdu["DATA"].header  #    and the associated axes labels
-npart    = hdu["NPART"].data   # number of particles per pixel (used to describe the level of noise per pixel). 
+
+var      = hdu["STAT"].data*1e40 # reading in the variance cube and adjusting the units
+npart    = hdu["NPART"].data  # number of particles per pixel (used to describe the level of noise per pixel). 
+
+hdu.close()
 
 print(f"Reading spectral cube of size {cube.shape}.")
 
@@ -162,9 +167,11 @@ nspec = cube.shape[1] * cube.shape[2]
 spectrum = cube.reshape(npix, -1) # create an array of spectra [npix, (sbin_x * sbin_y)]
 npart_flat = npart.reshape(-1)
 npart_flat[npart_flat == 0] = None
-noise_flat = 1/np.sqrt(npart_flat)
+
+noise_flat = var.reshape(npix, -1) 
 
 print(f"Re-shaping into array of shape {spectrum.shape}, with {spectrum.shape[0]} wavelengths and {spectrum.shape[1]} pixels.")
+print(f"Re-shaping noise into array of shape {noise_flat.shape}, with {noise_flat.shape[0]} wavelengths and {noise_flat.shape[1]} pixels.")
 
 # Begin by pulling out the wavelength axis of the cube -------------------------------------------------------------
 # These properties are necessary for logarithmically re-binning the spectra before
@@ -285,12 +292,12 @@ for j in range(nspec):
     if npart_flat[j] > 0:
         print(f"Fitting pixel [{j}]...")
         galaxy, log_lam_galaxy, velscale = util.log_rebin(wave_range, spectrum[:,j], velscale=velscale)
+        noise_rebin, log_lam_noise, velscale_2 = util.log_rebin(wave_range, 1/np.sqrt(noise_flat[:,j]), velscale=velscale)
+        noise_rebin /= np.median(galaxy)
         galaxy /= np.median(galaxy)
-        
-        noise  = np.full_like(galaxy, noise_flat[j]) 
 
         if n_mom == 2:
-            pp = ppxf(stars_templates, galaxy, noise, velscale, start,
+            pp = ppxf(stars_templates, galaxy, noise_rebin, velscale, start,
                       vsyst=dv, lam = np.exp(log_lam_galaxy),
                       plot=False, moments=2, degree=-1, mdegree=10,  # Set plot to False when using in batch mode. change mdegree=10 for testing
                       clean=False, regul=False)
@@ -304,7 +311,7 @@ for j in range(nspec):
               plt.savefig(f"{ppxf_output}/pPXF_fit/pPXF_fit_{j}.png")
 
         else:
-            pp = ppxf(stars_templates, galaxy, noise, velscale, start,
+            pp = ppxf(stars_templates, galaxy, noise_rebin, velscale, start,
                       vsyst=dv, lam = np.exp(log_lam_galaxy), bias = 0,
                       plot=False, moments=4, degree=-1, mdegree=10,  # Set plot to False when using in batch mode. change mdegree=10 for testing
                       clean=False, regul=False)
