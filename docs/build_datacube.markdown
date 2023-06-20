@@ -314,7 +314,6 @@ The list will always contain 5 elements, though the contents of this list will c
         | `h4_image` | a 2D numeric array giving the observed h4 higher-order moment in a given pixel. |
 
 1.  `variance_cube` - This will be a 3D numeric array containing the level of variance (1/noise<sup>2</sup>) per pixel per wavelength if a `signal_to_noise` value has been specified in the [`telescope`](telescope.markdown) function. Else, this element will be `NULL`.
-
 {: .bg-grey-lt-000 }
 ---
 
