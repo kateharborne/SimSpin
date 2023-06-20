@@ -3,7 +3,7 @@ layout: default
 title: FITS observation format
 parent: Examples
 nav_order: 2
-last_modified_date: "Wed, 3 Aug 2022 14:08:00 AWST"
+last_modified_date: "Tue, 20 June 2023 14:08:00 AWST"
 ---
 
 # Working with SimSpin FITS files 
@@ -199,6 +199,7 @@ summary(cube)
 # OBS_DISP   900  Rfits_image  list
 # OBS_H3     900  Rfits_image  list
 # OBS_H4     900  Rfits_image  list
+# RESIDUAL   900  Rfits_image  list
 # RAW_FLUX   900  Rfits_image  list
 # RAW_VEL    900  Rfits_image  list
 # RAW_DISP   900  Rfits_image  list
@@ -337,6 +338,7 @@ summary(cube)
 # OBS_DISP   900  Rfits_image  list
 # OBS_H3     900  Rfits_image  list
 # OBS_H4     900  Rfits_image  list
+# RESIDUAL   900  Rfits_image  list
 # RAW_MASS   900  Rfits_image  list
 # RAW_VEL    900  Rfits_image  list
 # RAW_DISP   900  Rfits_image  list
