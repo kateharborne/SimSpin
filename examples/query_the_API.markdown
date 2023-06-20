@@ -3,7 +3,7 @@ layout: default
 title: Querying the SimSpin API
 parent: Examples
 nav_order: 4
-last_modified_date: "Tues, 17 January 2022 11:11:00 AWST"
+last_modified_date: "Tue, 20 June 2023 11:11:00 AWST"
 ---
 
 # Not a fan of R? Why not use the API...
@@ -17,16 +17,23 @@ Using the API, it is possible to run SimSpin from Python. In the example below, 
 {: .fs-5 .fw-300 .pb-2 }
 ---
 
+## Interacting with the API using `requests`
+
 To begin, we need to use the `requests` package for Python3. If you do not already have this package installed, you can get it using the line below:
 
-```Python
+```python
 pip install requests
 ```
 
 With this package installed, we can go about working with the SimSpin package via queries to the API.
-Let's begin by building a SimSpin file. Using an example file from the package, we can post a query to the `make_simspin_file` function using the following code snippet. Here we do not describe the input parameters for each function, but you can find out more about each one at the [`make_simspin_file` documentation page](/SimSpin/docs/make_simspin_file.markdown). 
 
-```Python
+---
+
+## Building a SimSpin file through the API
+
+Let's begin by building a SimSpin file. Using an example file from the package, we can post a query to the `make_simspin_file` function using the following code snippet. Here we do not describe the input parameters for each function, but you can find out more about each one at the [`make_simspin_file`](/SimSpin/docs/make_simspin_file.markdown) documentation page. 
+
+```python
 import requests
 
 # Declare the input parameters for running `make_simpsin_file`
@@ -51,9 +58,9 @@ post_SimSpin_file_request = requests.post(
     files = file
 )
 ```
-We can check on the resulting output of the function using,
+We can check on the resulting output of the function using:
 
-```Python
+```python
 post_SimSpin_file_request.json()
 
 {'id': 'a83ca9f9-823a-4739-9721-23fceacecdd8',
@@ -72,3 +79,14 @@ post_SimSpin_file_request.json()
 
  ```
  
+ We will also receive an email to the listed address once the file construction is complete, as shown below. 
+<img align="centre" src="assets/images/simspin_file_api_example_email.png" width="750" height="237" />
+
+If you are a registered Data Central user, you can login to your account to browse a history of constructed files. In this scenario, we have not specififed our user credentials so must interact with the file using the `id` link listed. Navigating to the URL listed against `url` allows us to browse the details of the constructed file and download it directly if you wish to explore the file locally. 
+
+Otherwise, we can proceed to interacting with the produced SimSpin file on the server, and use this to construct a data cube.
+
+---
+
+## Building a data cube using the API
+
