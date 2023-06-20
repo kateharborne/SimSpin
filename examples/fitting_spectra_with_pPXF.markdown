@@ -3,7 +3,7 @@ layout: default
 title: Fitting spectra with pPXF
 parent: Examples
 nav_order: 3
-last_modified_date: "Thu, 4th Aug 2022 14:08:00 AWST"
+last_modified_date: "Tue, 20th June 2023 14:08:00 AWST"
 ---
 
 # Fitting stellar kinematics using pPXF
