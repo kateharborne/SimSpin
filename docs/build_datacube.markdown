@@ -3,7 +3,7 @@ layout: default
 title: build_datacube
 parent: Documentation
 nav_order: 5
-last_modified_date: "Tue, 28 March 2023 15:57:00 AWST"
+last_modified_date: "Tue, 20 June 2023 15:57:00 AWST"
 ---
 
 # Constructing your data cube
