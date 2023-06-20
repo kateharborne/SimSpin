@@ -3,7 +3,7 @@ layout: default
 title: make_simspin_file
 parent: Documentation
 nav_order: 2
-last_modified_date: "Tue, 12 July 2022 15:57:00 AWST"
+last_modified_date: "Tue, 20 Jun 2023 15:57:00 AWST"
 ---
 
 # Making the input file for SimSpin
