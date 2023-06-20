@@ -1,6 +1,6 @@
-# SimSpin v2.4.8 News
+# SimSpin v2.4.10 News
 
-### Last edit: 13/06/23
+### Last edit: 15/06/23
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -16,7 +16,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 13/06/23 | Adding the thermal dispersion component to the observed gas maps. | 2.4.9 | | Kate Harborne |
+| 15/06/23 | Updating the noise implementation for `build_datacube` using the median flux pixel to scale the level of noise such that the S/N does not go extreme towards the peak flux or minimum flux in the image. | 2.4.10 | | Kate Harborne |
+| 13/06/23 | Adding the thermal dispersion component to the observed gas maps. | 2.4.9 | d3e0675a80a0036da3e372344e40bf979ad9ffa7 | Kate Harborne |
 | 09/06/23 | Fixing the SFR maps produced in method = `gas` or `sf gas` mode. Previous values returned were mass-weighted mean SFR along the line-of-sight, now adjusted to give the sum of spawned fraction SFR along the LOS. | 2.4.8 | e1a6dd49d0aa74510c27aba5ccfeac8ab8a5e920 | Kate Harborne | 
 | 26/04/23 | Inverse variance cubes have large values that do not save to FITS successfully. Dividing by 1e40 to remove this issue and incorporating this with the units. Also modifying S/N description to give the MINIMUM S/N in the image, not the maximum. | 2.4.7 | fb904cd302cc6b8edda2032bb68fa8cd6b233f8a | Kate Harborne |
 | 23/04/23 | Fixing the noise implementation in methods spectral and velocity. Adding inverse variance cubes to the output when a S/N value is specified. Incorporating tests to check proper incorporation and behaviour. | 2.4.6 | 8eef4e6dea8f9901b83ced8f2b43cee1438fe034 | Kate Harborne |

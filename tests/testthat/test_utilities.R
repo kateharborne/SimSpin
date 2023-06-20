@@ -123,7 +123,7 @@ test_that("interp_quick fails if given more than a scalar", {
 })
 
 test_that("kernel weights sum to 1", {
-  expect_true(sum(.generate_uniform_sphere(100, kernel = "WC2")$weight) == 1)
-  expect_true(sum(.generate_uniform_sphere(100, kernel = "WC6")$weight) == 1)
-  expect_true(sum(.generate_uniform_sphere(100, kernel = "M4")$weight) == 1)
+  expect_equal(sum(.generate_uniform_sphere(100, kernel = "WC2")$weight), 1)
+  expect_equal(sum(.generate_uniform_sphere(100, kernel = "WC6")$weight), 1)
+  expect_equal(sum(.generate_uniform_sphere(100, kernel = "M4")$weight), 1)
 })
