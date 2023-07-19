@@ -10,9 +10,11 @@
 
 <p>&nbsp;</p>
 
-v2.4.x - A package for producing mock observations:
+v2.5.0 - A package for producing mock observations:
 
-SimSpin allows you to take a simulation of a galaxy and produce a data cube in the style of an Integral Field Spectroscopy (IFS) instrument. A mock observation is produced using three simple steps:
+SimSpin allows you to take a simulation of a galaxy and produce a data cube in the style of an Integral Field Spectroscopy (IFS) instrument. You can find the live documentation for this code at the following [website](https://kateharborne.github.io/SimSpin/). 
+
+A mock observation is produced using three simple steps:
 
 1.  Read in your particle data and produce the relevant spectra using the `make_simspin_file` function.
 2.  Setup the observation by defining your `telescope` and `observing_strategy`.
@@ -50,17 +52,19 @@ The following lines will take you from a particle simulation of a galaxy, an exa
                           method = "spectral")
                                 
 
-For a longer example of how each function can be used, please take a look at the documentation for the package. Short examples for each function are provided in each function's documentation, as well as an explanation of each of the possible input variables.
+For a longer example of how each function can be used, please take a look at the [documentation](https://kateharborne.github.io/SimSpin/docs/documentation) for the package. [Short examples](https://kateharborne.github.io/SimSpin/examples/examples) for each function are provided in each function's documentation, as well as an explanation of each of the possible input variables.
 
 From within R, you can display the package documentation by typing `?SimSpin` and select "Index" at the bottom of the page to view all available functions. Alternatively, type `?` followed by the function name to see function specific documentation.
 
-Longer examples are published [here](https://rpubs.com/kateharborne) and demonstrate a walk-through the basic code operation for SimSpin v2.1.1 (and v1.1.3).
+Longer examples are published [online](https://kateharborne.github.io/SimSpin/basic_usage/) and demonstrate a walk-through the basic code operation for SimSpin v2.5.0.
 
 If you have any further questions or requests for features in the code, report an issue or drop an email to [katherine.harborne\@uwa.edu.au](mailto:katherine.harborne@uwa.edu.au).
 
 ### Citation
 
-If you use this code in any of your own published research, please make sure to include the following citation in your bibliography:
+**NEW PUBLICATION** You can find the pre-print of the submitted work on the arXiv [here](https://arxiv.org/abs/2307.02618), which describes the updates to the code to produce mock spectral data cubes. New citation instructions will be provided here upon the acceptance of the work. 
+
+If you use this code in any of your own published research, please make sure to include the following citations in your bibliography:
 
 K.E. Harborne, C.Power and A.S.G. Robotham, (2020), ["SIMSPIN - Constructing mock IFS kinematic data cubes"](https://ui.adsabs.harvard.edu/abs/2020PASA...37...16H/abstract), Publications of the Astronomical Society of Australia, Volume 37, article id. e016
 
