@@ -14,42 +14,38 @@ authors:
     affiliation: The University of Western Australia
     orcid: 'https://orcid.org/0000-0002-2043-7985'
 identifiers:
+  - type: url
+    value: 'https://arxiv.org/abs/2307.02618'
+    description: 'arXiv e-print, SimSpin v.2.5.0'
   - type: other
     value: 'ascl:1903.006'
     description: Astrophysics Source Code Library
   - type: doi
     value: 10.1017/pasa.2020.8
     description: >-
-      Publications of the Astronomical Society of
-      Australia, Volume 37, article id. e016, May
-      2020
+      Publications of the Astronomical Society of Australia,
+      Volume 37, article id. e016, May 2020
 repository-code: >-
-  https://github.com/kateharborne/SimSpin/releases/tag/v1.1.3
+  https://github.com/kateharborne/SimSpin/releases/tag/v2.5.0
+url: 'https://kateharborne.github.io/SimSpin/'
 repository: 'https://github.com/kateharborne/SimSpin'
 abstract: >-
-  We present SimSpin, a new, public, software
-  framework for generating integral field
-  spectroscopy (IFS) data cubes from
-  N-body/hydrodynamical simulations of galaxies,
-  which can be compared directly with observational
-  datasets. SimSpin provides a consistent method for
-  studying a galaxy's stellar component. It can be
-  used to explore how observationally inferred
-  measurements of kinematics, such as the spin
-  parameter lambda_R, are impacted by the effects of,
-  for example, inclination, seeing conditions,
-  distance, etc. SimSpin is written in R and has been
-  designed to be highly modular, flexible, and
-  extensible. It is already being used by the
-  astrophysics community to generate IFS-like cubes
-  and FITS files for direct comparison of simulations
-  to observations. In this paper, we explain the
-  conceptual framework of SimSpin; how it is
-  implemented in R; and we demonstrate SimSpin's
-  current capabilities, providing as an example a
-  brief investigation of how numerical resolution
-  affects how reliably we can recover the intrinsic
-  stellar kinematics of a simulated galaxy. 
+  In this work, we present a methodology and a corresponding
+  code-base for constructing mock integral field
+  spectrograph (IFS) observations of simulated galaxies in a
+  consistent and reproducible way. Such methods are
+  necessary to improve the collaboration and comparison of
+  observation and theory results, and accelerate our
+  understanding of how the kinematics of galaxies evolve
+  over time. This code, SimSpin, is an open-source package
+  written in R, but also with an API interface such that the
+  code can be interacted with in any coding language.
+  Documentation and individual examples can be found at the
+  open-source website connected to the online repository.
+  SimSpin is already being utilised by international IFS
+  collaborations, including SAMI and MAGPI, for generating
+  comparable data sets from a diverse suite of cosmological
+  hydrodynamical simulations.
 keywords:
   - 'virtual observatory tools '
   - 'galaxies: evolution'
@@ -57,7 +53,7 @@ keywords:
   - 'methods: numerical'
 license: LGPL-3.0
 commit: >-
-  https://github.com/kateharborne/SimSpin/commit/b238197801be11a20746fbfc7ff0c687a5f028f8
-version: v1.1.3
-date-released: '2020-12-14'
+  https://github.com/kateharborne/SimSpin/commit/cc3b2018527995dfaf09130b1afbe4341566e4f7
+version: v2.5.0
+date-released: '2023-07-19'
 
