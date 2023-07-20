@@ -1446,8 +1446,8 @@ test_that("Gas spawning creates even images despite different n-values",{
   mask100 = n100$raw_images$particle_image; mask100[mask100 >= 1] = 1; mask100[mask100!=1]=NA
   mask500 = n500$raw_images$particle_image; mask500[mask500 >= 1] = 1; mask500[mask500!=1]=NA
 
-  expect_true(sum(n500$raw_images$mass_image*mask500, na.rm=T) == sum(n100$raw_images$mass_image*mask100, na.rm=T))
-  expect_true(sum(n500$raw_images$SFR_image) == sum(n100$raw_images$SFR_image))
+  expect_equal(sum(n500$raw_images$mass_image*mask500, na.rm=T), sum(n100$raw_images$mass_image*mask100, na.rm=T))
+  expect_equal(sum(n500$raw_images$SFR_image), sum(n100$raw_images$SFR_image))
 
 })
 
