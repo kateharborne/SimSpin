@@ -38,7 +38,7 @@ SimSpin has been used for a number of research publications including:
 If you use this code for your research, please make sure to include a citation to the source code paper. This reference will soon be updated for the newer v2.X.X. You can do so using the CITATION.cff file within the GitHub repo, or by including the following within your bibliography:
 {: .fs-5 .fw-300 }
 
-*NEW CITATION* With the release of v2.5.0, we have a new publication to record the significant upgrades since v1.1.1. This is under review, but available on the arXiv [here](https://arxiv.org/abs/2307.02618).
+**NEW CITATION** With the release of v2.5.0, we have a new publication to record the significant upgrades since v1.1.1. This is under review, but available on the arXiv [here](https://arxiv.org/abs/2307.02618).
 {: .note }
 
 [Download Citation](https://github.com/kateharborne/SimSpin/blob/main/CITATION.cff){: .btn .btn-purple }
