@@ -101,7 +101,7 @@ If you are following along with this example and would like to download a copy o
 
 Proceeding with building the observed data cube using the SimSpin file constructed above, we organise the various inputs of the [`build_datacube`](/SimSpin/docs/build_datacube) function into a Python dictionary.
 
-The code snippet below will download our simulated galaxy, project it to a distance of 0.3 Mpc at an inclination of 30&deg;and observe it with a SAMI-like instrument. 
+The code snippet below will download our simulated galaxy, project it to a distance of 0.3 kpc/'' at an inclination of 30&deg;and observe it with a SAMI-like instrument. 
 
 We use the "." notation to specify the inputs for [`telescope`](/SimSpin/docs/telescope) and [`observing_strategy`](/SimSpin/docs/observing_strategy) within the data dictionary. 
 {: .note}
