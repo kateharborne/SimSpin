@@ -7,7 +7,7 @@ permalink: /about/
 last_modified_date: "Tue, 20 June 2023 14:50:00 AWST"
 ---
 
-# SimSpin v2.4.x
+# SimSpin v2.5.x
 {: .fs-9 }
 
 A package for producing mock observations of simulations
@@ -38,10 +38,15 @@ SimSpin has been used for a number of research publications including:
 If you use this code for your research, please make sure to include a citation to the source code paper. This reference will soon be updated for the newer v2.X.X. You can do so using the CITATION.cff file within the GitHub repo, or by including the following within your bibliography:
 {: .fs-5 .fw-300 }
 
-[Download Citation](https://github.com/kateharborne/SimSpin/blob/master/CITATION.cff){: .btn .btn-purple }
-[See the paper](https://www.cambridge.org/core/journals/publications-of-the-astronomical-society-of-australia/article/abs/simspinconstructing-mock-ifs-kinematic-data-cubes/BA50F93F6F487ECE9E50773ECF0CB3F1){: .btn .btn-purple }
+*NEW CITATION* With the release of v2.5.0, we have a new publication to record the significant upgrades since v1.1.1. This is under review, but available on the arXiv [here](https://arxiv.org/abs/2307.02618).
+{: .note }
 
--   K.E. Harborne, C.Power and A.S.G. Robotham, (2020), ["SIMSPIN - Constructing mock IFS kinematic data cubes"](https://ui.adsabs.harvard.edu/abs/2020PASA...37...16H/abstract), Publications of the Astronomical Society of Australia, Volume 37, article id. e016
+[Download Citation](https://github.com/kateharborne/SimSpin/blob/main/CITATION.cff){: .btn .btn-purple }
+[See the paper](https://arxiv.org/abs/2307.02618){: .btn .btn-purple }
+
+- K.E. Harborne,  A. Serene, E.J.A. Davies,  C. Derkenne, S. Vaughan, A. Burdon, C. del P. Lagos,  R. McDermid,  S. O'Toole, C. Power, A.S.G. Robotham, G. Santucci, and R. Tobar (2023), [SimSpin v2.5.0 -- Constructing synthetic spectral IFU cubes for comparison with observational surveys](https://arxiv.org/abs/2307.02618)
+
+-   K.E. Harborne, C. Power and A.S.G. Robotham, (2020), ["SIMSPIN - Constructing mock IFS kinematic data cubes"](https://ui.adsabs.harvard.edu/abs/2020PASA...37...16H/abstract), Publications of the Astronomical Society of Australia, Volume 37, article id. e016
 
 -   K.E. Harborne, (2019), ["SimSpin: Kinematic analysis of galaxy simulations"](https://ui.adsabs.harvard.edu/abs/2019ascl.soft03006H/abstract), Astrophysics Source Code Library, record ascl:1903.006
 

@@ -250,7 +250,7 @@ When run in N-body mode, the `PartType2` Group is reserved for **disk** particle
 
 Within SimSpin, we assume that these particles trace a species of stars and will combine any particles in this group with any in `PartType3` bulge stars to form the stellar component table for analysis. 
 
-Metallicities and ages are assigned to N-body disk particles in the [make_simspin_file](/SimSpin/docs/make_simspin_file.markdown) function seperately to the bulge particles.  Hence, the necessary Datasets within the Group only include:
+Metallicities and ages are assigned to N-body disk particles in the [make_simspin_file](/SimSpin/docs/make_simspin_file) function seperately to the bulge particles.  Hence, the necessary Datasets within the Group only include:
 
 | **Table Name**         | **Shape** | **Description**                                           |
 |------------------------|----------------|-----------------------------------------------------------|
@@ -269,7 +269,7 @@ When run in N-body mode, the `PartType3` Group is reserved for **bulge** particl
 
 Within SimSpin, we assume that these particles trace a species of stars and will combine any particles in this group with any in `PartType2` disk stars to form the stellar component table for analysis. 
 
-Metallicities and ages are assigned to N-body bulge particles in the [make_simspin_file](/SimSpin/docs/make_simspin_file.markdown) function seperately to the disk particles.  Hence, the necessary Datasets within the Group include only: 
+Metallicities and ages are assigned to N-body bulge particles in the [make_simspin_file](/SimSpin/docs/make_simspin_file) function seperately to the disk particles.  Hence, the necessary Datasets within the Group include only: 
 
 | **Table Name**         | **Shape** | **Description**                                           |
 |------------------------|----------------|-----------------------------------------------------------|

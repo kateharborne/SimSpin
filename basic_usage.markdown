@@ -45,15 +45,15 @@ We define groups of particles or cells in each simulation according to the conve
 
 This information can be structured in an HDF5 file, with groups containing each of these particle types. Alternatively, SimSpin can also process Gadget binary files (SnapFormat type 1).
 
-If you have any issues with your input simulation file, check out [this page](examples/generating_hdf5.markdown) to check your input file structure.
+If you have any issues with your input simulation file, check out [this page](/SimSpin/examples/generating_hdf5) to check your input file structure.
 {: .note }
 
-We begin by running the [`make_simspin_file`](https://kateharborne.github.io/SimSpin/docs/make_simspin_file) function. 
+We begin by running the [`make_simspin_file`](/SimSpin/docs/make_simspin_file) function. 
 This will organise the provided data into a consistent format for SimSpin processing and assign SEDs to stellar particles given their individual ages and metallicities. 
 
 As this is the most time consuming process of the data-cube construction, we want to only do this once. 
 However, a single SimSpin file can be usede multiple times for a variety of different observing strategies and telescope set ups.
-The variety of options available for this process is defined in the [documentation here](docs/make_simspin_file.markdown).
+The variety of options available for this process is defined in the [documentation here](/SimSpin/docs/make_simspin_file).
 
 For this basic usage example, we will use the default parameters and one of the simple simulations included in the package:
 {: .fw-500 .text-grey-dk-100 }
