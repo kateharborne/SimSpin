@@ -269,8 +269,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   simspin_file = list("header"    = header,
                       "star_part" = galaxy_data$star_part,
                       "gas_part"  = galaxy_data$gas_part,
-                      "spectra"   = sed,
-                      "wave"      = temp$Wave)
+                      "spectral_weights" = sed)
 
   if (write_to_file){
     saveRDS(simspin_file, file = output, compress = "xz")
