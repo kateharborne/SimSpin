@@ -50,8 +50,8 @@
 #' tested for convergence depending on the resolution of the grid used to image
 #' the gas properties at the `build_datacube()` stage.
 #'@return Returns an .Rdata file that contains a list of particle positions,
-#' velocities, and spectra (or a list containing the same information to the
-#' environment without writing to file, when `write_to_file = F`).
+#' velocities, and spectral weights (or a list containing the same information
+#' to the environment without writing to file, when `write_to_file = F`).
 #'@examples
 #'ss_file = make_simspin_file(filename = system.file("extdata",
 #'                                                   "SimSpin_example_Gadget",
