@@ -1270,6 +1270,43 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   return(c(ID_lo = IDlo, ID_hi = IDhi, wt_lo = 1-(interp-IDlo), wt_hi = interp-IDlo))
 }
 
+.spectral_weights = function(Metallicity, Age, Template, cores){
+
+  f = function(metallicity, age) {
+      Z = as.numeric(.interp_quick(metallicity, Template$Z, log = TRUE))
+      A = as.numeric(.interp_quick(age * 1e9, Template$Age, log = TRUE))
+      # ID_lo = 1, ID_hi = 2, wt_lo = 3, wt_hi = 4
+      return(data.table::data.table("Z_ID_low" = Z[1],
+                                    "Z_ID_hi"  = Z[2],
+                                    "Z_wt_low" = Z[3],
+                                    "Z_wt_hi"  = Z[4],
+                                    "A_ID_low" = A[1],
+                                    "A_ID_hi"  = A[2],
+                                    "A_wt_low" = A[3],
+                                    "A_wt_hi"  = A[4]))
+    }
+
+    if (length(Age) == 1){
+      spectra = f(Metallicity, Age)
+      return(spectra)
+    } else {
+
+      if (cores > 1) {
+        doParallel::registerDoParallel(cores = cores)
+        i = integer()
+        output = foreach::foreach(i = 1:length(Metallicity), .packages = c("SimSpin", "foreach")) %dopar% {
+          f(Metallicity[i], Age[i])
+        }
+        closeAllConnections()
+      } else {
+        output = mapply(f, Metallicity, Age)
+      }
+
+      return(output)
+
+    }
+}
+
 # Function to generate spectra (w/o mass weighting)
 .spectra = function(Metallicity, Age, Template, cores){
   f = function(metallicity, age) {

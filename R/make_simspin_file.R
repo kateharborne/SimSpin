@@ -219,7 +219,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     galaxy_data$star_part[, Age := galaxy_data$ssp$Age, ]
     galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
 
-    sed  = .spectra(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores) # returns a list
+    sed  = .spectral_weights(Metallicity = AZ_bins$metallicities, Age = AZ_bins$ages, Template = temp, cores = cores)
+    # returns a list of which spectra from the template set and the associated weights for A and Z
 
   } else {sed = NULL}
 
