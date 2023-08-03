@@ -123,7 +123,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     simspin_file = paste0("./", object_name)
   }
 
-  if (length(simspin_data) == 4){
+  if (!"header" %in% names(simspin_data)){
     # if we are working with a simspin file from before v2.3.0
     simspin_data$header = list("InputFile" = "Unknown",
                                "OutputFile" = simspin_file,
@@ -187,6 +187,22 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     simspin_data$spectra = data.table::as.data.table(simspin_data$spectra)
   }
 
+  if (!"spectral_weights" %in% names(simspin_data)){
+    # if we are working with a simspin file from before v2.6.0
+    warning(cat("WARNING! - You are using an old SimSpin file (< v2.6.0). \n"))
+    cat("For smaller SimSpin file sizes, consider re-making your SimSpin files using the make_simspin_file() function. \n")
+    spectra_flag = 1
+  } else {spectra_flag = 0}
+
+  if (simspin_data$header$Template == "EMILES"){
+      temp = SimSpin::EMILES
+    } else if (simspin_data$header$Template == "BC03hr"){
+      temp = SimSpin::BC03hr
+    } else {
+      temp = SimSpin::BC03lr
+    }
+
+
   # Twisting galaxy about the z-axis to look from an angle
   twisted_data = twist_galaxy(galaxy_data, twist_rad = observation$twist_rad)
 
@@ -222,7 +238,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (observation$method == "spectral"){
 
     # read original wavelengths of the template spectra
-    wavelength = simspin_data$wave * (observation$z + 1) # and then applying a shift to those spectra due to redshift, z
+    wavelength = temp$Wave * (observation$z + 1) # and then applying a shift to those spectra due to redshift, z
 
     # If the requested wavelength resolution of the telescope is a smaller number than the intrinsic wavelength
     # resolution of the template spectra, the interpolation onto a finer grid can cause errors that pPXF cannot
@@ -260,10 +276,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     if (verbose){cat("Generating spectra per spaxel... \n")}
 
     if (cores == 1){
-      output = .spectral_spaxels(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose)
+      output = .spectral_spaxels(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, temp, verbose, spectra_flag)
     }
     if (cores > 1){
-      output = .spectral_spaxels_mc(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose, cores)
+      output = .spectral_spaxels_mc(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, temp, verbose, cores, spectra_flag)
     }
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$wave_bin))
@@ -328,10 +344,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (verbose){cat("Generating stellar velocity distributions per spaxel... \n")}
     if (cores == 1){
-      output = .velocity_spaxels(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, mass_flag)
+      output = .velocity_spaxels(part_in_spaxel, observation, galaxy_data, simspin_data, temp, verbose, mass_flag, spectra_flag)
     }
     if (cores > 1){
-      output = .velocity_spaxels_mc(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores, mass_flag)
+      output = .velocity_spaxels_mc(part_in_spaxel, observation, galaxy_data, simspin_data, temp, verbose, cores, mass_flag, spectra_flag)
     }
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))

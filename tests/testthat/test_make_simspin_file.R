@@ -13,7 +13,7 @@ ss_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", packag
 ss_horizon    = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", package = "SimSpin")
 ss_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", package = "SimSpin")
 
-ss_file_length = 5
+ss_file_length = 4
 ss_file_header_length = 15
 built_cube_size = 5
 
@@ -24,12 +24,18 @@ test_that("Initial run of each simulation type - Gadget.", {
   expect_null(make_simspin_file(ss_gadget, template = "BC03hr", output = paste(temp_loc, "/gadget_test", sep="")))
   expect_length(readRDS(paste(temp_loc, "/gadget_test", sep="")), ss_file_length)
   expect_true(length(readRDS(paste(temp_loc, "/gadget_test", sep=""))$gas_part) == 0)
+  expect_true(nrow(readRDS(paste(temp_loc, "/gadget_test", sep=""))$spectral_weights) == 8)
+  expect_true(length(readRDS(paste(temp_loc, "/gadget_test", sep=""))$spectral_weights) == 2) # for each of the two particle types
+
 })
 
 test_that("Initial run of each simulation type - HDF5", {
   expect_null(make_simspin_file(ss_hdf5, output = paste(temp_loc, "/hdf5_test", sep="")))
   expect_length(readRDS(paste(temp_loc, "/hdf5_test", sep="")), ss_file_length)
   expect_true(length(readRDS(paste(temp_loc, "/hdf5_test", sep=""))$gas_part) == 0)
+  expect_true(nrow(readRDS(paste(temp_loc, "/hdf5_test", sep=""))$spectral_weights) == 8)
+  expect_true(length(readRDS(paste(temp_loc, "/hdf5_test", sep=""))$spectral_weights) == 1) # for each of the two particle types
+
 })
 
 test_that("Initial run of each simulation type - EAGLE", {
@@ -38,6 +44,7 @@ test_that("Initial run of each simulation type - EAGLE", {
   EAGLE = readRDS(paste(temp_loc, "/eagle_test", sep=""))
   expect_length(EAGLE, ss_file_length)
   expect_true(length(EAGLE$gas_part) == 17)
+  expect_true(nrow(EAGLE$spectral_weights) == 8)
   expect_false(any(is.na(EAGLE$gas_part$ThermalDispersion)))
   expect_true(all(EAGLE$gas_part$ThermalDispersion[EAGLE$gas_part$Temperature < 1e4] == 11))
 })
@@ -48,6 +55,7 @@ test_that("Initial run of each simulation type - Magneticum", {
   magneticum = readRDS(paste(temp_loc, "/magneticum_test", sep=""))
   expect_length(magneticum, ss_file_length)
   expect_true(length(magneticum$gas_part) == 17)
+  expect_true(nrow(magneticum$spectral_weights) == 8)
   expect_false(any(is.na(magneticum$gas_part$ThermalDispersion)))
   expect_true(all(magneticum$gas_part$ThermalDispersion[magneticum$gas_part$Temperature < 1e4] == 11))
 
@@ -59,6 +67,7 @@ test_that("Initial run of each simulation type - HorizonAGN", {
   HAGN = readRDS(paste(temp_loc, "/horizon_test", sep=""))
   expect_length(HAGN, ss_file_length)
   expect_true(length(HAGN$gas_part) == 17)
+  expect_true(nrow(HAGN$spectral_weights) == 8)
   expect_false(any(is.na(HAGN$gas_part$ThermalDispersion)))
   expect_true(all(HAGN$gas_part$ThermalDispersion[HAGN$gas_part$Temperature < 1e4] == 11))
 
@@ -70,6 +79,7 @@ test_that("Initial run of each simulation type - IllustrisTNG", {
   TNG = readRDS(paste(temp_loc, "/illustris_test", sep=""))
   expect_length(TNG, ss_file_length)
   expect_true(length(TNG$gas_part) == 17)
+  expect_true(nrow(TNG$spectral_weights) == 8)
   expect_false(any(is.na(TNG$gas_part$ThermalDispersion)))
   expect_true(all(TNG$gas_part$ThermalDispersion[TNG$gas_part$Temperature < 1e4] == 11))
 
