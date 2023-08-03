@@ -15,7 +15,7 @@ ss_pd_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", p
 
 ss_gadget_old = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
 ss_gadget     = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
-ss_hdf5       = make_simspin_file(ss_pd_hdf5, write_to_file = FALSE)
+ss_hdf5       = make_simspin_file(ss_pd_hdf5, template = "BC03hr", write_to_file = FALSE)
 ss_eagle      = make_simspin_file(ss_pd_eagle, write_to_file = FALSE, template = "EMILES")
 ss_magneticum = make_simspin_file(ss_pd_magneticum, write_to_file = FALSE, template = "BC03hr", sph_spawn_n=10)
 ss_horizon    = make_simspin_file(ss_pd_horizon, write_to_file = FALSE, template = "BC03lr")
@@ -1027,12 +1027,15 @@ test_that("Repeated spectra are included in intrinsic spectra", {
   particle_IDs = which(galaxy_data$pixel_pos == i)
   galaxy_sample = galaxy_data[particle_IDs,]
 
-  intrinsic_spectra = simspin_data$spectra[ , galaxy_sample$sed_id, with=FALSE]
+  intrinsic_spectra = array(data = 0.0, dim = c(5, 842))
+  for (n in 1:length(particle_IDs)){
+    intrinsic_spectra[n,] = .spectra(SW=simspin_data$spectral_weights[[galaxy_sample$sed_id[n]]], Template = SimSpin::BC03lr)
+  }
+
   spectra = intrinsic_spectra * (galaxy_sample$Initial_Mass * 1e10) # reading relevant spectra
 
-  expect_true(all(intrinsic_spectra[,c(3),] == simspin_data$spectra[[paste0("V", galaxy_sample$sed_id[3])]]))
-  expect_equal((intrinsic_spectra[,c(1),] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[,c(1),], tolerance = 0.001)
-  expect_equal((intrinsic_spectra[,c(2),] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[,c(2),], tolerance = 0.001)
+  expect_equal((intrinsic_spectra[1,] * galaxy_sample$Initial_Mass[1] * 1e10), spectra[1,], tolerance = 0.001)
+  expect_equal((intrinsic_spectra[2,] * galaxy_sample$Initial_Mass[2] * 1e10), spectra[2,], tolerance = 0.001)
 })
 
 # Test that the output of blurred and un-blurred format is the same ------------
@@ -1204,53 +1207,104 @@ test_that("No NAs or NaNs are included in mock observed images", {
   expect_false(any(is.na(horizon_vel$observed_images$dispersion_image)))
 })
 
-# Testing that the build_datacbe function will work with old SimSpin files -----
-test_that("Old SimSpin files do not stop the code from working!!!", {
-  ss_gadget_trim = ss_gadget[2:5]
-  ss_hdf5_trim = ss_hdf5[2:5]
-  ss_eagle_trim = ss_eagle[2:5]
+# Testing that the build_datacube function will work with old SimSpin files -----
+test_that("SimSpin files < v2.3.0 do not stop the code from working!!!", {
 
-  expect_warning(build_datacube(simspin_file = ss_gadget_trim,
+  ss_gadget_v230 = ss_gadget[2:4]
+  ss_hdf5_v230 = ss_hdf5[2:4]
+  ss_eagle_v230 = ss_eagle[2:4]
+
+  ss_gadget_v230$wave = SimSpin::BC03lr$Wave[1:842]
+  ss_hdf5_v230$wave = SimSpin::BC03lr$Wave[1:6521]
+  ss_eagle_v230$wave = SimSpin::EMILES$Wave[1:20356]
+
+
+  expect_warning(build_datacube(simspin_file = ss_gadget_v230,
                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
                                 observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                 verbose = F))
 
-  BC03lr_cube = suppressWarnings(build_datacube(simspin_file = ss_gadget_trim,
+  BC03lr_cube = suppressWarnings(build_datacube(simspin_file = ss_gadget_v230,
                                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
                                                 observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                                 verbose = F))
   expect_length(BC03lr_cube, built_cube_size)
 
 
-  expect_warning(build_datacube(simspin_file = ss_hdf5_trim,
+  expect_warning(build_datacube(simspin_file = ss_hdf5_v230,
                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
                                 observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                 verbose = F))
 
-  BC03hr_cube = suppressWarnings(build_datacube(simspin_file = ss_hdf5_trim,
+  BC03hr_cube = suppressWarnings(build_datacube(simspin_file = ss_hdf5_v230,
                                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
                                                 observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                                 verbose = F))
   expect_length(BC03hr_cube, built_cube_size)
 
-  expect_warning(build_datacube(simspin_file = ss_eagle_trim,
+  expect_warning(build_datacube(simspin_file = ss_eagle_v230,
                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
                                 observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                 verbose = F))
 
-  EMILES_cube = suppressWarnings(build_datacube(simspin_file = ss_eagle_trim,
+  EMILES_cube = suppressWarnings(build_datacube(simspin_file = ss_eagle_v230,
                                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
                                                 observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                                                 verbose = F))
   expect_length(EMILES_cube, built_cube_size)
 
 
-  ss_gadget_trim$wave = ss_gadget_trim$wave[1:840]
+  ss_gadget_v230$wave = ss_gadget_v230$wave[1:840]
 
-  expect_error(build_datacube(simspin_file = ss_gadget_trim,
+  expect_error(build_datacube(simspin_file = ss_gadget_v230,
                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
                               verbose = F))
+
+})
+
+test_that("SimSpin files < 2.6.0 do not stop the code from working!!!", {
+  # SimSpin files before v2.6.0 include full spectra in the file - using
+  # .spectra() function to recreate this and test for a hydro and N-body model
+
+  ss_gadget_v260 = ss_gadget
+  ss_gadget_v260$spectra = vector(mode="list", length = length(ss_gadget_v260$spectral_weights))
+  for (part in 1:length(ss_gadget_v260$spectral_weights)){
+    ss_gadget_v260$spectra[[part]] = .spectra(ss_gadget_v260$spectral_weights[[part]], SimSpin::BC03lr)
+  }
+  ss_gadget_v260 = ss_gadget_v260[names(ss_gadget_v260) != "spectral_weights"]
+  ss_gadget_v260$wave = SimSpin::BC03lr$Wave
+
+  ss_eagle_v260 = ss_eagle
+  ss_eagle_v260$spectra = vector(mode="list", length = length(ss_eagle_v260$spectral_weights))
+  for (part in 1:length(ss_eagle_v260$spectral_weights)){
+    ss_eagle_v260$spectra[[part]] = .spectra(ss_eagle_v260$spectral_weights[[part]], SimSpin::EMILES)
+  }
+  ss_eagle_v260 = ss_eagle_v260[names(ss_eagle_v260) != "spectral_weights"]
+  ss_eagle_v260$wave = SimSpin::BC03lr$EMILES
+
+  expect_warning(build_datacube(simspin_file = ss_gadget_v260,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
+
+  nbody_cube  = suppressWarnings(build_datacube(simspin_file = ss_gadget_v260,
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                                verbose = F))
+  expect_length(nbody_cube, built_cube_size)
+
+
+  expect_warning(build_datacube(simspin_file = ss_eagle_v260,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                verbose = F))
+
+  hydro_cube  = suppressWarnings(build_datacube(simspin_file = ss_eagle_v260,
+                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3, wave_res = 1.06),
+                                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = T),
+                                                verbose = F))
+  expect_length(hydro_cube, built_cube_size)
 
 })
 
@@ -1260,21 +1314,24 @@ test_that("Flux conservation works as expected", {
   BC03_test = make_simspin_file(filename = ss_pd_gadget, disk_age = 5, disk_Z = 0.004, template = "BC03", write_to_file = F)
   EMILES_test = make_simspin_file(filename = ss_pd_gadget, disk_age = 5, disk_Z = 0.004, template = "EMILES", write_to_file = F)
 
-  BC03_test$spectra = data.table::data.table("V1" = BC03_test$spectra[[1]])
+  BC03_temp = SimSpin::BC03lr
   BC03_test$star_part$sed_id = rep(1, length(BC03_test$star_part$sed_id))
   BC03_test$star_part$Initial_Mass = rep(200006, length(BC03_test$star_part$sed_id))
-  EMILES_test$spectra = data.table::data.table("V1" = EMILES_test$spectra[[1]])
+  BC03_test$spectra = .spectra(BC03_test$spectral_weights[[1]], BC03_temp)
+
+  EMILES_temp = SimSpin::EMILES
   EMILES_test$star_part$sed_id = rep(1, length(EMILES_test$star_part$sed_id))
   EMILES_test$star_part$Initial_Mass = rep(200006, length(EMILES_test$star_part$sed_id))
+  EMILES_test$spectra = .spectra(EMILES_test$spectral_weights[[1]], EMILES_temp)
 
   wave_range = c(3700,5700)
-  BC03_wave_int = which(BC03_test$wave > wave_range[1] & BC03_test$wave < wave_range[2])
-  EMILES_wave_int = which(EMILES_test$wave > wave_range[1] & EMILES_test$wave < wave_range[2])
-  raw_diff_perc = (sum(BC03_test$spectra$V1[BC03_wave_int] * .qdiff(BC03_test$wave)[BC03_wave_int])/
-                     sum(EMILES_test$spectra$V1[EMILES_wave_int] * .qdiff(EMILES_test$wave)[EMILES_wave_int]))*100
+  BC03_wave_int = which(BC03_temp$Wave > wave_range[1] & BC03_temp$Wave < wave_range[2])
+  EMILES_wave_int = which(EMILES_temp$Wave > wave_range[1] & EMILES_temp$Wave < wave_range[2])
+  raw_diff_perc = (sum(BC03_test$spectra[BC03_wave_int] * .qdiff(BC03_temp$Wave)[BC03_wave_int])/
+                     sum(EMILES_test$spectra[EMILES_wave_int] * .qdiff(EMILES_temp$Wave)[EMILES_wave_int]))*100
 
-  #magplot(EMILES_test$wave[EMILES_wave_int], EMILES_test$spectra[[1]][EMILES_wave_int], type="l", col = "blue", lwd=2)
-  #lines(BC03_test$wave[BC03_wave_int], BC03_test$spectra[[1]][BC03_wave_int], col = "red", lwd=2)
+  #magplot(EMILES_temp$Wave[EMILES_wave_int], EMILES_test$spectra[EMILES_wave_int], type="l", col = "blue", lwd=2)
+  #lines(BC03_temp$Wave[BC03_wave_int], BC03_test$spectra[BC03_wave_int], col = "red", lwd=2)
 
   BC03_obs   = suppressWarnings(build_datacube(simspin_file = BC03_test,
                                 telescope = telescope(type="IFU", lsf_fwhm = 0, signal_to_noise = NA, wave_res = 1.06),
@@ -1330,14 +1387,12 @@ test_that("Error is given if you try to build an observation with a simspin file
   ss_eagle_gasonly = list("header"    = ss_eagle$header,
                           "star_part" = NULL,
                           "gas_part"  = ss_eagle$gas_part,
-                          "spectra"   = ss_eagle$spectra,
-                          "wave"      = ss_eagle$wave)
+                          "spectral_weights" = ss_eagle$spectral_weights)
 
   ss_eagle_nsfgasonly = list("header"    = ss_eagle$header,
                              "star_part" = NULL,
                              "gas_part"  = ss_eagle$gas_part[ss_eagle$gas_part$SFR == 0,],
-                             "spectra"   = ss_eagle$spectra,
-                             "wave"      = ss_eagle$wave)
+                             "spectral_weights" = ss_eagle$spectral_weights)
 
   expect_error(build_datacube(simspin_file = ss_eagle_gasonly,
                               telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
