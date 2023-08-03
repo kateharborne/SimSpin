@@ -1276,19 +1276,17 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
       Z = as.numeric(.interp_quick(metallicity, Template$Z, log = TRUE))
       A = as.numeric(.interp_quick(age * 1e9, Template$Age, log = TRUE))
       # ID_lo = 1, ID_hi = 2, wt_lo = 3, wt_hi = 4
-      return(data.table::data.table("Z_ID_low" = Z[1],
-                                    "Z_ID_hi"  = Z[2],
-                                    "Z_wt_low" = Z[3],
-                                    "Z_wt_hi"  = Z[4],
-                                    "A_ID_low" = A[1],
-                                    "A_ID_hi"  = A[2],
-                                    "A_wt_low" = A[3],
-                                    "A_wt_hi"  = A[4]))
+      return(c(Z, A))
     }
 
     if (length(Age) == 1){
-      spectra = f(Metallicity, Age)
-      return(spectra)
+
+      output = f(Metallicity, Age)
+      # "Z_ID_lo", "Z_ID_hi", "Z_wt_lo", "Z_wt_hi"
+      # "A_ID_lo", "A_ID_hi", "A_wt_lo", "A_wt_hi"
+      output = data.table::as.data.table(output)
+      return(output)
+
     } else {
 
       if (cores > 1) {
@@ -1298,8 +1296,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
           f(Metallicity[i], Age[i])
         }
         closeAllConnections()
+        output = data.table::as.data.table(output)
       } else {
         output = mapply(f, Metallicity, Age)
+        output = data.table::as.data.table(output)
       }
 
       return(output)
@@ -1308,45 +1308,42 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 # Function to generate spectra (w/o mass weighting)
-.spectra = function(Metallicity, Age, Template, cores){
-  f = function(metallicity, age) {
-    Z = as.numeric(.interp_quick(metallicity, Template$Z, log = TRUE))
-    A = as.numeric(.interp_quick(age * 1e9, Template$Age, log = TRUE))
-
-    weights = data.frame("hihi" = Z[4] * A[4],   # ID_lo = 1, ID_hi = 2, wt_lo = 3, wt_hi = 4
-                         "hilo" = Z[4] * A[3],
-                         "lohi" = Z[3] * A[4],
-                         "lolo" = Z[3] * A[3])
+.spectra = function(SW, Template){
+  # s = function(SW){
+    weights = data.frame("hihi" = SW[4] * SW[8],   # Z_ID_lo = 1, Z_ID_hi = 2, Z_wt_lo = 3, Z_wt_hi = 4
+                         "hilo" = SW[4] * SW[7],   # A_ID_lo = 5, A_ID_hi = 6, A_wt_lo = 7, A_wt_hi = 8
+                         "lohi" = SW[3] * SW[8],
+                         "lolo" = SW[3] * SW[7])
 
     part_spec = array(data = 0.0, dim = c(1, length(Template$Wave)))
-    part_spec = ((Template$Zspec[[Z[2]]][A[2],] * weights$hihi) +
-                 (Template$Zspec[[Z[2]]][A[1],] * weights$hilo) +
-                 (Template$Zspec[[Z[1]]][A[2],] * weights$lohi) +
-                 (Template$Zspec[[Z[1]]][A[1],] * weights$lolo))
+    part_spec = ((Template$Zspec[[SW[2]]][SW[6],] * weights$hihi) +
+                 (Template$Zspec[[SW[2]]][SW[5],] * weights$hilo) +
+                 (Template$Zspec[[SW[1]]][SW[6],] * weights$lohi) +
+                 (Template$Zspec[[SW[1]]][SW[5],] * weights$lolo))
 
     return(part_spec)
-  }
+  # }
 
-  if (length(Age) == 1){
-    spectra = data.table::data.table(f(Metallicity, Age))
-    return(spectra)
-  } else {
-
-    if (cores > 1) {
-      doParallel::registerDoParallel(cores = cores)
-      i = integer()
-      part_spec = foreach::foreach(i = 1:length(Metallicity), .packages = c("SimSpin", "foreach")) %dopar% {
-        f(Metallicity[i], Age[i])
-      }
-      closeAllConnections()
-      output = data.table::as.data.table(part_spec)
-    } else {
-      output = mapply(f, Metallicity, Age)
-      output = data.table::as.data.table(output)
-    }
-    return(output)
-
-  }
+  # if (length(spectral_weights) == 1){
+  #   spectra = data.table::data.table(s(spectral_weights))
+  #   return(spectra)
+  # } else {
+  #
+  #   if (cores > 1) {
+  #     doParallel::registerDoParallel(cores = cores)
+  #     i = integer()
+  #     part_spec = foreach::foreach(i = 1:length(spectral_weights), .packages = c("SimSpin", "foreach")) %dopar% {
+  #       s(spectral_weights[[i]])
+  #     }
+  #     closeAllConnections()
+  #     output = data.table::as.data.table(part_spec)
+  #   } else {
+  #     output = mapply(s, spectral_weights)
+  #     output = data.table::as.data.table(output)
+  #   }
+  #   return(output)
+  #
+  # }
 }
 
 .circular_ap=function(sbin){
@@ -1467,7 +1464,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 # spectral mode -
-.spectral_spaxels = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose){
+.spectral_spaxels = function(part_in_spaxel, wavelength, observation,
+                             galaxy_data, simspin_data, template, verbose, spectra_flag){
 
   spectra = matrix(data = 0.0, ncol = observation$wave_bin, nrow = observation$sbin^2)
   vel_los = array(data = 0.0, dim = observation$sbin^2)
@@ -1490,8 +1488,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     wave_diff_observed  = .qdiff(observation$wave_seq) # compute the wavelength channel widths in telescope
 
     for (p in 1:num_part){
-      intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-        (galaxy_sample$Initial_Mass[p])
+
+      if (spectra_flag == 1){
+        intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]][1:length(template$Wave)] *
+          (galaxy_sample$Initial_Mass[p])
+
+      } else {
+        intrinsic_spectra = .spectra(simspin_data$spectral_weights[[galaxy_sample$sed_id[p]]],
+                                     template) * (galaxy_sample$Initial_Mass[p])
+      }
       # reading particle luminosity in units of Lsol/Ang
 
       # pulling wavelengths and using doppler formula to compute the shift in
@@ -1537,7 +1542,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   return(list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map))
 }
 
-.spectral_spaxels_mc = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, verbose, cores){
+.spectral_spaxels_mc = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, template, verbose, cores, spectra_flag){
 
   spectra = matrix(data = 0.0, ncol = observation$wave_bin, nrow = observation$sbin^2)
   vel_los = array(data = 0.0, dim = observation$sbin^2)
@@ -1564,8 +1569,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      wave_diff_observed  = .qdiff(observation$wave_seq) # compute the wavelength channel widths in telescope
 
                      for (p in 1:num_part){
-                       intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-                         (galaxy_sample$Initial_Mass[p])
+
+                       if (spectra_flag == 1){
+                         intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]][1:length(template$Wave)] *
+                           (galaxy_sample$Initial_Mass[p])
+
+                       } else {
+                         intrinsic_spectra = .spectra(simspin_data$spectral_weights[[galaxy_sample$sed_id[p]]],
+                                                      template) * (galaxy_sample$Initial_Mass[p])
+                       }
                        # reading particle luminosity in units of Lsol/Ang
 
                        # pulling wavelengths and using doppler formula to compute the shift in
@@ -1623,7 +1635,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 }
 
 # stellar velocity mode -
-.velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, mass_flag){
+.velocity_spaxels = function(part_in_spaxel, observation, galaxy_data, simspin_data, template, verbose, mass_flag, spectra_flag){
 
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = 0.0, dim = observation$sbin^2)
@@ -1652,20 +1664,26 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
       band_lum = numeric(num_part)
       full_lum = numeric(num_part)
-      wave_seq_int = which(simspin_data$wave >= min(observation$wave_seq) & simspin_data$wave <= max(observation$wave_seq))
-      wave_diff_intrinsic = .qdiff(simspin_data$wave[wave_seq_int])
+      wave_seq_int = which(template$Wave >= min(observation$wave_seq) & template$Wave <= max(observation$wave_seq))
+      wave_diff_intrinsic = .qdiff(template$Wave[wave_seq_int])
       wave_diff_observed  = .qdiff(observation$wave_seq)
 
       for (p in 1:num_part){
 
-        intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-          (galaxy_sample$Initial_Mass[p])
+        if (spectra_flag == 1){
+          intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]][1:length(template$Wave)] *
+            (galaxy_sample$Initial_Mass[p])
+
+        } else {
+          intrinsic_spectra = .spectra(simspin_data$spectral_weights[[galaxy_sample$sed_id[p]]],
+                                       template) * (galaxy_sample$Initial_Mass[p])
+        }
         # reading particle luminosity in units of Lsol/Ang
 
         tot_lum = sum(intrinsic_spectra[wave_seq_int] * wave_diff_intrinsic)
         # total luminosity within the wavelength range of the telescope
 
-        lum = stats::approx(x = simspin_data$wave, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
+        lum = stats::approx(x = template$Wave, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
         new_lum = sum(lum * wave_diff_observed)
         # total luminosity integrated in wavelength bins
 
@@ -1710,7 +1728,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   return(list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map))
 }
 
-.velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores, mass_flag){
+.velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, template, verbose, cores, mass_flag, spectra_flag){
 
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = 0.0, dim = observation$sbin^2)
@@ -1743,19 +1761,26 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
                        band_lum = numeric(num_part)
                        full_lum = numeric(num_part)
-                       wave_seq_int = which(simspin_data$wave >= min(observation$wave_seq) & simspin_data$wave <= max(observation$wave_seq))
-                       wave_diff_intrinsic = .qdiff(simspin_data$wave[wave_seq_int])
+                       wave_seq_int = which(template$Wave >= min(observation$wave_seq) & template$Wave <= max(observation$wave_seq))
+                       wave_diff_intrinsic = .qdiff(template$Wave[wave_seq_int])
                        wave_diff_observed  = .qdiff(observation$wave_seq)
 
                        for (p in 1:num_part){
-                         intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]] *
-                           (galaxy_sample$Initial_Mass[p])
+
+                         if (spectra_flag == 1){
+                           intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]][1:length(template$Wave)] *
+                             (galaxy_sample$Initial_Mass[p])
+
+                         } else {
+                           intrinsic_spectra = .spectra(simspin_data$spectral_weights[[galaxy_sample$sed_id[p]]],
+                                                        template) * (galaxy_sample$Initial_Mass[p])
+                         }
                          # reading particle luminosity in units of Lsol/Ang
 
                          tot_lum = sum(intrinsic_spectra[wave_seq_int] * wave_diff_intrinsic)
                          # total luminosity within the wavelength range of the telescope
 
-                         lum = stats::approx(x = simspin_data$wave, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
+                         lum = stats::approx(x = template$Wave, y = intrinsic_spectra, xout = observation$wave_seq, rule=1)[[2]]
                          # transform luminosity into flux detected at telescope
                          #    flux in units erg/s/cm^2/Ang
 
