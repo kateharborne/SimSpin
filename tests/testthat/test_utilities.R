@@ -84,16 +84,16 @@ test_that("SED is returned as a list and data.table when 1 or multiple cores are
   ages = sample(seq(3e7, 1.4e10, length.out = 100), 100)/1e9
   metallicity = sample(seq(1e-4, 4e-2, length.out = 100), 100)
   temp = SimSpin::BC03lr
-  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = 1), "list")
-  expect_type(.spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = 2), "list")
-  expect_true(data.table::is.data.table(.spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = 1)))
-  expect_true(data.table::is.data.table(.spectra(Metallicity = metallicity, Age = ages, Template = temp, cores = 2)))
+  expect_type(.spectral_weights(Metallicity = metallicity, Age = ages, Template = temp, cores = 1), "list")
+  expect_type(.spectral_weights(Metallicity = metallicity, Age = ages, Template = temp, cores = 2), "list")
+  expect_true(data.table::is.data.table(.spectral_weights(Metallicity = metallicity, Age = ages, Template = temp, cores = 1)))
+  expect_true(data.table::is.data.table(.spectral_weights(Metallicity = metallicity, Age = ages, Template = temp, cores = 2)))
 })
 
 test_that("SED is returned as a list when only one age and metallicity are given", {
   temp = SimSpin::BC03lr
-  expect_type(.spectra(Metallicity = 1e-4, Age = 5, Template = temp, cores = 1), "list")
-  expect_true(data.table::is.data.table(.spectra(Metallicity = 1e-4, Age = 5, Template = temp, cores = 1)))
+  expect_type(.spectral_weights(Metallicity = 1e-4, Age = 5, Template = temp, cores = 1), "list")
+  expect_true(data.table::is.data.table(.spectral_weights(Metallicity = 1e-4, Age = 5, Template = temp, cores = 1)))
 })
 
 test_that("Filters and templates can be loaded successfully", {
