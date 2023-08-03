@@ -4,10 +4,10 @@ title: Home
 nav_order: 1
 description: "SimSpin is a package for producing mock IFS observations of galaxy simulations."
 permalink: /
-last_modified_date: "Friday 28 October 2022 13:57:00 AWST"
+last_modified_date: "Thurs, 03 Aug 2023 15:57:00 AWST"
 ---
 
-# SimSpin v2.5.0
+# SimSpin v2.6.0
 {: .fs-9 }
 
 A package for producing mock observations of simulations

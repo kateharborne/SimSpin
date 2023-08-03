@@ -3,16 +3,19 @@ layout: default
 title: make_simspin_file
 parent: Documentation
 nav_order: 2
-last_modified_date: "Tue, 20 Jun 2023 15:57:00 AWST"
+last_modified_date: "Thurs, 03 Aug 2023 15:57:00 AWST"
 ---
 
 # Making the input file for SimSpin
+
+Recent Updates
+{: .label .label-purple } 
 
 In order to build a data cube with SimSpin, we need to construct an input file.
 {: .fs-5 .fw-300 .pb-2 }
 
 The purpose of this input file is to prepare all the information of the supplied simulation in a consistent format.
-It also aims to prepare the computationally expensive steps only once (i.e. the generation of spectra for each star).
+It also aims to prepare the computationally expensive steps only once (i.e. the generation of spectral weights for each star).
 Once we have generated a SimSpin file, that file can be used as input to `build_datacube` many times. 
 {: .fw-300 }
 
@@ -57,10 +60,14 @@ make_simspin_file(filename,                         # REQUIRED input file
 ---
 
 ## Output Parameters
+
+It is worth noting that, in SimSpin files made using < v2.6.0, the output file contained the full spectrum associated with the particle `sed_id` (rather than just the locations within the templates and the associated weights). This makes these files 100 times larger than they need to be, but the code will still be able to construct data cubes using these older files. If the example below does not look the same as your file, check your SimSpin version using `packageVersion("SimSpin")`.
+{: .note}
+
 The output of `make_simspin_file` is a *List* element.
 If `write_to_file = T`, this list will be written to an .Rdata file at the location specified by `output`. Otherwise, it will be written as a variable to the environment.
 
-The list will contain the following 5 elements:
+The list will contain the following 4 elements:
 {: .fw-300 }
 
 1. `header` -  *List* element containing eight labelled properties for data transparency and reproducability.
@@ -101,10 +108,9 @@ The list will contain the following 5 elements:
     | `Hydrogen` | the fraction of hydrogen within the particle, given as a fraction of its total mass. |
     | `Oxygen` | the fraction of oxygen within the particle, given as a fraction of its total mass. |
 
-1. `spectra` - A *data.table* element containing the spectral flux associated with each particle, linked to each particle by the `sed_id` within the `star_part` element. Each row corresponds to the spectrum associated with an individual spectral ID. 
-
-1. `wave` - *Numeric* element containing the wavelengths in angstrom for the spectra in the element above. 
+1. `spectral_weights` - A *data.table* element containing a map to the spectra and weights necessary to construct a spectrum from the associated template for each stellar particle, linked to each particle by the `sed_id` within the `star_part` element. Each row corresponds to the spectral weights associated with an individual `sed_id`. 
 {: .bg-grey-lt-000 }
+
 ---
 
 ## Example
@@ -120,12 +126,11 @@ simspin_file = make_simspin_file(filename = simulation_file,
 Examining the SimSpin file produced, we can see that it contains:
 ```R
 summary(simspin_file)
-#           Length Class      Mode
-# header       8   -none-     list    
-# star_part   12   data.frame list   
-# gas_part     0   -none-     NULL   
-# spectra      2   -none-     list   
-# wave       842   -none-     numeric
+#                    Length Class      Mode
+# header                8   -none-     list    
+# star_part            12   data.frame list   
+# gas_part              0   -none-     NULL   
+# spectral_weights      2   -none-     list   
 ```
 - `header` is a list that contains details of the file you've just created. This allows you to recreate this file in the future using the same information. 
 ```R
@@ -145,26 +150,21 @@ names(simspin_file$star_part)
 simspin_file[["gas_part"]]
 # NULL
 ```
-- `spectra` is a list where each element describes the flux at a given wavelength for one group of stellar particles. These have been generated within the function for a distinct group of stellar particle ages and metallicities using the specified `template` spectra. Mapping between stellar particles and their respective spectra is given by the `sed_id` within the `star_part` data.frame. Each number `sed_id` corresponds to the element within `spectra` list. 
+- `spectral_weights` is a list where each row describes the weights and ids of a spectral template associated with one group of stellar particles. These have been generated within the function for a distinct group of stellar particle ages and metallicities using the specified `template` spectra. Mapping between stellar particles and their respective spectral weights is given by the `sed_id` within the `star_part` data.frame. Each number `sed_id` corresponds to the element within `spectral_weights` list. 
 Because the input simulation was an N-body model, we only have two associated spectra - one for the disk particles (with `disk_age = 5` and `disk_Z = 0.024`) and one for the bulge particles (with `bulge_age = 10` and `bulge_Z = 0.001`). 
 ```R
-simspin_file[["spectra"]]
-#[[1]]
-#   [1] 7.659288e-10 1.176103e-09 1.558386e-09 2.104659e-09 2.769032e-09 3.559435e-09 
-#   [7] 4.178723e-09 5.006696e-09 6.134861e-09 8.460731e-09 1.130473e-08 1.429757e-08 
-#  [13] ... [1221]
-#[[2]]
-#   [1] 1.089325e-08 1.397532e-08 1.675843e-08 2.010100e-08 2.321242e-08 2.587942e-08 
-#   [7] 2.695232e-08 2.921529e-08 3.182460e-08 4.229105e-08 4.810211e-08 5.303458e-08 
-#  [13] ... [1221]
+simspin_file[["spectral_weights"]]
+#             V1        V2
+# 1:   5.0000000   2.00000  # lower Z id
+# 2:   6.0000000   3.00000  # upper Z id
+# 3:   0.8010222   0.60206  # lower Z weight
+# 4:   0.1989778   0.39794  # upper Z weight
+# 5: 161.0000000 181.00000  # lower Age id
+# 6: 161.0000000 181.00000  # upper Age id
+# 7:   1.0000000   1.00000  # lower Age weight
+# 8:   0.0000000   0.00000  # upper Age weight
 ```
-- Finally `wave` contains the wavelength values in units of angstrom for all of the spectra contained in the `spectra` list.
-```R
-simspin_file[["wave"]]
-#   [1]    91    94    96    98   100   102   104   106   108   110   114   118   121   125   
-#  [15]   127   128   131   132   134   137   140   143   147   151   155   159   162   166   
-#  [29] ... [1221]
-```
+
 
 ---
 ## Notes

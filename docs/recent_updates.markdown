@@ -3,7 +3,7 @@ layout: default
 title: News
 parent: Documentation
 nav_order: 1
-last_modified_date: "Wed, 26 July 2023 15:57:00 AWST"
+last_modified_date: "Thurs, 03 Aug 2023 15:57:00 AWST"
 ---
 
 # News
@@ -16,6 +16,7 @@ The table below gives details of any recent updates made to SimSpin, along with 
 
 | Date | Summary of Change | Version | Commit | Author |
 |------|-------------------|---------|--------|--------|
+| 03/08/23 | Updating the information stored in the SimSpin files following a suggestion from SimSpin v2.5.0 paper review. Do not need to store the full spectrum for each particle. Just the weights and id's of the spectra within the template set. Reduces the simspin file sizes by factor of 100. Old SimSpin files will still work with the code, but will now issue a warning when using a file older than v2.6.0. Tagging for release. Thank you anonymous reviewer!!! | 2.6.0 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/cc3b2018527995dfaf09130b1afbe4341566e4f7) | Kate Harborne |
 | 19/07/23 | Tagging a stable release of the code to align with the submission of the SimSpin v2.5.0 paper to PASA on the 28th June 2023. | 2.5.0 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/cc3b2018527995dfaf09130b1afbe4341566e4f7) | Kate Harborne |
 | 15/06/23 | Updating the noise implementation for `build_datacube` using the median flux pixel to scale the level of noise such that the S/N does not go extreme towards the peak flux or minimum flux in the image. | 2.4.10 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/3bf98efea656776436fca3384cda1411f8f9e642)| Kate Harborne |
 | 13/06/23 | Adding the thermal dispersion component to the observed gas maps. | 2.4.9 | [ &#8618; ](https://github.com/kateharborne/SimSpin/commit/d3e0675a80a0036da3e372344e40bf979ad9ffa7) | Kate Harborne |

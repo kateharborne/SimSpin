@@ -4,7 +4,7 @@ title: Basic Usage
 permalink: /basic_usage/
 description: "A walkthrough demonstrating how to generate your first mock observation."
 nav_order: 4
-last_modified_date: "Mon, 27 March 2023 13:57:00 AWST"
+last_modified_date: "Thurs, 03 Aug 2023 15:57:00 AWST"
 ---
 
 # A walkthrough SimSpin's functions
@@ -75,25 +75,24 @@ The output of this function will be a list that can either be written to an Rdat
 In the case above, we assign the output to the environment variable `simspin_data`. 
 
 Despite accepting a variety of different simulation inputs, the output of the `make_simspin_file` function will always be the same. 
-The format will be a list containing 5 elements: 
+The format will be a list containing 4 elements: 
 
 ```R
 typeof(simspin_file) 
 # [1] "list"
 
 summary(simspin_file) 
-#           Length Class      Mode
-# header       8   -none-     list    
-# star_part   12   data.frame list   
-# gas_part     0   -none-     NULL   
-# spectra      2   -none-     list   
-# wave       842   -none-     numeric
+#                    Length Class      Mode
+# header                8   -none-     list    
+# star_part            12   data.frame list   
+# gas_part              0   -none-     NULL   
+# spectral_weights      2   -none-     list   
 ```
 
 While the length of each element may change depending on the input simulation type or observation properties requested, the element structure of the output will remain consistent. 
 
-In this case, because the input file is an *N*-body model containing both bulge and disk particles, the resulting element `spectra` is a `list` with *2* entries (with one spectra assigned for the bulge particles and the second to the disk particles).
-For a hydrodynamical model, the  `spectra` element may have many more entries due to the broader variety in stellar ages and metallicities, but will remain an element of mode `list`. 
+In this case, because the input file is an *N*-body model containing both bulge and disk particles, the resulting element `spectral_weights` is a `list` with *2* entries (with one spectra assigned for the bulge particles and the second to the disk particles).
+For a hydrodynamical model, the  `spectral_weights` element may have many more entries due to the broader variety in stellar ages and metallicities, but will remain an element of mode `list`. 
 
 Once a file has been produced for a single simulated galaxy, the same file can be used to produce any number of different observations.
 
