@@ -1,7 +1,7 @@
 # Kate Harborne 20/09/21
 # Voronoi tessellation of pixels to meet some minimum particle number threshold
 
-.make_bin = function(vorbin_spaxel, bin_id, verbose, index = NULL){
+.make_bin = function(vorbin_spaxel, bin_id, verbose=F, index = NULL){
 
     # define some flags for whether or not a bin can accrete any more pixels
     topo_criteria = F
