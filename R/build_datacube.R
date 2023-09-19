@@ -235,10 +235,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # which particles sit in each spaxel?
   part_in_spaxel = galaxy_data[, list(val=list(ID), .N), by = "pixel_pos"]
 
-  if (voronoi_bin){ # Are we going to Voronoi bin the images? If yes, to how many particles per pixel?
+  if (voronoi_bin){ # Returning the binned pixels based on some voronoi limit
     observation$particle_limit = vorbin_limit
     part_in_spaxel = voronoi(part_in_spaxel, observation,
                              roundness_limit = 0.3, uniform_limit = 0.8)
+  } else { # Returning the bins as every pixel a seperate bin
+    part_in_spaxel$bin_number = seq(1, nrow(part_in_spaxel))
   }
 
 

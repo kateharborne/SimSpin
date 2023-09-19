@@ -218,6 +218,19 @@ voronoi = function(part_in_spaxel, observation, roundness_limit = 0.3, uniform_l
 
   }
 
-  return(part_in_spaxel)
+  # re-jigging the output part_in_spaxel
+  unique_bins = unique(part_in_spaxel$bin_number)
+  bn = length(unique_bins)
+  new_part_in_spaxel = data.table::data.table("pixel_pos" = vector(mode="list", length=bn),
+                                              "val" = vector(mode="list", length=bn),
+                                              "N" = numeric(length=bn))
+
+  for (bin in 1:bn){
+    new_part_in_spaxel$pixel_pos[bin][[1]] = c(part_in_spaxel$pixel_pos[part_in_spaxel$bin_number == unique_bins[bin]])
+    new_part_in_spaxel$val[bin][[1]] = c(unlist(part_in_spaxel$val[part_in_spaxel$bin_number == unique_bins[bin]]))
+    new_part_in_spaxel$N[bin] = sum(part_in_spaxel$N[part_in_spaxel$bin_number == unique_bins[bin]])
+  }
+
+  return(new_part_in_spaxel)
 
 }
