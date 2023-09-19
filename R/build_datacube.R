@@ -237,6 +237,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   if (voronoi_bin){ # Are we going to Voronoi bin the images? If yes, to how many particles per pixel?
     observation$particle_limit = vorbin_limit
+    part_in_spaxel = voronoi(part_in_spaxel, observation,
+                             roundness_limit = 0.3, uniform_limit = 0.8)
   }
 
 
