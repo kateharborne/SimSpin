@@ -1919,7 +1919,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
                      OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
-                     result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map)
+                     result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map, vorbin_map)
                      return(result)
                      closeAllConnections()
                    }
