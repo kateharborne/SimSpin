@@ -1553,16 +1553,18 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   age_map = array(data = 0.0, dim = observation$sbin^2)
   met_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  vorbin_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = part_in_spaxel$N[i]
                      part_map = num_part
+                     vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
@@ -1620,7 +1622,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
                      met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
-                     result = list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map)
+                     result = list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map, vorbin_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -1632,8 +1634,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   age_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[5]]))
   met_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[6]]))
   part_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[7]]))
+  vorbin_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[8]]))
 
-  return(list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map))
+  return(list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map, vorbin_map))
 }
 
 # stellar velocity mode -
@@ -1648,12 +1651,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   mass_map = array(data = 0.0, dim = observation$sbin^2)
   band_map = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  vorbin_map = array(data=0, dim = observation$sbin^2)
+
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
     num_part = part_in_spaxel$N[i] # number of particles in spaxel
     part_map[part_in_spaxel$pixel_pos[[i]]] = num_part
+    vorbin_map[part_in_spaxel$pixel_pos[[i]]] = i
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
@@ -1727,7 +1733,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   }
 
-  return(list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map))
+  return(list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map, vorbin_map))
 }
 
 .velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, template, verbose, cores, mass_flag, spectra_flag){
@@ -1741,16 +1747,19 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   met_map  = array(data = 0.0, dim = observation$sbin^2)
   mass_map  = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  vorbin_map = array(data=0, dim = observation$sbin^2)
+
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = part_in_spaxel$N[i]
                      part_map = num_part
+                     vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
@@ -1820,7 +1829,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
                      met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
                      mass_map = sum(galaxy_sample$Mass)
 
-                     result = list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map)
+                     result = list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map, vorbin_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -1834,8 +1843,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   met_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[7]]))
   mass_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[8]]))
   part_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[9]]))
+  vorbin_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[10]]))
 
-  return(list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map))
+  return(list(vel_spec, lum_map, band_map, vel_los, dis_los, age_map, met_map, mass_map, part_map, vorbin_map))
 
 }
 
@@ -1850,11 +1860,13 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   Z_map    = array(data = 0.0, dim = observation$sbin^2)
   OH_map   = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  vorbin_map = array(data=0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
     num_part = part_in_spaxel$N[i] # number of particles in spaxel
     part_map[part_in_spaxel$pixel_pos[[i]]] = num_part
+    vorbin_map[part_in_spaxel$pixel_pos[[i]]] = i
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
@@ -1871,7 +1883,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   }
 
-  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map))
+  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map, vorbin_map))
 }
 
 .gas_velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
@@ -1884,15 +1896,17 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   Z_map    = array(data = 0.0, dim = observation$sbin^2)
   OH_map   = array(data = 0.0, dim = observation$sbin^2)
   part_map = array(data=0, dim = observation$sbin^2)
+  vorbin_map = array(data=0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = part_in_spaxel$N[i]
                      part_map = num_part
+                     vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
@@ -1918,8 +1932,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
   Z_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[6]]))
   OH_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[7]]))
   part_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[8]]))
+  vorbin_map[unlist(part_in_spaxel$pixel_pos)] = matrix(unlist(output[[9]]))
 
-  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map))
+  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map, vorbin_map))
 
 }
 
