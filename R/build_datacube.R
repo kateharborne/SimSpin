@@ -553,10 +553,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (verbose){cat("Done! \n")}
 
-    if (!voronoi_bin){ # if vorbin has not been requested, don't supply it in the output
-      output$raw_images = output$raw_images[-which(names(output$raw_images) == "voronoi_bins")]
-    }
+  }
 
+  if (!voronoi_bin){ # if vorbin has not been requested, don't supply it in the output
+    output$raw_images = output$raw_images[-which(names(output$raw_images) == "voronoi_bins")]
   }
 
   # Trimming off extra zeros from images outside the aperture of the telescope
