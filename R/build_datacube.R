@@ -237,9 +237,14 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   if (voronoi_bin){ # Returning the binned pixels based on some voronoi limit
     if (verbose){cat("Binning spaxels into voronoi bins... \n")}
-    observation$particle_limit = vorbin_limit
-    part_in_spaxel = voronoi(part_in_spaxel, observation,
-                             roundness_limit = 0.3, uniform_limit = 0.8)
+
+    part_in_spaxel = voronoi(part_in_spaxel=part_in_spaxel, obs=observation,
+                             particle_limit = as.numeric(vorbin_limit),
+                             roundness_limit = 0.3, uniform_limit = 0.8,
+                             verbose = verbose)
+
+    observation$particle_limit = as.numeric(vorbin_limit)
+
   }
 
 
@@ -547,6 +552,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
 
     if (verbose){cat("Done! \n")}
+
+    if (!voronoi_bin){ # if vorbin has not been requested, don't supply it in the output
+      output$raw_images = output$raw_images[-which(names(output$raw_images) == "voronoi_bins")]
+    }
 
   }
 
