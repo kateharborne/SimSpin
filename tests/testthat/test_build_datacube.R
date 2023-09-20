@@ -1506,3 +1506,52 @@ test_that("Gas spawning creates even images despite different n-values",{
 
 })
 
+# Checking that the voronoi binning works as we expect -------------------------
+test_that("Voronoi bin maps are produced and saved to the raw_images output", {
+
+  vorbin_spectral = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "spectral", verbose = T,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_spectral$raw_images))
+  expect_length(vorbin_spectral$raw_images, (spectra_raw_images_size + 1))
+
+  vorbin_velocity = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "velocity", verbose = T,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_velocity$raw_images))
+  expect_length(vorbin_velocity$raw_images, (velocity_raw_images_size_massflagfalse + 1))
+
+  vorbin_velocity_mf = build_datacube(simspin_file = ss_eagle,
+                                      telescope = telescope(type = "SAMI"),
+                                      observing_strategy = observing_strategy(dist_z = 0.03),
+                                      method = "velocity", verbose = T, mass_flag = T,
+                                      voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_velocity_mf$raw_images))
+  expect_length(vorbin_velocity_mf$raw_images, (velocity_raw_images_size_massflagtrue + 1))
+
+  vorbin_gas      = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "gas", verbose = T,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_gas$raw_images))
+
+  vorbin_sfgas    = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "sf_gas", verbose = T,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_sfgas$raw_images))
+
+})
+
+
