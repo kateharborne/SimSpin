@@ -1,7 +1,7 @@
 # Kate Harborne 20/09/21
 # Voronoi tessellation of pixels to meet some minimum particle number threshold
 
-.make_bin = function(vorbin_spaxel, bin_id, verbose=F, index = NULL){
+.make_bin = function(vorbin_spaxel, particle_limit, bin_id, roundness_limit, uniform_limit, verbose=F, index = NULL){
 
     # define some flags for whether or not a bin can accrete any more pixels
     topo_criteria = F
@@ -48,7 +48,7 @@
 
       if (roundness_criteria){ # if we meet the roundness criteria, test for uniformity
 
-        possible_candidates$uniformity = abs(1 - ((possible_candidates$N + vorbin_spaxel$N[index_to_bin])/observation$particle_limit))
+        possible_candidates$uniformity = abs(1 - ((possible_candidates$N + vorbin_spaxel$N[index_to_bin])/particle_limit))
 
         #possible_candidates = possible_candidates[which(possible_candidates$uniformity <= 0.2),]
 
@@ -102,7 +102,7 @@
 
 }
 
-voronoi = function(part_in_spaxel, observation, roundness_limit = 0.3, uniform_limit = 0.8){
+voronoi = function(part_in_spaxel, obs, particle_limit, roundness_limit = 0.3, uniform_limit = 0.8, verbose=F){
 
   # Following the algorithm set out in Cappellari & Copin (2003):
   # (i) Begin at the highest valued pixel in the image.
@@ -115,8 +115,8 @@ voronoi = function(part_in_spaxel, observation, roundness_limit = 0.3, uniform_l
 
   vorbin_spaxels = part_in_spaxel
   # x-y position of pixel
-  vorbin_spaxels$xbin = vorbin_spaxels$pixel_pos %% observation$sbin
-  vorbin_spaxels$ybin = vorbin_spaxels$pixel_pos %/% observation$sbin
+  vorbin_spaxels$xbin = vorbin_spaxels$pixel_pos %% obs$sbin
+  vorbin_spaxels$ybin = vorbin_spaxels$pixel_pos %/% obs$sbin
   vorbin_spaxels$area = 1
   vorbin_spaxels$joined_ids = list()
 
@@ -130,7 +130,7 @@ voronoi = function(part_in_spaxel, observation, roundness_limit = 0.3, uniform_l
   # while pixels have not yet been binned, run algorithm
   while (nrow(vorbin_spaxels[vorbin_spaxels$bin_number == 0]) > 0){
 
-    if (part_in_spaxel$N[each] >= observation$particle_limit){
+    if (part_in_spaxel$N[each] >= particle_limit){
 
       if(verbose){print(paste("Pixel", each, "meets limit - no binning."))}
       part_in_spaxel$bin_number[each] = bin_id
@@ -142,14 +142,14 @@ voronoi = function(part_in_spaxel, observation, roundness_limit = 0.3, uniform_l
     } else {
       if(verbose){print(paste("Pixel", each, "does not meet limit - binning commencing."))}
 
-      binned_spaxels = .make_bin(vorbin_spaxels, bin_id, verbose, index=NULL)
+      binned_spaxels = .make_bin(vorbin_spaxels, particle_limit, bin_id, roundness_limit, uniform_limit, verbose, index=NULL)
       vorbin_spaxels = binned_spaxels$vorbin
       index = binned_spaxels$index
 
-      while (vorbin_spaxels$N[index] < (observation$particle_limit*uniform_limit) &&
+      while (vorbin_spaxels$N[index] < (particle_limit*uniform_limit) &&
              !is.na(vorbin_spaxels$bin_number[index])){
         if(verbose){print(paste("More pixels need adding to bin to meet vorbin_limit!"))}
-        binned_spaxels = .make_bin(vorbin_spaxels, bin_id, verbose, index = index)
+        binned_spaxels = .make_bin(vorbin_spaxels, particle_limit, bin_id, roundness_limit, uniform_limit, verbose, index = index)
         vorbin_spaxels = binned_spaxels$vorbin
         index = binned_spaxels$index
       }
@@ -193,7 +193,7 @@ voronoi = function(part_in_spaxel, observation, roundness_limit = 0.3, uniform_l
     join_index = which(vorbin_spaxels$bin_number %in% join_to_bin)
 
     if (length(join_to_bin) > 1){ # if more than 1 close bin, minimise uniformity
-      uniformity = abs(1 - ((binned_spaxels$N[join_index] + unbinned_spaxel$N)/observation$particle_limit))
+      uniformity = abs(1 - ((binned_spaxels$N[join_index] + unbinned_spaxel$N)/particle_limit))
       n = which(uniformity == min(uniformity))[1]
       join_index = join_index[n]
     } else {n = 1}
