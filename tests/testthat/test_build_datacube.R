@@ -1512,7 +1512,7 @@ test_that("Voronoi bin maps are produced and saved to the raw_images output", {
   vorbin_spectral = build_datacube(simspin_file = ss_eagle,
                                    telescope = telescope(type = "SAMI"),
                                    observing_strategy = observing_strategy(dist_z = 0.03),
-                                   method = "spectral", verbose = T,
+                                   method = "spectral", verbose = F,
                                    voronoi_bin = T, vorbin_limit = 10)
 
   expect_true("voronoi_bins" %in% names(vorbin_spectral$raw_images))
@@ -1521,7 +1521,7 @@ test_that("Voronoi bin maps are produced and saved to the raw_images output", {
   vorbin_velocity = build_datacube(simspin_file = ss_eagle,
                                    telescope = telescope(type = "SAMI"),
                                    observing_strategy = observing_strategy(dist_z = 0.03),
-                                   method = "velocity", verbose = T,
+                                   method = "velocity", verbose = F,
                                    voronoi_bin = T, vorbin_limit = 10)
 
   expect_true("voronoi_bins" %in% names(vorbin_velocity$raw_images))
@@ -1530,7 +1530,7 @@ test_that("Voronoi bin maps are produced and saved to the raw_images output", {
   vorbin_velocity_mf = build_datacube(simspin_file = ss_eagle,
                                       telescope = telescope(type = "SAMI"),
                                       observing_strategy = observing_strategy(dist_z = 0.03),
-                                      method = "velocity", verbose = T, mass_flag = T,
+                                      method = "velocity", verbose = F, mass_flag = T,
                                       voronoi_bin = T, vorbin_limit = 10)
 
   expect_true("voronoi_bins" %in% names(vorbin_velocity_mf$raw_images))
@@ -1539,7 +1539,7 @@ test_that("Voronoi bin maps are produced and saved to the raw_images output", {
   vorbin_gas      = build_datacube(simspin_file = ss_eagle,
                                    telescope = telescope(type = "SAMI"),
                                    observing_strategy = observing_strategy(dist_z = 0.03),
-                                   method = "gas", verbose = T,
+                                   method = "gas", verbose = F,
                                    voronoi_bin = T, vorbin_limit = 10)
 
   expect_true("voronoi_bins" %in% names(vorbin_gas$raw_images))
@@ -1547,11 +1547,33 @@ test_that("Voronoi bin maps are produced and saved to the raw_images output", {
   vorbin_sfgas    = build_datacube(simspin_file = ss_eagle,
                                    telescope = telescope(type = "SAMI"),
                                    observing_strategy = observing_strategy(dist_z = 0.03),
-                                   method = "sf_gas", verbose = T,
+                                   method = "sf gas", verbose = F,
                                    voronoi_bin = T, vorbin_limit = 10)
 
   expect_true("voronoi_bins" %in% names(vorbin_sfgas$raw_images))
 
 })
 
+test_that("Number of particles in the image is consistent in the binned and unbinned images", {
 
+  vorbin_velocity = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "velocity", verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  notbin_velocity = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "velocity", verbose = F,
+                                   voronoi_bin = F)
+
+  vorbins = unique(c(vorbin_velocity$raw_images$voronoi_bins))
+  N = 0
+  for (i in 1:length(vorbins)){
+    N = N + vorbin_velocity$raw_images$particle_image[vorbin_velocity$raw_images$voronoi_bins == vorbins[i]][1]
+  }
+
+  expect_equal(N, sum(notbin_velocity$raw_images$particle_image))
+
+})
