@@ -756,6 +756,54 @@ plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
 
 }
 
+#' Plotting pretty Voronoi bin images
+#'
+#' A function to produce a plot of the Voronoi bins produced by
+#' \code{build_datacube()} with associated colour bar and labels.
+#'
+#' @param voronoi_bins Numeric array containing the metallicity image.
+#' @param fig Numeric array of length 4 describing the boundary of the image
+#' @param new Boolean. Should the image be added to the existing plot? Default
+#' is FALSE.
+#' @param main Image title, default "".
+#' @param na.color String. Colour given to NA values in the image.
+#' @param zlim Numeric array of length 2. Describing the numeric range of
+#' colours in the image. Default is NA, in which the range will be described by
+#' the minimum and maximum values in the image.
+#' @param ... Further variables passed to magimage. See
+#' \code{\link[magicaxis]{magimage}} for further details.
+#' @return Returns an image to the plotting window of the input
+#' \code{build_datacube} image.
+#' @examples
+#' ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
+#' package = "SimSpin")
+#' ss_eagle = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
+#' cube = build_datacube(simspin_file = ss_eagle,
+#'                       telescope = telescope(type="SAMI"),
+#'                       observing_strategy = observing_strategy(),
+#'                       method = "velocity", voronoi_bin = T)
+#' plot_voronoi(cube$raw_images$voronoi_bins)
+
+plot_voronoi <- function(voronoi_bins, fig = c(0,1,0,1), new=F,
+                         main="", na.color = "white", zlim = NA,
+                         ...){
+
+  bin_map = voronoi_bins
+  im_dim = dim(bin_map)%/%2
+  bin_val = c(min(bin_map, na.rm=T), max(bin_map, na.rm=T))
+
+  if (all(bin_val == 0)){
+    stop("Image contains only '0'. No image can be produced in this case. \n
+         Please check your build_datacube function and try again.")
+  }
+
+  bin_map_cols = cmocean::cmocean("phase", version = "2.0", start = .1, end=1)(max(bin_map, na.rm=T))
+
+  par(pty="s", fig=fig, xpd=FALSE, ps=12, cex=1, new=new); options(scipen = 1)
+  .image_nan(z = bin_map, zlim = if(is.na(zlim[1])){bin_val}else{zlim},
+             col = bin_map_cols, na.color = na.color, xaxt="n",
+             yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
+}
 
 .image_nan <- function(z, zlim, col, na.color='gray', ...){
   # Function for plotting an image with NAs as a set colour
