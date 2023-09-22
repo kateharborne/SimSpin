@@ -129,6 +129,8 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
                                                    "VelocityAnisotropy" = numeric(rbins),
                                                    "SpinParameter_Bullock" = numeric(rbins),
                                                    "SpecificAngularMomentum" = numeric(rbins),
+                                                   "Circularity" = numeric(rbins),
+                                                   "KappaRot" = numeric(rbins),
                                                    "Shape_p" = numeric(rbins),
                                                    "Shape_q" = numeric(rbins),
                                                    "NumberOfParticles" = numeric(rbins)))
@@ -139,6 +141,11 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
   galaxy_data$v_r = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2) + (galaxy_data$vz^2))
   galaxy_data$v_theta = atan2(y = galaxy_data$vy, x = galaxy_data$vx)
   galaxy_data$v_phi = atan2(y = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2)), x = galaxy_data$vz)
+
+  galaxy_data$R = sqrt((galaxy_data$x^2) + (galaxy_data$y^2))
+  galaxy_data$phi_circ = atan2(y = galaxy_data$y, x = galaxy_data$x)
+  galaxy_data$vR = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2))
+  galaxy_data$vphi_circ = atan2(y = galaxy_data$vy, x = galaxy_data$vx)
 
   galaxy_data$rbin = cut(galaxy_data$r, breaks=lseq, labels=F)
   particle_ID = NULL # initiallising varible to avoid CRAN error in checks
@@ -152,6 +159,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     binID = part_in_rbin$rbin_ID[bin]
     if (!is.na(binID)){
       sample = galaxy_data[part_in_rbin$val[[bin]],]
+      J = angmom_galaxy(sample[,1:8])
 
       analysis_data$RadialTrends$Mass[binID] = sum(sample$Mass)
       analysis_data$RadialTrends$Age[binID] = mean(sample$Age)
@@ -159,7 +167,9 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends$RotationalVelocity[binID] = mean(sample$v_theta)
       analysis_data$RadialTrends$RotationalDispersion[binID] = sd(sample$v_theta)
       analysis_data$RadialTrends$VelocityAnisotropy[binID] = 1 - ((sd(sample$v_theta)^2 + sd(sample$v_phi)^2) / (2 * sd(sample$v_r)^2))
-      analysis_data$RadialTrends$SpecificAngularMomentum[binID] = sqrt(sum(angmom_galaxy(sample[,1:8])^2))/sum(sample$Mass)
+      analysis_data$RadialTrends$SpecificAngularMomentum[binID] = sqrt(sum(J^2))/sum(sample$Mass)
+      analysis_data$RadialTrends$Circularity[binID] = J[3]
+      analysis_data$RadialTrends$KappaRot[binID] = sum(sample$Mass * (sample$vphi_circ^2)) / sum(sample$mass * (sample$v_r^2))
       analysis_data$RadialTrends$NumberOfParticles[binID] = length(sample$ID)
     } else {
       analysis_data$RadialTrends$Mass[binID] = NA
@@ -169,6 +179,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends$RotationalDispersion[binID] = NA
       analysis_data$RadialTrends$VelocityAnisotropy[binID] = NA
       analysis_data$RadialTrends$SpecificAngularMomentum[binID] = NA
+      analysis_data$RadialTrends$KappaRot[binID] = NA
       analysis_data$RadialTrends$NumberOfParticles[binID] = 0
     }
 
