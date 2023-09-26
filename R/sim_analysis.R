@@ -228,3 +228,24 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
 
   return(analysis_data)
 }
+
+
+.j_circ = function(galaxy_data){
+
+  data.table::setorder(galaxy_data, r)
+
+  galaxy_data$cumMass = cumsum(galaxy_data$Mass)
+
+  galaxy_data$specific_binding_E = ((3/5)*.g_in_kpcMsolkms2*(galaxy_data$cumMass^2)/(galaxy_data$r))/max(galaxy_data$cumMass)
+
+  bins = seq(0, max(galaxy_data$specific_binding_E), length.out = 150)
+  galaxy_data$ebins = cut(galaxy_data$specific_binding_E, breaks=c(bins, (max(bins) + diff(bins)[1])), labels=F)
+  galaxy_data$jcirc = 0
+
+  for (bin in 1:length(bins)){
+    jcirc = max(galaxy_data$jz[galaxy_data$ebins == bin], na.rm=T)
+    galaxy_data$jcirc[galaxy_data$ebins == bin] = jcirc
+  }
+
+  return(galaxy_data)
+}
