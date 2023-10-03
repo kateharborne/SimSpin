@@ -177,6 +177,8 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
   galaxy_data$vR = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2))
   galaxy_data$vphi_circ = atan2(y = galaxy_data$vy, x = galaxy_data$vx)
 
+  galaxy_data = .j_circ(galaxy_data)
+
   # Spherical binning measurements ---------------------------------------------
   galaxy_data$rbin = cut(galaxy_data$r, breaks=lseq, labels=F)
   particle_ID = NULL # initiallising varible to avoid CRAN error in checks
@@ -212,9 +214,9 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
   }
 
   bin_vol = (4/3)*pi*(bin_ends^3)
-  analysis_data$RadialTrends_Spherical$CumulativeMass = cumsum(analysis_data$RadialTrends$Mass)
-  analysis_data$RadialTrends_Spherical$Density = analysis_data$RadialTrends$CumulativeMass / bin_vol
-  analysis_data$RadialTrends_Spherical$CircularVelocity = sqrt(.g_in_kpcMsolkms2 * analysis_data$RadialTrends$CumulativeMass / bin_ends)
+  analysis_data$RadialTrends_Spherical$CumulativeMass = cumsum(analysis_data$RadialTrends_Spherical$Mass)
+  analysis_data$RadialTrends_Spherical$Density = analysis_data$RadialTrends_Spherical$CumulativeMass / bin_vol
+  analysis_data$RadialTrends_Spherical$CircularVelocity = sqrt(.g_in_kpcMsolkms2 * analysis_data$RadialTrends_Spherical$CumulativeMass / bin_ends)
 
   for (cbin in 1:rbins){
     sample = galaxy_data[galaxy_data$r <= bin_ends[cbin],]
@@ -228,6 +230,65 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     analysis_data$RadialTrends_Spherical$Shape_p[cbin] = shapes$p
     analysis_data$RadialTrends_Spherical$Shape_q[cbin] = shapes$q
   }
+
+  # Cylindrical binning measurements ---------------------------------------------
+  galaxy_data$cbin = cut(galaxy_data$R, breaks=lseq, labels=F)
+  particle_ID = NULL # initiallising varible to avoid CRAN error in checks
+
+  galaxy_data_table = data.table::data.table("particle_ID" = seq(1, length(galaxy_data$x)),
+                                             "cbin_ID"=galaxy_data$cbin)
+
+  # which particles sit in each spherical bin?
+  part_in_cbin = galaxy_data_table[, list(val=list(particle_ID)), by = "cbin_ID"]
+  bin_height = numeric(rbins)
+
+  for (bin in 1:rbins){
+    binID = part_in_cbin$cbin_ID[bin]
+    if (!is.na(binID)){
+      sample = galaxy_data[part_in_cbin$val[[bin]],]
+      J = angmom_galaxy(sample[,1:8])
+      co_sample = sample[which(J[3]>0),]
+      bin_height[bin] = max(sample$z) - min(sample$z)
+
+      analysis_data$RadialTrends_Cylindrical$Mass[binID] = sum(sample$Mass)
+      analysis_data$RadialTrends_Cylindrical$Age[binID] = mean(sample$Age)
+      analysis_data$RadialTrends_Cylindrical$Metallicity[binID] = mean(sample$Metallicity)
+
+      analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = mean(sample$vphi_circ)
+      analysis_data$RadialTrends_Cylindrical$RotationalDispersion[binID] = sd(sample$vphi_circ)
+      analysis_data$RadialTrends_Cylindrical$Circularity[binID] = mean(J[3]/sample$j_circ)
+      analysis_data$RadialTrends_Cylindrical$KappaRot[binID] = sum(sample$Mass*(sample$vphi_circ)^2)/sum(sample$Mass*sample$v_r)
+      analysis_data$RadialTrends_Cylindrical$KappaCoRot[binID] = sum(co_sample$Mass*(co_sample$vphi_circ)^2)/sum(co_sample$Mass*co_sample$v_r)
+
+      analysis_data$RadialTrends_Cylindrical$SpinParameter_Wilkinson[binID] = mean(sample$vphi_circ)/
+        sqrt((mean(sample$vphi_circ)^2)+((sd(sample$vz)^2 + sd(sample$vR)^2 + sd(sample$vphi_circ)^2)/3))
+
+      analysis_data$RadialTrends_Cylindrical$DisktoTotal[binID] = sum(sample$Mass[which(J[3]/sample$j_circ > 0.7)])/sum(sample$Mass)
+      analysis_data$RadialTrends_Cylindrical$SpheroidtoTotal[binID] = (2*sum(sample$Mass[which(sample$vphi_circ < 0)]))/sum(sample$Mass)
+      analysis_data$RadialTrends_Cylindrical$NumberOfParticles[binID] = length(sample$ID)
+    } else {
+      bin_height[bin] = NA
+      analysis_data$RadialTrends_Cylindrical$Mass[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$Age[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$Metallicity[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$RotationalDispersion[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$Circularity[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$KappaRot[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$KappaCoRot[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$SpinParameter_Wilkinson[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$DisktoTotal[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$SpheroidtoTotal[binID] = NA
+      analysis_data$RadialTrends_Cylindrical$NumberOfParticles[binID] = 0
+    }
+
+    bin_vol = pi*(bin_ends^2)*(bin_height)
+    analysis_data$RadialTrends_Cylindrical$CumulativeMass = cumsum(analysis_data$RadialTrends_Cylindrical$Mass)
+    analysis_data$RadialTrends_Cylindrical$Density = analysis_data$RadialTrends_Cylindrical$CumulativeMass / bin_vol
+    analysis_data$RadialTrends_Cylindrical$CircularVelocity = sqrt(.g_in_kpcMsolkms2 * analysis_data$RadialTrends_Cylindrical$CumulativeMass / bin_ends)
+
+  }
+
 
   shapes = .measure_pqj(galaxy_data = list("star_part" = galaxy_data), half_mass = analysis_data$HalfMassProperties$Mass)
   analysis_data$HalfMassProperties$Shape_p = shapes$p
@@ -243,20 +304,9 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
 
 .j_circ = function(galaxy_data){
 
-  data.table::setorder(galaxy_data, r)
-
+  data.table::setorder(galaxy_data, R)
   galaxy_data$cumMass = cumsum(galaxy_data$Mass)
-
-  galaxy_data$specific_binding_E = ((3/5)*.g_in_kpcMsolkms2*(galaxy_data$cumMass^2)/(galaxy_data$r))/max(galaxy_data$cumMass)
-
-  bins = seq(0, max(galaxy_data$specific_binding_E), length.out = 150)
-  galaxy_data$ebins = cut(galaxy_data$specific_binding_E, breaks=c(bins, (max(bins) + diff(bins)[1])), labels=F)
-  galaxy_data$jcirc = 0
-
-  for (bin in 1:length(bins)){
-    jcirc = max(galaxy_data$jz[galaxy_data$ebins == bin], na.rm=T)
-    galaxy_data$jcirc[galaxy_data$ebins == bin] = jcirc
-  }
+  galaxy_data$j_circ = sqrt(.g_in_kpcMsolkms2*(galaxy_data$cumMass)/(galaxy_data$R))*galaxy_data$R
 
   return(galaxy_data)
 }
