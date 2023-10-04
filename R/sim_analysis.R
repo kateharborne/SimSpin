@@ -157,7 +157,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
                                                                "RotationalDispersion" = numeric(rbins),
                                                                "Circularity" = numeric(rbins),
                                                                "KappaRot" = numeric(rbins),
-                                                               "KappCoRot" = numeric(rbins),
+                                                               "KappaCoRot" = numeric(rbins),
                                                                "SpinParameter_Wilkinson" = numeric(rbins),
                                                                "DisktoTotal" = numeric(rbins),
                                                                "SpheroidtoTotal" = numeric(rbins),
@@ -177,6 +177,10 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
   galaxy_data$vR = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2))
   galaxy_data$vphi_circ = atan2(y = galaxy_data$vy, x = galaxy_data$vx)
 
+  galaxy_data$Jx = galaxy_data$Mass * ((galaxy_data$y * galaxy_data$vz) - (galaxy_data$z * galaxy_data$vy))
+  galaxy_data$Jy = galaxy_data$Mass * ((galaxy_data$x * galaxy_data$vz) - (galaxy_data$z * galaxy_data$vz))
+  galaxy_data$Jz = galaxy_data$Mass * ((galaxy_data$x * galaxy_data$vy) - (galaxy_data$y * galaxy_data$vx))
+
   galaxy_data = .j_circ(galaxy_data)
 
   # Spherical binning measurements ---------------------------------------------
@@ -193,13 +197,12 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     binID = part_in_rbin$rbin_ID[bin]
     if (!is.na(binID)){
       sample = galaxy_data[part_in_rbin$val[[bin]],]
-      J = angmom_galaxy(sample[,1:8])
 
       analysis_data$RadialTrends_Spherical$Mass[binID] = sum(sample$Mass)
       analysis_data$RadialTrends_Spherical$Age[binID] = mean(sample$Age)
       analysis_data$RadialTrends_Spherical$Metallicity[binID] = mean(sample$Metallicity)
       analysis_data$RadialTrends_Spherical$VelocityAnisotropy[binID] = 1 - ((sd(sample$v_theta)^2 + sd(sample$v_phi)^2) / (2 * sd(sample$v_r)^2))
-      analysis_data$RadialTrends_Spherical$SpecificAngularMomentum[binID] = sqrt(sum(J^2))/sum(sample$Mass)
+      analysis_data$RadialTrends_Spherical$SpecificAngularMomentum[binID] = sqrt((sample$Jx^2 + sample$Jy^2 + sample$Jz^2))/sum(sample$Mass)
       analysis_data$RadialTrends_Spherical$NumberOfParticles[binID] = length(sample$ID)
     } else {
       analysis_data$RadialTrends_Spherical$Mass[binID] = NA
@@ -207,7 +210,6 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Spherical$Metallicity[binID] = NA
       analysis_data$RadialTrends_Spherical$VelocityAnisotropy[binID] = NA
       analysis_data$RadialTrends_Spherical$SpecificAngularMomentum[binID] = NA
-      analysis_data$RadialTrends_Spherical$KappaRot[binID] = NA
       analysis_data$RadialTrends_Spherical$NumberOfParticles[binID] = 0
     }
 
@@ -246,8 +248,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     binID = part_in_cbin$cbin_ID[bin]
     if (!is.na(binID)){
       sample = galaxy_data[part_in_cbin$val[[bin]],]
-      J = angmom_galaxy(sample[,1:8])
-      co_sample = sample[which(J[3]>0),]
+      co_sample = sample[sample$Jz>0,]
       bin_height[bin] = max(sample$z) - min(sample$z)
 
       analysis_data$RadialTrends_Cylindrical$Mass[binID] = sum(sample$Mass)
@@ -256,14 +257,14 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
 
       analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = mean(sample$vphi_circ)
       analysis_data$RadialTrends_Cylindrical$RotationalDispersion[binID] = sd(sample$vphi_circ)
-      analysis_data$RadialTrends_Cylindrical$Circularity[binID] = mean(J[3]/sample$j_circ)
+      analysis_data$RadialTrends_Cylindrical$Circularity[binID] = mean((sample$Jz/sample$Mass)/sample$j_circ)
       analysis_data$RadialTrends_Cylindrical$KappaRot[binID] = sum(sample$Mass*(sample$vphi_circ)^2)/sum(sample$Mass*sample$v_r)
       analysis_data$RadialTrends_Cylindrical$KappaCoRot[binID] = sum(co_sample$Mass*(co_sample$vphi_circ)^2)/sum(co_sample$Mass*co_sample$v_r)
 
       analysis_data$RadialTrends_Cylindrical$SpinParameter_Wilkinson[binID] = mean(sample$vphi_circ)/
         sqrt((mean(sample$vphi_circ)^2)+((sd(sample$vz)^2 + sd(sample$vR)^2 + sd(sample$vphi_circ)^2)/3))
 
-      analysis_data$RadialTrends_Cylindrical$DisktoTotal[binID] = sum(sample$Mass[which(J[3]/sample$j_circ > 0.7)])/sum(sample$Mass)
+      analysis_data$RadialTrends_Cylindrical$DisktoTotal[binID] = sum(sample$Mass[which(((sample$Jz/sample$Mass)/sample$j_circ) > 0.7)])/sum(sample$Mass)
       analysis_data$RadialTrends_Cylindrical$SpheroidtoTotal[binID] = (2*sum(sample$Mass[which(sample$vphi_circ < 0)]))/sum(sample$Mass)
       analysis_data$RadialTrends_Cylindrical$NumberOfParticles[binID] = length(sample$ID)
     } else {
