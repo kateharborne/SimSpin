@@ -131,6 +131,9 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
                        "HalfMassProperties" = list("Mass" = half_mass,
                                                    "RadiusCircular" = numeric(1),
                                                    "RadiusElliptical" = numeric(1),
+                                                   "Radius_a" = numeric(1),
+                                                   "Radius_b" = numeric(1),
+                                                   "Radius_c" = numeric(1),
                                                    "Shape_p" = numeric(1),
                                                    "Shape_q" = numeric(1)),
                        "RadialTrends_Spherical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
@@ -298,6 +301,9 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
   hm_props = .new_half_mass_data(galaxy_data = galaxy_data, p = shapes$p, q = shapes$q, half_mass = analysis_data$HalfMassProperties$Mass)
   analysis_data$HalfMassProperties$RadiusCircular = max(hm_props$r)
   analysis_data$HalfMassProperties$RadiusElliptical = max(sqrt((hm_props$x*hm_props$x) + ((hm_props$y/shapes$p)*(hm_props$y/shapes$p)) + ((hm_props$z/shapes$q)*(hm_props$z/shapes$q))))
+  analysis_data$HalfMassProperties$Radius_a = max(hm_props$x)
+  analysis_data$HalfMassProperties$Radius_b = max(hm_props$y)
+  analysis_data$HalfMassProperties$Radius_c = max(hm_props$z)
 
   return(analysis_data)
 }
