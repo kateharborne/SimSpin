@@ -46,7 +46,7 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
                       titleshift = -4, labN=5, ...){
 
   Flux = flux_image
-  im_dim = dim(Flux)%/%2
+  im_dim = dim(Flux)/2
   flux_val = c(min(Flux, na.rm = T), max(Flux, na.rm = T))
 
   if (all(flux_val == 0)){
@@ -114,7 +114,7 @@ plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
                       titleshift = -4, labN=5, ...){
 
   Mass = mass_image
-  im_dim = dim(Mass)%/%2
+  im_dim = dim(Mass)/2
   mass_val = c(min(Mass, na.rm = T), max(Mass, na.rm = T))
 
   if (all(mass_val == 0)){
@@ -184,7 +184,7 @@ plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
                           titleshift = -4, labN=5, ...){
 
   V = velocity_image
-  im_dim = dim(V)%/%2
+  im_dim = dim(V)/2
   vel_val = max(c(abs(min(V, na.rm = T)), abs(max(V, na.rm = T))))
 
   if (all(vel_val == 0)){
@@ -252,7 +252,7 @@ plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
                             titleshift = -4, labN=5, ...){
 
   disp_map = dispersion_image
-  im_dim = dim(disp_map)%/%2
+  im_dim = dim(disp_map)/2
   disp_val = c(floor(min(disp_map, na.rm=T)), max(disp_map, na.rm=T))
 
   if (all(disp_val == 0)){
@@ -321,7 +321,7 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
                       titleshift = -4, labN=5, ...){
 
   V = h3_image
-  im_dim = dim(V)%/%2
+  im_dim = dim(V)/2
   vel_val = max(c(abs(min(V, na.rm = T)), abs(max(V, na.rm = T))))
 
   if (all(vel_val == 0)){
@@ -389,7 +389,7 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
                       titleshift = -4, labN=5, ...){
 
   V = h4_image
-  im_dim = dim(V)%/%2
+  im_dim = dim(V)/2
   vel_val = max(c(abs(min(V, na.rm = T)), abs(max(V, na.rm = T))))
 
   if (all(vel_val == 0)){
@@ -458,7 +458,7 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
                      titleshift = -4, labN=5, ...){
 
   age_map = age_image
-  im_dim = dim(age_map)%/%2
+  im_dim = dim(age_map)/2
   age_val = c(floor(min(age_map, na.rm=T)/2), max(age_map, na.rm=T))
 
   if (all(age_val == 0)){
@@ -526,7 +526,7 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
                              titleshift = -4, labN=5, ...){
 
   met_map = metallicity_image
-  im_dim = dim(met_map)%/%2
+  im_dim = dim(met_map)/2
   met_val = c(floor(min(met_map, na.rm=T)/2), max(met_map, na.rm=T))
 
   if (all(met_val == 0)){
@@ -595,7 +595,7 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
                            titleshift = -4, labN=5, ...){
 
   part_map = particle_image
-  im_dim = dim(part_map)%/%2
+  im_dim = dim(part_map)/2
   part_val = c(floor(min(part_map, na.rm=T)/2), max(part_map, na.rm=T))
 
   if (all(part_val == 0)){
@@ -663,7 +663,7 @@ plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
                      titleshift = -4, labN=5, ...){
 
   part_map = SFR_image
-  im_dim = dim(part_map)%/%2
+  im_dim = dim(part_map)/2
   part_val = c(floor(min(part_map, na.rm=T)/2), max(part_map, na.rm=T))
 
   if (all(part_val == 0)){
@@ -731,7 +731,7 @@ plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
                     titleshift = -4, labN=5, ...){
 
   met_map = OH_image
-  im_dim = dim(met_map)%/%2
+  im_dim = dim(met_map)/2
   met_val = c(floor(min(met_map, na.rm=T)/2), max(met_map, na.rm=T))
 
   if (all(met_val == 0)){
@@ -789,7 +789,7 @@ plot_voronoi <- function(voronoi_bins, fig = c(0,1,0,1), new=F,
                          ...){
 
   bin_map = voronoi_bins
-  im_dim = dim(bin_map)%/%2
+  im_dim = dim(bin_map)/2
   bin_val = c(min(bin_map, na.rm=T), max(bin_map, na.rm=T))
 
   if (all(bin_val == 0)){
