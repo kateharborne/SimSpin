@@ -1577,3 +1577,20 @@ test_that("Number of particles in the image is consistent in the binned and unbi
   expect_equal(N, sum(notbin_velocity$raw_images$particle_image))
 
 })
+
+test_that("Vorbin images made with single and multi-core methods are the same", {
+
+  vorbin_velocity = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "velocity", verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  vorbin_velocity_mc = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "velocity", verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10, cores = 2)
+
+  expect_equal(vorbin_velocity$raw_images$voronoi_bins, vorbin_velocity_mc$raw_images$voronoi_bins)
+})
