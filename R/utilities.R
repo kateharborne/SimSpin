@@ -1527,8 +1527,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
     # transform luminosity into flux detected at telescope
     #    flux in units erg/s/cm^2/Ang
-    spectral_dist = ((luminosity*.lsol_to_erg) /
-      4 * pi * (observation$lum_dist*.mpc_to_cm)^2) / (1 + observation$z)
+    spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
+                    (1 + observation$z)
 
     for (bin in 1:length(part_in_spaxel$pixel_pos[[i]])){
       spectra[part_in_spaxel$pixel_pos[[i]][bin], ] = spectral_dist
@@ -1985,14 +1985,14 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     for (p in 1:length(unlist(part_in_spaxel$pixel_pos[[bin]]))){
       vel_spec[unlist(part_in_spaxel$pixel_pos[[bin]][p]),] = v_dist[bin,]
     }
-    mass_map[unlist(part_in_spaxel$pixel_pos)] = mass_dist[bin]
-    vel_los[unlist(part_in_spaxel$pixel_pos)] = vel_dist[bin]
-    dis_los[unlist(part_in_spaxel$pixel_pos)] = dis_dist[bin]
-    SFR_map[unlist(part_in_spaxel$pixel_pos)] = SFR_dist[bin]
-    Z_map[unlist(part_in_spaxel$pixel_pos)] = Z_dist[bin]
-    OH_map[unlist(part_in_spaxel$pixel_pos)] = OH_dist[bin]
-    part_map[unlist(part_in_spaxel$pixel_pos)] = part_dist[bin]
-    vorbin_map[unlist(part_in_spaxel$pixel_pos)] = vorbin_dist[bin]
+    mass_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = mass_dist[bin]
+    vel_los[unlist(part_in_spaxel$pixel_pos[[bin]])] = vel_dist[bin]
+    dis_los[unlist(part_in_spaxel$pixel_pos[[bin]])] = dis_dist[bin]
+    SFR_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = SFR_dist[bin]
+    Z_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = Z_dist[bin]
+    OH_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = OH_dist[bin]
+    part_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = part_dist[bin]
+    vorbin_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = vorbin_dist[bin]
   }
 
   return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map, vorbin_map))
