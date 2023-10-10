@@ -32,7 +32,7 @@ Imports:
     stringr,
     stats,
     utils
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Suggests: 
     testthat,
     knitr,
