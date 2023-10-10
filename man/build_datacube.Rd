@@ -17,7 +17,9 @@ build_datacube(
   observer_name = "Anonymous",
   split_save = F,
   cores = 1,
-  mass_flag = F
+  mass_flag = F,
+  voronoi_bin = F,
+  vorbin_limit = 10
 )
 }
 \arguments{

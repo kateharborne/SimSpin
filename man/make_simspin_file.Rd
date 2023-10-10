@@ -72,8 +72,8 @@ the gas properties at the `build_datacube()` stage.}
 }
 \value{
 Returns an .Rdata file that contains a list of particle positions,
-velocities, and spectra (or a list containing the same information to the
-environment without writing to file, when `write_to_file = F`).
+velocities, and spectral weights (or a list containing the same information
+to the environment without writing to file, when `write_to_file = F`).
 }
 \description{
 The purpose of this function is to construct a SimSpin file containing the
