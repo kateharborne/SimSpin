@@ -26,7 +26,7 @@
 #'\describe{
 #'   \item{Properties}{list()}
 #'   \item{HalfMassProperties}{list()}
-#'   \item{RadialTrends_Spherical}{data.frame()}}
+#'   \item{RadialTrends_Spherical}{data.frame()}
 #'   \item{RadialTrends_Cylindrical}{data.frame()}}
 #'   where \code{Properties} includes:
 #'   \describe{\item{Type}{Component considered within analysis}
