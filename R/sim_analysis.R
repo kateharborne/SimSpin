@@ -96,8 +96,6 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     galaxy_data = simspin_data$gas_part
     if (is.null(galaxy_data)){
       stop(cat("Error: There are no gas particles contained within this simulation. Try again with type = 'stars'"))
-    } else {
-      galaxy_data$Age = rep(NA, length(galaxy_data$ID))
     }
   }
 
@@ -123,48 +121,98 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     bin_ends = lseq + c(diff(lseq), diff(lseq)[(rbins-1)])
   }
 
-  analysis_data = list("Properties" = list("Type" = type,
-                                           "TotalMass" = sum(galaxy_data$Mass),
-                                           "MeanAge" = mean(galaxy_data$Age),
-                                           "MeanMetallicity" = mean(galaxy_data$Metallicity),
-                                           "NumberOfParticles" = length(galaxy_data$ID)),
-                       "HalfMassProperties" = list("Mass" = half_mass,
-                                                   "RadiusCircular" = numeric(1),
-                                                   "RadiusElliptical" = numeric(1),
-                                                   "Radius_a" = numeric(1),
-                                                   "Radius_b" = numeric(1),
-                                                   "Radius_c" = numeric(1),
-                                                   "Shape_p" = numeric(1),
-                                                   "Shape_q" = numeric(1)),
-                       "RadialTrends_Spherical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
-                                                             "Mass"    = numeric(rbins),
-                                                             "CumulativeMass" = numeric(rbins),
-                                                             "Density" = numeric(rbins),
-                                                             "Age"     = numeric(rbins),
-                                                             "Metallicity" = numeric(rbins),
-                                                             "CircularVelocity" = numeric(rbins),
-                                                             "VelocityAnisotropy" = numeric(rbins),
-                                                             "SpinParameter_Bullock" = numeric(rbins),
-                                                             "SpecificAngularMomentum" = numeric(rbins),
-                                                             "Shape_p" = numeric(rbins),
-                                                             "Shape_q" = numeric(rbins),
-                                                             "NumberOfParticles" = numeric(rbins)),
-                       "RadialTrends_Cylindrical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
+  if (type == "gas"){
+    analysis_data = list("Properties" = list("Type" = type,
+                                             "TotalMass" = sum(galaxy_data$Mass),
+                                             "MeanSFR" = mean(galaxy_data$SFR),
+                                             "MeanMetallicity" = mean(galaxy_data$Metallicity),
+                                             "NumberOfParticles" = length(galaxy_data$ID)),
+                         "HalfMassProperties" = list("Mass" = half_mass,
+                                                     "RadiusCircular" = numeric(1),
+                                                     "RadiusElliptical" = numeric(1),
+                                                     "Radius_a" = numeric(1),
+                                                     "Radius_b" = numeric(1),
+                                                     "Radius_c" = numeric(1),
+                                                     "Shape_p" = numeric(1),
+                                                     "Shape_q" = numeric(1)),
+                         "RadialTrends_Spherical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
+                                                               "Mass"    = numeric(rbins),
+                                                               "CumulativeMass" = numeric(rbins),
+                                                               "Density" = numeric(rbins),
+                                                               "SFR"     = numeric(rbins),
+                                                               "Metallicity" = numeric(rbins),
+                                                               "CircularVelocity" = numeric(rbins),
+                                                               "VelocityAnisotropy" = numeric(rbins),
+                                                               "SpinParameter_Bullock" = numeric(rbins),
+                                                               "SpecificAngularMomentum" = numeric(rbins),
+                                                               "Shape_p" = numeric(rbins),
+                                                               "Shape_q" = numeric(rbins),
+                                                               "NumberOfParticles" = numeric(rbins)),
+                         "RadialTrends_Cylindrical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
+                                                                 "Mass"    = numeric(rbins),
+                                                                 "CumulativeMass" = numeric(rbins),
+                                                                 "Density" = numeric(rbins),
+                                                                 "SFR"     = numeric(rbins),
+                                                                 "Metallicity" = numeric(rbins),
+                                                                 "CircularVelocity" = numeric(rbins),
+                                                                 "RotationalVelocity" = numeric(rbins),
+                                                                 "RotationalDispersion" = numeric(rbins),
+                                                                 "Circularity" = numeric(rbins),
+                                                                 "KappaRot" = numeric(rbins),
+                                                                 "KappaCoRot" = numeric(rbins),
+                                                                 "SpinParameter_Wilkinson" = numeric(rbins),
+                                                                 "DisktoTotal" = numeric(rbins),
+                                                                 "SpheroidtoTotal" = numeric(rbins),
+                                                                 "NumberOfParticles" = numeric(rbins)))
+
+  } # output changes slightly based on if stellar or gas properties are requested
+
+  if (type == "stars"){
+    analysis_data = list("Properties" = list("Type" = type,
+                                             "TotalMass" = sum(galaxy_data$Mass),
+                                             "MeanAge" = mean(galaxy_data$Age),
+                                             "MeanMetallicity" = mean(galaxy_data$Metallicity),
+                                             "NumberOfParticles" = length(galaxy_data$ID)),
+                         "HalfMassProperties" = list("Mass" = half_mass,
+                                                     "RadiusCircular" = numeric(1),
+                                                     "RadiusElliptical" = numeric(1),
+                                                     "Radius_a" = numeric(1),
+                                                     "Radius_b" = numeric(1),
+                                                     "Radius_c" = numeric(1),
+                                                     "Shape_p" = numeric(1),
+                                                     "Shape_q" = numeric(1)),
+                         "RadialTrends_Spherical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
                                                                "Mass"    = numeric(rbins),
                                                                "CumulativeMass" = numeric(rbins),
                                                                "Density" = numeric(rbins),
                                                                "Age"     = numeric(rbins),
                                                                "Metallicity" = numeric(rbins),
                                                                "CircularVelocity" = numeric(rbins),
-                                                               "RotationalVelocity" = numeric(rbins),
-                                                               "RotationalDispersion" = numeric(rbins),
-                                                               "Circularity" = numeric(rbins),
-                                                               "KappaRot" = numeric(rbins),
-                                                               "KappaCoRot" = numeric(rbins),
-                                                               "SpinParameter_Wilkinson" = numeric(rbins),
-                                                               "DisktoTotal" = numeric(rbins),
-                                                               "SpheroidtoTotal" = numeric(rbins),
-                                                               "NumberOfParticles" = numeric(rbins)))
+                                                               "VelocityAnisotropy" = numeric(rbins),
+                                                               "SpinParameter_Bullock" = numeric(rbins),
+                                                               "SpecificAngularMomentum" = numeric(rbins),
+                                                               "Shape_p" = numeric(rbins),
+                                                               "Shape_q" = numeric(rbins),
+                                                               "NumberOfParticles" = numeric(rbins)),
+                         "RadialTrends_Cylindrical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
+                                                                 "Mass"    = numeric(rbins),
+                                                                 "CumulativeMass" = numeric(rbins),
+                                                                 "Density" = numeric(rbins),
+                                                                 "Age"     = numeric(rbins),
+                                                                 "Metallicity" = numeric(rbins),
+                                                                 "CircularVelocity" = numeric(rbins),
+                                                                 "RotationalVelocity" = numeric(rbins),
+                                                                 "RotationalDispersion" = numeric(rbins),
+                                                                 "Circularity" = numeric(rbins),
+                                                                 "KappaRot" = numeric(rbins),
+                                                                 "KappaCoRot" = numeric(rbins),
+                                                                 "SpinParameter_Wilkinson" = numeric(rbins),
+                                                                 "DisktoTotal" = numeric(rbins),
+                                                                 "SpheroidtoTotal" = numeric(rbins),
+                                                                 "NumberOfParticles" = numeric(rbins)))
+
+  }
+
 
   # For spherical-binned properties ---------------------------------------------
   galaxy_data$r = sqrt((galaxy_data$x^2) + (galaxy_data$y^2) + (galaxy_data$z^2))
@@ -202,14 +250,16 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       sample = galaxy_data[part_in_rbin$val[[bin]],]
 
       analysis_data$RadialTrends_Spherical$Mass[binID] = sum(sample$Mass)
-      analysis_data$RadialTrends_Spherical$Age[binID] = mean(sample$Age)
+      if(type == "stars"){analysis_data$RadialTrends_Spherical$Age[binID] = mean(sample$Age)}
+      if(type == "gas"){analysis_data$RadialTrends_Spherical$SFR[binID] = mean(sample$SFR)}
       analysis_data$RadialTrends_Spherical$Metallicity[binID] = mean(sample$Metallicity)
       analysis_data$RadialTrends_Spherical$VelocityAnisotropy[binID] = 1 - ((sd(sample$v_theta)^2 + sd(sample$v_phi)^2) / (2 * sd(sample$v_r)^2))
-      analysis_data$RadialTrends_Spherical$SpecificAngularMomentum[binID] = sqrt((sample$Jx^2 + sample$Jy^2 + sample$Jz^2))/sum(sample$Mass)
+      analysis_data$RadialTrends_Spherical$SpecificAngularMomentum[binID] = mean(sqrt((sample$Jx^2 + sample$Jy^2 + sample$Jz^2))/sum(sample$Mass))
       analysis_data$RadialTrends_Spherical$NumberOfParticles[binID] = length(sample$ID)
     } else {
       analysis_data$RadialTrends_Spherical$Mass[binID] = NA
-      analysis_data$RadialTrends_Spherical$Age[binID] = NA
+      if(type == "stars"){analysis_data$RadialTrends_Spherical$Age[binID] = NA}
+      if(type == "gas"){analysis_data$RadialTrends_Spherical$SFR[binID] = NA}
       analysis_data$RadialTrends_Spherical$Metallicity[binID] = NA
       analysis_data$RadialTrends_Spherical$VelocityAnisotropy[binID] = NA
       analysis_data$RadialTrends_Spherical$SpecificAngularMomentum[binID] = NA
@@ -255,7 +305,8 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       bin_height[bin] = max(sample$z) - min(sample$z)
 
       analysis_data$RadialTrends_Cylindrical$Mass[binID] = sum(sample$Mass)
-      analysis_data$RadialTrends_Cylindrical$Age[binID] = mean(sample$Age)
+      if(type=="stars"){analysis_data$RadialTrends_Cylindrical$Age[binID] = mean(sample$Age)}
+      if(type=="gas"){analysis_data$RadialTrends_Cylindrical$SFR[binID] = mean(sample$SFR)}
       analysis_data$RadialTrends_Cylindrical$Metallicity[binID] = mean(sample$Metallicity)
 
       analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = mean(sample$vphi_circ)
@@ -273,7 +324,8 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     } else {
       bin_height[bin] = NA
       analysis_data$RadialTrends_Cylindrical$Mass[binID] = NA
-      analysis_data$RadialTrends_Cylindrical$Age[binID] = NA
+      if(type=="stars"){analysis_data$RadialTrends_Cylindrical$Age[binID] = NA}
+      if(type=="gas"){analysis_data$RadialTrends_Cylindrical$SFR[binID] = NA}
       analysis_data$RadialTrends_Cylindrical$Metallicity[binID] = NA
       analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = NA
       analysis_data$RadialTrends_Cylindrical$RotationalDispersion[binID] = NA
