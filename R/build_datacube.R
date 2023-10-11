@@ -48,6 +48,11 @@
 #' and velocity gridding on. Default is 1.
 #'@param mass_flag Boolean flag that, when set to TRUE, will compute properties
 #' using a mass weighting rather than a luminosity weighting. Default is FALSE.
+#'@param voronoi_bin Boolean flag that, when set to TRUE, will bin pixels into
+#' voronoi tessellated cells that contain a minimum number of particles per
+#' pixel, specified by \code{vorbin_limit}. Default is FALSE.
+#'@param vorbin_limit Integer float that describes the minimum number of
+#' particles per pixel within a given bin, only used if \code{voronoi_bin = T}.
 #'@return Returns a list containing four elements:
 #'\enumerate{
 #' \item \code{spectral_cube} or \code{velocity_cube} - a 3D array containing
