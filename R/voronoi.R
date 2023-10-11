@@ -42,7 +42,7 @@
 #'cube = build_datacube(simspin_file = ss_gadget,
 #'                      telescope = telescope(type="SAMI"),
 #'                      observing_strategy = observing_strategy(),
-#'                      voronoi_bin = T, vorbin_limit = 10)
+#'                      voronoi_bin = TRUE, vorbin_limit = 10)
 #'
 
 
