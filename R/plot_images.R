@@ -781,7 +781,7 @@ plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
 #' cube = build_datacube(simspin_file = ss_eagle,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
-#'                       method = "velocity", voronoi_bin = T)
+#'                       method = "velocity", voronoi_bin = TRUE)
 #' plot_voronoi(cube$raw_images$voronoi_bins)
 
 plot_voronoi <- function(voronoi_bins, fig = c(0,1,0,1), new=F,

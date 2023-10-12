@@ -48,6 +48,6 @@ ss_eagle = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
 cube = build_datacube(simspin_file = ss_eagle,
                       telescope = telescope(type="SAMI"),
                       observing_strategy = observing_strategy(),
-                      method = "velocity", voronoi_bin = T)
+                      method = "velocity", voronoi_bin = TRUE)
 plot_voronoi(cube$raw_images$voronoi_bins)
 }
