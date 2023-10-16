@@ -33,7 +33,9 @@ build_datacube(simspin_file,                     # REQUIRED input SimSpin file
                telescope_name = "SimSpin",
                observer_name = "Anonymous",
                split_save = F, cores = 1,        
-               mass_flag = F)                    # mass or luminosity-weighted? (if method = "velocity").
+               mass_flag = F,                    # mass or luminosity-weighted? (if method = "velocity").
+               voronoi_bin = F,                  # should we bin pixels until they meet a 
+               vorbin_limit = 10)                #   minimum number of particles limit?
 
 ```
 {: pb-4 }
@@ -62,6 +64,8 @@ As of version 2.2.0, the `method` input parameter has been moved directly to the
 | `split_save`         | Only used when `write_fits = TRUE`. Should the output FITS be saved as one file with multiple HDUs to describe the output cube and observed images (`split_save = FALSE`)?  Or should each cube/image be saved to a seperate file (`split_save = TRUE`)? In this case, the file name root will be taken from the state of `output_location` and descriptive names will automatically be appended to individual files (i.e. "_spectral_cube.FITS", "_velocity_image.FITS", etc.). |
 | `cores`              | Specifiying the number of cores to run the code with parallellism turned on. |
 | `mass_flag`          | When `mass_flag = TRUE` and `method = "velocity"`, the output kinematic properties will be mass weighted rather than luminosity weighted. By default, this parameter is set to `FALSE`. |
+| `voronoi_bin`        | When `voronoi_bin = TRUE`, the output images will all be binned into Voronoi tesselated pixels containing some minimum limit of particles (`vorbin_limit`). This approach allows us to minimise the affects of shot noise on the output kinematics. |
+| `vorbin_limit`       | Used when `voronoi_bin = TRUE`, an integer describing the minimum number of particles per pixel in a given output image. |
 
 ---
 ## Output parameters
@@ -301,6 +305,10 @@ The list will always contain 5 elements, though the contents of this list will c
         | `metallicity_image` | a 2D numeric array giving the log10 mean gas metallicity in a given pixel, i.e. [log10(Z / 0.0127)]. |
         | `OH_image` | a 2D numeric array giving the log10 ratio of oxygen to hydrogen abundance in a given pixel, i.e. [log10(O/H) + 12]. |
         | `particle_image` | a 2D numeric array giving the number of particles per pixel. |
+    
+    -   If `voronoi_bin = TRUE`, an additional image will be included in this list:
+    
+        | `voronoi_bins` | a 2D numeric array of integer bin numbers showing which pixels have been joined together to meet the minimum number of particles limit. The same value of flux, mass, age, metallicity and kinematics will be given for all pixel values in the same voronoi bin. 
 
 1.  `observed_images` - This will be a list of a variable number of images.
     -   In `method = "spectral"`, the returned element will be `NULL`. This is because observed images will need to be fitted using external software such as pPXF. 
