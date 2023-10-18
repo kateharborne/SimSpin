@@ -216,17 +216,22 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
 
   # For spherical-binned properties ---------------------------------------------
   galaxy_data$r = sqrt((galaxy_data$x^2) + (galaxy_data$y^2) + (galaxy_data$z^2))
-  galaxy_data$theta = atan2(y = galaxy_data$y, x = galaxy_data$x)
-  galaxy_data$phi = atan2(y = sqrt((galaxy_data$x^2) + (galaxy_data$y^2)), x = galaxy_data$z)
-  galaxy_data$v_r = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2) + (galaxy_data$vz^2))
-  galaxy_data$v_theta = atan2(y = galaxy_data$vy, x = galaxy_data$vx)
-  galaxy_data$v_phi = atan2(y = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2)), x = galaxy_data$vz)
+  galaxy_data$theta = atan2(y = sqrt((galaxy_data$x^2) + (galaxy_data$y^2)), x = galaxy_data$z)
+  galaxy_data$phi = atan2(y = galaxy_data$y, x = galaxy_data$x)
+  galaxy_data$v_r = (sin(galaxy_data$theta) * cos(galaxy_data$phi) * galaxy_data$vx) +
+                    (sin(galaxy_data$theta) * sin(galaxy_data$phi) * galaxy_data$vy) +
+                    (cos(galaxy_data$theta) * galaxy_data$vz)
+  galaxy_data$v_theta = (cos(galaxy_data$theta) * cos(galaxy_data$phi) * galaxy_data$vx) +
+                        (cos(galaxy_data$theta) * sin(galaxy_data$phi) * galaxy_data$vy) +
+                        (-sin(galaxy_data$theta))
+  galaxy_data$v_phi = (-sin(galaxy_data$phi) * galaxy_data$vx) +
+                      (cos(galaxy_data$phi) * galaxy_data$vy)
 
   # For circularly-binned properties -------------------------------------------
   galaxy_data$R = sqrt((galaxy_data$x^2) + (galaxy_data$y^2))
   galaxy_data$phi_circ = atan2(y = galaxy_data$y, x = galaxy_data$x)
-  galaxy_data$vR = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2))
-  galaxy_data$vphi_circ = atan2(y = galaxy_data$vy, x = galaxy_data$vx)
+  galaxy_data$vR = galaxy_data$vy*sin(galaxy_data$phi_circ) + galaxy_data$vx*cos(galaxy_data$phi_circ)
+  galaxy_data$vphi_circ = galaxy_data$vy*cos(galaxy_data$phi_circ) - galaxy_data$vx*sin(galaxy_data$phi_circ)
 
   galaxy_data$Jx = galaxy_data$Mass * ((galaxy_data$y * galaxy_data$vz) - (galaxy_data$z * galaxy_data$vy))
   galaxy_data$Jy = galaxy_data$Mass * ((galaxy_data$x * galaxy_data$vz) - (galaxy_data$z * galaxy_data$vz))
@@ -316,7 +321,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Cylindrical$KappaCoRot[binID] = sum(co_sample$Mass*(co_sample$vphi_circ)^2)/sum(co_sample$Mass*co_sample$v_r)
 
       analysis_data$RadialTrends_Cylindrical$SpinParameter_Wilkinson[binID] = mean(sample$vphi_circ)/
-        sqrt((mean(sample$vphi_circ)^2)+((sd(sample$vz)^2 + sd(sample$vR)^2 + sd(sample$vphi_circ)^2)/3))
+        sqrt((mean(sample$vphi_circ^2))+((sd(sample$vz^2) + sd(sample$vR^2) + sd(sample$vphi_circ^2))/3))
 
       analysis_data$RadialTrends_Cylindrical$DisktoTotal[binID] = sum(sample$Mass[which(((sample$Jz/sample$Mass)/sample$j_circ) > 0.7)])/sum(sample$Mass)
       analysis_data$RadialTrends_Cylindrical$SpheroidtoTotal[binID] = (2*sum(sample$Mass[which(sample$vphi_circ < 0)]))/sum(sample$Mass)
