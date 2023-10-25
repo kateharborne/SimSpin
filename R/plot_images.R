@@ -26,6 +26,8 @@
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -94,6 +96,8 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -164,6 +168,8 @@ plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -232,6 +238,8 @@ plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -301,6 +309,8 @@ plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -369,6 +379,8 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -437,6 +449,8 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -506,6 +520,8 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -575,6 +591,8 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -643,6 +661,8 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -711,6 +731,8 @@ plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
