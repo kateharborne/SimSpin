@@ -62,6 +62,10 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
   output_file_root = stringr::str_remove(stringr::str_remove(output_name, ".fits"), ".FITS")
 
   observation = simspin_datacube$observation
+
+  voronoi = FALSE # flag to determine behaviour of writing FITS files of voronoi binned data
+  if ("voronoi_bins" %in% names(simspin_datacube$raw_images)){voronoi=TRUE}
+
   simspin_cube = simspin_datacube[[1]] # getting either the "velocity cube" or the "spectral cube"
 
   galaxy_centre_norm = galaxy_centre / sqrt((galaxy_centre[1]^2) + (galaxy_centre[2]^2) + (galaxy_centre[3]^2))
@@ -203,6 +207,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                                      "lum_dist" = "num: distance to object in Mpc",
                                      "method" = "str: name of observing method employed",
                                      "origin" = "str: version of SimSpin used for observing",
+                                     "particle_limit" = "int: minimum number of particles per pixel. If 0, model has not been voronoi binned",
                                      "pointing_kpc" = "num: x-y position of field of view centre relative to object centre in units of kpc",
                                      "pointing_deg" = "num: x-y position of field of view centre relative to object centre in units of degrees",
                                      "psf_fwhm" = "num: the full-width half-maximum of the point spread function kernel in arcsec",
@@ -356,10 +361,34 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames = c("RAW_FLUX", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
-    bunits = c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
-    image_names = c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
-    extnum = c(4,5,6,7,8,9)
+    extnames =
+      if(voronoi){
+        c("RAW_FLUX", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART", "VORONOI")
+      } else {
+        c("RAW_FLUX", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
+      }
+
+    bunits =
+      if(voronoi){
+        c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number", "Bin ID")
+        } else {
+        c("erg/s/cm**2", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
+        }
+
+    image_names =
+      if (voronoi){
+        c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image", "voronoi_bins")
+      } else {
+        c("flux_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
+      }
+
+    extnum =
+      if (voronoi){
+        c(4,5,6,7,8,9,10)
+      } else {
+        c(4,5,6,7,8,9)
+      }
+
     output_image_file_names = paste0(output_dir, "/", output_file_root, "_raw_", image_names, ".FITS")
 
     if (split_save){ # if writing each image to a seperate file
