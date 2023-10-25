@@ -1,6 +1,6 @@
-# SimSpin v2.6.0 News
+# SimSpin v2.7.0 News
 
-### Last edit: 03/08/23
+### Last edit: 25/10/23
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -16,6 +16,7 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
+| 25/10/23 | Adding functionality to voronoi bin individual pixels until the contain some minimum number of particles. This is important for reducing the effects of shot noise on the measured kinematics, especially in dispersion supported systems. We add a new function `voronoi`, which performs the tessellation algorithm as used in the (Vorbin python package)[https://pypi.org/project/vorbin/] (Cappellari & Copin, 2003). When requested, this will add a new image to the `raw_images` output list called `voronoi_bins`, detailing the bin ids assigned to each pixel in the field-of-view of a given observation. | 2.7.0 |  | Kate Harborne |
 | 03/08/23 | Updating the information stored in the SimSpin files following a suggestion from SimSpin v2.5.0 paper review. Do not need to store the full spectrum for each particle. Just the weights and id's of the spectra within the template set. Reduces the simspin file sizes by factor of 100. Old SimSpin files will still work with the code, but will now issue a warning when using a file older than v2.6.0. Tagging for release. Thank you anonymous reviewer!!! | 2.6.0 | ecb9d38031b40e63216d6200409b24ece8fadb69 | Kate Harborne |
 | 19/07/23 | Tagging a stable release of the code to align with the submission of the SimSpin v2.5.0 paper to PASA on the 28th June 2023. | 2.5.0 | cc3b2018527995dfaf09130b1afbe4341566e4f7 | Kate Harborne |
 | 15/06/23 | Updating the noise implementation for `build_datacube` using the median flux pixel to scale the level of noise such that the S/N does not go extreme towards the peak flux or minimum flux in the image. | 2.4.10 | 3bf98efea656776436fca3384cda1411f8f9e642 | Kate Harborne |
