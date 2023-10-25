@@ -22,6 +22,10 @@
 #' (rather than just particles from a single galaxy), you can the half-mass
 #' value at which the alignment function is run. Numeric length = 1. Default is
 #' NA, in which case half the total mass of the supplied simulation data is used.
+#'@param verbose Boolean to describe if the code should give updates on
+#' progress. Default is FALSE.
+#'@param shape Boolean to describe whether or not the shape of the system should
+#' be measured at increasing radii. Default is TRUE.
 #'@return Returns a list that contains:
 #'\describe{
 #'   \item{Properties}{list()}
@@ -78,7 +82,7 @@
 #'props = sim_analysis(simspin_file = ss_gadget)
 #'
 
-sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks=NA){
+sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks=NA, verbose=F, shape=T){
 
   # Reading in SimSpin file data
   if (typeof(simspin_file) == "character"){ # if provided with path to file
@@ -145,8 +149,6 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
                                                                "VelocityAnisotropy" = numeric(rbins),
                                                                "SpinParameter_Bullock" = numeric(rbins),
                                                                "SpecificAngularMomentum" = numeric(rbins),
-                                                               "Shape_p" = numeric(rbins),
-                                                               "Shape_q" = numeric(rbins),
                                                                "NumberOfParticles" = numeric(rbins)),
                          "RadialTrends_Cylindrical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
                                                                  "Mass"    = numeric(rbins),
@@ -191,8 +193,6 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
                                                                "VelocityAnisotropy" = numeric(rbins),
                                                                "SpinParameter_Bullock" = numeric(rbins),
                                                                "SpecificAngularMomentum" = numeric(rbins),
-                                                               "Shape_p" = numeric(rbins),
-                                                               "Shape_q" = numeric(rbins),
                                                                "NumberOfParticles" = numeric(rbins)),
                          "RadialTrends_Cylindrical" = data.frame("Radius"  = lseq + ((bin_ends - lseq)/2),
                                                                  "Mass"    = numeric(rbins),
@@ -211,6 +211,11 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
                                                                  "SpheroidtoTotal" = numeric(rbins),
                                                                  "NumberOfParticles" = numeric(rbins)))
 
+  }
+
+  if (shape){ # if shape is requested, add placeholders for p and q shapes
+    analysis_data$RadialTrends_Spherical$Shape_p = numeric(rbins)
+    analysis_data$RadialTrends_Spherical$Shape_q = numeric(rbins)
   }
 
 
@@ -271,6 +276,14 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Spherical$NumberOfParticles[binID] = 0
     }
 
+    if (verbose){
+      if (bin == 1){
+        cat("Done with spherical radial bin 1... ", sep = "")
+        } else {
+        cat(bin, "... ", sep="")
+      }
+    }
+
   }
 
   bin_vol = (4/3)*pi*(bin_ends^3)
@@ -284,11 +297,21 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     M  = analysis_data$RadialTrends_Spherical$CumulativeMass[cbin]
     analysis_data$RadialTrends_Spherical$SpinParameter_Bullock[cbin] = sqrt(sum(angmom_galaxy(sample[,1:8])^2)) / (sqrt(2)*M*vc*bin_ends[cbin])
 
-    shapes = tryCatch(expr = {.measure_pqj(galaxy_data = list("star_part" = galaxy_data), half_mass = M)},
-                      error = function(e){list(p = NA, q = NA)})
+    if (shape){
+      shapes = tryCatch(expr = {.measure_pqj(galaxy_data = list("star_part" = galaxy_data), half_mass = M)},
+                        error = function(e){list(p = NA, q = NA)})
 
-    analysis_data$RadialTrends_Spherical$Shape_p[cbin] = shapes$p
-    analysis_data$RadialTrends_Spherical$Shape_q[cbin] = shapes$q
+      analysis_data$RadialTrends_Spherical$Shape_p[cbin] = shapes$p
+      analysis_data$RadialTrends_Spherical$Shape_q[cbin] = shapes$q
+    }
+
+    if (verbose){
+      if (cbin == 1){
+        cat("Additional measurements within spherical radial bin 1... ", sep="")
+      } else {
+        cat(cbin, "... ", sep="")
+      }
+    }
   }
 
   # Cylindrical binning measurements ---------------------------------------------
@@ -347,6 +370,12 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     analysis_data$RadialTrends_Cylindrical$CumulativeMass = cumsum(analysis_data$RadialTrends_Cylindrical$Mass)
     analysis_data$RadialTrends_Cylindrical$Density = analysis_data$RadialTrends_Cylindrical$CumulativeMass / bin_vol
     analysis_data$RadialTrends_Cylindrical$CircularVelocity = sqrt(.g_in_kpcMsolkms2 * analysis_data$RadialTrends_Cylindrical$CumulativeMass / bin_ends)
+
+    if (verbose){
+      if(bin == 1){cat("Done with cylindrical radial bin 1... ", sep="")}else{
+        cat(bin, "... ", sep="")
+      }
+    }
 
   }
 

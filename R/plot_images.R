@@ -60,7 +60,7 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = Flux, zlim =  if(is.na(zlim[1])){flux_val}else{zlim}, col = flux_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){flux_val}else{zlim}, scale = c(1, 1/20),
