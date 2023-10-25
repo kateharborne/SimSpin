@@ -4,7 +4,14 @@
 \alias{sim_analysis}
 \title{A function for measuring the particle properties of the input simulation}
 \usage{
-sim_analysis(simspin_file, type = "stars", half_mass = NA, bin_breaks = NA)
+sim_analysis(
+  simspin_file,
+  type = "stars",
+  half_mass = NA,
+  bin_breaks = NA,
+  verbose = F,
+  shape = T
+)
 }
 \arguments{
 \item{simspin_file}{The path to the location of the SimSpin .Rdata file OR
@@ -21,6 +28,12 @@ NA, in which case half the total mass of the supplied simulation data is used.}
 \item{bin_breaks}{Optional parameter that allows you to specify radial bin
 break positions. Default will give bins spaced with varying sized bins:
 `seq(0, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 501, by=50)`}
+
+\item{verbose}{Boolean to describe if the code should give updates on
+progress. Default is FALSE.}
+
+\item{shape}{Boolean to describe whether or not the shape of the system should
+be measured at increasing radii. Default is TRUE.}
 }
 \value{
 Returns a list that contains:
