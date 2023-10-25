@@ -22,13 +22,13 @@ An S4 class to represent projected distance to a galaxy
 }
 \section{Functions}{
 \itemize{
-\item \code{kpc_per_arcsec()}: Query the kpc_per_arcsec of a Distance object
+\item \code{kpc_per_arcsec}: Query the kpc_per_arcsec of a Distance object
 
-\item \code{Mpc()}: Query the Mpc of a Distance object
+\item \code{Mpc}: Query the Mpc of a Distance object
 
-\item \code{z()}: Query the z of a Distance object
-
+\item \code{z}: Query the z of a Distance object
 }}
+
 \section{Slots}{
 
 \describe{
