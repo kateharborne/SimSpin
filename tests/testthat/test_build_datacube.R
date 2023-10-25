@@ -662,6 +662,19 @@ test_that("Data cubes can be written to a single files", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               method="velocity", mass_flag = T,
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS"),
+                               split_save=F, voronoi_bin = T, vorbin_limit = 10), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS")))
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS"))) == velocity_number_of_hdu_massflagtrue_sntrue+1)
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS")))[velocity_raw_mass_loc_massflagtrue] == "RAW_MASS")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS")))[velocity_variance_loc_massflagtrue] == "STAT")
+
+
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method="velocity", mass_flag = F,
                                write_fits = T, output_location = paste0(temp_loc, "/ss_gadget_mff_snt.FITS"),
                                split_save=F), built_cube_size)
@@ -670,6 +683,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mff_snt.FITS"))) == velocity_number_of_hdu_massflagfalse_sntrue)
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mff_snt.FITS")))[velocity_raw_mass_loc_massflagfalse] == "RAW_MASS")
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mff_snt.FITS")))[velocity_variance_loc_massflagfalse] == "STAT")
+
 
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
@@ -682,6 +696,18 @@ test_that("Data cubes can be written to a single files", {
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf.FITS"))) == velocity_number_of_hdu_massflagtrue_snfalse)
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf.FITS")))[velocity_raw_mass_loc_massflagtrue] == "RAW_MASS")
   expect_true(is.na(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf.FITS")))[velocity_variance_loc_massflagtrue] == "STAT"))
+
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               method="velocity", mass_flag = T,
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS"),
+                               split_save=F, voronoi_bin = T, vorbin_limit = 10), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS"))) == velocity_number_of_hdu_massflagtrue_snfalse+1)
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))[velocity_raw_mass_loc_massflagtrue] == "RAW_MASS")
+  expect_true(is.na(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))[velocity_variance_loc_massflagtrue] == "STAT"))
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="MUSE", fov = 10, signal_to_noise = NA),
@@ -719,17 +745,55 @@ test_that("Data cubes can be written to a single files", {
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                write_fits = T, output_location = paste0(temp_loc, "/ss_hdf5.FITS")), built_cube_size)
 
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               write_fits = T, voronoi_bin = T, vorbin_limit = 10,
+                               output_location = paste0(temp_loc, "/ss_gadget_voronoi.FITS")), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_voronoi.FITS")))
+
+  vorbin_fits = Rfits::Rfits_read_all(paste0(temp_loc, "/ss_gadget_voronoi.FITS"), header = T)
+  expect_true(length(vorbin_fits) == (spectra_number_of_hdu_snfalse+1))
+  expect_true(vorbin_fits[[2]]$keyvalues$CTYPE3 == "WAVE")
+  expect_true(all(dim(vorbin_fits[[2]]$imDat) == c(vorbin_fits[[2]]$keyvalues$NAXIS1, vorbin_fits[[2]]$keyvalues$NAXIS2, vorbin_fits[[2]]$keyvalues$NAXIS3)))
+  expect_true(vorbin_fits[[spectral_raw_vel_loc]]$keyvalues$EXTNAME == "RAW_VEL")
+  expect_true(names(vorbin_fits)[ob_table_loc] == "OB_TABLE")
+  expect_true(vorbin_fits[[(spectra_number_of_hdu_snfalse+1)]]$keyvalues$EXTNAME == "VORONOI")
+
+  expect_length(build_datacube(simspin_file = ss_gadget,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 30),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               write_fits = T, voronoi_bin = T, vorbin_limit = 10,
+                               output_location = paste0(temp_loc, "/ss_gadget_voronoi_sntrue.FITS")), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_voronoi_sntrue.FITS")))
+
+  vorbin_fits_sntrue = Rfits::Rfits_read_all(paste0(temp_loc, "/ss_gadget_voronoi_sntrue.FITS"), header = T)
+  expect_true(length(vorbin_fits_sntrue) == (spectra_number_of_hdu_sntrue+1))
+  expect_true(vorbin_fits_sntrue[[2]]$keyvalues$CTYPE3 == "WAVE")
+  expect_true(all(dim(vorbin_fits_sntrue[[2]]$imDat) == c(vorbin_fits_sntrue[[2]]$keyvalues$NAXIS1,
+                                                          vorbin_fits_sntrue[[2]]$keyvalues$NAXIS2,
+                                                          vorbin_fits_sntrue[[2]]$keyvalues$NAXIS3)))
+  expect_true(vorbin_fits_sntrue[[spectral_raw_vel_loc]]$keyvalues$EXTNAME == "RAW_VEL")
+  expect_true(names(vorbin_fits_sntrue)[ob_table_loc] == "OB_TABLE")
+  expect_true(vorbin_fits_sntrue[[(spectra_number_of_hdu_sntrue+1)]]$keyvalues$EXTNAME == "VORONOI")
+
 })
 
 unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS",
          paste0(temp_loc, "/ss_gadget.FITS"),
          paste0(temp_loc, "/ss_gadget_mft.FITS"),
+         paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS"),
          paste0(temp_loc, "/ss_gadget_mff_snt.FITS"),
          paste0(temp_loc, "/ss_gadget_mft_snf.FITS"),
+         paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS"),
          paste0(temp_loc, "/ss_eagle.FITS"),
          paste0(temp_loc, "/ss_eagle_snt.FITS"),
          paste0(temp_loc, "/ss_magenticum.FITS"),
-         paste0(temp_loc, "/ss_hdf5.FITS")))
+         paste0(temp_loc, "/ss_hdf5.FITS"),
+         paste0(temp_loc, "/ss_gadget_voronoi.FITS"),
+         paste0(temp_loc, "/ss_gadget_voronoi_sntrue.FITS")))
 
 test_that("Data cubes can be written to multiple files", {
   expect_length(build_datacube(simspin_file = ss_gadget,
@@ -1593,4 +1657,51 @@ test_that("Vorbin images made with single and multi-core methods are the same", 
                                    voronoi_bin = T, vorbin_limit = 10, cores = 2)
 
   expect_equal(vorbin_velocity$raw_images$voronoi_bins, vorbin_velocity_mc$raw_images$voronoi_bins)
+})
+
+test_that("Voronoi binned images can be blurred with the PSF", {
+
+  vorbin_spectral = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "spectral", verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_spectral$raw_images))
+  expect_length(vorbin_spectral$raw_images, (spectra_raw_images_size + 1))
+
+  vorbin_velocity = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "velocity", verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_velocity$raw_images))
+  expect_length(vorbin_velocity$raw_images, (velocity_raw_images_size_massflagfalse + 1))
+
+  vorbin_velocity_mf = build_datacube(simspin_file = ss_eagle,
+                                      telescope = telescope(type = "SAMI"),
+                                      observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                      method = "velocity", verbose = F, mass_flag = T,
+                                      voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_velocity_mf$raw_images))
+  expect_length(vorbin_velocity_mf$raw_images, (velocity_raw_images_size_massflagtrue + 1))
+
+  vorbin_gas      = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "gas", verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_gas$raw_images))
+
+  vorbin_sfgas    = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "sf gas", verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  expect_true("voronoi_bins" %in% names(vorbin_sfgas$raw_images))
+
 })
