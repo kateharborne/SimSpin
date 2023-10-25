@@ -1,5 +1,5 @@
 # Author: Kate Harborne
-# Date: 26/10/2020
+# Date: 25/10/2023
 # Title: plot_images - a suite of function for plotting pretty images
 
 #' Plotting pretty flux images
@@ -43,7 +43,7 @@
 plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
                       units = expression("Flux, CGS"), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
-                      titleshift = -4, labN=5, ...){
+                      titleshift = -4, labN=5, radii_col="red", ...){
 
   Flux = flux_image
   im_dim = dim(Flux)/2
@@ -60,7 +60,7 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = Flux, zlim =  if(is.na(zlim[1])){flux_val}else{zlim}, col = flux_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){flux_val}else{zlim}, scale = c(1, 1/20),
@@ -111,7 +111,7 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
 plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
                       units = expression("Mass, M"["sol"]), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
-                      titleshift = -4, labN=5, ...){
+                      titleshift = -4, labN=5, radii_col="red", ...){
 
   Mass = mass_image
   im_dim = dim(Mass)/2
@@ -128,7 +128,7 @@ plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = Mass, zlim =  if(is.na(zlim[1])){mass_val}else{zlim}, col = mass_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){mass_val}else{zlim}, scale = c(1, 1/20),
@@ -181,7 +181,7 @@ plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
 plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
                           units = expression("velocity"[LOS] * ", km s"^{-1}), main="",
                           radii = NA, na.color = "white", zlim = NA, legend = T,
-                          titleshift = -4, labN=5, ...){
+                          titleshift = -4, labN=5, radii_col="red", ...){
 
   V = velocity_image
   im_dim = dim(V)/2
@@ -198,7 +198,7 @@ plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = V, zlim = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, col = velo_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, scale = c(1, 1/20),
@@ -249,7 +249,7 @@ plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
 plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
                             units = expression("dispersion"[LOS] * ", km s"^{-1}), main="",
                             radii = NA, na.color = "white", zlim = NA, legend=T,
-                            titleshift = -4, labN=5, ...){
+                            titleshift = -4, labN=5, radii_col="red", ...){
 
   disp_map = dispersion_image
   im_dim = dim(disp_map)/2
@@ -267,7 +267,7 @@ plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
              col = disp_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){disp_val}else{zlim}, scale = c(1, 1/20),
@@ -318,7 +318,7 @@ plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
 plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
                       units = expression("h"[3]), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
-                      titleshift = -4, labN=5, ...){
+                      titleshift = -4, labN=5, radii_col="red", ...){
 
   V = h3_image
   im_dim = dim(V)/2
@@ -335,7 +335,7 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = V, zlim = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, col = velo_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, scale = c(1, 1/20),
@@ -386,7 +386,7 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
 plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
                       units = expression("h"[4]), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
-                      titleshift = -4, labN=5, ...){
+                      titleshift = -4, labN=5, radii_col="red", ...){
 
   V = h4_image
   im_dim = dim(V)/2
@@ -403,7 +403,7 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = V, zlim = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, col = velo_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, scale = c(1, 1/20),
@@ -455,7 +455,7 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
 plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
                      units = expression("Age, Gyr"), main="", radii = NA,
                      na.color = "white", zlim = NA, legend=T,
-                     titleshift = -4, labN=5, ...){
+                     titleshift = -4, labN=5, radii_col="red", ...){
 
   age_map = age_image
   im_dim = dim(age_map)/2
@@ -472,7 +472,7 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = age_map, zlim = if(is.na(zlim[1])){age_val}else{zlim}, col = age_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){age_val}else{zlim}, scale = c(1, 1/20),
@@ -523,7 +523,7 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
 plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
                              units = expression("log10(Z/Z"[solar]*")"), main="",
                              na.color = "white", zlim = NA, legend=T, radii = NA,
-                             titleshift = -4, labN=5, ...){
+                             titleshift = -4, labN=5, radii_col="red", ...){
 
   met_map = metallicity_image
   im_dim = dim(met_map)/2
@@ -541,7 +541,7 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
              col = met_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){met_val}else{zlim}, scale = c(1, 1/20),
@@ -592,7 +592,7 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
 plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
                            units = expression("Number of particles"), main="", radii = NA,
                            na.color = "white", zlim = NA, legend=T,
-                           titleshift = -4, labN=5, ...){
+                           titleshift = -4, labN=5, radii_col="red", ...){
 
   part_map = particle_image
   im_dim = dim(part_map)/2
@@ -609,7 +609,7 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = part_map, zlim = if(is.na(zlim[1])){part_val}else{zlim}, col = part_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){part_val}else{zlim}, scale = c(1, 1/20),
@@ -660,7 +660,7 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
 plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
                      units = expression("SFR, M"["sol"]*"/yr"), main="", radii = NA,
                      na.color = "white", zlim = NA, legend=T,
-                     titleshift = -4, labN=5, ...){
+                     titleshift = -4, labN=5, radii_col="red",...){
 
   part_map = SFR_image
   im_dim = dim(part_map)/2
@@ -677,7 +677,7 @@ plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = part_map, zlim = if(is.na(zlim[1])){part_val}else{zlim}, col = part_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){part_val}else{zlim}, scale = c(1, 1/20),
@@ -728,7 +728,7 @@ plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
 plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
                     units = expression("log10(O/H) + 12"), main="",
                     na.color = "white", zlim = NA, legend=T, radii = NA,
-                    titleshift = -4, labN=5, ...){
+                    titleshift = -4, labN=5, radii_col="red", ...){
 
   met_map = OH_image
   im_dim = dim(met_map)/2
@@ -746,7 +746,7 @@ plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
              col = met_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL, lwd=2)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){met_val}else{zlim}, scale = c(1, 1/20),
