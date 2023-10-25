@@ -174,6 +174,11 @@ The list will always contain 5 elements, though the contents of this list will c
             <td class="tg-0pky">version of SimSpin used for observing</td>
         </tr>
         <tr>
+            <td class="tg-0pky">partilce_limit</td>
+            <td class="tg-0pky">num</td>
+            <td class="tg-0pky">integer number of minimum particles per pixel in a voronoi binned image, i.e. the `vorbin_limit`. If `voronoi` is not requested, this value will show zero. </td>
+        </tr>
+        <tr>
             <td class="tg-0pky">pointing_kpc</td>
             <td class="tg-0pky">num</td>
             <td class="tg-0pky">x-y position of field of view centre relative to object centre in units of kpc</td>
