@@ -133,16 +133,16 @@ test_that("Magneticum files can be built - spectral mode and be identical in ser
 
 test_that("HorizonAGN files can be built - spectral mode and be identical in series and parallel", {
   horizon_spectra = build_datacube(simspin_file = ss_horizon,
-                                      telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                      observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
+                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
   expect_length(horizon_spectra, built_cube_size)
   expect_length(horizon_spectra$raw_images, spectra_raw_images_size)
   expect_null(horizon_spectra$observed_images)
 
   horizon_parallel_spectra = build_datacube(simspin_file = ss_horizon,
-                                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                               cores = 2)
+                                            telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                            observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                            cores = 2)
   expect_length(horizon_parallel_spectra, built_cube_size)
   expect_length(horizon_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(horizon_parallel_spectra$observed_images)
@@ -156,16 +156,16 @@ test_that("HorizonAGN files can be built - spectral mode and be identical in ser
 
 test_that("IllustrisTNG files can be built - spectral mode and be identical in series and parallel", {
   illustris_spectra = build_datacube(simspin_file = ss_illustris,
-                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
+                                     telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                     observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
   expect_length(illustris_spectra, built_cube_size)
   expect_length(illustris_spectra$raw_images, spectra_raw_images_size)
   expect_null(illustris_spectra$observed_images)
 
   illustris_parallel_spectra = build_datacube(simspin_file = ss_illustris,
-                                            telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                            observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                            cores = 2)
+                                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                              cores = 2)
   expect_length(illustris_parallel_spectra, built_cube_size)
   expect_length(illustris_parallel_spectra$raw_images, spectra_raw_images_size)
   expect_null(illustris_parallel_spectra$observed_images)
@@ -259,18 +259,18 @@ test_that("Magneticum files can be built - velocity mode and be identical in ser
 
 test_that("HorizonAGN files can be built - velocity mode and be identical in series and parallel.", {
   horizon_velocity = build_datacube(simspin_file = ss_horizon,
-                                       telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                                       observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                       method = "velocity")
+                                    telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                    observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                    method = "velocity")
   expect_length(horizon_velocity, built_cube_size)
   expect_length(horizon_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(horizon_velocity$observed_images, velocity_observed_images_size)
 
   horizon_parallel_velocity = build_datacube(simspin_file = ss_horizon,
-                                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                                method = "velocity",
-                                                cores = 2)
+                                             telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                             observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                             method = "velocity",
+                                             cores = 2)
   expect_length(horizon_parallel_velocity, built_cube_size)
   expect_length(horizon_parallel_velocity$raw_images, velocity_raw_images_size_massflagfalse)
   expect_length(horizon_parallel_velocity$observed_images, velocity_observed_images_size)
@@ -287,18 +287,18 @@ test_that("HorizonAGN files can be built - velocity mode and be identical in ser
 
 test_that("IllustrisTNG files can be built - velocity mode and be identical in series and parallel.", {
   illustris_velocity = build_datacube(simspin_file = ss_illustris,
-                                    telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                                    observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                    method = "velocity", mass_flag = T)
+                                      telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                      observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                      method = "velocity", mass_flag = T)
   expect_length(illustris_velocity, built_cube_size)
   expect_length(illustris_velocity$raw_images, velocity_raw_images_size_massflagtrue)
   expect_length(illustris_velocity$observed_images, velocity_observed_images_size)
 
   illustris_parallel_velocity = build_datacube(simspin_file = ss_illustris,
-                                             telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                                             observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                             method = "velocity", mass_flag = T,
-                                             cores = 2)
+                                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                               method = "velocity", mass_flag = T,
+                                               cores = 2)
   expect_length(illustris_parallel_velocity, built_cube_size)
   expect_length(illustris_parallel_velocity$raw_images, velocity_raw_images_size_massflagtrue)
   expect_length(illustris_parallel_velocity$observed_images, velocity_observed_images_size)
@@ -325,10 +325,10 @@ test_that("EAGLE files can be built - gas mode and be identical in series and pa
   expect_length(eagle_gas$observed_images, gas_observed_images_size)
 
   eagle_parallel_gas = build_datacube(simspin_file = ss_eagle,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                               method = "gas",
-                               cores = 2)
+                                      telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                      observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                      method = "gas",
+                                      cores = 2)
   expect_length(eagle_parallel_gas, built_cube_size)
   expect_length(eagle_parallel_gas$raw_images, gas_raw_images_size)
   expect_length(eagle_parallel_gas$observed_images, gas_observed_images_size)
@@ -385,18 +385,18 @@ test_that("Magneticum files can be built - gas mode and be identical in series a
 
 test_that("HorizonAGN files can be built - gas mode and be identical in series and parallel.", {
   horizon_gas = build_datacube(simspin_file = ss_horizon,
-                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                                  observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 0, twist_deg = 90, blur = F),
-                                  method = "gas")
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 0, twist_deg = 90, blur = F),
+                               method = "gas")
   expect_length(horizon_gas, built_cube_size)
   expect_length(horizon_gas$raw_images, gas_raw_images_size)
   expect_length(horizon_gas$observed_images, gas_observed_images_size)
 
   horizon_parallel_gas = build_datacube(simspin_file = ss_horizon,
-                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                                           observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 0, twist_deg = 90, blur = F),
-                                           method = "gas",
-                                           cores = 2)
+                                        telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                        observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 0, twist_deg = 90, blur = F),
+                                        method = "gas",
+                                        cores = 2)
   expect_length(horizon_parallel_gas, built_cube_size)
   expect_length(horizon_parallel_gas$raw_images, gas_raw_images_size)
   expect_length(horizon_parallel_gas$observed_images, gas_observed_images_size)
@@ -419,18 +419,18 @@ test_that("HorizonAGN files can be built - gas mode and be identical in series a
 
 test_that("IllustrisTNG files can be built - gas mode and be identical in series and parallel.", {
   illustris_gas = build_datacube(simspin_file = ss_illustris,
-                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                               observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 0, twist_deg = 90, blur = F),
-                               method = "gas")
+                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                 observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 0, twist_deg = 90, blur = F),
+                                 method = "gas")
   expect_length(illustris_gas, built_cube_size)
   expect_length(illustris_gas$raw_images, gas_raw_images_size)
   expect_length(illustris_gas$observed_images, gas_observed_images_size)
 
   illustris_parallel_gas = build_datacube(simspin_file = ss_illustris,
-                                        telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
-                                        observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 0, twist_deg = 90, blur = F),
-                                        method = "gas",
-                                        cores = 2)
+                                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                          observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 0, twist_deg = 90, blur = F),
+                                          method = "gas",
+                                          cores = 2)
   expect_length(illustris_parallel_gas, built_cube_size)
   expect_length(illustris_parallel_gas$raw_images, gas_raw_images_size)
   expect_length(illustris_parallel_gas$observed_images, gas_observed_images_size)
@@ -598,7 +598,7 @@ test_that("Data cubes can be generated using mass rather than luminosity weighti
   expect_true("mass_image" %in% names(eagle_mass$observed_images))
   expect_false("flux_image" %in% names(eagle_mass$raw_images))
   expect_false("flux_image" %in% names(eagle_mass$observed_images))
-  })
+})
 
 # Testing that build_datacube works to write to FITS file ----
 test_that("Data cubes can be written to a single files", {
@@ -669,7 +669,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS")))
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS"))) == velocity_number_of_hdu_massflagtrue_sntrue+1)
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS")))[velocity_raw_mass_loc_massflagtrue] == "RAW_MASS")
-  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS")))[velocity_variance_loc_massflagtrue] == "STAT")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_voronoi.FITS")))[(velocity_variance_loc_massflagtrue+1)] == "STAT")
 
 
   expect_length(build_datacube(simspin_file = ss_gadget,
@@ -707,7 +707,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS"))) == velocity_number_of_hdu_massflagtrue_snfalse+1)
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))[velocity_raw_mass_loc_massflagtrue] == "RAW_MASS")
-  expect_true(is.na(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))[velocity_variance_loc_massflagtrue] == "STAT"))
+  expect_true(is.na(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))[(velocity_variance_loc_massflagtrue+1)] == "STAT"))
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="MUSE", fov = 10, signal_to_noise = NA),
@@ -777,7 +777,7 @@ test_that("Data cubes can be written to a single files", {
                                                           vorbin_fits_sntrue[[2]]$keyvalues$NAXIS3)))
   expect_true(vorbin_fits_sntrue[[spectral_raw_vel_loc]]$keyvalues$EXTNAME == "RAW_VEL")
   expect_true(names(vorbin_fits_sntrue)[ob_table_loc] == "OB_TABLE")
-  expect_true(vorbin_fits_sntrue[[(spectra_number_of_hdu_sntrue+1)]]$keyvalues$EXTNAME == "VORONOI")
+  expect_true(vorbin_fits_sntrue[[spectra_number_of_hdu_sntrue]]$keyvalues$EXTNAME == "VORONOI")
 
 })
 
@@ -799,7 +799,7 @@ test_that("Data cubes can be written to multiple files", {
   expect_length(build_datacube(simspin_file = ss_gadget,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                               write_fits = T, split_save=T), built_cube_size)
+                               write_fits = T, split_save=T, voronoi = T, vorbin_limit = 10), built_cube_size)
 
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_observation_summary.FITS"))
@@ -809,6 +809,7 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_voronoi_bins.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_inv_variance_cube.FITS"))
 
   spectral_fits = Rfits::Rfits_read("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS")
@@ -910,6 +911,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_voronoi_bins.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_inv_variance_cube.FITS",
 
          paste0(temp_loc, "/ss_gadget_velocity_cube.FITS"),
@@ -967,7 +969,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_hdf5_raw_age_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS")
-         ))
+))
 
 test_that("Mask can be included in FITS files correctly", {
   cube = build_datacube(simspin_file = ss_gadget,
@@ -1041,7 +1043,7 @@ unlink(c(paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.F
 # Testing that build_datacube will give warning if the spectra given is low res ----
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {
   expect_warning(build_datacube(simspin_file = ss_gadget, telescope = telescope(type="IFU", lsf_fwhm = 0.9),
-                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45)))
+                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45)))
   expect_warning(build_datacube(simspin_file = ss_gadget, telescope = telescope(type="IFU", lsf_fwhm = 3.08),
                                 observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45)))
 })
@@ -1106,8 +1108,8 @@ test_that("Repeated spectra are included in intrinsic spectra", {
 test_that("Format of blurring output is the same as unblurred output", {
 
   unblurred = build_datacube(simspin_file = ss_hdf5,
-                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                          observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = F))
+                             telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                             observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = F))
 
   blurred = build_datacube(simspin_file = ss_hdf5,
                            telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -1177,11 +1179,11 @@ test_that("EAGLE cubes can be built with mass weighting rather than luminosity",
                                  observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                  method = "velocity",
                                  mass_flag = T)$flux_image ==
-                  build_datacube(simspin_file = ss_eagle,
-                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
-                                 observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                 method = "velocity",
-                                 mass_flag = T, cores=2)$flux_image, na.rm=T))
+                    build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                   method = "velocity",
+                                   mass_flag = T, cores=2)$flux_image, na.rm=T))
 
 })
 
@@ -1221,10 +1223,10 @@ test_that("Pointing description works effectively", {
   up_index = which(shifted_up_gal$observed_images$mass_image == max(shifted_up_gal$observed_images$mass_image, na.rm=T))
 
   shifted_up_gal_deg = build_datacube(simspin_file = ss_gadget,
-                                  telescope = telescope(type = "SAMI"),
-                                  observing_strategy = observing_strategy(dist_kpc_per_arcsec = 1, inc_deg = 90, pointing_deg = c(0,0.00139)),
-                                  method="velocity",
-                                  mass_flag = T)
+                                      telescope = telescope(type = "SAMI"),
+                                      observing_strategy = observing_strategy(dist_kpc_per_arcsec = 1, inc_deg = 90, pointing_deg = c(0,0.00139)),
+                                      method="velocity",
+                                      mass_flag = T)
 
   up_index_deg = which(shifted_up_gal_deg$observed_images$mass_image == max(shifted_up_gal_deg$observed_images$mass_image, na.rm=T))
 
@@ -1398,14 +1400,14 @@ test_that("Flux conservation works as expected", {
   #lines(BC03_temp$Wave[BC03_wave_int], BC03_test$spectra[BC03_wave_int], col = "red", lwd=2)
 
   BC03_obs   = suppressWarnings(build_datacube(simspin_file = BC03_test,
-                                telescope = telescope(type="IFU", lsf_fwhm = 0, signal_to_noise = NA, wave_res = 1.06),
-                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = F),
-                                method = "spectral", write_fits = F))
+                                               telescope = telescope(type="IFU", lsf_fwhm = 0, signal_to_noise = NA, wave_res = 1.06),
+                                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = F),
+                                               method = "spectral", write_fits = F))
 
   EMILES_obs = suppressWarnings(build_datacube(simspin_file = EMILES_test,
-                                telescope = telescope(type="IFU", lsf_fwhm = 0, signal_to_noise = NA, wave_res = 1.06),
-                                observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = F),
-                                method = "spectral", write_fits = F))
+                                               telescope = telescope(type="IFU", lsf_fwhm = 0, signal_to_noise = NA, wave_res = 1.06),
+                                               observing_strategy = observing_strategy(dist_z = 0.05, inc_deg = 45, blur = F),
+                                               method = "spectral", write_fits = F))
 
   BC03_obs_range   = which(BC03_obs$observation$wave_seq > wave_range[1] & BC03_obs$observation$wave_seq < wave_range[2])
   EMILES_obs_range = which(EMILES_obs$observation$wave_seq > wave_range[1] & EMILES_obs$observation$wave_seq < wave_range[2])
@@ -1469,14 +1471,14 @@ test_that("Error is given if you try to build an observation with a simspin file
                               method = "spectral"))
 
   expect_error(build_datacube(simspin_file = ss_gadget,
-                                telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
-                                observing_strategy = observing_strategy(),
-                                method = "gas"))
+                              telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                              observing_strategy = observing_strategy(),
+                              method = "gas"))
 
   expect_error(build_datacube(simspin_file = ss_gadget,
-                                telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
-                                observing_strategy = observing_strategy(),
-                                method = "sf gas"))
+                              telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
+                              observing_strategy = observing_strategy(),
+                              method = "sf gas"))
 
   expect_error(build_datacube(simspin_file = ss_eagle_nsfgasonly,
                               telescope = telescope(type = "IFU", fov = 3, lsf_fwhm = 3),
@@ -1544,17 +1546,17 @@ test_that("Noise increases as expected in spectral cubes", {
 test_that("Gas spawning creates even images despite different n-values",{
 
   ss_eagle_500  = make_simspin_file(ss_pd_eagle, write_to_file = FALSE,
-                                       template = "BC03lr", sph_spawn_n = 500)
+                                    template = "BC03lr", sph_spawn_n = 500)
 
   ss_eagle_100 = ss_illustris  = make_simspin_file(ss_pd_eagle,
-                                                       write_to_file = FALSE,
-                                                       template = "BC03lr",
-                                                       sph_spawn_n = 100)
+                                                   write_to_file = FALSE,
+                                                   template = "BC03lr",
+                                                   sph_spawn_n = 100)
 
   n500 =  build_datacube(simspin_file = ss_eagle_500,
-                        telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA, fov = 25),
-                        observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 45, blur = F),
-                        method = "gas")
+                         telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA, fov = 25),
+                         observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 45, blur = F),
+                         method = "gas")
 
   n100 = build_datacube(simspin_file = ss_eagle_100,
                         telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA, fov = 25),
@@ -1651,10 +1653,10 @@ test_that("Vorbin images made with single and multi-core methods are the same", 
                                    voronoi_bin = T, vorbin_limit = 10)
 
   vorbin_velocity_mc = build_datacube(simspin_file = ss_eagle,
-                                   telescope = telescope(type = "SAMI"),
-                                   observing_strategy = observing_strategy(dist_z = 0.03),
-                                   method = "velocity", verbose = F,
-                                   voronoi_bin = T, vorbin_limit = 10, cores = 2)
+                                      telescope = telescope(type = "SAMI"),
+                                      observing_strategy = observing_strategy(dist_z = 0.03),
+                                      method = "velocity", verbose = F,
+                                      voronoi_bin = T, vorbin_limit = 10, cores = 2)
 
   expect_equal(vorbin_velocity$raw_images$voronoi_bins, vorbin_velocity_mc$raw_images$voronoi_bins)
 })
