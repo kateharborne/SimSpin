@@ -16,6 +16,7 @@ plot_metallicity(
   radii = NA,
   titleshift = -4,
   labN = 5,
+  radii_col = "red",
   ...
 )
 }
@@ -49,6 +50,9 @@ the units. Default is -4.}
 
 \item{labN}{Numeric. Describes the minimum number of numeric labels added to
 the colour bar. Default is 5.}
+
+\item{radii_col}{String. Describing the colour of the ellipse drawn if
+\code{radii} list is specified. Default is "red".}
 
 \item{...}{Further variables passed to magimage. See
 \code{\link[magicaxis]{magimage}} for further details.}

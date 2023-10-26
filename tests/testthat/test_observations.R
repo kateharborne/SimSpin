@@ -8,7 +8,7 @@ context("Testing observation description functions.\n")
 telescope_length = 12
 obs_strategy_wo_blur_length = 5
 obs_strategy_w_blur_length = 7
-obs_length = 34
+obs_length = 35
 
 # Testing that the telescope() function works with each of the possible default
 #  "types".

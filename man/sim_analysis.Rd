@@ -4,7 +4,14 @@
 \alias{sim_analysis}
 \title{A function for measuring the particle properties of the input simulation}
 \usage{
-sim_analysis(simspin_file, type = "stars", half_mass = NA, bin_breaks = NA)
+sim_analysis(
+  simspin_file,
+  type = "stars",
+  half_mass = NA,
+  bin_breaks = NA,
+  verbose = F,
+  shape = T
+)
 }
 \arguments{
 \item{simspin_file}{The path to the location of the SimSpin .Rdata file OR
@@ -21,26 +28,46 @@ NA, in which case half the total mass of the supplied simulation data is used.}
 \item{bin_breaks}{Optional parameter that allows you to specify radial bin
 break positions. Default will give bins spaced with varying sized bins:
 `seq(0, 9, by=1), seq(12, 51, by=3), seq(61, 101, by=10), seq(151, 501, by=50)`}
+
+\item{verbose}{Boolean to describe if the code should give updates on
+progress. Default is FALSE.}
+
+\item{shape}{Boolean to describe whether or not the shape of the system should
+be measured at increasing radii. Default is TRUE.}
 }
 \value{
 Returns a list that contains:
 \describe{
   \item{Properties}{list()}
   \item{HalfMassProperties}{list()}
-  \item{RadialTrends}{data.frame()}}
-  where \code{Properties} include:
+  \item{RadialTrends_Spherical}{data.frame()}
+  \item{RadialTrends_Cylindrical}{data.frame()}}
+  where \code{Properties} includes:
   \describe{\item{Type}{Component considered within analysis}
             \item{TotalMass}{Total mass (solar)}
             \item{MeanAge}{Mean age (Gyr)}
             \item{MeanMetallicity}{Mean metallicity (fraction of solar)}
             \item{NumberOfParticles}{Total number of particles}}
-  where \code{HalfMassProperties} include:
+  where \code{HalfMassProperties} includes:
   \describe{\item{Mass}{Half mass (solar)}
             \item{RadiusCircular}{Circularised radius at half-mass (kpc)}
             \item{RadiusElliptical}{Elliptical radius at half-mass given shapes p & q (kpc)}
             \item{Shape_p}{Axis ratio (b/a) of particles within half-mass}
             \item{Shape_q}{Axis ratio (c/a) of particles within half-mass}}
-  and where \code{RadialTrends} include:
+  where \code{RadialTrends_Spherical} includes:
+  \describe{\item{Radius}{Radial coordinate at the centre of the radial bin (kpc)}
+            \item{Mass}{Mass (solar) contained within radial bin}
+            \item{CumulativeMass}{Mass (solar) of all particles contained within radius of this bin}
+            \item{Density}{Mass density of shell (Msol/kpc^3)}
+            \item{Age}{Mean age (Gyr) of particles within radial bin}
+            \item{Metallicity}{Mean metallicity (fraction of solar) of particles within radial bin}
+            \item{VelocityAnisotropy}{Beta parameter of particles within radial bin}
+            \item{SpinParameter_Bullock}{Bullock et al (2001) spin parameter measured from all particles contained within radius of this bin}
+            \item{SpecificAngularMomentum}{Mass weighted angular momentum, j (kpc km/s), of particles within radial bin}
+            \item{Shape_p}{Axis ratio (b/a) of all particles within radius of this bin}
+            \item{Shape_q}{Axis ratio (c/a) of all particles within radius of this bin},
+            \item{NumberOfParticles}{Number of particles contained within radial bin}}
+  where \code{RadialTrends_Cylindrical} includes:
   \describe{\item{Radius}{Radial coordinate at the centre of the radial bin (kpc)}
             \item{Mass}{Mass (solar) contained within radial bin}
             \item{CumulativeMass}{Mass (solar) of all particles contained within radius of this bin}
@@ -50,11 +77,12 @@ Returns a list that contains:
             \item{CircularVelocity}{Circular velocity (km/s) due to mass contained within radius of this bin}
             \item{RotationalVelocity}{Mean velocity along circular orbits (km/s) in radial bin}
             \item{RotationalDispersion}{Standard deviation of velocities in circular orbits (km/s) in radial bin}
-            \item{VelocityAnisotropy}{Beta parameter of particles within radial bin}
-            \item{SpinParameter_Bullock}{Bullock et al (2001) spin parameter measured from all particles contained within radius of this bin}
-            \item{SpecificAngularMomentum}{Mass weighted angular momentum, j (kpc km/s), of particles within radial bin}
-            \item{Shape_p}{Axis ratio (b/a) of all particles within radius of this bin}
-            \item{Shape_q}{Axis ratio (c/a) of all particles within radius of this bin},
+            \item{Circularity}{The circularity parameter j[z]/j[circ](E), as defined in Abadi et al. (2003).}
+            \item{KappaRot}{The fraction of kinetic energy of the system contained within a rotational component, as defined by Sales et al. (2010).}
+            \item{KappaCoRot}{The fraction of kinetic energy of the system conatined within a co-rotating component, as defined by Correa et al. (2017).}
+            \item{SpinParameter_Wilkinson}{The stellar spin parameter as defined in Wilkinson et al (2023).}
+            \item{DisktoTotal}{The mass fraction of orbits with circularity > 0.7, as defined by Sales et al. (2010).}
+            \item{SpheroidtoTotal}{Twice the mass fraction of counter-rotating orbits, as defined in Wilkinson et al. (2023).}
             \item{NumberOfParticles}{Number of particles contained within radial bin}}
 }
 \description{

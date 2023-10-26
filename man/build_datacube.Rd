@@ -17,7 +17,9 @@ build_datacube(
   observer_name = "Anonymous",
   split_save = F,
   cores = 1,
-  mass_flag = F
+  mass_flag = F,
+  voronoi_bin = F,
+  vorbin_limit = 10
 )
 }
 \arguments{
@@ -73,6 +75,13 @@ and velocity gridding on. Default is 1.}
 
 \item{mass_flag}{Boolean flag that, when set to TRUE, will compute properties
 using a mass weighting rather than a luminosity weighting. Default is FALSE.}
+
+\item{voronoi_bin}{Boolean flag that, when set to TRUE, will bin pixels into
+voronoi tessellated cells that contain a minimum number of particles per
+pixel, specified by \code{vorbin_limit}. Default is FALSE.}
+
+\item{vorbin_limit}{Integer float that describes the minimum number of
+particles per pixel within a given bin, only used if \code{voronoi_bin = T}.}
 }
 \value{
 Returns a list containing four elements:

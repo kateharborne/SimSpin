@@ -48,6 +48,11 @@
 #' and velocity gridding on. Default is 1.
 #'@param mass_flag Boolean flag that, when set to TRUE, will compute properties
 #' using a mass weighting rather than a luminosity weighting. Default is FALSE.
+#'@param voronoi_bin Boolean flag that, when set to TRUE, will bin pixels into
+#' voronoi tessellated cells that contain a minimum number of particles per
+#' pixel, specified by \code{vorbin_limit}. Default is FALSE.
+#'@param vorbin_limit Integer float that describes the minimum number of
+#' particles per pixel within a given bin, only used if \code{voronoi_bin = T}.
 #'@return Returns a list containing four elements:
 #'\enumerate{
 #' \item \code{spectral_cube} or \code{velocity_cube} - a 3D array containing
@@ -80,7 +85,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                           telescope_name="SimSpin",
                           observer_name="Anonymous",
                           split_save=F,
-                          cores=1, mass_flag = F){
+                          cores=1, mass_flag = F,
+                          voronoi_bin=F, vorbin_limit=10){
 
   if (missing(method)){
     if ("method" %in% names(telescope)){
@@ -234,6 +240,19 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # which particles sit in each spaxel?
   part_in_spaxel = galaxy_data[, list(val=list(ID), .N), by = "pixel_pos"]
 
+  if (voronoi_bin){ # Returning the binned pixels based on some voronoi limit
+    if (verbose){cat("Binning spaxels into voronoi bins... \n")}
+
+    part_in_spaxel = voronoi(part_in_spaxel=part_in_spaxel, obs=observation,
+                             particle_limit = as.numeric(vorbin_limit),
+                             roundness_limit = 0.3, uniform_limit = 0.8,
+                             verbose = verbose)
+
+    observation$particle_limit = as.numeric(vorbin_limit)
+
+  }
+
+
   # SPECTRAL mode method =======================================================
   if (observation$method == "spectral"){
 
@@ -289,7 +308,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
       age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
       metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
+      particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("spectral_cube"    = cube,
@@ -358,7 +378,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       age_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
       metallicity_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
       mass_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[9]], dim = c(observation$sbin, observation$sbin))
+      particle_image = array(data = output[[9]], dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[10]], dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
       flux_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
@@ -465,7 +486,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       SFR_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
       metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
       OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
+      particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[9]], dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
       flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
@@ -536,6 +558,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     if (verbose){cat("Done! \n")}
 
+  }
+
+  if (!voronoi_bin){ # if vorbin has not been requested, don't supply it in the output
+    output$raw_images = output$raw_images[-which(names(output$raw_images) == "voronoi_bins")]
   }
 
   # Trimming off extra zeros from images outside the aperture of the telescope

@@ -1,5 +1,5 @@
 # Author: Kate Harborne
-# Date: 26/10/2020
+# Date: 25/10/2023
 # Title: plot_images - a suite of function for plotting pretty images
 
 #' Plotting pretty flux images
@@ -26,6 +26,8 @@
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -43,10 +45,10 @@
 plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
                       units = expression("Flux, CGS"), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
-                      titleshift = -4, labN=5, ...){
+                      titleshift = -4, labN=5, radii_col="red", ...){
 
   Flux = flux_image
-  im_dim = dim(Flux)%/%2
+  im_dim = dim(Flux)/2
   flux_val = c(min(Flux, na.rm = T), max(Flux, na.rm = T))
 
   if (all(flux_val == 0)){
@@ -60,7 +62,7 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = Flux, zlim =  if(is.na(zlim[1])){flux_val}else{zlim}, col = flux_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){flux_val}else{zlim}, scale = c(1, 1/20),
@@ -94,6 +96,8 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -111,10 +115,10 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
 plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
                       units = expression("Mass, M"["sol"]), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
-                      titleshift = -4, labN=5, ...){
+                      titleshift = -4, labN=5, radii_col="red", ...){
 
   Mass = mass_image
-  im_dim = dim(Mass)%/%2
+  im_dim = dim(Mass)/2
   mass_val = c(min(Mass, na.rm = T), max(Mass, na.rm = T))
 
   if (all(mass_val == 0)){
@@ -128,7 +132,7 @@ plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = Mass, zlim =  if(is.na(zlim[1])){mass_val}else{zlim}, col = mass_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){mass_val}else{zlim}, scale = c(1, 1/20),
@@ -164,6 +168,8 @@ plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -181,10 +187,10 @@ plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
 plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
                           units = expression("velocity"[LOS] * ", km s"^{-1}), main="",
                           radii = NA, na.color = "white", zlim = NA, legend = T,
-                          titleshift = -4, labN=5, ...){
+                          titleshift = -4, labN=5, radii_col="red", ...){
 
   V = velocity_image
-  im_dim = dim(V)%/%2
+  im_dim = dim(V)/2
   vel_val = max(c(abs(min(V, na.rm = T)), abs(max(V, na.rm = T))))
 
   if (all(vel_val == 0)){
@@ -198,7 +204,7 @@ plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = V, zlim = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, col = velo_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, scale = c(1, 1/20),
@@ -232,6 +238,8 @@ plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -249,10 +257,10 @@ plot_velocity <- function(velocity_image, fig = c(0,1,0,1), new=F,
 plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
                             units = expression("dispersion"[LOS] * ", km s"^{-1}), main="",
                             radii = NA, na.color = "white", zlim = NA, legend=T,
-                            titleshift = -4, labN=5, ...){
+                            titleshift = -4, labN=5, radii_col="red", ...){
 
   disp_map = dispersion_image
-  im_dim = dim(disp_map)%/%2
+  im_dim = dim(disp_map)/2
   disp_val = c(floor(min(disp_map, na.rm=T)), max(disp_map, na.rm=T))
 
   if (all(disp_val == 0)){
@@ -267,7 +275,7 @@ plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
              col = disp_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){disp_val}else{zlim}, scale = c(1, 1/20),
@@ -301,6 +309,8 @@ plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -318,10 +328,10 @@ plot_dispersion <- function(dispersion_image, fig = c(0,1,0,1), new=F,
 plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
                       units = expression("h"[3]), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
-                      titleshift = -4, labN=5, ...){
+                      titleshift = -4, labN=5, radii_col="red", ...){
 
   V = h3_image
-  im_dim = dim(V)%/%2
+  im_dim = dim(V)/2
   vel_val = max(c(abs(min(V, na.rm = T)), abs(max(V, na.rm = T))))
 
   if (all(vel_val == 0)){
@@ -335,7 +345,7 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = V, zlim = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, col = velo_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, scale = c(1, 1/20),
@@ -369,6 +379,8 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -386,10 +398,10 @@ plot_h3   <- function(h3_image, fig = c(0,1,0,1), new=F,
 plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
                       units = expression("h"[4]), main="",
                       radii = NA, na.color = "white", zlim = NA, legend = T,
-                      titleshift = -4, labN=5, ...){
+                      titleshift = -4, labN=5, radii_col="red", ...){
 
   V = h4_image
-  im_dim = dim(V)%/%2
+  im_dim = dim(V)/2
   vel_val = max(c(abs(min(V, na.rm = T)), abs(max(V, na.rm = T))))
 
   if (all(vel_val == 0)){
@@ -403,7 +415,7 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = V, zlim = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, col = velo_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main = main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){c(-vel_val,vel_val)}else{zlim}, scale = c(1, 1/20),
@@ -437,6 +449,8 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -455,10 +469,10 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
 plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
                      units = expression("Age, Gyr"), main="", radii = NA,
                      na.color = "white", zlim = NA, legend=T,
-                     titleshift = -4, labN=5, ...){
+                     titleshift = -4, labN=5, radii_col="red", ...){
 
   age_map = age_image
-  im_dim = dim(age_map)%/%2
+  im_dim = dim(age_map)/2
   age_val = c(floor(min(age_map, na.rm=T)/2), max(age_map, na.rm=T))
 
   if (all(age_val == 0)){
@@ -472,7 +486,7 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = age_map, zlim = if(is.na(zlim[1])){age_val}else{zlim}, col = age_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){age_val}else{zlim}, scale = c(1, 1/20),
@@ -506,6 +520,8 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -523,10 +539,10 @@ plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
 plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
                              units = expression("log10(Z/Z"[solar]*")"), main="",
                              na.color = "white", zlim = NA, legend=T, radii = NA,
-                             titleshift = -4, labN=5, ...){
+                             titleshift = -4, labN=5, radii_col="red", ...){
 
   met_map = metallicity_image
-  im_dim = dim(met_map)%/%2
+  im_dim = dim(met_map)/2
   met_val = c(floor(min(met_map, na.rm=T)/2), max(met_map, na.rm=T))
 
   if (all(met_val == 0)){
@@ -541,7 +557,7 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
              col = met_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){met_val}else{zlim}, scale = c(1, 1/20),
@@ -575,6 +591,8 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -592,10 +610,10 @@ plot_metallicity <- function(metallicity_image, fig = c(0,1,0,1), new=F,
 plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
                            units = expression("Number of particles"), main="", radii = NA,
                            na.color = "white", zlim = NA, legend=T,
-                           titleshift = -4, labN=5, ...){
+                           titleshift = -4, labN=5, radii_col="red", ...){
 
   part_map = particle_image
-  im_dim = dim(part_map)%/%2
+  im_dim = dim(part_map)/2
   part_val = c(floor(min(part_map, na.rm=T)/2), max(part_map, na.rm=T))
 
   if (all(part_val == 0)){
@@ -609,7 +627,7 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = part_map, zlim = if(is.na(zlim[1])){part_val}else{zlim}, col = part_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){part_val}else{zlim}, scale = c(1, 1/20),
@@ -643,6 +661,8 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -660,10 +680,10 @@ plot_particles <- function(particle_image, fig = c(0,1,0,1), new=F,
 plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
                      units = expression("SFR, M"["sol"]*"/yr"), main="", radii = NA,
                      na.color = "white", zlim = NA, legend=T,
-                     titleshift = -4, labN=5, ...){
+                     titleshift = -4, labN=5, radii_col="red",...){
 
   part_map = SFR_image
-  im_dim = dim(part_map)%/%2
+  im_dim = dim(part_map)/2
   part_val = c(floor(min(part_map, na.rm=T)/2), max(part_map, na.rm=T))
 
   if (all(part_val == 0)){
@@ -677,7 +697,7 @@ plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
   .image_nan(z = part_map, zlim = if(is.na(zlim[1])){part_val}else{zlim}, col = part_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){part_val}else{zlim}, scale = c(1, 1/20),
@@ -711,6 +731,8 @@ plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
 #' the units. Default is -4.
 #' @param labN Numeric. Describes the minimum number of numeric labels added to
 #' the colour bar. Default is 5.
+#' @param radii_col String. Describing the colour of the ellipse drawn if
+#' \code{radii} list is specified. Default is "red".
 #' @param ... Further variables passed to magimage. See
 #' \code{\link[magicaxis]{magimage}} for further details.
 #' @return Returns an image to the plotting window of the input
@@ -728,10 +750,10 @@ plot_SFR <- function(SFR_image, fig = c(0,1,0,1), new=F,
 plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
                     units = expression("log10(O/H) + 12"), main="",
                     na.color = "white", zlim = NA, legend=T, radii = NA,
-                    titleshift = -4, labN=5, ...){
+                    titleshift = -4, labN=5, radii_col="red", ...){
 
   met_map = OH_image
-  im_dim = dim(met_map)%/%2
+  im_dim = dim(met_map)/2
   met_val = c(floor(min(met_map, na.rm=T)/2), max(met_map, na.rm=T))
 
   if (all(met_val == 0)){
@@ -746,7 +768,7 @@ plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
              col = met_map_cols, na.color = na.color, xaxt="n",
              yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
   if (!is.na(radii[1])){
-    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = "red", density = NULL)
+    plotrix::draw.ellipse(im_dim[1], im_dim[2], radii$a, radii$b, radii$ang, border = radii_col, density = NULL, lwd=2)
   }
   if (legend){
     .magcolbar(position = "bottom", range = if(is.na(zlim[1])){met_val}else{zlim}, scale = c(1, 1/20),
@@ -756,6 +778,54 @@ plot_OH <- function(OH_image, fig = c(0,1,0,1), new=F,
 
 }
 
+#' Plotting pretty Voronoi bin images
+#'
+#' A function to produce a plot of the Voronoi bins produced by
+#' \code{build_datacube()} with associated colour bar and labels.
+#'
+#' @param voronoi_bins Numeric array containing the metallicity image.
+#' @param fig Numeric array of length 4 describing the boundary of the image
+#' @param new Boolean. Should the image be added to the existing plot? Default
+#' is FALSE.
+#' @param main Image title, default "".
+#' @param na.color String. Colour given to NA values in the image.
+#' @param zlim Numeric array of length 2. Describing the numeric range of
+#' colours in the image. Default is NA, in which the range will be described by
+#' the minimum and maximum values in the image.
+#' @param ... Further variables passed to magimage. See
+#' \code{\link[magicaxis]{magimage}} for further details.
+#' @return Returns an image to the plotting window of the input
+#' \code{build_datacube} image.
+#' @examples
+#' ss_pd_eagle = system.file("extdata", "SimSpin_example_EAGLE.hdf5",
+#' package = "SimSpin")
+#' ss_eagle = make_simspin_file(ss_pd_eagle, write_to_file = FALSE)
+#' cube = build_datacube(simspin_file = ss_eagle,
+#'                       telescope = telescope(type="SAMI"),
+#'                       observing_strategy = observing_strategy(),
+#'                       method = "velocity", voronoi_bin = TRUE)
+#' plot_voronoi(cube$raw_images$voronoi_bins)
+
+plot_voronoi <- function(voronoi_bins, fig = c(0,1,0,1), new=F,
+                         main="", na.color = "white", zlim = NA,
+                         ...){
+
+  bin_map = voronoi_bins
+  im_dim = dim(bin_map)/2
+  bin_val = c(min(bin_map, na.rm=T), max(bin_map, na.rm=T))
+
+  if (all(bin_val == 0)){
+    stop("Image contains only '0'. No image can be produced in this case. \n
+         Please check your build_datacube function and try again.")
+  }
+
+  bin_map_cols = cmocean::cmocean("phase", version = "2.0", start = .1, end=1)(max(bin_map, na.rm=T))
+
+  par(pty="s", fig=fig, xpd=FALSE, ps=12, cex=1, new=new); options(scipen = 1)
+  .image_nan(z = bin_map, zlim = if(is.na(zlim[1])){bin_val}else{zlim},
+             col = bin_map_cols, na.color = na.color, xaxt="n",
+             yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1, main=main, ...)
+}
 
 .image_nan <- function(z, zlim, col, na.color='gray', ...){
   # Function for plotting an image with NAs as a set colour

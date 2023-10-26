@@ -10,7 +10,7 @@
 
 <p>&nbsp;</p>
 
-v2.6.0 - A package for producing mock observations:
+v2.7.0 - A package for producing mock observations:
 
 SimSpin allows you to take a simulation of a galaxy and produce a data cube in the style of an Integral Field Spectroscopy (IFS) instrument. You can find the live documentation for this code at the following [website](https://kateharborne.github.io/SimSpin/). 
 
