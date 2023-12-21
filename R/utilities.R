@@ -1483,6 +1483,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
   # read original wavelengths of the template spectra and then applying a shift
   # to those spectra due to redshift, z
+  if(verbose){cat("Using assigned spectra to compute the flux per particle... \n")}
+
   wavelength = template$Wave * (observation$z + 1)
 
   for (p in 1:nrow(galaxy_data)){
@@ -1530,7 +1532,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
     galaxy_data$filter_luminosity[p] = .bandpass(wave = observation$wave_seq,
                                                  flux = spectral_dist,
                                                  filter = filter)
+
+    if(verbose){if(p == 1){cat("Computed flux from spectra 1, ")}else{cat(paste(p), ", ")}}
+
   }
+
+  if (verbose){cat("\n Done!")}
 
   return(galaxy_data)
 
