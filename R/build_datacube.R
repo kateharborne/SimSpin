@@ -229,6 +229,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # Trimming particles that lie outside the aperture of the telescope
   galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$pixel_region[!is.na(observation$pixel_region)],]
 
+  # function for adding flux information to stellar methods
+  if (observation$method == "spectral" | observation$method == "velocity"){
+    galaxy_data = .compute_flux(observation, galaxy_data, simspin_data,
+                                template=temp, verbose, spectra_flag)
+  }
+
   if (length(galaxy_data$ID) == 0){
     stop(paste0("Error: There are no simulation particles within the aperture of the telescope. \n
          Please check that the method, `", method, "` is suitable for your input simulation file. \n
