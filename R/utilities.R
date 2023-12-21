@@ -1463,6 +1463,79 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "Hydrogen"
 
 }
 
+.compute_flux = function(observation, galaxy_data, simspin_data,
+                         template, verbose, spectra_flag){
+
+  # Function to pre-compute the fluxes per particle and add this to the galaxy
+  # data frame. This can then be used quickly to compute an un-binned flux map.
+  #
+  # observation  :: List. The output list from the observation() function.
+  # galaxy_data  :: Data.Frame. The output table of particle details.
+  # simspin_data :: List. The simspin_file data, importantly containing the
+  #                 spectral mapping for each particle.
+  # template     :: List. The spectral templates with which the SimSpin file has
+  #                 been built.
+  # verbose      :: Boolean. Should the progress of the function be output to
+  #                 the user?
+  # spectra_flag :: Boolean. Is this an old SimSpin file where the full spectra
+  #                 is given, rather than just the template indicies?
+  #
+
+  # read original wavelengths of the template spectra and then applying a shift
+  # to those spectra due to redshift, z
+  wavelength = template$Wave * (observation$z + 1)
+
+  for (p in 1:nrow(galaxy_data)){
+
+    # reading particle luminosity in units of Lsol/Ang
+    if (spectra_flag == 1){
+      intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]][1:length(template$Wave)] *
+        (galaxy_sample$Initial_Mass[p])
+
+    } else {
+      intrinsic_spectra = .spectra(simspin_data$spectral_weights[[galaxy_sample$sed_id[p]]],
+                                   template) * (galaxy_sample$Initial_Mass[p])
+    }
+
+    # pulling wavelengths and using doppler formula to compute the shift in
+    #   wavelengths caused by LOS velocity
+    wave_shift = wavelength * exp((galaxy_sample$vy[p] / .speed_of_light))
+
+    # pulling out the wavelengths that would fall within the telescope range
+    wave_seq_int = which(wave_shift >= min(observation$wave_edges) & wave_shift <= max(observation$wave_edges))
+    wave_diff_intrinsic = .qdiff(wave_shift[wave_seq_int])
+
+    tot_lum = sum(intrinsic_spectra[wave_seq_int] * wave_diff_intrinsic)
+    # total luminosity within the wavelength range of the telescope
+
+    # interpolate each shifted wavelength to telescope grid of wavelengths
+    #   and sum to one spectra
+    part_lum = stats::spline(x = wave_shift, y = intrinsic_spectra, xout = observation$wave_seq)[[2]]
+
+    new_lum = sum(part_lum * wave_diff_observed)
+    # total luminosity integrated in wavelength bins
+
+    scale_frac = tot_lum / new_lum
+    # scaling factor necessary to conserve flux in the new spectrum
+
+    luminosity = part_lum*scale_frac
+
+    # transform luminosity into flux detected at telescope
+    #    flux in units erg/s/cm^2/Ang
+    spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
+      (1 + observation$z)
+
+
+    galaxy_data$luminosity[p] = sum(spectral_dist, na.rm=T)
+    galaxy_data$filter_luminosity[p] = .bandpass(wave = observation$wave_seq,
+                                                 flux = spectral_dist,
+                                                 filter = filter)
+  }
+
+  return(galaxy_data)
+
+}
+
 # spectral mode -
 .spectral_spaxels = function(part_in_spaxel, wavelength, observation,
                              galaxy_data, simspin_data, template, verbose, spectra_flag){
