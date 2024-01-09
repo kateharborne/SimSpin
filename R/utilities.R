@@ -1486,22 +1486,24 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   if(verbose){cat("Using assigned spectra to compute the flux per particle... \n")}
 
   wavelength = template$Wave * (observation$z + 1)
+  wave_diff_observed  = .qdiff(observation$wave_seq)
+  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (p in 1:nrow(galaxy_data)){
 
     # reading particle luminosity in units of Lsol/Ang
     if (spectra_flag == 1){
-      intrinsic_spectra = simspin_data$spectra[[galaxy_sample$sed_id[p]]][1:length(template$Wave)] *
-        (galaxy_sample$Initial_Mass[p])
+      intrinsic_spectra = simspin_data$spectra[[galaxy_data$sed_id[p]]][1:length(template$Wave)] *
+        (galaxy_data$Initial_Mass[p])
 
     } else {
-      intrinsic_spectra = .spectra(simspin_data$spectral_weights[[galaxy_sample$sed_id[p]]],
-                                   template) * (galaxy_sample$Initial_Mass[p])
+      intrinsic_spectra = .spectra(simspin_data$spectral_weights[[galaxy_data$sed_id[p]]],
+                                   template) * (galaxy_data$Initial_Mass[p])
     }
 
     # pulling wavelengths and using doppler formula to compute the shift in
     #   wavelengths caused by LOS velocity
-    wave_shift = wavelength * exp((galaxy_sample$vy[p] / .speed_of_light))
+    wave_shift = wavelength * exp((galaxy_data$vy[p] / .speed_of_light))
 
     # pulling out the wavelengths that would fall within the telescope range
     wave_seq_int = which(wave_shift >= min(observation$wave_edges) & wave_shift <= max(observation$wave_edges))
@@ -1758,7 +1760,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   #part_map = array(data=0, dim = observation$sbin^2)
   vorbin_map = array(data=0, dim = observation$sbin^2)
 
-  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
+  #filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
@@ -1863,7 +1865,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   #part_map = array(data=0, dim = observation$sbin^2)
   vorbin_map = array(data=0, dim = observation$sbin^2)
 
-  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
+  #filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
