@@ -246,6 +246,43 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # which particles sit in each spaxel?
   part_in_spaxel = galaxy_data[, list(val=list(ID), .N), by = "pixel_pos"]
 
+
+  if (method == "spectral" | method == "velocity"){
+    summed_images = galaxy_data[, list(.N,
+                                       luminosity = sum(luminosity),
+                                       filter_luminosity = sum(filter_luminosity),
+                                       mass = sum(Mass)),
+                                by = "pixel_pos"]
+
+
+    empty_pixels = data.table::data.table("pixel_pos" = which(!(seq(1:(observation$sbin*observation$sbin))
+                                                                %in% summed_images$pixel_pos)),
+                                          "N" = 0,
+                                          "luminosity" = 0.,
+                                          "filter_luminosity" = 0.,
+                                          "mass" = 0.)
+
+    summed_images = data.table::rbindlist(list(summed_images, empty_pixels))
+    summed_images = summed_images[order(pixel_pos)]
+    remove(empty_pixels)
+
+  } else if (method == "gas" | method == "sf gas"){
+    summed_images = galaxy_data[, list(.N,
+                                       sfr = sum(SFR),
+                                       mass = sum(Mass)),
+                                by = "pixel_pos"]
+
+    empty_pixels = data.table::data.table("pixel_pos" = which(!(seq(1:(observation$sbin*observation$sbin))
+                                                                %in% summed_images$pixel_pos)),
+                                          "N" = 0,
+                                          "sfr" = 0.,
+                                          "mass" = 0.)
+
+    summed_images = data.table::rbindlist(list(summed_images, empty_pixels))
+    summed_images = summed_images[order(pixel_pos)]
+    remove(empty_pixels)
+  }
+
   if (voronoi_bin){ # Returning the binned pixels based on some voronoi limit
     if (verbose){cat("Binning spaxels into voronoi bins... \n")}
 
