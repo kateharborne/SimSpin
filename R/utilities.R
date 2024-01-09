@@ -24,7 +24,7 @@
 # globalVariable definitions
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_luminosity",
                   "Hydrogen", "hcl.colors", "ID", "Initial_Mass", "luminosity", "Mass",
-                  "Metallicity", "N", "Oxygen", "par", "R", "SFR", "SFT", "SmoothingLength",
+                  "Metallicity", "N", "Oxygen", "par", "pixel_pos", "R", "SFR", "SFT", "SmoothingLength",
                   "sed_id", "Temperature", "ThermalDispersion", "text", "vx", "vy", "vz", "x", "y",
                   "z"))
 
