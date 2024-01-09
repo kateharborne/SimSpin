@@ -346,13 +346,14 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$wave_bin))
     raw_images = list(
-      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
-      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
-      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
+      flux_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      age_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("spectral_cube"    = cube,
@@ -415,17 +416,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
     raw_images = list(
-      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
-      velocity_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      dispersion_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      age_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
-      mass_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[9]], dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[10]], dim = c(observation$sbin, observation$sbin))
+      flux_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      age_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
-      flux_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      flux_image = array(data = summed_images$filter_luminosity, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
@@ -523,17 +524,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
     raw_images = list(
-      mass_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
-      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
-      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      SFR_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[9]], dim = c(observation$sbin, observation$sbin))
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      SFR_image = array(data = summed_images$sfr, dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      OH_image  = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
-      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      flux_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
