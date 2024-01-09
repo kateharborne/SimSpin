@@ -1550,17 +1550,17 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   spectra = matrix(data = 0.0, ncol = observation$wave_bin, nrow = observation$sbin^2)
   vel_los = array(data = 0.0, dim = observation$sbin^2)
   dis_los = array(data = 0.0, dim = observation$sbin^2)
-  lum_map = array(data = 0.0, dim = observation$sbin^2)
+  #lum_map = array(data = 0.0, dim = observation$sbin^2)
   age_map = array(data = 0.0, dim = observation$sbin^2)
   met_map = array(data = 0.0, dim = observation$sbin^2)
-  part_map = array(data=0, dim = observation$sbin^2)
+  #part_map = array(data=0, dim = observation$sbin^2)
   vorbin_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:nrow(part_in_spaxel)){ # computing the spectra at each occupied spatial pixel position
 
     num_part = part_in_spaxel$N[i] # number of particles in spaxel
-    part_map[part_in_spaxel$pixel_pos[[i]]] = num_part
+    #part_map[part_in_spaxel$pixel_pos[[i]]] = num_part
     vorbin_map[part_in_spaxel$pixel_pos[[i]]] = i
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
@@ -1614,7 +1614,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
       spectra[part_in_spaxel$pixel_pos[[i]][bin], ] = spectral_dist
     }
 
-    lum_map[part_in_spaxel$pixel_pos[[i]]] = sum(spectra[part_in_spaxel$pixel_pos[[i]],], na.rm=T)
+    #lum_map[part_in_spaxel$pixel_pos[[i]]] = sum(spectra[part_in_spaxel$pixel_pos[[i]],], na.rm=T)
                                            #.bandpass(wave = observation$wave_seq,
                                            #          flux = spectra[part_in_spaxel$pixel_pos[[i]],],
                                            #          filter = filter)
@@ -1625,7 +1625,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
     if (verbose){cat(i, "... ", sep = "")}
   }
-  return(list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map, vorbin_map))
+  return(list(spectra, #lum_map,
+              vel_los, dis_los, age_map, met_map, #part_map,
+              vorbin_map))
 }
 
 .spectral_spaxels_mc = function(part_in_spaxel, wavelength, observation, galaxy_data, simspin_data, template, verbose, cores, spectra_flag){
@@ -1633,10 +1635,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   spectra = matrix(data = 0.0, ncol = observation$wave_bin, nrow = observation$sbin^2)
   vel_los = array(data = 0.0, dim = observation$sbin^2)
   dis_los = array(data = 0.0, dim = observation$sbin^2)
-  lum_map = array(data = 0.0, dim = observation$sbin^2)
+  #lum_map = array(data = 0.0, dim = observation$sbin^2)
   age_map = array(data = 0.0, dim = observation$sbin^2)
   met_map = array(data = 0.0, dim = observation$sbin^2)
-  part_map = array(data=0, dim = observation$sbin^2)
+  #part_map = array(data=0, dim = observation$sbin^2)
   vorbin_map = array(data=0, dim = observation$sbin^2)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
@@ -1644,10 +1646,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list())) %dopar% {
 
                      num_part = part_in_spaxel$N[i]
-                     part_map = num_part
+                     #part_map = num_part
                      vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
@@ -1697,7 +1699,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      #    flux in units erg/s/cm^2/Ang
                      spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
                                (1 + observation$z)
-                     lum_map = sum(spectra, na.rm = T)
+                     #lum_map = sum(spectra, na.rm = T)
                                #.bandpass(wave = observation$wave_seq,
                                #          flux = spectra,
                                #          filter = filter)
@@ -1706,19 +1708,21 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
                      met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
-                     result = list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map, vorbin_map)
+                     result = list(spectra, #lum_map,
+                                   vel_los, dis_los, age_map, met_map,# part_map,
+                                   vorbin_map)
                      return(result)
                      closeAllConnections()
                    }
 
   spectral_dist = matrix(unlist(output[[1]]), ncol=observation$wave_bin, byrow = T)
-  lum_dist = matrix(unlist(output[[2]]))
-  vel_dist = matrix(unlist(output[[3]]))
-  dis_dist = matrix(unlist(output[[4]]))
-  age_dist = matrix(unlist(output[[5]]))
-  met_dist = matrix(unlist(output[[6]]))
-  part_dist = matrix(unlist(output[[7]]))
-  vorbin_dist = matrix(unlist(output[[8]]))
+  #lum_dist = matrix(unlist(output[[2]]))
+  vel_dist = matrix(unlist(output[[2]]))
+  dis_dist = matrix(unlist(output[[3]]))
+  age_dist = matrix(unlist(output[[4]]))
+  met_dist = matrix(unlist(output[[5]]))
+  #part_dist = matrix(unlist(output[[7]]))
+  vorbin_dist = matrix(unlist(output[[6]]))
 
   for (bin in 1:nrow(part_in_spaxel)){
 
@@ -1726,16 +1730,18 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
       spectra[unlist(part_in_spaxel$pixel_pos[[bin]][p]),] = spectral_dist[bin,]
     }
 
-    lum_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = lum_dist[bin]
+    #lum_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = lum_dist[bin]
     vel_los[unlist(part_in_spaxel$pixel_pos[[bin]])] = vel_dist[bin]
     dis_los[unlist(part_in_spaxel$pixel_pos[[bin]])] = dis_dist[bin]
     age_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = age_dist[bin]
     met_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = met_dist[bin]
-    part_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = part_dist[bin]
+    #part_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = part_dist[bin]
     vorbin_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = vorbin_dist[bin]
   }
 
-  return(list(spectra, lum_map, vel_los, dis_los, age_map, met_map, part_map, vorbin_map))
+  return(list(spectra, #lum_map,
+              vel_los, dis_los, age_map, met_map, #part_map,
+              vorbin_map))
 }
 
 # stellar velocity mode -
@@ -1744,20 +1750,20 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = 0.0, dim = observation$sbin^2)
   dis_los  = array(data = 0.0, dim = observation$sbin^2)
-  lum_map  = array(data = 0.0, dim = observation$sbin^2)
+  #lum_map  = array(data = 0.0, dim = observation$sbin^2)
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
-  mass_map = array(data = 0.0, dim = observation$sbin^2)
-  band_map = array(data = 0.0, dim = observation$sbin^2)
-  part_map = array(data=0, dim = observation$sbin^2)
+  #mass_map = array(data = 0.0, dim = observation$sbin^2)
+  #band_map = array(data = 0.0, dim = observation$sbin^2)
+  #part_map = array(data=0, dim = observation$sbin^2)
   vorbin_map = array(data=0, dim = observation$sbin^2)
 
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
-    num_part = part_in_spaxel$N[i] # number of particles in spaxel
-    part_map[part_in_spaxel$pixel_pos[[i]]] = num_part
+    #num_part = part_in_spaxel$N[i] # number of particles in spaxel
+    #part_map[part_in_spaxel$pixel_pos[[i]]] = num_part
     vorbin_map[part_in_spaxel$pixel_pos[[i]]] = i
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
@@ -1833,14 +1839,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     dis_los[part_in_spaxel$pixel_pos[[i]]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
     age_map[part_in_spaxel$pixel_pos[[i]]]   = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
     met_map[part_in_spaxel$pixel_pos[[i]]]   = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
-    mass_map[part_in_spaxel$pixel_pos[[i]]]  = sum(galaxy_sample$Mass)
+    #mass_map[part_in_spaxel$pixel_pos[[i]]]  = sum(galaxy_sample$Mass)
 
     if (verbose){cat(i, "... ", sep = "")}
 
   }
 
   return(list(vel_spec, #lum_map, band_map,
-              vel_los, dis_los, age_map, met_map, mass_map, part_map, vorbin_map))
+              vel_los, dis_los, age_map, met_map, #mass_map, part_map,
+              vorbin_map))
 }
 
 .velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, template, verbose, cores, mass_flag, spectra_flag){
@@ -1848,12 +1855,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   vel_spec = matrix(data = 0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = 0.0, dim = observation$sbin^2)
   dis_los  = array(data = 0.0, dim = observation$sbin^2)
-  lum_map  = array(data = 0.0, dim = observation$sbin^2)
-  band_map = array(data = 0.0, dim = observation$sbin^2)
+  #lum_map  = array(data = 0.0, dim = observation$sbin^2)
+  #band_map = array(data = 0.0, dim = observation$sbin^2)
   age_map  = array(data = 0.0, dim = observation$sbin^2)
   met_map  = array(data = 0.0, dim = observation$sbin^2)
-  mass_map  = array(data = 0.0, dim = observation$sbin^2)
-  part_map = array(data=0, dim = observation$sbin^2)
+  #mass_map  = array(data = 0.0, dim = observation$sbin^2)
+  #part_map = array(data=0, dim = observation$sbin^2)
   vorbin_map = array(data=0, dim = observation$sbin^2)
 
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
@@ -1862,10 +1869,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list())) %dopar% {
 
-                     num_part = part_in_spaxel$N[i]
-                     part_map = num_part
+                     #num_part = part_in_spaxel$N[i]
+                     #part_map = num_part
                      vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
@@ -1936,10 +1943,11 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
                      age_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
                      met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
-                     mass_map = sum(galaxy_sample$Mass)
+                     #mass_map = sum(galaxy_sample$Mass)
 
                      result = list(vel_spec, #lum_map, band_map,
-                                   vel_los, dis_los, age_map, met_map, mass_map, part_map, vorbin_map)
+                                   vel_los, dis_los, age_map, met_map, #mass_map, part_map,
+                                   vorbin_map)
                      return(result)
                      closeAllConnections()
                    }
@@ -1952,9 +1960,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   dis_dist = matrix(unlist(output[[3]]))
   age_dist = matrix(unlist(output[[4]]))
   met_dist = matrix(unlist(output[[5]]))
-  mass_dist = matrix(unlist(output[[6]]))
-  part_dist = matrix(unlist(output[[7]]))
-  vorbin_dist = matrix(unlist(output[[8]]))
+  #mass_dist = matrix(unlist(output[[6]]))
+  #part_dist = matrix(unlist(output[[7]]))
+  vorbin_dist = matrix(unlist(output[[6]]))
 
   for (bin in 1:nrow(part_in_spaxel)){
     for (p in 1:length(unlist(part_in_spaxel$pixel_pos[[bin]]))){
@@ -1966,14 +1974,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     dis_los[unlist(part_in_spaxel$pixel_pos[[bin]])] = dis_dist[bin]
     age_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = age_dist[bin]
     met_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = met_dist[bin]
-    mass_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = mass_dist[bin]
-    part_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = part_dist[bin]
+    #mass_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = mass_dist[bin]
+    #part_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = part_dist[bin]
     vorbin_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = vorbin_dist[bin]
 
   }
 
   return(list(vel_spec, #lum_map, band_map,
-              vel_los, dis_los, age_map, met_map, mass_map, part_map, vorbin_map))
+              vel_los, dis_los, age_map, met_map, #mass_map, part_map,
+              vorbin_map))
 
 }
 
@@ -1983,17 +1992,17 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   vel_spec = matrix(data = 0.0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = 0.0, dim = observation$sbin^2)
   dis_los  = array(data = 0.0, dim = observation$sbin^2)
-  mass_map = array(data = 0.0, dim = observation$sbin^2)
-  SFR_map  = array(data = 0.0, dim = observation$sbin^2)
+  #mass_map = array(data = 0.0, dim = observation$sbin^2)
+  #SFR_map  = array(data = 0.0, dim = observation$sbin^2)
   Z_map    = array(data = 0.0, dim = observation$sbin^2)
   OH_map   = array(data = 0.0, dim = observation$sbin^2)
-  part_map = array(data=0, dim = observation$sbin^2)
+  #part_map = array(data=0, dim = observation$sbin^2)
   vorbin_map = array(data=0, dim = observation$sbin^2)
 
   for (i in 1:(dim(part_in_spaxel)[1])){
 
-    num_part = part_in_spaxel$N[i] # number of particles in spaxel
-    part_map[part_in_spaxel$pixel_pos[[i]]] = num_part
+    #num_part = part_in_spaxel$N[i] # number of particles in spaxel
+    #part_map[part_in_spaxel$pixel_pos[[i]]] = num_part
     vorbin_map[part_in_spaxel$pixel_pos[[i]]] = i
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
@@ -2006,10 +2015,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
       vel_spec[part_in_spaxel$pixel_pos[[i]][bin], ] = v_dist
     }
 
-    mass_map[part_in_spaxel$pixel_pos[[i]]]  = sum(galaxy_sample$Mass)
+    #mass_map[part_in_spaxel$pixel_pos[[i]]]  = sum(galaxy_sample$Mass)
     vel_los[part_in_spaxel$pixel_pos[[i]]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
     dis_los[part_in_spaxel$pixel_pos[[i]]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-    SFR_map[part_in_spaxel$pixel_pos[[i]]]   = sum(galaxy_sample$SFR)
+    #SFR_map[part_in_spaxel$pixel_pos[[i]]]   = sum(galaxy_sample$SFR)
     Z_map[part_in_spaxel$pixel_pos[[i]]]     = log10(mean(galaxy_sample$Metallicity)/0.0127)
     OH_map[part_in_spaxel$pixel_pos[[i]]]    = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
@@ -2017,7 +2026,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   }
 
-  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map, vorbin_map))
+  return(list(vel_spec, #mass_map,
+              vel_los, dis_los, #SFR_map,
+              Z_map, OH_map, #part_map,
+              vorbin_map))
 }
 
 .gas_velocity_spaxels_mc = function(part_in_spaxel, observation, galaxy_data, simspin_data, verbose, cores){
@@ -2025,64 +2037,70 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   vel_spec = matrix(data = 0.0, ncol = observation$vbin, nrow = observation$sbin^2)
   vel_los  = array(data = 0.0, dim = observation$sbin^2)
   dis_los  = array(data = 0.0, dim = observation$sbin^2)
-  mass_map  = array(data = 0.0, dim = observation$sbin^2)
-  SFR_map  = array(data = 0.0, dim = observation$sbin^2)
+  #mass_map  = array(data = 0.0, dim = observation$sbin^2)
+  #SFR_map  = array(data = 0.0, dim = observation$sbin^2)
   Z_map    = array(data = 0.0, dim = observation$sbin^2)
   OH_map   = array(data = 0.0, dim = observation$sbin^2)
-  part_map = array(data=0, dim = observation$sbin^2)
+  #part_map = array(data=0, dim = observation$sbin^2)
   vorbin_map = array(data=0, dim = observation$sbin^2)
 
   doParallel::registerDoParallel(cores)
 
   i = integer()
   output = foreach(i = 1:(dim(part_in_spaxel)[1]), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(), list(), list(), list(), list(), list(), list(), list(), list())) %dopar% {
+                   .init=list(list(), list(), list(), list(), list(), list())) %dopar% {
 
-                     num_part = part_in_spaxel$N[i]
-                     part_map = num_part
+                     #num_part = part_in_spaxel$N[i]
+                     #part_map = num_part
                      vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
 
                      # adding the "gaussians" of each particle to the velocity bins
                      vel_spec = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
-                     mass_map = sum(galaxy_sample$Mass)
+                     #mass_map = sum(galaxy_sample$Mass)
                      vel_los  = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los  = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
-                     SFR_map  = sum(galaxy_sample$SFR)
+                     #SFR_map  = sum(galaxy_sample$SFR)
                      Z_map    = log10(mean(galaxy_sample$Metallicity)/0.0127)
                      OH_map   = log10(mean(galaxy_sample$Oxygen/galaxy_sample$Hydrogen))+12
 
-                     result = list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map, vorbin_map)
+                     result = list(vel_spec, #mass_map,
+                                   vel_los, dis_los, #SFR_map,
+                                   Z_map, OH_map, #part_map,
+                                   vorbin_map)
                      return(result)
                      closeAllConnections()
                    }
 
   v_dist = matrix(unlist(output[[1]]), ncol=observation$vbin, byrow = T)
-  mass_dist = matrix(unlist(output[[2]]))
-  vel_dist = matrix(unlist(output[[3]]))
-  dis_dist = matrix(unlist(output[[4]]))
-  SFR_dist = matrix(unlist(output[[5]]))
-  Z_dist = matrix(unlist(output[[6]]))
-  OH_dist = matrix(unlist(output[[7]]))
-  part_dist = matrix(unlist(output[[8]]))
-  vorbin_dist = matrix(unlist(output[[9]]))
+  #mass_dist = matrix(unlist(output[[2]]))
+  vel_dist = matrix(unlist(output[[2]]))
+  dis_dist = matrix(unlist(output[[3]]))
+  #SFR_dist = matrix(unlist(output[[5]]))
+  Z_dist = matrix(unlist(output[[4]]))
+  OH_dist = matrix(unlist(output[[5]]))
+  #part_dist = matrix(unlist(output[[8]]))
+  vorbin_dist = matrix(unlist(output[[6]]))
 
   for (bin in 1:nrow(part_in_spaxel)){
     for (p in 1:length(unlist(part_in_spaxel$pixel_pos[[bin]]))){
       vel_spec[unlist(part_in_spaxel$pixel_pos[[bin]][p]),] = v_dist[bin,]
     }
-    mass_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = mass_dist[bin]
+    #mass_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = mass_dist[bin]
     vel_los[unlist(part_in_spaxel$pixel_pos[[bin]])] = vel_dist[bin]
     dis_los[unlist(part_in_spaxel$pixel_pos[[bin]])] = dis_dist[bin]
-    SFR_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = SFR_dist[bin]
+    #SFR_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = SFR_dist[bin]
     Z_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = Z_dist[bin]
     OH_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = OH_dist[bin]
-    part_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = part_dist[bin]
+    #part_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = part_dist[bin]
     vorbin_map[unlist(part_in_spaxel$pixel_pos[[bin]])] = vorbin_dist[bin]
   }
 
-  return(list(vel_spec, mass_map, vel_los, dis_los, SFR_map, Z_map, OH_map, part_map, vorbin_map))
+  return(list(vel_spec, #mass_map,
+              vel_los, dis_los, #SFR_map,
+              Z_map, OH_map,# part_map,
+              vorbin_map))
 
 }
 
