@@ -27,7 +27,7 @@ built_cube_size = 5
 ob_table_loc = 3
 variance_loc_spectral = 10
 
-spectra_raw_images_size = 6
+spectra_raw_images_size = 7
 spectra_observed_images_size = NULL
 spectra_number_of_hdu_sntrue = 10
 spectra_number_of_hdu_snfalse = 9
@@ -1620,7 +1620,7 @@ test_that("Voronoi bin maps are produced and saved to the raw_images output", {
 
 })
 
-test_that("Number of particles in the image is consistent in the binned and unbinned images", {
+test_that("Summed images are consistent in the binned and unbinned images - stellar", {
 
   vorbin_velocity = build_datacube(simspin_file = ss_eagle,
                                    telescope = telescope(type = "SAMI"),
@@ -1634,13 +1634,34 @@ test_that("Number of particles in the image is consistent in the binned and unbi
                                    method = "velocity", verbose = F,
                                    voronoi_bin = F)
 
-  vorbins = unique(c(vorbin_velocity$raw_images$voronoi_bins))
-  N = 0
-  for (i in 1:length(vorbins)){
-    N = N + vorbin_velocity$raw_images$particle_image[vorbin_velocity$raw_images$voronoi_bins == vorbins[i]][1]
-  }
+  expect_equal(vorbin_velocity$raw_images$particle_image, notbin_velocity$raw_images$particle_image)
+  expect_equal(vorbin_velocity$raw_images$flux_image, notbin_velocity$raw_images$flux_image)
+  expect_equal(vorbin_velocity$raw_images$mass_image, notbin_velocity$raw_images$mass_image)
+  expect_equal(vorbin_velocity$observed_images$flux_image, notbin_velocity$observed_images$flux_image)
+  expect_false(all(vorbin_velocity$observed_images$velocity_image == notbin_velocity$observed_images$velocity_image))
+  expect_false(all(vorbin_velocity$raw_images$velocity_image == notbin_velocity$raw_images$velocity_image))
 
-  expect_equal(N, sum(notbin_velocity$raw_images$particle_image))
+})
+
+test_that("Summed images are consistent in the binned and unbinned images - gas", {
+
+  vorbin_gas      = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "gas", verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10)
+
+  notbin_gas      = build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03),
+                                   method = "gas", verbose = F,
+                                   voronoi_bin = F)
+
+  expect_equal(vorbin_gas$raw_images$particle_image, notbin_gas$raw_images$particle_image)
+  expect_equal(vorbin_gas$raw_images$mass_image, notbin_gas$raw_images$mass_image)
+  expect_equal(vorbin_gas$raw_images$SFR_image, notbin_gas$raw_images$SFR_image)
+  expect_false(all(vorbin_gas$observed_images$velocity_image == notbin_gas$observed_images$velocity_image))
+  expect_false(all(vorbin_gas$raw_images$velocity_image == notbin_gas$raw_images$velocity_image))
 
 })
 
