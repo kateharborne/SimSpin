@@ -219,8 +219,8 @@ The returned variable will always be a list containing 4 elements:
 > summary(gadget_cube)
 #                 Length  Class  Mode   
 # spectral_cube   1731600 -none- numeric
-# observation          35 -none- list   
-# raw_images            6 -none- list   
+# observation          36 -none- list   
+# raw_images            7 -none- list   
 # observed_images       0 -none- NULL   
 ```
 
@@ -230,7 +230,6 @@ The overall format of this output will be consistent regardless of the inputs of
 However, the names of individual elements change to reflect the variety in the requested properties specified by [`telescope`](docs/telescope.markdown) and [`observing_strategy`](docs/observing_strategy.markdown). The method of observation will also modify the length of each element. 
 
 * For example,  `method = 'spectral'` will return a variable `spectral_cube` as its first element; specifying instead `method = 'velocity'` will return a `velocity_cube`.
-* Similarly, if we are working in velocity mode with `mass_flag = T`, the images within the `raw_images` and `observed_images` elements will include an array called `mass_image`, rather than `flux_image`.
 * The `observed_images` element will be `NULL` when a cube is built with `method = 'spectral'`, as observational images must be generated using external software such as pPXF. 
 
 ---
@@ -353,35 +352,36 @@ cube$OB_TABLE
 #10:       twist_rad                   0    num: projected inclination of object in radians about the vertical axis
 #11:        lsf_fwhm                2.65    num: line-spread function of telescope given as full-width half-maximum in Angstrom
 #12:        lum_dist              227.48    num: distance to object in Mpc
-#13:          method            spectral    str: name of observing method employed
-#14:          origin    SimSpin_v2.4.5.5    str: version of SimSpin used for observing
-#15:    pointing_kpc                 0,0    num: x-y position of field of view centre relative to object centre in units of kpc
-#16:    pointing_deg                 0,0    num: x-y position of field of view centre relative to object centre in units of degrees
-#17:        psf_fwhm                   0    num: the full-width half-maximum of the point spread function kernel in arcsec
-#18:            sbin                  30    num: the number of spatial pixels across the diameter of the field of view
-#19:        sbin_seq      -7.5024,7.5024    num: the min and max spatial bin centres in kpc
-#20:       sbin_size             0.50016    num: the size of each pixel in kpc
-#21:     spatial_res                 0.5    num: the size of each pixel in arcsec
-#22: signal_to_noise                  10    num: the signal-to-noise ratio for observed spectrum
-#23:        wave_bin                1924    num: the number of wavelength bins for a given telescope
-#24:     wave_centre                4700    num: the central wavelength for a given telescope in Angstrom
-#25:        wave_res                1.04    num: the width of each wavelength bin in Angstrom
-#26:        wave_seq        3700,5699.92    num: the min and max wavelength bin centres in Angstrom
-#27:      wave_edges     3699.48,5700.44    num: the wavelength bin edges in Angstrom
-#28:       vbin_size             66.3371    num: the size of each velocity bin in km/s
-#29:      vbin_error             71.7812    num: the velocity uncertainty given the telescope LSF in km/s
-#30:               z                0.05    num: the redshift distance of the object observed
-#31:        LSF_conv               FALSE    bool: has line spread function convolution been applied?
+#13:       mass_flag               FALSE    bool: kinematics are mass weighted if TRUE
+#14:          method            spectral    str: name of observing method employed
+#15:          origin    SimSpin_v2.4.5.5    str: version of SimSpin used for observing
+#16:    pointing_kpc                 0,0    num: x-y position of field of view centre relative to object centre in units of kpc
+#17:    pointing_deg                 0,0    num: x-y position of field of view centre relative to object centre in units of degrees
+#18:        psf_fwhm                   0    num: the full-width half-maximum of the point spread function kernel in arcsec
+#19:            sbin                  30    num: the number of spatial pixels across the diameter of the field of view
+#20:        sbin_seq      -7.5024,7.5024    num: the min and max spatial bin centres in kpc
+#21:       sbin_size             0.50016    num: the size of each pixel in kpc
+#22:     spatial_res                 0.5    num: the size of each pixel in arcsec
+#23: signal_to_noise                  10    num: the signal-to-noise ratio for observed spectrum
+#24:        wave_bin                1924    num: the number of wavelength bins for a given telescope
+#25:     wave_centre                4700    num: the central wavelength for a given telescope in Angstrom
+#26:        wave_res                1.04    num: the width of each wavelength bin in Angstrom
+#27:        wave_seq        3700,5699.92    num: the min and max wavelength bin centres in Angstrom
+#28:      wave_edges     3699.48,5700.44    num: the wavelength bin edges in Angstrom
+#29:       vbin_size             66.3371    num: the size of each velocity bin in km/s
+#30:      vbin_error             71.7812    num: the velocity uncertainty given the telescope LSF in km/s
+#31:               z                0.05    num: the redshift distance of the object observed
+#32:        LSF_conv               FALSE    bool: has line spread function convolution been applied?
 #               Name               Value    Units
 
 ```
 
-Using the values in elements `[25]` and `[26]`, we can define the wavelength range for each spectrum in the cube and plot a given output with the appropriate labels.
+Using the values in elements `[26]` and `[27]`, we can define the wavelength range for each spectrum in the cube and plot a given output with the appropriate labels.
 
 ```r
 
-wavelength_range = as.numeric(stringr::str_split(string = cube$OB_TABLE$Value[26], pattern = ",")[[1]]) 
-wavelength_seq   = seq(wavelength_range[1], wavelength_range[2], by = as.numeric(cube$OB_TABLE$Value[25])) 
+wavelength_range = as.numeric(stringr::str_split(string = cube$OB_TABLE$Value[27], pattern = ",")[[1]]) 
+wavelength_seq   = seq(wavelength_range[1], wavelength_range[2], by = as.numeric(cube$OB_TABLE$Value[26])) 
 
 # examining the central spaxel of the output spectral cube:
 magicaxis::magplot(wavelength_seq, cube$DATA[["imDat"]][15,15,], type="l", col = "purple", lwd =2, xlab = "Wavelength, Angstroms", ylab = "Luminosity, CGS")

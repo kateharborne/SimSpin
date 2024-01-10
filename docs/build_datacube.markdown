@@ -164,6 +164,11 @@ The list will always contain 5 elements, though the contents of this list will c
             <td class="tg-0pky">distance to object in Mpc</td>
         </tr>
         <tr>
+            <td class="tg-0pky">mass_flag</td>
+            <td class="tg-0pky">bool</td>
+            <td class="tg-0pky">kinematics are weighted by mass if TRUE</td>
+        </tr>
+        <tr>
             <td class="tg-0pky">method</td>
             <td class="tg-0pky">str</td>
             <td class="tg-0pky">name of observing method employed</td>
@@ -355,8 +360,8 @@ Examining the output produced, we can see that this object contains:
 summary(cube)
 #                 Length  Class  Mode   
 # spectral_cube   1731600 -none- numeric
-# observation          34 -none- list   
-# raw_images            6 -none- list   
+# observation          36 -none- list   
+# raw_images            7 -none- list   
 # observed_images       0 -none- NULL   
 # variance_cube         0 -none- NULL
 ```
@@ -377,7 +382,7 @@ summary(cube)
 
 *   `observation` is the summary of the code. It contains information about how the observation has been constructed, such as the telescope parameters, the simulation parameters, the code version and run date. The full list output contains 34 different descriptors. These can be browsed [above](#output-parameters). 
 
-*   `raw_images` is a list with 6 elements that conatin summary images of the observed simulation. The raw outputs contain the observations without observational parameters applied (such as the seeing conditions or line-spread-function). 
+*   `raw_images` is a list with 7 elements that contain summary images of the observed simulation. The raw outputs contain the observations without observational parameters applied (such as the seeing conditions or line-spread-function). 
 
     ```r
     # making a mask from the aperture region information included within the output$observation
