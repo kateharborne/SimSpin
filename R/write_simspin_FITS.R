@@ -134,7 +134,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                         "EXTNAME"="DATA", "HDUCLASS"="ESO",
                         "HDUDOC"="DICD", "HDUVERS"="DCID version 6",
                         "HDUCLAS1"="IMAGE", "HDUCLAS2"="DATA", "ERRDATA"="STAT",
-                        "OBJECT"=object_name, "BUNIT"="erg/s/cm**2",
+                        "OBJECT"=object_name, "BUNIT"=if(mass_flag){"Msol"}else{"erg/s/cm**2"},
                         "CRPIX1"=1, "CRPIX2"=1,
                         "CDELT1"=observation$sbin_size/observation$ang_size/3600,
                         "CDELT2"=observation$sbin_size/observation$ang_size/3600,
@@ -531,36 +531,19 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                              "CUNIT2"="Units of coordinate increment and value",
                              "EXTNAME"="Image extension name")
 
-    extnames    = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                    if (voronoi){
+    extnames    = if (voronoi){
                       c("OBS_FLUX", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RESIDUAL", "RAW_FLUX", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART", "VORONOI")
                     } else {
                       c("OBS_FLUX", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RESIDUAL", "RAW_FLUX", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
                     }
-                  } else {
-                    if (voronoi){
-                      c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RESIDUAL", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART", "VORONOI")
-                    } else {
-                      c("OBS_MASS", "OBS_VEL", "OBS_DISP", "OBS_H3", "OBS_H4", "RESIDUAL", "RAW_MASS", "RAW_VEL", "RAW_DISP", "RAW_AGE", "RAW_Z", "NPART")
-                    }
-                  }
 
-    bunits      = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                    if (voronoi){
+    bunits      = if (voronoi){
                       c("erg/s/cm**2", "km/s", "km/s", "unitless", "unitless", "percentage", "erg/s/cm**2", "Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number", "Bin ID")
                     } else {
                       c("erg/s/cm**2", "km/s", "km/s", "unitless", "unitless", "percentage", "erg/s/cm**2", "Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
                     }
-                  } else {
-                    if (voronoi){
-                      c("Msol", "km/s", "km/s", "unitless", "unitless", "percentage", "Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number", "Bin ID")
-                    } else {
-                      c("Msol", "km/s", "km/s", "unitless", "unitless", "percentage", "Msol", "km/s", "km/s", "Gyr", "Z_solar", "Particle number")
-                    }
-                  }
 
-    image_names = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                    if (voronoi){
+    image_names = if (voronoi){
                       c("flux_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals",
                         "flux_image", "mass_image", "velocity_image", "dispersion_image", "age_image",
                         "metallicity_image", "particle_image", "voronoi_bins")
@@ -569,46 +552,20 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                         "flux_image", "mass_image", "velocity_image", "dispersion_image", "age_image",
                         "metallicity_image", "particle_image")
                     }
-                  } else {
-                    if (voronoi){
-                      c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals",
-                        "mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image",
-                        "particle_image", "voronoi_bins")
-                    } else {
-                      c("mass_image", "velocity_image", "dispersion_image", "h3_image", "h4_image", "residuals",
-                        "mass_image", "velocity_image", "dispersion_image", "age_image", "metallicity_image", "particle_image")
-                    }
-                  }
 
-    rawobs = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-               if (voronoi){
+    rawobs = if (voronoi){
                  c("obs", "obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw", "raw", "raw")
                } else {
                  c("obs", "obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw", "raw")
                }
-             } else {
-               if (voronoi){
-                 c("obs", "obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw", "raw")
-               } else {
-                 c("obs", "obs", "obs", "obs", "obs", "obs", "raw", "raw", "raw", "raw", "raw", "raw")
-               }
-             }
 
     output_image_file_names = paste0(output_dir, "/", output_file_root, "_", rawobs, "_", image_names, ".FITS")
 
-    extnum = if ("flux_image" %in% names(simspin_datacube$raw_images)){
-                if (voronoi){
+    extnum = if (voronoi){
                   c(4,5,6,7,8,9,10,11,12,13,14,15,16,17)
                 } else {
                   c(4,5,6,7,8,9,10,11,12,13,14,15,16)
                 }
-             } else {
-               if (voronoi){
-                 c(4,5,6,7,8,9,10,11,12,13,14,15,16)
-               } else {
-                 c(4,5,6,7,8,9,10,11,12,13,14,15)
-               }
-             }
 
     if (split_save){ # if writing each image to a seperate file
       for (i in 1:length(extnum)){ # for each image in the build_datacube output,
