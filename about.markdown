@@ -4,10 +4,10 @@ title: About
 nav_order: 2
 description: "Some background about SimSpin."
 permalink: /about/
-last_modified_date: "Thurs, 03 Aug 2023 15:57:00 AWST"
+last_modified_date: "Wed 10 Jan 2024 15:57:00 AWST"
 ---
 
-# SimSpin v2.8.0
+# SimSpin v2.8.1
 {: .fs-9 }
 
 A package for producing mock observations of simulations

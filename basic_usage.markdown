@@ -4,7 +4,7 @@ title: Basic Usage
 permalink: /basic_usage/
 description: "A walkthrough demonstrating how to generate your first mock observation."
 nav_order: 4
-last_modified_date: "Thurs, 03 Aug 2023 15:57:00 AWST"
+last_modified_date: "Wed 10 Jan 2024 15:57:00 AWST"
 ---
 
 # A walkthrough SimSpin's functions
