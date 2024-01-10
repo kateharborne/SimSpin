@@ -14,9 +14,11 @@ authors:
     affiliation: The University of Western Australia
     orcid: 'https://orcid.org/0000-0002-2043-7985'
 identifiers:
-  - type: url
-    value: 'https://arxiv.org/abs/2307.02618'
-    description: 'arXiv e-print, SimSpin v.2.5.0'
+  - type: doi
+    value: 10.1017/pasa.2023.47
+    description >-
+      Publications of the Astronomical Society of Australia,
+      Volume 40, article id. e048, Oct 2023
   - type: other
     value: 'ascl:1903.006'
     description: Astrophysics Source Code Library
@@ -26,7 +28,7 @@ identifiers:
       Publications of the Astronomical Society of Australia,
       Volume 37, article id. e016, May 2020
 repository-code: >-
-  https://github.com/kateharborne/SimSpin/releases/tag/v2.5.0
+  https://github.com/kateharborne/SimSpin/releases/tag/v2.6.0
 url: 'https://kateharborne.github.io/SimSpin/'
 repository: 'https://github.com/kateharborne/SimSpin'
 abstract: >-
@@ -53,7 +55,7 @@ keywords:
   - 'methods: numerical'
 license: LGPL-3.0
 commit: >-
-  https://github.com/kateharborne/SimSpin/commit/cc3b2018527995dfaf09130b1afbe4341566e4f7
-version: v2.5.0
+  https://github.com/kateharborne/SimSpin/commit/76fd5c260d9567a964f65299f9334629f7715161
+version: v2.6.0
 date-released: '2023-07-19'
 

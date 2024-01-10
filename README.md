@@ -10,7 +10,7 @@
 
 <p>&nbsp;</p>
 
-v2.7.0 - A package for producing mock observations:
+v2.8.0 - A package for producing mock observations:
 
 SimSpin allows you to take a simulation of a galaxy and produce a data cube in the style of an Integral Field Spectroscopy (IFS) instrument. You can find the live documentation for this code at the following [website](https://kateharborne.github.io/SimSpin/). 
 
@@ -62,9 +62,9 @@ If you have any further questions or requests for features in the code, report a
 
 ### Citation
 
-**NEW PUBLICATION** You can find the pre-print of the submitted work on the arXiv [here](https://arxiv.org/abs/2307.02618), which describes the updates to the code to produce mock spectral data cubes. New citation instructions will be provided here upon the acceptance of the work. 
-
 If you use this code in any of your own published research, please make sure to include the following citations in your bibliography:
+
+**NEW PUBLICATION** K.E. Harborne, A. Serene, E.J.A. Davies, C. Derkenne, S. Vaughan, A.I. Burdon, C. del P. Lagos, R. McDermid, S. O'Toole, C. Power, A.S.G Robotham, G. Santucci, R. Tobar (2023), [SimSpin v2.6.0—constructing synthetic spectral IFU cubes for comparison with observational surveys](https://ui.adsabs.harvard.edu/abs/2023PASA...40...48H/abstract), Publications of the Astronomical Society of Australia, Volume 40, article id. e048
 
 K.E. Harborne, C.Power and A.S.G. Robotham, (2020), ["SIMSPIN - Constructing mock IFS kinematic data cubes"](https://ui.adsabs.harvard.edu/abs/2020PASA...37...16H/abstract), Publications of the Astronomical Society of Australia, Volume 37, article id. e016
 
