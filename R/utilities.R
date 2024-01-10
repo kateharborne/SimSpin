@@ -1566,6 +1566,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     vorbin_map[part_in_spaxel$pixel_pos[[i]]] = i
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
+    pixel_size = length(unique(galaxy_sample$pixel_pos))
+    galaxy_sample$Mass = galaxy_sample$Mass / pixel_size
 
     luminosity = numeric(length(observation$wave_seq)) # initiallise a spectrum array for this pixel
 
@@ -1610,7 +1612,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     # transform luminosity into flux detected at telescope
     #    flux in units erg/s/cm^2/Ang
     spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
-                    (1 + observation$z)
+                    (1 + observation$z) / pixel_size
 
     for (bin in 1:length(part_in_spaxel$pixel_pos[[i]])){
       spectra[part_in_spaxel$pixel_pos[[i]][bin], ] = spectral_dist
@@ -1655,6 +1657,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
+                     pixel_size = length(unique(galaxy_sample$pixel_pos))
+                     galaxy_sample$Mass = galaxy_sample$Mass / pixel_size
 
                      luminosity = numeric(length(observation$wave_seq)) # initialize a spectrum array for this pixel
 
@@ -1700,7 +1704,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      # transform luminosity into flux detected at telescope
                      #    flux in units erg/s/cm^2/Ang
                      spectra = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
-                               (1 + observation$z)
+                               (1 + observation$z) / pixel_size
                      #lum_map = sum(spectra, na.rm = T)
                                #.bandpass(wave = observation$wave_seq,
                                #          flux = spectra,
@@ -1769,6 +1773,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     vorbin_map[part_in_spaxel$pixel_pos[[i]]] = i
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
+    pixel_size = length(unique(galaxy_sample$pixel_pos))
+    galaxy_sample$Mass = galaxy_sample$Mass / pixel_size
 
     if (mass_flag){
 
@@ -1878,6 +1884,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
+                     pixel_size = length(unique(galaxy_sample$pixel_pos))
+                     galaxy_sample$Mass = galaxy_sample$Mass / pixel_size
 
                      if (mass_flag){
 
@@ -2008,9 +2016,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     vorbin_map[part_in_spaxel$pixel_pos[[i]]] = i
 
     galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
+    pixel_size = length(unique(galaxy_sample$pixel_pos))
+    galaxy_sample$Mass = galaxy_sample$Mass / pixel_size
 
     # adding the "gaussians" of each particle to the velocity bins
-
     v_dist = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
 
     for (bin in 1:length(part_in_spaxel$pixel_pos[[i]])){
@@ -2057,6 +2066,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      vorbin_map = i
 
                      galaxy_sample = galaxy_data[ID %in% part_in_spaxel$val[[i]]]
+                     pixel_size = length(unique(galaxy_sample$pixel_pos))
+                     galaxy_sample$Mass = galaxy_sample$Mass / pixel_size
 
                      # adding the "gaussians" of each particle to the velocity bins
                      vel_spec = .sum_gas_velocities(galaxy_sample = galaxy_sample, observation = observation)
