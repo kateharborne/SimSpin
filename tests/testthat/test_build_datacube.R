@@ -25,12 +25,12 @@ temp_loc = tempdir()
 
 built_cube_size = 5
 ob_table_loc = 3
-variance_loc_spectral = 10
+variance_loc_spectral = 11
 
 spectra_raw_images_size = 7
 spectra_observed_images_size = NULL
-spectra_number_of_hdu_sntrue = 10
-spectra_number_of_hdu_snfalse = 9
+spectra_number_of_hdu_sntrue = 11
+spectra_number_of_hdu_snfalse = 10
 spectral_raw_vel_loc = 5
 
 velocity_raw_images_size = 7
@@ -815,6 +815,7 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_observation_summary.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_mass_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS"))
@@ -917,6 +918,7 @@ test_that("Data cubes can be written to multiple files", {
 unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_observation_summary.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_mass_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS",
@@ -933,6 +935,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_gadget_obs_h3_image.FITS"),
          paste0(temp_loc, "/ss_gadget_obs_h4_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_mass_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_age_image.FITS"),
@@ -975,6 +978,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_hdf5_spectral_cube.FITS"),
          paste0(temp_loc, "/ss_hdf5_observation_summary.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_flux_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_raw_mass_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_velocity_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_dispersion_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_age_image.FITS"),
@@ -1017,6 +1021,7 @@ unlink(c(paste0(temp_loc, "/ss_gadget.FITS"),
          paste0(temp_loc, "/ss_gadget_spectral_cube.FITS"),
          paste0(temp_loc, "/ss_gadget_observation_summary.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_mass_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_age_image.FITS"),
@@ -1034,6 +1039,7 @@ test_that("FITS files will be written with automatic names at directory given by
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_observation_summary.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_mass_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS")))
@@ -1044,6 +1050,7 @@ test_that("FITS files will be written with automatic names at directory given by
 unlink(c(paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_observation_summary.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_flux_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_mass_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS"),
@@ -1223,7 +1230,7 @@ test_that("Pointing description works effectively", {
                                method="velocity",
                                mass_flag = T)
 
-  centre_index = which(centred_gal$observed_images$mass_image == max(centred_gal$observed_images$mass_image, na.rm=T))
+  centre_index = which(centred_gal$raw_images$mass_image == max(centred_gal$raw_images$mass_image, na.rm=T))
 
   shifted_up_gal = build_datacube(simspin_file = ss_gadget,
                                   telescope = telescope(type = "SAMI"),
@@ -1231,7 +1238,7 @@ test_that("Pointing description works effectively", {
                                   method="velocity",
                                   mass_flag = T)
 
-  up_index = which(shifted_up_gal$observed_images$mass_image == max(shifted_up_gal$observed_images$mass_image, na.rm=T))
+  up_index = which(shifted_up_gal$raw_images$mass_image == max(shifted_up_gal$raw_images$mass_image, na.rm=T))
 
   shifted_up_gal_deg = build_datacube(simspin_file = ss_gadget,
                                       telescope = telescope(type = "SAMI"),
@@ -1239,7 +1246,7 @@ test_that("Pointing description works effectively", {
                                       method="velocity",
                                       mass_flag = T)
 
-  up_index_deg = which(shifted_up_gal_deg$observed_images$mass_image == max(shifted_up_gal_deg$observed_images$mass_image, na.rm=T))
+  up_index_deg = which(shifted_up_gal_deg$raw_images$mass_image == max(shifted_up_gal_deg$raw_images$mass_image, na.rm=T))
 
   shifted_down_gal = build_datacube(simspin_file = ss_gadget,
                                     telescope = telescope(type = "SAMI"),
@@ -1247,7 +1254,7 @@ test_that("Pointing description works effectively", {
                                     method="velocity",
                                     mass_flag = T)
 
-  down_index = which(shifted_down_gal$observed_images$mass_image == max(shifted_down_gal$observed_images$mass_image, na.rm=T))
+  down_index = which(shifted_down_gal$raw_images$mass_image == max(shifted_down_gal$raw_images$mass_image, na.rm=T))
 
   shifted_left_gal = build_datacube(simspin_file = ss_gadget,
                                     telescope = telescope(type = "SAMI"),
@@ -1255,7 +1262,7 @@ test_that("Pointing description works effectively", {
                                     method="velocity",
                                     mass_flag = T)
 
-  left_index =which(shifted_left_gal$observed_images$mass_image == max(shifted_left_gal$observed_images$mass_image, na.rm=T))
+  left_index =which(shifted_left_gal$raw_images$mass_image == max(shifted_left_gal$raw_images$mass_image, na.rm=T))
 
   shifted_right_gal = build_datacube(simspin_file = ss_gadget,
                                      telescope = telescope(type = "SAMI"),
@@ -1263,7 +1270,7 @@ test_that("Pointing description works effectively", {
                                      method="velocity",
                                      mass_flag = T)
 
-  right_index = which(shifted_right_gal$observed_images$mass_image == max(shifted_right_gal$observed_images$mass_image, na.rm=T))
+  right_index = which(shifted_right_gal$raw_images$mass_image == max(shifted_right_gal$raw_images$mass_image, na.rm=T))
 
   expect_true((centre_index - up_index) == -300) # check all centres have shifted by the expected number of pixels
   expect_true((centre_index - down_index) == 300)
