@@ -351,9 +351,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
       age_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
       metallicity_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
       particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
+      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("spectral_cube"    = cube,
