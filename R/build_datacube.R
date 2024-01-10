@@ -510,6 +510,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
     observation$vbin_seq   = observation$vbin_edges[1:observation$vbin] + diff(observation$vbin_edges)/2
 
+    observation$mass_flag = TRUE
+
     if (verbose){cat("Generating gas velocity distributions per spaxel... \n")}
     if (cores == 1){
       output = .gas_velocity_spaxels(part_in_spaxel, observation, galaxy_data, simspin_data, verbose)
