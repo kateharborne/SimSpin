@@ -82,6 +82,7 @@ observation = function(telescope, observing_strategy, method){
                 twist_rad       = observing_strategy$twist_deg * (pi/180),
                 lsf_fwhm        = telescope$lsf_fwhm,
                 lum_dist        = lum_dist,
+                mass_flag       = FALSE,
                 method          = method,
                 origin          = paste0("SimSpin_v", packageVersion("SimSpin")),
                 particle_limit  = 0,

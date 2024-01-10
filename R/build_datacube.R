@@ -405,6 +405,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
     observation$vbin_seq   = observation$vbin_edges[1:observation$vbin] + diff(observation$vbin_edges)/2
+    if (mass_flag){observation$mass_flag = TRUE}
 
     if (verbose){cat("Generating stellar velocity distributions per spaxel... \n")}
     if (cores == 1){
@@ -487,11 +488,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
         output$observed_images$residuals[c,d]        = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
                                                                  output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
       }
-    }
-
-    if (mass_flag){ # if mass flag is T, renaming the flux image as mass image
-      output$raw_images = output$raw_images[-which(names(output$raw_images) == "flux_image")]
-      names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
     }
 
     if (verbose){cat("Done! \n")}
