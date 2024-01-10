@@ -294,12 +294,13 @@ The list will always contain 5 elements, though the contents of this list will c
 1.  `raw_images` - This will be a list of a variable number of images.
     -   In `method = "spectral"` or `"velocity"`, there will be 6 raw images listed:
 
-        | `flux_image` or `mass_image`  | a 2D numeric array giving the total flux in the requested band described by `filter` or the total mass within a given pixel. |
+        | `flux_image` | a 2D numeric array giving the total flux observed within the wavelenth range of the requested `telescope`. | 
         | `velocity_image`   | a 2D numeric array giving the particle mass-weighted mean LOS velocity in a given pixel. |
         | `dispersion_image` | a 2D numeric array giving the particle mass-weighted standard deviation of the LOS velocity in a given pixel. |
         | `age_image` | a 2D numeric array giving the mass-weighted particle mean age in a given pixel. |
         | `metallicity_image` | a 2D numeric array giving the mass-weighted particle mean metallicity in a given pixel. |
         | `particle_image` | a 2D numeric array giving the number of particles per pixel. |
+        | `mass_image` | a 2D numeric array giving the total mass within a given pixel. |
 
     -   In `method = "gas"` or `"sf_gas"`, there will be 7 raw images listed:
 
@@ -313,14 +314,14 @@ The list will always contain 5 elements, though the contents of this list will c
     
     -   If `voronoi_bin = TRUE`, an additional image will be included in this list:
     
-        | `voronoi_bins` | a 2D numeric array of integer bin numbers showing which pixels have been joined together to meet the minimum number of particles limit. The same value of flux, mass, age, metallicity and kinematics will be given for all pixel values in the same voronoi bin. 
+        | `voronoi_bins` | a 2D numeric array of integer bin numbers showing which pixels have been joined together to meet the minimum number of particles limit. The same value of age, metallicity and kinematics will be given for all pixel values in the same voronoi bin. *Summed images (i.e. flux, mass, SFR and particle number) will still be given in un-binned forms.* |
 
 1.  `observed_images` - This will be a list of a variable number of images.
     -   In `method = "spectral"`, the returned element will be `NULL`. This is because observed images will need to be fitted using external software such as pPXF. 
 
     -   In all other methods, (`method = "velocity"`, `"gas"` or `"sf_gas"`), the returned element will be a list of length 5 containing:
 
-        | `flux_image` or `mass_image`  | a 2D numeric array giving the total flux in the requested band described by `filter` or the total mass within a given pixel (always returned for gas observations). |
+        | `flux_image` or `mass_image`  | a 2D numeric array giving the total flux in the requested band described by `filter` or the total mass within a given pixel (returned only for gas observations). |
         | `velocity_image`   | a 2D numeric array giving the observed mean LOS velocity in a given pixel. |
         | `dispersion_image` | a 2D numeric array giving the observed standard deviation of the LOS velocity in a given pixel. |
         | `h3_image` | a 2D numeric array giving the observed h3 higher-order moment in a given pixel. |
