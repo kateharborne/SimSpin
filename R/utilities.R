@@ -1485,6 +1485,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   # to those spectra due to redshift, z
   if(verbose){cat("Using assigned spectra to compute the flux per particle... \n")}
 
+  lum = numeric(length = nrow(galaxy_data))
+  band_lum = numeric(length = nrow(galaxy_data))
+
   wavelength = template$Wave * (observation$z + 1)
   wave_diff_observed  = .qdiff(observation$wave_seq)
   filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
@@ -1530,14 +1533,17 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
       (1 + observation$z)
 
 
-    galaxy_data$luminosity[p] = sum(spectral_dist, na.rm=T)
-    galaxy_data$filter_luminosity[p] = .bandpass(wave = observation$wave_seq,
-                                                 flux = spectral_dist,
-                                                 filter = filter)
+    lum[p] = sum(spectral_dist, na.rm=T)
+    band_lum[p] = .bandpass(wave = observation$wave_seq,
+                            flux = spectral_dist,
+                            filter = filter)
 
     if(verbose){if(p == 1){cat("Computed flux from spectra 1, ")}else{cat(paste(p), ", ")}}
 
   }
+
+  galaxy_data[ , luminosity := lum, ]
+  galaxy_data[ , filter_luminosity := band_lum, ]
 
   if (verbose){cat("\n Done!")}
 
