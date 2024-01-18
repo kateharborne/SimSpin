@@ -305,7 +305,8 @@ disp_map_cols = colorRampPalette(RColorBrewer::brewer.pal(9, "YlOrRd"))(50)
 vel_val = max(c(abs(min(gadget2_binary_cube$raw_images$velocity_image, na.rm = T)), abs(max(gadget2_binary_cube$raw_images$velocity_image, na.rm = T))))
 disp_val = c(floor(min(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T)/2), max(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T))
 
-par(pty="s", fig=c(0,0.5,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1)  
+options(scipen=999)
+par(pty="s", fig=c(0,0.5,0,1), xpd=FALSE, ps=12, cex=1)  
 image_nan(z = gadget2_binary_cube$raw_images$velocity_image, zlim = c(-vel_val,vel_val), col = velo_map_cols, na.color = "white", xaxt="n",
           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
 rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
@@ -313,7 +314,7 @@ fields::image.plot(legend.only = TRUE, zlim = c(-vel_val,vel_val), col = velo_ma
                    horizontal = TRUE, family="serif", font=1,
                    legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
 
-par(pty="s", fig=c(0.5,1,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1, new=TRUE)  
+par(pty="s", fig=c(0.5,1,0,1), xpd=FALSE, ps=12, cex=1, new=TRUE)  
 image_nan(z = gadget2_binary_cube$raw_images$dispersion_image, zlim = disp_val, col = disp_map_cols, na.color = "white", xaxt="n",
           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
 rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
