@@ -287,45 +287,45 @@ This output produced by `build_datacube` is a list with 4 elements as described 
     + `particle_image` -- *2D numeric array* -- This is the final 2D array that contains the number of particles contained in a given pixel. 
 4. `observed_images` -- *List* -- This will be `NULL` for spectral data cubes, but when used in `velocity` mode, this list will contain 2D arrays that correspond to the observed flux/mass, LOS velocity and LOS dispersion calculated using the collapsed velocity cube. 
 
-```{r, echo=FALSE, fig.dim=c(7,5), fig.align='center'}
-
-image_nan <- function(z, zlim, col, na.color='gray', ...){
-  zstep <- (zlim[2] - zlim[1]) / length(col); # step in the color palette
-  newz.na <- zlim[2] + zstep # new z for NA
-  
-  z[which(is.na(z>zlim[2]))] <- newz.na # same for newz.na
-  
-  zlim[2] <- zlim[2] + zstep # extend top limit to include the new value na
-  
-  col <- c(col, na.color) # we construct the new color range by including: na.color
-  
-  magicaxis::magimage(z=z, zlim=zlim, col=col, ...) # we finally call image(...)
-}
-velo_map_cols = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(40))
-disp_map_cols = colorRampPalette(RColorBrewer::brewer.pal(9, "YlOrRd"))(50)
-
-vel_val = max(c(abs(min(gadget2_binary_cube$raw_images$velocity_image, na.rm = T)), abs(max(gadget2_binary_cube$raw_images$velocity_image, na.rm = T))))
-disp_val = c(floor(min(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T)/2), max(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T))
-
-options(scipen=999)
-par(pty="s", fig=c(0,0.5,0,1), xpd=FALSE, ps=12, cex=1)  
-image_nan(z = gadget2_binary_cube$raw_images$velocity_image, zlim = c(-vel_val,vel_val), col = velo_map_cols, na.color = "white", xaxt="n",
-          yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
-rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
-fields::image.plot(legend.only = TRUE, zlim = c(-vel_val,vel_val), col = velo_map_cols,
-                   horizontal = TRUE, family="serif", font=1,
-                   legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
-
-par(pty="s", fig=c(0.5,1,0,1), xpd=FALSE, ps=12, cex=1, new=TRUE)  
-image_nan(z = gadget2_binary_cube$raw_images$dispersion_image, zlim = disp_val, col = disp_map_cols, na.color = "white", xaxt="n",
-          yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
-rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
-fields::image.plot(legend.only = TRUE, zlim = c(disp_val), col = disp_map_cols,
-                   horizontal = TRUE, family="serif", font=1,
-                   legend.lab = expression("dispersion"[LOS] * ", km s"^{-1}))
-
-
-```
+# ```{r, echo=FALSE, fig.dim=c(7,5), fig.align='center'}
+# 
+# image_nan <- function(z, zlim, col, na.color='gray', ...){
+#   zstep <- (zlim[2] - zlim[1]) / length(col); # step in the color palette
+#   newz.na <- zlim[2] + zstep # new z for NA
+#   
+#   z[which(is.na(z>zlim[2]))] <- newz.na # same for newz.na
+#   
+#   zlim[2] <- zlim[2] + zstep # extend top limit to include the new value na
+#   
+#   col <- c(col, na.color) # we construct the new color range by including: na.color
+#   
+#   magicaxis::magimage(z=z, zlim=zlim, col=col, ...) # we finally call image(...)
+# }
+# velo_map_cols = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(40))
+# disp_map_cols = colorRampPalette(RColorBrewer::brewer.pal(9, "YlOrRd"))(50)
+# 
+# vel_val = max(c(abs(min(gadget2_binary_cube$raw_images$velocity_image, na.rm = T)), abs(max(gadget2_binary_cube$raw_images$velocity_image, na.rm = T))))
+# disp_val = c(floor(min(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T)/2), max(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T))
+# 
+# options(scipen=999)
+# par(pty="s", fig=c(0,0.5,0,1), xpd=FALSE, ps=12, cex=1)  
+# image_nan(z = gadget2_binary_cube$raw_images$velocity_image, zlim = c(-vel_val,vel_val), col = velo_map_cols, na.color = "white", xaxt="n",
+#           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
+# rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
+# fields::image.plot(legend.only = TRUE, zlim = c(-vel_val,vel_val), col = velo_map_cols,
+#                    horizontal = TRUE, family="serif", font=1,
+#                    legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
+# 
+# par(pty="s", fig=c(0.5,1,0,1), xpd=FALSE, ps=12, cex=1, new=TRUE)  
+# image_nan(z = gadget2_binary_cube$raw_images$dispersion_image, zlim = disp_val, col = disp_map_cols, na.color = "white", xaxt="n",
+#           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
+# rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
+# fields::image.plot(legend.only = TRUE, zlim = c(disp_val), col = disp_map_cols,
+#                    horizontal = TRUE, family="serif", font=1,
+#                    legend.lab = expression("dispersion"[LOS] * ", km s"^{-1}))
+# 
+# 
+# ```
 
 Here, we have plotted the `velocity_image` and `dispersion_image` calculated from the particle data. We have highlighted a single spaxel. The spectrum associated with this spaxel is shown in the figure below. Such a spectrum is present in all occupied spaxels of the image. 
 
