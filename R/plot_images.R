@@ -110,7 +110,7 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
 #'                       method = "velocity", mass_flag=TRUE)
-#' plot_mass(cube$observed_images$mass_image)
+#' plot_mass(cube$raw_images$mass_image)
 
 plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
                       units = expression("Mass, M"["sol"]), main="",
