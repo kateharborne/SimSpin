@@ -30,6 +30,7 @@ test_that("Each image type can be plotted for build_datacube images - Gadget", {
   expect_invisible(plot_age(gadget_cube$raw_images$age_image))
   expect_invisible(plot_metallicity(gadget_cube$raw_images$metallicity_image))
   expect_invisible(plot_particles(gadget_cube$raw_images$particle_image))
+  expect_invisible(plot_mass(gadget_cube$raw_images$mass_image))
 
   expect_invisible(plot_flux(gadget_cube$observed_images$flux_image))
   expect_invisible(plot_velocity(gadget_cube$observed_images$velocity_image))
@@ -46,6 +47,7 @@ test_that("Each image type can be plotted for build_datacube images - HDF5", {
                              method="velocity", mass_flag=T,
                              verbose = F)
 
+  expect_invisible(plot_flux(hdf5_cube$raw_images$flux_image))
   expect_invisible(plot_mass(hdf5_cube$raw_images$mass_image))
   expect_invisible(plot_velocity(hdf5_cube$raw_images$velocity_image))
   expect_invisible(plot_dispersion(hdf5_cube$raw_images$dispersion_image))
@@ -53,7 +55,7 @@ test_that("Each image type can be plotted for build_datacube images - HDF5", {
   expect_invisible(plot_metallicity(hdf5_cube$raw_images$metallicity_image))
   expect_invisible(plot_particles(hdf5_cube$raw_images$particle_image))
 
-  expect_invisible(plot_mass(hdf5_cube$observed_images$mass_image))
+  expect_invisible(plot_flux(hdf5_cube$observed_images$flux_image))
   expect_invisible(plot_velocity(hdf5_cube$observed_images$velocity_image))
   expect_invisible(plot_dispersion(hdf5_cube$observed_images$dispersion_image))
   expect_invisible(plot_h3(hdf5_cube$observed_images$h3_image))
@@ -91,6 +93,7 @@ test_that("Each image type can be plotted for build_datacube images - Magneticum
                                    method="velocity", mass_flag=T,
                                    verbose = F)
 
+  expect_invisible(plot_flux(magneticum_cube$raw_images$flux_image))
   expect_invisible(plot_mass(magneticum_cube$raw_images$mass_image))
   expect_invisible(plot_velocity(magneticum_cube$raw_images$velocity_image))
   expect_invisible(plot_dispersion(magneticum_cube$raw_images$dispersion_image))
@@ -98,7 +101,7 @@ test_that("Each image type can be plotted for build_datacube images - Magneticum
   expect_invisible(plot_metallicity(magneticum_cube$raw_images$metallicity_image))
   expect_invisible(plot_particles(magneticum_cube$raw_images$particle_image))
 
-  expect_invisible(plot_mass(magneticum_cube$observed_images$mass_image))
+  expect_invisible(plot_flux(magneticum_cube$observed_images$flux_image))
   expect_invisible(plot_velocity(magneticum_cube$observed_images$velocity_image))
   expect_invisible(plot_dispersion(magneticum_cube$observed_images$dispersion_image))
   expect_invisible(plot_h3(magneticum_cube$observed_images$h3_image))
@@ -114,8 +117,11 @@ test_that("Each image type can be plotted for build_datacube images - HorizonAGN
                                 verbose = F)
 
   expect_invisible(plot_flux(horizon_cube$raw_images$flux_image))
+  expect_invisible(plot_mass(horizon_cube$raw_images$mass_image))
   expect_invisible(plot_velocity(horizon_cube$raw_images$velocity_image))
   expect_invisible(plot_dispersion(horizon_cube$raw_images$dispersion_image))
+  expect_invisible(plot_age(horizon_cube$raw_images$age_image))
+  expect_invisible(plot_metallicity(horizon_cube$raw_images$metallicity_image))
   expect_invisible(plot_particles(horizon_cube$raw_images$particle_image))
 })
 
