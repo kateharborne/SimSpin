@@ -299,7 +299,7 @@ image_nan <- function(z, zlim, col, na.color='gray', ...){
    
    col <- c(col, na.color) # we construct the new color range by including: na.color
    
-   magicaxis::magimage(z=z, zlim=zlim, col=col, ...) # we finally call image(...)
+   magicaxis::magimage(x=z, zlim=zlim, col=col, ...) # we finally call image(...)
 }
  
 velo_map_cols = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(40))
