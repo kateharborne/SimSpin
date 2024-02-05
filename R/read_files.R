@@ -61,10 +61,7 @@
   data = file(f, "rb") # open file for reading in binary mode
 
   block         = readBin(data, "integer", n=1) #block size field, giving the length of the header
-
-  if(block!=256){ # if not 256, this is not a Gadget binary file.
-      close(data); stop("Not a Gadget binary file.")}
-    }
+  if(block!=256){close(data); stop("Not a Gadget binary file.")}
   Npart         = readBin(data, "integer", n=6) # number of particles of each type in this file
   Massarr       = readBin(data, "numeric", n=6, size=8) # mass of each particle type. set to 0 for present particles means read mass in mass block.
   Time          = readBin(data, "numeric", n=1, size=8) # time of output, or expansion factor for cosmological simulations
@@ -134,7 +131,96 @@
 }
 
 
-.try_tipsy = function(data){
+.read_tipsy = function(f, endian){
+
+  data = file(f, "rb")
+
+  time = readBin(data, "numeric", n = 1, endian = endian)
+  n = readBin(data, "int", n=1, endian = endian)
+  dims = readBin(data, "int", n=1, endian = endian)
+  ngas = readBin(data, "int", n=1, endian = endian)
+  ndark = readBin(data, "int", n=1, endian = endian)
+  nstar = readBin(data, "int", n=1, endian = endian)
+
+  if (fs == 32 + 48*ngas + 36*ndark + 44*nstar){
+    pad = readBin(data, "int", n = 1, endian = endian)
+  } else if (fs != 28 + 48*ngas + 36*ndark + 44*nstar){
+    stop()
+  }
+
+  # beginning with the gas properties
+  if (ngas > 0){
+    # initialise the gas table
+    if (verbose){cat("There are ", ngas, " gas particles in this file. Building gas_part.")}
+
+
+    gas_part = readBin(data, "numeric", n = ngas*12, size = 4, endian = endian)
+
+    gas_part = data.table::as.data.table(matrix(gas_data, nrow = ngas, ncol = 12, byrow = T))
+
+    data.table::setnames(gas_part,
+                         old = c("V1", "V2", "V3", "V4", "V5", "V6",
+                                 "V7", "V8", "V9", "V10", "V11", "V12"),
+                         new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Density",
+                                 "Temperature", "SmoothingLength", "Metallicity", "Phi"))
+
+    gas_part$ID = 1:ngas
+
+  }
+
+  if (ndark > 0){
+
+    if (verbose){cat("There are ", ndark, " DM particles in this file. Throwing these away... (sorry)")}
+    dm_part = readBin(data, "numeric", n = ndark*9, size = 4, endian = endian)
+    remove(dm_part)
+
+  }
+
+  if (nstar > 0){
+    # initialise the gas table
+    if (verbose){cat("There are ", nstar, " star particles in this file. Building star_part.")}
+    star_part = readBin(data, "numeric", n = nstar*11, size = 4, endian = endian)
+
+    star_part = data.table::as.data.table(matrix(star_part, nrow = nstar, ncol = 11, byrow = T))
+
+    data.table::setnames(star_part,
+                         old = c("V1", "V2", "V3", "V4", "V5", "V6",
+                                 "V7", "V8", "V9", "V10", "V11"),
+                         new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Metallicity",
+                                 "StellarFormationTime", "SofteningLength", "Phi"))
+
+    star_part$ID = 1:nstar
+    ssp = data.table::data.table("Initial_Mass" = star_part$Mass*0.5, # need to find the initial stellar mass value
+                                 "Age" = as.numeric(.SFTtoAge(a = star_part$StellarFormationTime, cores = cores)),
+                                 "Metallicity" = star_part$Metallicity)
+
+  }
+
+  close(data)
+
+  # reading auxilliary files to get the oxygen/carbon/hydrogen
+  if (file.exists(paste0(f,".OxMassFrac"))){
+    oxygen_data = file(paste0(f,".OxMassFrac"), "rb")
+    oxygen = readBin(oxygen_data, "numeric", n = ngas, size = 4, endian = endian)
+    close(oxygen_data)
+    gas_part$Oxygen = oxygen
+    remove(oxygen)
+  }
+
+  if (file.exists(paste0(f,".uHot"))){
+    u_data = file(paste0(f,".uHot"), "rb")
+    internal_energy = readBin(u_data, "numeric", n = nstar, size = 4, endian = endian)
+    close(u_data)
+    ssp$InternalEnergy = internal_energy
+    remove(internal_energy)
+  }
+
+
+  head = list("Npart" = c(0, ngas, 0, 0, nstar, 0), # number of gas and stars
+              "Time" = time, "Redshift" = ((1/time)-1), # relevent simulation data
+              "Nall" = (ngas+nstars), "Type"="Tipsy") # number of particles in the original file
+
+  return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
 
