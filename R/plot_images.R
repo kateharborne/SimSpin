@@ -110,7 +110,7 @@ plot_flux <- function(flux_image, fig = c(0,1,0,1), new=F,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
 #'                       method = "velocity", mass_flag=TRUE)
-#' plot_mass(cube$observed_images$mass_image)
+#' plot_mass(cube$raw_images$mass_image)
 
 plot_mass <- function(mass_image, fig = c(0,1,0,1), new=F,
                       units = expression("Mass, M"["sol"]), main="",
@@ -844,7 +844,7 @@ plot_voronoi <- function(voronoi_bins, fig = c(0,1,0,1), new=F,
 
   col <- c(col, na.color) # we construct the new color range by including: na.color
 
-  magicaxis::magimage(z=z, zlim=zlim, col=col, ...) # we finally call image(...)
+  magicaxis::magimage(x=z, zlim=zlim, col=col, ...) # we finally call image(...)
 }
 
 .magcolbar <- # function modified from magicaxis to generate colour bars

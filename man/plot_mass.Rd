@@ -73,5 +73,5 @@ cube = build_datacube(simspin_file = ss_gadget,
                       telescope = telescope(type="SAMI"),
                       observing_strategy = observing_strategy(),
                       method = "velocity", mass_flag=TRUE)
-plot_mass(cube$observed_images$mass_image)
+plot_mass(cube$raw_images$mass_image)
 }

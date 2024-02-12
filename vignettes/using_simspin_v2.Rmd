@@ -2,7 +2,7 @@
 title: "Using SimSpin v2.3.16"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using SimSpin v2.0.0}
+  %\VignetteIndexEntry{Using SimSpin v2.3.16}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -66,8 +66,8 @@ gadget2_binary_galaxy = make_simspin_file(filename = system.file("extdata",
 ```{r, echo=FALSE, fig.dim=c(7,5), fig.align='center'}
 # Code not printed in vignette as the plotting script is just to illustrate the 
 #  shape of the galaxy model.
-
-par(pty="s", fig=c(0,0.5,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1)
+options(scipen = 999)
+par(pty="s", fig=c(0,0.5,0,1), xpd=FALSE, ps=12, cex=1)
 magicaxis::magplot(gadget2_binary_galaxy$star_part$x[1:1000], gadget2_binary_galaxy$star_part$z[1:1000], type="p", pch=20,
                    xlim = c(-25, 25), ylim = c(-25,25), col="blue",
                    xlab = "x, kpc", ylab = "z, kpc")
@@ -75,7 +75,8 @@ points(gadget2_binary_galaxy$star_part$x[1001:2500], gadget2_binary_galaxy$star_
 legend("topleft", inset=c(-0.02,0.01), c("Edge-on"), bty="n")
 legend("bottomright", inset=c(0.01,0.01), c("disk", "bulge"), col=c("blue", "red"), pch=c(16,16))
 
-par(pty="s", fig=c(0.5,1,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1, new=TRUE)
+options(scipen = 999)
+par(pty="s", fig=c(0.5,1,0,1), xpd=FALSE, ps=12, cex=1, new=TRUE)
 magicaxis::magplot(gadget2_binary_galaxy$star_part$x[1:1000], gadget2_binary_galaxy$star_part$y[1:1000], type="p", pch=20,
                    xlim = c(-25, 25), ylim = c(-25,25), col="blue",
                    xlab = "x, kpc", ylab = "y, kpc")
@@ -102,15 +103,16 @@ gadget2_hdf5_galaxy = make_simspin_file(filename = system.file("extdata",
 ```{r, echo=FALSE, fig.dim=c(7,5), fig.align='center'}
 # Code not printed in vignette as the plotting script is just to illustrate the 
 #  shape of the galaxy model.
-
-par(pty="s", fig=c(0,0.5,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1)
+options(scipen = 999)
+par(pty="s", fig=c(0,0.5,0,1), xpd=FALSE, ps=12, cex=1)
 magicaxis::magplot(gadget2_hdf5_galaxy$star_part$x, gadget2_hdf5_galaxy$star_part$z, type="p", pch=20,
                    xlim = c(-15, 15), ylim = c(-15,15), col="red",
                    xlab = "x, kpc", ylab = "z, kpc")
 legend("topleft", inset=c(-0.02,0.01), c("Edge-on"), bty="n")
 legend("bottomright", inset=c(0.01,0.01), c("disk", "bulge"), col=c("blue", "red"), pch=c(16,16))
 
-par(pty="s", fig=c(0.5,1,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1, new=TRUE)
+options(scipen = 999)
+par(pty="s", fig=c(0.5,1,0,1), xpd=FALSE, ps=12, cex=1, new=TRUE)
 magicaxis::magplot(gadget2_hdf5_galaxy$star_part$x, gadget2_hdf5_galaxy$star_part$y, type="p", pch=20,
                    xlim = c(-15, 15), ylim = c(-15,15), col="red",
                    xlab = "x, kpc", ylab = "y, kpc")
@@ -288,24 +290,26 @@ This output produced by `build_datacube` is a list with 4 elements as described 
 ```{r, echo=FALSE, fig.dim=c(7,5), fig.align='center'}
 
 image_nan <- function(z, zlim, col, na.color='gray', ...){
-  zstep <- (zlim[2] - zlim[1]) / length(col); # step in the color palette
-  newz.na <- zlim[2] + zstep # new z for NA
-  
-  z[which(is.na(z>zlim[2]))] <- newz.na # same for newz.na
-  
-  zlim[2] <- zlim[2] + zstep # extend top limit to include the new value na
-  
-  col <- c(col, na.color) # we construct the new color range by including: na.color
-  
-  magicaxis::magimage(z=z, zlim=zlim, col=col, ...) # we finally call image(...)
+   zstep <- (zlim[2] - zlim[1]) / length(col); # step in the color palette
+   newz.na <- zlim[2] + zstep # new z for NA
+   
+   z[which(is.na(z>zlim[2]))] <- newz.na # same for newz.na
+   
+   zlim[2] <- zlim[2] + zstep # extend top limit to include the new value na
+   
+   col <- c(col, na.color) # we construct the new color range by including: na.color
+   
+   magicaxis::magimage(x=z, zlim=zlim, col=col, ...) # we finally call image(...)
 }
+ 
 velo_map_cols = rev(colorRampPalette(RColorBrewer::brewer.pal(9, "RdYlBu"))(40))
 disp_map_cols = colorRampPalette(RColorBrewer::brewer.pal(9, "YlOrRd"))(50)
-
+ 
 vel_val = max(c(abs(min(gadget2_binary_cube$raw_images$velocity_image, na.rm = T)), abs(max(gadget2_binary_cube$raw_images$velocity_image, na.rm = T))))
 disp_val = c(floor(min(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T)/2), max(gadget2_binary_cube$raw_images$dispersion_image, na.rm=T))
 
-par(pty="s", fig=c(0,0.5,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1)  
+options(scipen=999)
+par(pty="s", fig=c(0,0.5,0,1), xpd=FALSE, ps=12, cex=1)
 image_nan(z = gadget2_binary_cube$raw_images$velocity_image, zlim = c(-vel_val,vel_val), col = velo_map_cols, na.color = "white", xaxt="n",
           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
 rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
@@ -313,7 +317,7 @@ fields::image.plot(legend.only = TRUE, zlim = c(-vel_val,vel_val), col = velo_ma
                    horizontal = TRUE, family="serif", font=1,
                    legend.lab = expression("velocity"[LOS] * ", km s"^{-1}))
 
-par(pty="s", fig=c(0.5,1,0,1), options(scipen = 999), xpd=FALSE, ps=12, cex=1, new=TRUE)  
+par(pty="s", fig=c(0.5,1,0,1), xpd=FALSE, ps=12, cex=1, new=TRUE)
 image_nan(z = gadget2_binary_cube$raw_images$dispersion_image, zlim = disp_val, col = disp_map_cols, na.color = "white", xaxt="n",
           yaxt="n", ann=FALSE, magmap=FALSE, family="mono", font=1)
 rect(14,14,15,15, col=NA, lty=1, lwd=3, border="red")
@@ -327,7 +331,8 @@ fields::image.plot(legend.only = TRUE, zlim = c(disp_val), col = disp_map_cols,
 Here, we have plotted the `velocity_image` and `dispersion_image` calculated from the particle data. We have highlighted a single spaxel. The spectrum associated with this spaxel is shown in the figure below. Such a spectrum is present in all occupied spaxels of the image. 
 
 ```{r, fig.dim=c(7,5)}
-par(options(scipen = 0), xpd=FALSE, ps=12, cex=1)  
+options(scipen = 0)
+par(xpd=FALSE, ps=12, cex=1)  
 
 magicaxis::magplot(gadget2_binary_cube$observation$wave_seq,
                    gadget2_binary_cube$spectral_cube[15,15,]/median(gadget2_binary_cube$spectral_cube[15,15,]),
@@ -391,7 +396,8 @@ These values can be used to reconstruct the data cube for kinematic fitting.
 We can examine an image of the wavelength slices in the cube by plotting each slice in the gif below. Alternatively, such a FITS file can also be examined using tools like [SAOImageDS9](https://sites.google.com/cfa.harvard.edu/saoimageds9).
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.align='center', fig.dim=c(7,5)}
-par(pty="s", options(scipen = 999), xpd=FALSE, ps=12, cex=1)  
+options(scipen = 999)
+par(pty="s", xpd=FALSE, ps=12, cex=1)  
 sub_cube = spectral_cube[,,seq(763,1162,by=16)]
 sub_wave = wavelength_range[seq(763,1162,by=16)]
 flux_val = c(min(sub_cube, na.rm = T), max(sub_cube, na.rm = T))

@@ -229,6 +229,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   # Trimming particles that lie outside the aperture of the telescope
   galaxy_data = galaxy_data[galaxy_data$pixel_pos %in% observation$pixel_region[!is.na(observation$pixel_region)],]
 
+  # function for adding flux information to stellar methods
+  if (observation$method == "spectral" | observation$method == "velocity"){
+    galaxy_data = .compute_flux(observation, galaxy_data, simspin_data,
+                                template=temp, verbose, spectra_flag)
+  }
+
   if (length(galaxy_data$ID) == 0){
     stop(paste0("Error: There are no simulation particles within the aperture of the telescope. \n
          Please check that the method, `", method, "` is suitable for your input simulation file. \n
@@ -239,6 +245,43 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   # which particles sit in each spaxel?
   part_in_spaxel = galaxy_data[, list(val=list(ID), .N), by = "pixel_pos"]
+
+
+  if (method == "spectral" | method == "velocity"){
+    summed_images = galaxy_data[, list(.N,
+                                       luminosity = sum(luminosity),
+                                       filter_luminosity = sum(filter_luminosity),
+                                       mass = sum(Mass)),
+                                by = "pixel_pos"]
+
+
+    empty_pixels = data.table::data.table("pixel_pos" = which(!(seq(1:(observation$sbin*observation$sbin))
+                                                                %in% summed_images$pixel_pos)),
+                                          "N" = 0,
+                                          "luminosity" = 0.,
+                                          "filter_luminosity" = 0.,
+                                          "mass" = 0.)
+
+    summed_images = data.table::rbindlist(list(summed_images, empty_pixels))
+    summed_images = summed_images[order(pixel_pos)]
+    remove(empty_pixels)
+
+  } else if (method == "gas" | method == "sf gas"){
+    summed_images = galaxy_data[, list(.N,
+                                       sfr = sum(SFR),
+                                       mass = sum(Mass)),
+                                by = "pixel_pos"]
+
+    empty_pixels = data.table::data.table("pixel_pos" = which(!(seq(1:(observation$sbin*observation$sbin))
+                                                                %in% summed_images$pixel_pos)),
+                                          "N" = 0,
+                                          "sfr" = 0.,
+                                          "mass" = 0.)
+
+    summed_images = data.table::rbindlist(list(summed_images, empty_pixels))
+    summed_images = summed_images[order(pixel_pos)]
+    remove(empty_pixels)
+  }
 
   if (voronoi_bin){ # Returning the binned pixels based on some voronoi limit
     if (verbose){cat("Binning spaxels into voronoi bins... \n")}
@@ -303,13 +346,14 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$wave_bin))
     raw_images = list(
-      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
-      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
-      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      age_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[8]], dim = c(observation$sbin, observation$sbin))
+      flux_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      age_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("spectral_cube"    = cube,
@@ -361,6 +405,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
     observation$vbin_seq   = observation$vbin_edges[1:observation$vbin] + diff(observation$vbin_edges)/2
+    if (mass_flag){observation$mass_flag = TRUE}
 
     if (verbose){cat("Generating stellar velocity distributions per spaxel... \n")}
     if (cores == 1){
@@ -372,17 +417,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
     raw_images = list(
-      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
-      velocity_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      dispersion_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      age_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
-      mass_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[9]], dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[10]], dim = c(observation$sbin, observation$sbin))
+      flux_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      age_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
-      flux_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      flux_image = array(data = summed_images$filter_luminosity, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
@@ -445,11 +490,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       }
     }
 
-    if (mass_flag){ # if mass flag is T, renaming the flux image as mass image
-      output$raw_images = output$raw_images[-which(names(output$raw_images) == "flux_image")]
-      names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
-    }
-
     if (verbose){cat("Done! \n")}
 
   }
@@ -470,6 +510,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     observation$vbin_edges = seq(-(observation$vbin * observation$vbin_size)/2, (observation$vbin * observation$vbin_size)/2, by=observation$vbin_size)
     observation$vbin_seq   = observation$vbin_edges[1:observation$vbin] + diff(observation$vbin_edges)/2
 
+    observation$mass_flag = TRUE
+
     if (verbose){cat("Generating gas velocity distributions per spaxel... \n")}
     if (cores == 1){
       output = .gas_velocity_spaxels(part_in_spaxel, observation, galaxy_data, simspin_data, verbose)
@@ -480,17 +522,17 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
     raw_images = list(
-      mass_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
-      velocity_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
-      dispersion_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      SFR_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
-      OH_image  = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
-      particle_image = array(data = output[[8]], dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[9]], dim = c(observation$sbin, observation$sbin))
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
+      velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
+      SFR_image = array(data = summed_images$sfr, dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      OH_image  = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
-      flux_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
+      flux_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
