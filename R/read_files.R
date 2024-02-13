@@ -133,6 +133,8 @@
 
 .read_tipsy = function(f, endian){
 
+  fs = file.info(f)$size
+
   data = file(f, "rb")
 
   time = readBin(data, "numeric", n = 1, endian = endian)
@@ -156,7 +158,7 @@
 
     gas_part = readBin(data, "numeric", n = ngas*12, size = 4, endian = endian)
 
-    gas_part = data.table::as.data.table(matrix(gas_data, nrow = ngas, ncol = 12, byrow = T))
+    gas_part = data.table::as.data.table(matrix(gas_part, nrow = ngas, ncol = 12, byrow = T))
 
     data.table::setnames(gas_part,
                          old = c("V1", "V2", "V3", "V4", "V5", "V6",
@@ -211,8 +213,16 @@
     u_data = file(paste0(f,".uHot"), "rb")
     internal_energy = readBin(u_data, "numeric", n = nstar, size = 4, endian = endian)
     close(u_data)
-    ssp$InternalEnergy = internal_energy
+    gas_part$InternalEnergy = internal_energy
     remove(internal_energy)
+  }
+
+  if (file.exists(paste0(f,".timeform"))){
+    sfr_data = file(paste0(f,".timeform"), "rb")
+    stars_formed = readBin(sfr_data, "numeric", n = nstar, size = 4, endian = endian)
+    close(sfr_data)
+    cut(stars_formed)
+    remove(stars_formed)
   }
 
 
