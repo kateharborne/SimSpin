@@ -143,30 +143,6 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     }
   }
 
-  # now binning stellar particles based on their A/Z position
-  # if (length(unique(galaxy_data$ssp$Age)) > 2){ # if not an N-body simulation
-  #
-  #   # reassign any age==0 particles to have a small non-zero age
-  #   galaxy_data$ssp$Age[galaxy_data$ssp$Age==0] = 1e-9
-  #
-  #   age_grid = 10^(seq(log10(min(galaxy_data$ssp$Age))-0.02, log10(max(galaxy_data$ssp$Age))+0.02, by = 0.02))
-  #   Z_grid   = 10^(seq(log10(min(galaxy_data$ssp$Metallicity))-0.1, log10(max(galaxy_data$ssp$Metallicity))+0.1, by = 0.1))
-  #
-  #   age_cen  = 10^(seq(log10(min(galaxy_data$ssp$Age))-0.01, log10(max(galaxy_data$ssp$Age))+0.01, by = 0.02))
-  #   Z_cen    = 10^(seq(log10(min(galaxy_data$ssp$Metallicity))-0.05, log10(max(galaxy_data$ssp$Metallicity))+0.05, by = 0.1))
-  #
-  #   AZ       = data.frame("ages" = rep(age_cen, length = length(age_cen)*length(Z_cen)),
-  #                         "metallicities" = rep(Z_cen, each = length(age_cen)),
-  #                         "id" = seq(1, length(age_cen)*length(Z_cen)))
-  #
-  #   az_pos = cut(galaxy_data$ssp$Age, breaks = age_grid, labels = F) +
-  #     (length(age_cen) * cut(galaxy_data$ssp$Metallicity, breaks = Z_grid, labels = F)) - length(age_cen)
-  #
-  #   AZ_bins = AZ[sort(unique(az_pos)),]
-  #   AZ_bins$sed_id = seq(1, length(AZ_bins$id))
-  #
-  # }
-
   if (!is.null(galaxy_data$ssp)){ # if there are stellar particles in the file at all
                                   #  adding info to stellar_particle data
 
@@ -176,6 +152,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       galaxy_data$star_part = galaxy_data$star_part[-c(Z0_int),]
       galaxy_data$ssp       = galaxy_data$ssp[-c(Z0_int),]
     }
+
+    # ensure that Ages are described relative to the time "now"
+    galaxy_data$ssp$Age = galaxy_data$ssp$Age - as.numeric(.SFTtoAge(galaxy_data$head$Time, cores = 1))
 
     # reassign any age==0 particles to have a small non-zero age
     galaxy_data$ssp$Age[galaxy_data$ssp$Age==0] = 1e-9

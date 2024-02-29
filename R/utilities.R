@@ -182,6 +182,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
          See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
   }
 
+  if (!"Time" %in% names(head)){
+    head$Time = (1/(head$Redshift)) - 1
+  }
+
   # default (if header if blank) is a gadget file.
   if(is.null(head$RunLabel)){
     gadget2 = T
