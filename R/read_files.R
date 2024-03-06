@@ -155,7 +155,6 @@
     # initialise the gas table
     if (verbose){cat("There are ", ngas, " gas particles in this file. Building gas_part.")}
 
-
     gas_part = readBin(data, "numeric", n = ngas*12, size = 4, endian = endian)
 
     gas_part = data.table::as.data.table(matrix(gas_part, nrow = ngas, ncol = 12, byrow = T))
@@ -174,6 +173,17 @@
     gas_part$Hydrogen = 1.0 - gas_part$Metallicity - hetot
     gas_part$ID = 1:ngas
 
+    #mean molecular mass, i.e. the mean atomic mass per particle
+    mu = numeric(length = ngas)
+    mu[gas_part$Temperature <= 1e4] = 0.59
+    mu[gas_part$Temperature > 1e4] = 1.3
+
+    #Gas internal energy derived from temperature
+    gas_part$InternalEnergy = gas_part$Temperature / (mu *((5/3) - 1))
+    gas_part$ThermalDispersion = sqrt((gas_part$InternalEnergy)*(.adiabatic_index - 1))
+
+    #star formation rate
+    gas_part$SFR = numeric(ngas) #?
   }
 
   if (ndark > 0){
@@ -198,8 +208,8 @@
                                  "StellarFormationTime", "SofteningLength", "Phi"))
 
     star_part$ID = 1:nstar
-    ssp = data.table::data.table("Initial_Mass" = star_part$Mass, # need to find the initial stellar mass value
-                                 "Age" = numeric(nstar),
+    ssp = data.table::data.table("Initial_Mass" = star_part$Mass, # ? need to find the initial stellar mass value
+                                 "Age" = numeric(nstar), # ? StellarFormationTime in odd units, not well converted to age in Gyr
                                  "Metallicity" = star_part$Metallicity)
 
   }
@@ -215,20 +225,11 @@
     remove(oxygen)
   }
 
-  if (file.exists(paste0(f,".uHot"))){
-    u_data = file(paste0(f,".uHot"), "rb")
-    internal_energy = readBin(u_data, "numeric", n = ngas, size = 4, endian = endian)
-    close(u_data)
-    gas_part$InternalEnergy = internal_energy
-    remove(internal_energy)
-  }
-
   if (file.exists(paste0(f,".timeform"))){
     age_data = file(paste0(f,".timeform"), "rb")
     stars_formed = readBin(age_data, "numeric", n = ngas, size = 4, endian = endian)
     close(age_data)
   }
-
 
   head = list("Npart" = c(0, ngas, 0, 0, nstar, 0), # number of gas and stars
               "Time" = time, "Redshift" = ((1/time)-1), # relevent simulation data
