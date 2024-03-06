@@ -131,7 +131,7 @@
 }
 
 
-.read_tipsy = function(f, endian){
+.read_tipsy = function(f, endian, cores, verbose=F){
 
   fs = file.info(f)$size
 
@@ -166,6 +166,12 @@
                          new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Density",
                                  "Temperature", "SmoothingLength", "Metallicity", "Phi"))
 
+    # Helium mass fraction including correction based on metallicity, from
+    # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
+    hetot = 0.236 + (2.1 * gas_part$Metallicity)
+    # Hydrogen mass fraction including correction based on metallicity, from
+    # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
+    gas_part$Hydrogen = 1.0 - gas_part$Metallicity - hetot
     gas_part$ID = 1:ngas
 
   }
@@ -192,8 +198,8 @@
                                  "StellarFormationTime", "SofteningLength", "Phi"))
 
     star_part$ID = 1:nstar
-    ssp = data.table::data.table("Initial_Mass" = star_part$Mass*0.5, # need to find the initial stellar mass value
-                                 "Age" = as.numeric(.SFTtoAge(a = star_part$StellarFormationTime, cores = cores)),
+    ssp = data.table::data.table("Initial_Mass" = star_part$Mass, # need to find the initial stellar mass value
+                                 "Age" = numeric(nstar),
                                  "Metallicity" = star_part$Metallicity)
 
   }
@@ -211,18 +217,16 @@
 
   if (file.exists(paste0(f,".uHot"))){
     u_data = file(paste0(f,".uHot"), "rb")
-    internal_energy = readBin(u_data, "numeric", n = nstar, size = 4, endian = endian)
+    internal_energy = readBin(u_data, "numeric", n = ngas, size = 4, endian = endian)
     close(u_data)
     gas_part$InternalEnergy = internal_energy
     remove(internal_energy)
   }
 
   if (file.exists(paste0(f,".timeform"))){
-    sfr_data = file(paste0(f,".timeform"), "rb")
-    stars_formed = readBin(sfr_data, "numeric", n = nstar, size = 4, endian = endian)
-    close(sfr_data)
-    cut(stars_formed)
-    remove(stars_formed)
+    age_data = file(paste0(f,".timeform"), "rb")
+    stars_formed = readBin(age_data, "numeric", n = ngas, size = 4, endian = endian)
+    close(age_data)
   }
 
 
@@ -487,7 +491,7 @@
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
                                       "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "Metallicity" = gas$Metallicity,
-                                      "Carbon" = gas$`ElementAbundance/Carbon`,
+                                      #"Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" = gas$`ElementAbundance/Oxygen`)
 
@@ -584,7 +588,7 @@
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
                                       "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "Metallicity" = gas$Metallicity,
-                                      "Carbon" = gas$`ElementAbundance/Carbon`,
+                                      #"Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" =  gas$`ElementAbundance/Oxygen`)
 
@@ -683,7 +687,7 @@
                                       "ThermalDispersion" = sqrt((gas$Pressure*.gcm1_to_msolkm1)/(gas$Density*.gcm3_to_msolkm3)),
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$Metallicity,
-                                      "Carbon" = gas$`ElementAbundance/Carbon`,
+                                      #"Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" =  gas$`ElementAbundance/Oxygen`)
 
@@ -802,7 +806,7 @@
                                       "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$Metallicity,
-                                      "Carbon" = gas$`ElementAbundance/Carbon`,
+                                      #"Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" = gas$`ElementAbundance/Oxygen`)
 
