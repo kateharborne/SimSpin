@@ -441,6 +441,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                   "observed_images" = observed_images,
                   "variance_cube"   = NULL)
 
+    if (mass_flag){
+      output$observed_images$mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
+    } # ensures that the observed mass image is blurred with the same kernel
+
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
       output = blur_datacube(output) # apply psf convolution to each cube plane
