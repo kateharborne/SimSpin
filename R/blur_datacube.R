@@ -79,9 +79,11 @@ blur_datacube = function(datacube_output){
     }
 
     # 2. Blurring the observed flux map
-    blur_image = array(data = 0.0, dim = cube_dims[c(1,2)])
-    blur_image = ProFit::profitBruteConv(datacube_output$observed_images$flux_image, observation$psf_kernel) * aperture_region
-    datacube_output$observed_images$flux_image = blur_image
+    if (observation$method == "velocity"){  # if your observation is of stars, blur the flux map
+      blur_image = array(data = 0.0, dim = cube_dims[c(1,2)])
+      blur_image = ProFit::profitBruteConv(datacube_output$observed_images$flux_image, observation$psf_kernel) * aperture_region
+      datacube_output$observed_images$flux_image = blur_image
+    }
 
     blur_mass_image = array(data = 0.0, dim = cube_dims[c(1,2)])
     blur_mass_image = ProFit::profitBruteConv(datacube_output$observed_images$mass_image, observation$psf_kernel) * aperture_region
