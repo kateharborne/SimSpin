@@ -83,11 +83,9 @@ blur_datacube = function(datacube_output){
     blur_image = ProFit::profitBruteConv(datacube_output$observed_images$flux_image, observation$psf_kernel) * aperture_region
     datacube_output$observed_images$flux_image = blur_image
 
-    if (observation$mass_flag){ # ensuring "observed" mass map images are also blurred with the psf kernel
-      blur_image = array(data = 0.0, dim = cube_dims[c(1,2)])
-      blur_image = ProFit::profitBruteConv(datacube_output$observed_images$mass_image, observation$psf_kernel) * aperture_region
-      datacube_output$observed_images$mass_image = blur_image
-    }
+    blur_mass_image = array(data = 0.0, dim = cube_dims[c(1,2)])
+    blur_mass_image = ProFit::profitBruteConv(datacube_output$observed_images$mass_image, observation$psf_kernel) * aperture_region
+    datacube_output$observed_images$mass_image = blur_mass_image
 
     # Returning output in same format as input
     blur_output = list("velocity_cube"    = blur_cube,

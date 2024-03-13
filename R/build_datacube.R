@@ -432,7 +432,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
-      residuals = array(0.0, dim = c(observation$sbin, observation$sbin))
+      residuals = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("velocity_cube"   = cube,
@@ -440,10 +441,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                   "raw_images"      = raw_images,
                   "observed_images" = observed_images,
                   "variance_cube"   = NULL)
-
-    if (mass_flag){
-      output$observed_images$mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
-    } # ensures that the observed mass image is blurred with the same kernel
 
     if (observation$psf_fwhm > 0){
       if (verbose){cat("Convolving cube with PSF... \n")    }
