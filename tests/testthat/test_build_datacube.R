@@ -34,16 +34,17 @@ spectra_number_of_hdu_snfalse = 10
 spectral_raw_vel_loc = 5
 
 velocity_raw_images_size = 7
-velocity_observed_images_size = 6
+velocity_observed_images_size = 7
 
-velocity_number_of_hdu_sntrue = 17
-velocity_number_of_hdu_snfalse = 16
+velocity_number_of_hdu_sntrue = 18
+velocity_number_of_hdu_snfalse = 17
 velocity_obs_vel_loc = 5
 velocity_obs_h3_loc = 7
 velocity_obs_h4_loc = 8
 velocity_obs_res_loc = 9
-velocity_raw_mass_loc = 11
-velocity_variance_loc = 17
+velocity_obs_mass_loc = 10
+velocity_raw_mass_loc = 12
+velocity_variance_loc = 18
 
 gas_raw_images_size = 7
 gas_observed_images_size = 6
@@ -664,6 +665,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mft.FITS")))
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS"))) == velocity_number_of_hdu_sntrue)
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS")))[velocity_raw_mass_loc] == "RAW_MASS")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS")))[velocity_obs_mass_loc] == "OBS_MASS")
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS")))[velocity_variance_loc] == "STAT")
   expect_true(stringr::str_detect(Rfits::Rfits_read_header_raw(paste0(temp_loc, "/ss_gadget_mft.FITS")), "Msol"))
 
