@@ -89,6 +89,13 @@ blur_datacube = function(datacube_output){
     blur_mass_image = ProFit::profitBruteConv(datacube_output$observed_images$mass_image, observation$psf_kernel) * aperture_region
     datacube_output$observed_images$mass_image = blur_mass_image
 
+    if (observation$method == "gas" | observation$method == "sf gas"){  # if your observation is of gas, blur the sfr map
+      blur_sfr_image = array(data = 0.0, dim = cube_dims[c(1,2)])
+      blur_sfr_image = ProFit::profitBruteConv(datacube_output$observed_images$SFR_image, observation$psf_kernel) * aperture_region
+      datacube_output$observed_images$SFR_image = blur_sfr_image
+    }
+
+
     # Returning output in same format as input
     blur_output = list("velocity_cube"    = blur_cube,
                        "observation"      = observation,

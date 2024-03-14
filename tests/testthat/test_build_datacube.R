@@ -47,10 +47,11 @@ velocity_raw_mass_loc = 12
 velocity_variance_loc = 18
 
 gas_raw_images_size = 7
-gas_observed_images_size = 6
-gas_number_of_hdu_snfalse = 16
-gas_number_of_hdu_sntrue = 17
+gas_observed_images_size = 7
+gas_number_of_hdu_snfalse = 17
+gas_number_of_hdu_sntrue = 18
 gas_obs_res_loc = 9
+gas_obs_sfr_loc = 10
 
 # Testing that build_datacube works in spectral mode ----
 
@@ -752,6 +753,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum.FITS")))
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == gas_number_of_hdu_snfalse)
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
+  expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_sfr_loc]]$keyvalues$EXTNAME == "OBS_SFR")
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 10, spatial_res = 0.25, fov=50),
