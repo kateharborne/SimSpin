@@ -748,10 +748,10 @@ test_that("Data cubes can be written to a single files", {
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method="sf gas",
                                write_fits = T, output_location = paste0(temp_loc, "/ss_magneticum.FITS"),
-                               split_save=F), built_cube_size)
+                               split_save=F, voronoi_bin = T, vorbin_limit = 10), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum.FITS")))
-  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == gas_number_of_hdu_snfalse)
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == (gas_number_of_hdu_snfalse+1))
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_sfr_loc]]$keyvalues$EXTNAME == "OBS_SFR")
 
