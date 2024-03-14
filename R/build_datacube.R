@@ -432,7 +432,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
-      residuals = array(0.0, dim = c(observation$sbin, observation$sbin))
+      residuals = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("velocity_cube"   = cube,
@@ -532,12 +533,13 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
-      flux_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
-      residuals = array(0.0, dim = c(observation$sbin, observation$sbin))
+      residuals = array(0.0, dim = c(observation$sbin, observation$sbin)),
+      SFR_image = array(data = summed_images$sfr, dim = c(observation$sbin, observation$sbin))
     )
 
     output = list("velocity_cube"   = cube,
@@ -595,8 +597,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
       }
     }
-
-    names(output$observed_images)[which(names(output$observed_images) == "flux_image")] = "mass_image"
 
     if (verbose){cat("Done! \n")}
 

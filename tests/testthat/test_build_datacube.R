@@ -34,22 +34,24 @@ spectra_number_of_hdu_snfalse = 10
 spectral_raw_vel_loc = 5
 
 velocity_raw_images_size = 7
-velocity_observed_images_size = 6
+velocity_observed_images_size = 7
 
-velocity_number_of_hdu_sntrue = 17
-velocity_number_of_hdu_snfalse = 16
+velocity_number_of_hdu_sntrue = 18
+velocity_number_of_hdu_snfalse = 17
 velocity_obs_vel_loc = 5
 velocity_obs_h3_loc = 7
 velocity_obs_h4_loc = 8
 velocity_obs_res_loc = 9
-velocity_raw_mass_loc = 11
-velocity_variance_loc = 17
+velocity_obs_mass_loc = 10
+velocity_raw_mass_loc = 12
+velocity_variance_loc = 18
 
 gas_raw_images_size = 7
-gas_observed_images_size = 6
-gas_number_of_hdu_snfalse = 16
-gas_number_of_hdu_sntrue = 17
+gas_observed_images_size = 7
+gas_number_of_hdu_snfalse = 17
+gas_number_of_hdu_sntrue = 18
 gas_obs_res_loc = 9
+gas_obs_sfr_loc = 10
 
 # Testing that build_datacube works in spectral mode ----
 
@@ -664,6 +666,7 @@ test_that("Data cubes can be written to a single files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mft.FITS")))
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS"))) == velocity_number_of_hdu_sntrue)
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS")))[velocity_raw_mass_loc] == "RAW_MASS")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS")))[velocity_obs_mass_loc] == "OBS_MASS")
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft.FITS")))[velocity_variance_loc] == "STAT")
   expect_true(stringr::str_detect(Rfits::Rfits_read_header_raw(paste0(temp_loc, "/ss_gadget_mft.FITS")), "Msol"))
 
@@ -745,11 +748,12 @@ test_that("Data cubes can be written to a single files", {
                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                method="sf gas",
                                write_fits = T, output_location = paste0(temp_loc, "/ss_magneticum.FITS"),
-                               split_save=F), built_cube_size)
+                               split_save=F, voronoi_bin = T, vorbin_limit = 10), built_cube_size)
 
   expect_true(file.exists(paste0(temp_loc, "/ss_magneticum.FITS")))
-  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == gas_number_of_hdu_snfalse)
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == (gas_number_of_hdu_snfalse+1))
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
+  expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_sfr_loc]]$keyvalues$EXTNAME == "OBS_SFR")
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 10, spatial_res = 0.25, fov=50),
