@@ -374,7 +374,6 @@
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
                                       "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "Metallicity" = gas$Metallicity,
-                                      #"Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" = gas$`ElementAbundance/Oxygen`)
 
@@ -471,7 +470,6 @@
                                       "SmoothingLength" = gas$SmoothingLength*.cm_to_kpc, # Smoothing length in kpc
                                       "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "Metallicity" = gas$Metallicity,
-                                      #"Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" =  gas$`ElementAbundance/Oxygen`)
 
@@ -570,7 +568,6 @@
                                       "ThermalDispersion" = sqrt((gas$Pressure*.gcm1_to_msolkm1)/(gas$Density*.gcm3_to_msolkm3)),
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$Metallicity,
-                                      #"Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" =  gas$`ElementAbundance/Oxygen`)
 
@@ -636,6 +633,8 @@
   if ("PartType0" %in% groups){                             # If gas particles are present in the file
 
     PT0_attr = hdf5r::list.datasets(data[["PartType0"]])    # get list of fields
+
+
     n_gas_prop = length(PT0_attr)                           # how many fields?
     gas = vector("list", n_gas_prop)                        # make a vector
     names(gas) = PT0_attr                                   # assign field names to elements
@@ -693,7 +692,6 @@
                                       "ThermalDispersion" = sqrt((gas$InternalEnergy*.cms_to_kms)*(.adiabatic_index - 1)),
                                       "SmoothingLength" = 2*(((3/(4*pi))*((gas$Mass*.g_to_msol) / (gas$Density*.gcm3_to_msolkpc3)))^(1/3)), # smoothing length based on mass/density in units of kpc
                                       "Metallicity" = gas$Metallicity,
-                                      #"Carbon" = gas$`ElementAbundance/Carbon`,
                                       "Hydrogen" = gas$`ElementAbundance/Hydrogen`,
                                       "Oxygen" = gas$`ElementAbundance/Oxygen`)
 
@@ -790,11 +788,6 @@
     names(particle_list) <- current_names
   }
 
-  if ("SmoothedElementAbundance/Carbon" %in% current_names){
-    current_names[which(current_names == "SmoothedElementAbundance/Carbon")] <- "ElementAbundance/Carbon"
-    names(particle_list) <- current_names
-  }
-
   if ("Velocities" %in% current_names){
     current_names[which(current_names == "Velocities")] <- "Velocity"
     names(particle_list) <- current_names
@@ -832,19 +825,17 @@
 
   if (!is.null(nrow(particle_list$Metallicity))){
     Metallicity = (colSums(particle_list$Metallicity[2:11,]))/(particle_list$Mass)
-    Carbon      = particle_list$Metallicity[2,] / particle_list$Mass
     Hydrogen    = (particle_list$Mass - colSums(particle_list$Metallicity)) / particle_list$Mass
     Oxygen      = particle_list$Metallicity[4,] / particle_list$Mass
 
     particle_list$Metallicity = Metallicity
-    particle_list$`ElementAbundance/Carbon` = Carbon
     particle_list$`ElementAbundance/Oxygen` = Hydrogen
     particle_list$`ElementAbundance/Hydrogen` = Oxygen
 
   }
 
   expected_names_gas = c("Coordinates", "Density", "Mass", "ParticleIDs",
-                         "ElementAbundance/Carbon", "ElementAbundance/Oxygen",
+                         "ElementAbundance/Oxygen",
                          "ElementAbundance/Hydrogen", "Metallicity",
                          "StarFormationRate", "Velocity")
 
