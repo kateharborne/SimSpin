@@ -322,7 +322,7 @@
 
   Npart = head$NumPart_ThisFile
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
-              "Time" = head$Time, "Redshift" = head$Redshift, # relevent simulation data
+              "Time" = head$Time, "Redshift" = head$Redshift, # relevant simulation data
               "Nall" = head$NumPart_Total, "Type"="nbody") # number of particles in the original file
 
   return(list(star_part=star_part, gas_part=gas_part, head=head))
@@ -337,6 +337,14 @@
   if ("PartType0" %in% groups){ # If gas particles are present in the file
 
     PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+
+    expected_names_gas = c("Coordinates", "Density", "Mass", "ParticleIDs",
+                           "ElementAbundance/Oxygen",
+                           "ElementAbundance/Hydrogen", "Metallicity",
+                           "StarFormationRate", "Velocity", "SmoothingLength",
+                           "Temperature", "InternalEnergy")
+    PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
+
     n_gas_prop = length(PT0_attr)
     gas = vector("list", n_gas_prop)
     names(gas) = PT0_attr
@@ -385,6 +393,12 @@
 
   if ("PartType4" %in% groups){
     PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+
+    expected_names_stars = c("Coordinates", "InitialMass", "Mass", "ParticleIDs",
+                             "Metallicity", "StellarFormationTime", "Velocity")
+    PT4_attr = PT4_attr[which(PT4_attr %in% expected_names_stars)] # trim list to only read in necessary data sets
+
+
     n_star_prop = length(PT4_attr)
     stars = vector("list", n_star_prop)
     names(stars) = PT4_attr
@@ -432,6 +446,12 @@
   if ("PartType0" %in% groups){ # If gas particles are present in the file
 
     PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+
+    expected_names_gas = c("Coordinates", "Density", "Mass", "ParticleIDs",
+                           "Metallicity",  "StarFormationRate", "Velocity",
+                           "SmoothingLength", "Temperature", "InternalEnergy")
+    PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
+
     n_gas_prop = length(PT0_attr)
     gas = vector("list", n_gas_prop)
     names(gas) = PT0_attr
@@ -451,7 +471,6 @@
            Either `SmoothingLength`, `Temperature` or `InternalEnergy`. \n
            See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#parttype0 for more info.")
     }
-
 
     one_p_flag = FALSE
     if (is.null(dim(gas$Coordinates))){one_p_flag = TRUE}
@@ -481,6 +500,11 @@
 
   if ("PartType4" %in% groups){
     PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+
+    expected_names_stars = c("Coordinates", "InitialMass", "Mass", "ParticleIDs",
+                             "Metallicity", "StellarFormationTime", "Velocity")
+    PT4_attr = PT4_attr[which(PT4_attr %in% expected_names_stars)] # trim list to only read in necessary data sets
+
     n_star_prop = length(PT4_attr)
     stars = vector("list", n_star_prop)
     names(stars) = PT4_attr
@@ -531,6 +555,14 @@
   if ("PartType0" %in% groups){ # If gas particles are present in the file
 
     PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+
+    expected_names_gas = c("Coordinates", "Density", "Mass", "ParticleIDs",
+                           "ElementAbundance/Oxygen",
+                           "ElementAbundance/Hydrogen", "Metallicity",
+                           "StarFormationRate", "Velocity", "Temperature",
+                           "Pressure")
+    PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
+
     n_gas_prop = length(PT0_attr)
     gas = vector("list", n_gas_prop)
     names(gas) = PT0_attr
@@ -579,6 +611,11 @@
 
   if ("PartType4" %in% groups){
     PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+
+    expected_names_stars = c("Coordinates", "InitialMass", "Mass", "ParticleIDs",
+                             "Metallicity", "StellarFormationTime", "Velocity")
+    PT4_attr = PT4_attr[which(PT4_attr %in% expected_names_stars)] # trim list to only read in necessary data sets
+
     n_star_prop = length(PT4_attr)
     stars = vector("list", n_star_prop)
     names(stars) = PT4_attr
@@ -634,6 +671,11 @@
 
     PT0_attr = hdf5r::list.datasets(data[["PartType0"]])    # get list of fields
 
+    expected_names_gas = c("Coordinates", "Density", "Masses", "ParticleIDs",
+                           "GFM_Metals", "GFM_Metallicity",
+                           "StarFormationRate", "Velocities",
+                           "ElectronAbundance", "InternalEnergy")
+    PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
 
     n_gas_prop = length(PT0_attr)                           # how many fields?
     gas = vector("list", n_gas_prop)                        # make a vector
@@ -704,6 +746,11 @@
   if ("PartType4" %in% groups){
 
     PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
+
+    expected_names_stars = c("Coordinates", "GFM_InitialMass", "Masses", "ParticleIDs",
+                             "GFM_Metallicity", "GFM_StellarFormationTime", "Velocities")
+    PT4_attr = PT4_attr[which(PT4_attr %in% expected_names_stars)] # trim list to only read in necessary data sets
+
     n_star_prop = length(PT4_attr)
     stars = vector("list", n_star_prop)
     names(stars) = PT4_attr
@@ -816,17 +863,21 @@
   if ("GFM_Metals" %in% current_names){
     id_to_remove = which(current_names == "GFM_Metals")
 
-    particle_list$`ElementAbundance/Carbon` = particle_list$GFM_Metals[3,]
     particle_list$`ElementAbundance/Oxygen` = particle_list$GFM_Metals[5,]
     particle_list$`ElementAbundance/Hydrogen` = particle_list$GFM_Metals[1,]
 
     particle_list = particle_list[-id_to_remove]
   }
 
-  if (!is.null(nrow(particle_list$Metallicity))){
-    Metallicity = (colSums(particle_list$Metallicity[2:11,]))/(particle_list$Mass)
-    Hydrogen    = (particle_list$Mass - colSums(particle_list$Metallicity)) / particle_list$Mass
-    Oxygen      = particle_list$Metallicity[4,] / particle_list$Mass
+  if (!is.null(nrow(particle_list$Metallicity)) |
+      length(particle_list$Metallicity)[1] == 11){
+
+    one_p_flag = FALSE
+    if (is.null(dim(particle_list$Coordinates))){one_p_flag = TRUE}
+
+    Metallicity = if(one_p_flag){(sum(particle_list$Metallicity[2:11]))/(particle_list$Mass)}else{(colSums(particle_list$Metallicity[2:11,]))/(particle_list$Mass)}
+    Hydrogen    = if(one_p_flag){(particle_list$Mass - sum(particle_list$Metallicity)) / particle_list$Mass}else{(particle_list$Mass - colSums(particle_list$Metallicity)) / particle_list$Mass}
+    Oxygen      = if(one_p_flag){particle_list$Metallicity[4] / particle_list$Mass}else{particle_list$Metallicity[4,] / particle_list$Mass}
 
     particle_list$Metallicity = Metallicity
     particle_list$`ElementAbundance/Oxygen` = Hydrogen
