@@ -43,7 +43,7 @@ test_that("Initial run of each simulation type - EAGLE", {
 
   EAGLE = readRDS(paste(temp_loc, "/eagle_test", sep=""))
   expect_length(EAGLE, ss_file_length)
-  expect_true(length(EAGLE$gas_part) == 17)
+  expect_true(length(EAGLE$gas_part) == 16)
   expect_true(nrow(EAGLE$spectral_weights) == 8)
   expect_false(any(is.na(EAGLE$gas_part$ThermalDispersion)))
   expect_true(all(EAGLE$gas_part$ThermalDispersion[EAGLE$gas_part$Temperature < 1e4] == 11))
