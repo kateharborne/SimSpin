@@ -24,33 +24,9 @@
     return(output = "gadget_binary")
 
   } else {
-    endian = "little"
-    n = readBin(data, "int", n=1, endian = endian)
-    dims = readBin(data, "int", n=1, endian = endian)
 
-    close(data)
+    return(output = "hdf5")
 
-    if (dims > 3 | dims < 1){
-      # The file is written NOT little endian, switch the format to BIG!
-      endian = "big"
-
-      data = file(f, "rb")
-
-      time = readBin(data, "numeric", n = 1, endian = endian)
-      n = readBin(data, "int", n=1, endian = endian)
-      dims = readBin(data, "int", n=1, endian = endian)
-      close(data)
-
-      if (dims %in% c(1,2,3)){
-        return(output = "tipsy_binary_big")
-      } else {
-        return(output = "hdf5")
-      }
-    } else {
-      if (dims %in% c(1,2,3)){
-        return(output = "tipsy_binary_little")
-      }
-    }
   }
 
 }
@@ -130,116 +106,6 @@
 
 }
 
-
-.read_tipsy = function(f, endian, cores, verbose=F){
-
-  fs = file.info(f)$size
-
-  data = file(f, "rb")
-
-  time = readBin(data, "numeric", n = 1, endian = endian)
-  n = readBin(data, "int", n=1, endian = endian)
-  dims = readBin(data, "int", n=1, endian = endian)
-  ngas = readBin(data, "int", n=1, endian = endian)
-  ndark = readBin(data, "int", n=1, endian = endian)
-  nstar = readBin(data, "int", n=1, endian = endian)
-
-  if (fs == 32 + 48*ngas + 36*ndark + 44*nstar){
-    pad = readBin(data, "int", n = 1, endian = endian)
-  } else if (fs != 28 + 48*ngas + 36*ndark + 44*nstar){
-    stop()
-  }
-
-  # beginning with the gas properties
-  if (ngas > 0){
-    # initialise the gas table
-    if (verbose){cat("There are ", ngas, " gas particles in this file. Building gas_part.")}
-
-    gas_part = readBin(data, "numeric", n = ngas*12, size = 4, endian = endian)
-
-    gas_part = data.table::as.data.table(matrix(gas_part, nrow = ngas, ncol = 12, byrow = T))
-
-    data.table::setnames(gas_part,
-                         old = c("V1", "V2", "V3", "V4", "V5", "V6",
-                                 "V7", "V8", "V9", "V10", "V11", "V12"),
-                         new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Density",
-                                 "Temperature", "SmoothingLength", "Metallicity", "Phi"))
-
-    # Helium mass fraction including correction based on metallicity, from
-    # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
-    hetot = 0.236 + (2.1 * gas_part$Metallicity)
-    # Hydrogen mass fraction including correction based on metallicity, from
-    # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
-    gas_part$Hydrogen = 1.0 - gas_part$Metallicity - hetot
-    gas_part$ID = 1:ngas
-
-    #mean molecular mass, i.e. the mean atomic mass per particle
-    mu = numeric(length = ngas)
-    mu[gas_part$Temperature <= 1e4] = 0.59
-    mu[gas_part$Temperature > 1e4] = 1.3
-
-    #Gas internal energy derived from temperature
-    gas_part$InternalEnergy = gas_part$Temperature / (mu *((5/3) - 1))
-    gas_part$ThermalDispersion = sqrt((gas_part$InternalEnergy)*(.adiabatic_index - 1))
-
-    #star formation rate
-    gas_part$SFR = numeric(ngas) #?
-  }
-
-  if (ndark > 0){
-
-    if (verbose){cat("There are ", ndark, " DM particles in this file. Throwing these away... (sorry)")}
-    dm_part = readBin(data, "numeric", n = ndark*9, size = 4, endian = endian)
-    remove(dm_part)
-
-  }
-
-  if (nstar > 0){
-    # initialise the gas table
-    if (verbose){cat("There are ", nstar, " star particles in this file. Building star_part.")}
-    star_part = readBin(data, "numeric", n = nstar*11, size = 4, endian = endian)
-
-    star_part = data.table::as.data.table(matrix(star_part, nrow = nstar, ncol = 11, byrow = T))
-
-    data.table::setnames(star_part,
-                         old = c("V1", "V2", "V3", "V4", "V5", "V6",
-                                 "V7", "V8", "V9", "V10", "V11"),
-                         new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Metallicity",
-                                 "StellarFormationTime", "SofteningLength", "Phi"))
-
-    star_part$ID = 1:nstar
-    ssp = data.table::data.table("Initial_Mass" = star_part$Mass, # ? need to find the initial stellar mass value
-                                 "Age" = numeric(nstar), # ? StellarFormationTime in odd units, not well converted to age in Gyr
-                                 "Metallicity" = star_part$Metallicity)
-
-  }
-
-  close(data)
-
-  # reading auxilliary files to get the oxygen/carbon/hydrogen
-  if (file.exists(paste0(f,".OxMassFrac"))){
-    oxygen_data = file(paste0(f,".OxMassFrac"), "rb")
-    oxygen = readBin(oxygen_data, "numeric", n = ngas, size = 4, endian = endian)
-    close(oxygen_data)
-    gas_part$Oxygen = oxygen
-    remove(oxygen)
-  }
-
-  if (file.exists(paste0(f,".timeform"))){
-    age_data = file(paste0(f,".timeform"), "rb")
-    stars_formed = readBin(age_data, "numeric", n = ngas, size = 4, endian = endian)
-    close(age_data)
-  }
-
-  head = list("Npart" = c(0, ngas, 0, 0, nstar, 0), # number of gas and stars
-              "Time" = time, "Redshift" = ((1/time)-1), # relevent simulation data
-              "Nall" = (ngas+nstars), "Type"="Tipsy") # number of particles in the original file
-
-  return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
-
-}
-
-
 # Functions for reading in HDF5 files
 .read_hdf5 = function(f, cores=1){
 
@@ -258,29 +124,45 @@
   }
 
   # check for missing header fields
-  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable",
-                       "NumPart_Total")
+  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable")
 
   if (!all(required_headers %in% names(head))){
     stop("Error. Missing a required header field. \n
-         One of `BoxSize`, `Redshift`, `HubbleParam`, `MassTable`, or `NumPart_Total` is missing. \n
+         One of `BoxSize`, `Redshift`, `HubbleParam` or `MassTable` is missing. \n
          See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
   }
 
+  other_headers = c("NumPart_ThisFile", "NumPart_Total")
+  if (!any(other_headers %in% names(head))){
+    stop("Error. Missing a required header field. \n
+         One of `NumPart_ThisFile` or `NumPart_Total` is missing. \n
+         See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
+  }
+
+
   # default (if header if blank) is a gadget file.
-  if(is.null(head$RunLabel)){
+  if(is.null(head$RunLabel) && is.null(head$SimulationName)){
     gadget2 = T
     eagle = F
     magneticum = F
     horizonagn = F
     illustristng = F
-
   } else {
-    gadget2 = F
-    if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "eagle")){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
-    if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "magneticum")){magneticum = T}else{magneticum=F}
-    if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "horizon")){horizonagn = T}else{horizonagn = F}
-    if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "illustristng")){illustristng = T}else{illustristng = F}
+
+    if ("SimulationName" %in% names(head)){
+      gadget2 = F
+      eagle = F
+      magneticum = F
+      horizonagn = F
+      if(stringr::str_detect(stringr::str_to_lower(head$SimulationName), "tng")){illustristng = T}else{illustristng = F}
+    } else {
+      gadget2 = F
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "tng")){illustristng = T}else{illustristng = F}
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "eagle")){eagle = T}else{eagle=F} # determining if EAGLE input (based on number of parameters in Header)
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "magneticum")){magneticum = T}else{magneticum=F}
+      if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "horizon")){horizonagn = T}else{horizonagn = F}
+    }
+
   }
 
   # Read particle data differently depending on the simulation being read in...
@@ -743,6 +625,10 @@
 .illustristng_read_hdf5 = function(data, head, cores){
 
   head$Time = 1/(1+head$Redshift)
+
+  if (!"NumPart_Total" %in% names(head)){
+    head$NumPart_Total = head$NumPart_ThisFile
+  }
 
   groups = hdf5r::list.groups(data)                         # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")]  # Pick out PartTypeX groups
