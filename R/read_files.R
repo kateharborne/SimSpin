@@ -559,8 +559,9 @@
     PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
 
     expected_names_gas = c("Coordinates", "Density", "Mass", "ParticleIDs",
-                           "ElementAbundance/Oxygen",
-                           "ElementAbundance/Hydrogen", "Metallicity",
+                           "ElementAbundance/Oxygen", "SmoothedElementAbundance/Oxygen",
+                           "ElementAbundance/Hydrogen", "SmoothedElementAbundance/Hydrogen",
+                           "Metallicity", "SmoothedMetallicity",
                            "StarFormationRate", "Velocity", "Temperature",
                            "Pressure")
     PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
@@ -615,7 +616,8 @@
     PT4_attr = hdf5r::list.datasets(data[["PartType4"]])
 
     expected_names_stars = c("Coordinates", "InitialMass", "Mass", "ParticleIDs",
-                             "Metallicity", "StellarFormationTime", "Velocity")
+                             "Metallicity", "SmoothedMetallicity",
+                             "StellarFormationTime", "Velocity")
     PT4_attr = PT4_attr[which(PT4_attr %in% expected_names_stars)] # trim list to only read in necessary data sets
 
     n_star_prop = length(PT4_attr)
