@@ -118,8 +118,13 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
              "Please specify an integer value for sph_spawn_n."))
   }
 
-  galaxy_data = tryCatch(expr = {.read_gadget(filename)},
-                         error = function(e){.read_hdf5(filename, cores)})      # run this if first try errors
+  file_type = .get_file_type(filename)
+
+  if (file_type == "hdf5"){
+    galaxy_data = .read_hdf5(filename, cores)
+  } else if (file_type == "gadget_binary") {
+    galaxy_data = .read_gadget(filename)
+  }
 
   header$Type = galaxy_data$head$Type
 
@@ -228,7 +233,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       new_gas_part[, vz := rep(galaxy_data$gas_part$vz, each=sph_spawn_n),]
       new_gas_part[, SmoothingLength := rep(0, galaxy_data$head$NumPart_Total[1]*sph_spawn_n),]
       new_gas_part[, Metallicity := rep(galaxy_data$gas_part$Metallicity, each=sph_spawn_n),]
-      new_gas_part[, Carbon := rep(galaxy_data$gas_part$Carbon, each=sph_spawn_n),]
+      #new_gas_part[, Carbon := rep(galaxy_data$gas_part$Carbon, each=sph_spawn_n),]
       new_gas_part[, Hydrogen := rep(galaxy_data$gas_part$Hydrogen, each=sph_spawn_n),]
       new_gas_part[, Oxygen := rep(galaxy_data$gas_part$Oxygen, each=sph_spawn_n),]
 

@@ -43,7 +43,7 @@ test_that("Initial run of each simulation type - EAGLE", {
 
   EAGLE = readRDS(paste(temp_loc, "/eagle_test", sep=""))
   expect_length(EAGLE, ss_file_length)
-  expect_true(length(EAGLE$gas_part) == 17)
+  expect_true(length(EAGLE$gas_part) == 16)
   expect_true(nrow(EAGLE$spectral_weights) == 8)
   expect_false(any(is.na(EAGLE$gas_part$ThermalDispersion)))
   expect_true(all(EAGLE$gas_part$ThermalDispersion[EAGLE$gas_part$Temperature < 1e4] == 11))
@@ -54,7 +54,7 @@ test_that("Initial run of each simulation type - Magneticum", {
 
   magneticum = readRDS(paste(temp_loc, "/magneticum_test", sep=""))
   expect_length(magneticum, ss_file_length)
-  expect_true(length(magneticum$gas_part) == 17)
+  expect_true(length(magneticum$gas_part) == 16)
   expect_true(nrow(magneticum$spectral_weights) == 8)
   expect_false(any(is.na(magneticum$gas_part$ThermalDispersion)))
   expect_true(all(magneticum$gas_part$ThermalDispersion[magneticum$gas_part$Temperature < 1e4] == 11))
@@ -66,7 +66,7 @@ test_that("Initial run of each simulation type - HorizonAGN", {
 
   HAGN = readRDS(paste(temp_loc, "/horizon_test", sep=""))
   expect_length(HAGN, ss_file_length)
-  expect_true(length(HAGN$gas_part) == 17)
+  expect_true(length(HAGN$gas_part) == 16)
   expect_true(nrow(HAGN$spectral_weights) == 8)
   expect_false(any(is.na(HAGN$gas_part$ThermalDispersion)))
   expect_true(all(HAGN$gas_part$ThermalDispersion[HAGN$gas_part$Temperature < 1e4] == 11))
@@ -78,7 +78,7 @@ test_that("Initial run of each simulation type - IllustrisTNG", {
 
   TNG = readRDS(paste(temp_loc, "/illustris_test", sep=""))
   expect_length(TNG, ss_file_length)
-  expect_true(length(TNG$gas_part) == 17)
+  expect_true(length(TNG$gas_part) == 16)
   expect_true(nrow(TNG$spectral_weights) == 8)
   expect_false(any(is.na(TNG$gas_part$ThermalDispersion)))
   expect_true(all(TNG$gas_part$ThermalDispersion[TNG$gas_part$Temperature < 1e4] == 11))
@@ -469,10 +469,12 @@ test_that("A file with wrongly named attributes will error.",{
   # Testing also that the code errors if the file does not contain the correct attributes.
   file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), overwrite = T)
   modified_illustris = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), mode = "r+") # read in the horizonagn file and rename the RubLabel
-  modified_illustris[["PartType0/MisnamedDataset"]] <- numeric(length=100) # rename an the attribute name
-  hdf5r::h5attr(modified_illustris[["PartType0/MisnamedDataset"]], "a_misnamed_attribute") <- 7620
-  hdf5r::h5attr(modified_illustris[["PartType0/MisnamedDataset"]], "h_scaling") <- 0
-  hdf5r::h5attr(modified_illustris[["PartType0/MisnamedDataset"]], "to_cgs") <- 0
+  modified_illustris.part0 <- modified_illustris[["PartType0"]]
+  modified_illustris.part0$link_delete("Masses")
+  modified_illustris[["PartType0/Masses"]] <- numeric(length=100) # rename an the attribute name
+  hdf5r::h5attr(modified_illustris[["PartType0/Masses"]], "a_misnamed_attribute") <- 7620
+  hdf5r::h5attr(modified_illustris[["PartType0/Masses"]], "h_scaling") <- 0
+  hdf5r::h5attr(modified_illustris[["PartType0/Masses"]], "to_cgs") <- 0
   hdf5r::h5close(modified_illustris) #close
 
   expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_IllustrisTNG_copy.hdf5"), write_to_file = F))
@@ -548,15 +550,15 @@ test_that("A hydro sim will error without neccesary header field.",{
 
 test_that("An HDF5 file for a hydro sim will give warning without neccesary RunLabel header field.",{
   # Testing also that the code errors if the file does not contain the correct attributes.
-  file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), overwrite = T)
-  modified_tng = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+  file.copy(from = ss_eagle, to = paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"), overwrite = T)
+  modified_tng = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
   modified_tng.head <- modified_tng[["Header"]]
   modified_tng.head$attr_delete("RunLabel")
   hdf5r::h5close(modified_tng) #close
 
-  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), write_to_file = F))
+  expect_error(make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"), write_to_file = F))
 
-  unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
+  unlink(paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"))
 })
 
 test_that("A galaxy with a star with age of 0 will NOT raise an error.", {
