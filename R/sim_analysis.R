@@ -67,11 +67,11 @@
 #'             \item{CircularVelocity}{Circular velocity (km/s) due to mass contained within radius of this bin}
 #'             \item{RotationalVelocity}{Mean velocity along circular orbits (km/s) in radial bin}
 #'             \item{RotationalDispersion}{Standard deviation of velocities in circular orbits (km/s) in radial bin}
-#'             \item{Circularity}{The circularity parameter j[z]/j[circ](E), as defined in Abadi et al. (2003).}
+#'             \item{Circularity}{The circularity parameter j[z]/j[circ] = j[z]/rV[circ], as defined in Scannapieco et al (2008).}
 #'             \item{KappaRot}{The fraction of kinetic energy of the system contained within a rotational component, as defined by Sales et al. (2010).}
 #'             \item{KappaCoRot}{The fraction of kinetic energy of the system conatined within a co-rotating component, as defined by Correa et al. (2017).}
 #'             \item{SpinParameter_Wilkinson}{The stellar spin parameter as defined in Wilkinson et al (2023).}
-#'             \item{DisktoTotal}{The mass fraction of orbits with circularity > 0.7, as defined by Sales et al. (2010).}
+#'             \item{DisktoTotal}{The mass fraction of orbits with circularity > 0.7, as defined in Grand et al. (2017).}
 #'             \item{SpheroidtoTotal}{Twice the mass fraction of counter-rotating orbits, as defined in Wilkinson et al. (2023).}
 #'             \item{NumberOfParticles}{Number of particles contained within radial bin}}
 
