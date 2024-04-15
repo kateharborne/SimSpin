@@ -256,22 +256,22 @@
       param = read.delim(list.files(dirname(f), full.names = T)[stringr::str_detect(list.files(dirname(f)), ".param")],
                          blank.lines.skip = T, sep = "=", comment.char = "#")
 
-      max_runtime = as.numeric(param[which(stringr::str_detect(param$achInFile, "nSteps")), 2])
-      min_timestep = as.numeric(param[which(stringr::str_detect(param$achInFile, "dDelta")), 2])
+      min_timestep = as.numeric(param[which(stringr::str_detect(param$achInFile, "dDelta")), 2][1])
       remove(param)
 
     } else {
-      min_timestep = 2.12113e-06
-      max_runtime  = 1000
-      warning("Unable to find parameter file. Assuming minimum time step = 2.12113e-06 and maximum run time = 1000 Myr. \n
+
+      min_timestep  = 2.12e-6
+      warning("Unable to find parameter file. Assuming time step = 2.12e-06. \n
               Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input.")
     }
 
+    stars_formed = stars_formed*1e6 # formation time of stars in yrs
 
-    stars_formed = stars_formed*1e6 # age in yrs
+    age_of_sim = (time/min_timestep)*1e6 # age of simulation in years
 
-    initial_stars = which(stars_formed<(min_timestep*1e6))
-    stars_formed[initial_stars] = (max_runtime*1e6) # set age of initial stars as age of the simulation
+    stars_age = age_of_sim-stars_formed
+    remove(stars_formed)
   }
 
   if (file.exists(paste0(f,".massform"))){
