@@ -497,28 +497,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                  (Template$Zspec[[SW[1]]][SW[5],] * weights$lolo))
 
     return(part_spec)
-  # }
-
-  # if (length(spectral_weights) == 1){
-  #   spectra = data.table::data.table(s(spectral_weights))
-  #   return(spectra)
-  # } else {
-  #
-  #   if (cores > 1) {
-  #     doParallel::registerDoParallel(cores = cores)
-  #     i = integer()
-  #     part_spec = foreach::foreach(i = 1:length(spectral_weights), .packages = c("SimSpin", "foreach")) %dopar% {
-  #       s(spectral_weights[[i]])
-  #     }
-  #     closeAllConnections()
-  #     output = data.table::as.data.table(part_spec)
-  #   } else {
-  #     output = mapply(s, spectral_weights)
-  #     output = data.table::as.data.table(output)
-  #   }
-  #   return(output)
-  #
-  # }
 }
 
 .circular_ap=function(sbin){
