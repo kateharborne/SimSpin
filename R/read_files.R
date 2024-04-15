@@ -24,9 +24,33 @@
     return(output = "gadget_binary")
 
   } else {
+    endian = "little"
+    n = readBin(data, "int", n=1, endian = endian)
+    dims = readBin(data, "int", n=1, endian = endian)
 
-    return(output = "hdf5")
+    close(data)
 
+    if (dims > 3 | dims < 1){
+      # The file is written NOT little endian, switch the format to BIG!
+      endian = "big"
+
+      data = file(f, "rb")
+
+      time = readBin(data, "numeric", n = 1, endian = endian)
+      n = readBin(data, "int", n=1, endian = endian)
+      dims = readBin(data, "int", n=1, endian = endian)
+      close(data)
+
+      if (dims %in% c(1,2,3)){
+        return(output = "tipsy_binary_big")
+      } else {
+        return(output = "hdf5")
+      }
+    } else {
+      if (dims %in% c(1,2,3)){
+        return(output = "tipsy_binary_little")
+      }
+    }
   }
 
 }
@@ -105,6 +129,166 @@
   return(list(star_part = star_part, gas_part = gas_part, head = head))
 
 }
+
+# Function for reading tipsy binary files
+.read_tipsy = function(f, endian, cores, verbose=F){
+
+  fs = file.info(f)$size
+
+  data = file(f, "rb")
+
+  time = readBin(data, "numeric", n = 1, endian = endian)
+  n = readBin(data, "int", n=1, endian = endian)
+  dims = readBin(data, "int", n=1, endian = endian)
+  ngas = readBin(data, "int", n=1, endian = endian)
+  ndark = readBin(data, "int", n=1, endian = endian)
+  nstar = readBin(data, "int", n=1, endian = endian)
+
+  if (fs == 32 + 48*ngas + 36*ndark + 44*nstar){
+    pad = readBin(data, "int", n = 1, endian = endian)
+  } else if (fs != 28 + 48*ngas + 36*ndark + 44*nstar){
+    stop()
+  }
+
+  # beginning with the gas properties
+  if (ngas > 0){
+    # initialise the gas table
+    if (verbose){cat("There are ", ngas, " gas particles in this file. Building gas_part.")}
+
+    gas_part = readBin(data, "numeric", n = ngas*12, size = 4, endian = endian)
+
+    gas_part = data.table::as.data.table(matrix(gas_part, nrow = ngas, ncol = 12, byrow = T))
+
+    data.table::setnames(gas_part,
+                         old = c("V1", "V2", "V3", "V4", "V5", "V6",
+                                 "V7", "V8", "V9", "V10", "V11", "V12"),
+                         new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Density",
+                                 "Temperature", "SmoothingLength", "Metallicity", "Phi"))
+
+    # Helium mass fraction including correction based on metallicity, from
+    # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
+    hetot = 0.236 + (2.1 * gas_part$Metallicity)
+    # Hydrogen mass fraction including correction based on metallicity, from
+    # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
+    gas_part$Hydrogen = 1.0 - gas_part$Metallicity - hetot
+    gas_part$ID = 1:ngas
+
+    #mean molecular mass, i.e. the mean atomic mass per particle
+    mu = numeric(length = ngas)
+    mu[gas_part$Temperature <= 1e4] = 0.59
+    mu[gas_part$Temperature > 1e4] = 1.3
+
+    #Gas internal energy derived from temperature
+    gas_part$InternalEnergy = gas_part$Temperature / (mu *((5/3) - 1))
+    gas_part$ThermalDispersion = sqrt((gas_part$InternalEnergy)*(.adiabatic_index - 1))
+
+    #star formation rate, computed based on the SFE and gas mass
+
+    if (any(stringr::str_detect(list.files(dirname(f)), ".param"))){
+
+      param = read.delim(list.files(dirname(f), full.names = T)[stringr::str_detect(list.files(dirname(f)), ".param")],
+                         blank.lines.skip = T, sep = "=", comment.char = "#")
+
+      sfe = as.numeric(param[which(stringr::str_detect(param$achInFile, "dCStar")), 2])
+      remove(param)
+
+    } else {
+      sfe = 0.1
+      warning("Unable to find parameter file. Assuming Star Formation Efficiency = 0.1 SFR/Msol_gas. \n
+              Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input.")
+    }
+
+    gas_part$SFR = gas_part$Mass * sfe
+
+  }
+
+  if (ndark > 0){
+
+    if (verbose){cat("There are ", ndark, " DM particles in this file. Throwing these away... (sorry)")}
+    dm_part = readBin(data, "numeric", n = ndark*9, size = 4, endian = endian)
+    remove(dm_part)
+
+  }
+
+  if (nstar > 0){
+    # initialise the gas table
+    if (verbose){cat("There are ", nstar, " star particles in this file. Building star_part.")}
+    star_part = readBin(data, "numeric", n = nstar*11, size = 4, endian = endian)
+
+    star_part = data.table::as.data.table(matrix(star_part, nrow = nstar, ncol = 11, byrow = T))
+
+    data.table::setnames(star_part,
+                         old = c("V1", "V2", "V3", "V4", "V5", "V6",
+                                 "V7", "V8", "V9", "V10", "V11"),
+                         new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Metallicity",
+                                 "StellarFormationTime", "SofteningLength", "Phi"))
+
+    star_part$ID = 1:nstar
+
+    ssp = data.table::data.table("Initial_Mass" = numeric(nstar), # ? need to find the initial stellar mass value
+                                 "Age" = numeric(nstar), # ? StellarFormationTime in odd units, not well converted to age in Gyr
+                                 "Metallicity" = star_part$Metallicity)
+
+  }
+
+  close(data)
+
+  # reading auxilliary files to get the oxygen/carbon/hydrogen
+  if (file.exists(paste0(f,".OxMassFrac"))){
+    oxygen_data = file(paste0(f,".OxMassFrac"), "rb")
+    oxygen = readBin(oxygen_data, "numeric", n = ngas, size = 4, endian = endian)
+    close(oxygen_data)
+    gas_part$Oxygen = oxygen
+    remove(oxygen)
+  }
+
+  if (file.exists(paste0(f,".timeform"))){
+    age_data = file(paste0(f,".timeform"), "rb")
+    stars_formed = readBin(age_data, "numeric", n = nstar, size = 4, endian = endian)
+    close(age_data)
+
+    if (any(stringr::str_detect(list.files(dirname(f)), ".param"))){
+
+      param = read.delim(list.files(dirname(f), full.names = T)[stringr::str_detect(list.files(dirname(f)), ".param")],
+                         blank.lines.skip = T, sep = "=", comment.char = "#")
+
+      max_runtime = as.numeric(param[which(stringr::str_detect(param$achInFile, "nSteps")), 2])
+      min_timestep = as.numeric(param[which(stringr::str_detect(param$achInFile, "dDelta")), 2])
+      remove(param)
+
+    } else {
+      min_timestep = 2.12113e-06
+      max_runtime  = 1000
+      warning("Unable to find parameter file. Assuming minimum time step = 2.12113e-06 and maximum run time = 1000 Myr. \n
+              Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input.")
+    }
+
+
+    stars_formed = stars_formed*1e6 # age in yrs
+
+    initial_stars = which(stars_formed<(min_timestep*1e6))
+    stars_formed[initial_stars] = (max_runtime*1e6) # set age of initial stars as age of the simulation
+  }
+
+  if (file.exists(paste0(f,".massform"))){
+    mass_data = file(paste0(f,".massform"), "rb")
+    stars_mass_formed = readBin(mass_data, "numeric", n = nstar, size = 4, endian = endian)
+    close(mass_data)
+
+    stars_mass_formed = stars_mass_formed*1e10 # initial mass in Msol
+  }
+
+  ssp$Age = stars_formed
+  ssp$Initial_Mass = stars_mass_formed
+
+  head = list("Npart" = c(0, ngas, 0, 0, nstar, 0), # number of gas and stars
+              "Time" = time, "Redshift" = ((1/time)-1), # relevent simulation data
+              "Nall" = (ngas+nstars), "Type"="Tipsy") # number of particles in the original file
+
+  return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
+
+}
+
 
 # Functions for reading in HDF5 files
 .read_hdf5 = function(f, cores=1){
