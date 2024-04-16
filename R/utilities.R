@@ -376,6 +376,11 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 } # input a radial position, r
 # returns the corresponding kernel weight at that radius
 
+.wendland_c4 = function(r){ # SPH smoothing kernel commonly used in Gasoline
+  return((495/(32*pi))*((1-r)^6)*(((35/3)*r^2) + (6*r) + 1))
+} # input a radial position, r
+# returns the corresponding kernel weight at that radius
+
 .wendland_c6 = function(r){ # SPH smoothing kernel used in Magneticum
   return((1365/(64*pi))*((1-r)^8)*(1 + (8*r) + (25*r^2) + (32*r^3)))
 } # input a radial position, r
@@ -408,6 +413,11 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   sph = sphereplot::car2sph(xyz_norm) # convert to spherical coordinates
   if (kernel == "WC2"){
     weights = .wendland_c2(sph[,3])
+    sph_kernel = data.frame("long" = sph[,1], "lat" = sph[,2],
+                            "r/h" = sph[,3], "weight" = weights/sum(weights))
+  }
+  if (kernel == "WC4"){
+    weights = .wendland_c4(sph[,3])
     sph_kernel = data.frame("long" = sph[,1], "lat" = sph[,2],
                             "r/h" = sph[,3], "weight" = weights/sum(weights))
   }
