@@ -131,7 +131,7 @@
 }
 
 # Function for reading tipsy binary files
-.read_tipsy = function(f, endian, cores, verbose=F){
+.read_tipsy = function(f, endian, verbose=F){
 
   fs = file.info(f)$size
 
