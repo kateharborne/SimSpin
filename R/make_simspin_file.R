@@ -125,9 +125,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   } else if (file_type == "gadget_binary") {
     galaxy_data = .read_gadget(filename)
   } else if (file_type == "tipsy_binary_big") {
-    galaxy_data = .read_tipsy(filename, endian = "big", cores, verbose)
+    galaxy_data = .read_tipsy(filename, endian = "big", cores, verbose=F)
   } else if (file_type == "tipsy_binary_little"){
-    galaxy_data = .read_tipsy(filename, endian = "little", cores, verbose)
+    galaxy_data = .read_tipsy(filename, endian = "little", cores, verbose=F)
   }
 
   header$Type = galaxy_data$head$Type
@@ -222,7 +222,11 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   } else {sed = NULL} # if only gas in the file
 
-  if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" | galaxy_data$head$Type == "Horizon-AGN" | galaxy_data$head$Type == "Illustris-TNG"){
+  if (galaxy_data$head$Type == "EAGLE" |
+      galaxy_data$head$Type == "Magneticum" |
+      galaxy_data$head$Type == "Horizon-AGN" |
+      galaxy_data$head$Type == "Illustris-TNG" |
+      galaxy_data$head$Type == "Tipsy"){
     if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles because we are working with SPH models
 
       gas_part_names = names(galaxy_data$gas_part)
@@ -244,6 +248,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       kernel = character(1) # choosing the kernel relevant for the
       if (galaxy_data$head$Type == "EAGLE"){
         kernel = "WC2"
+      } else if (galaxy_data$head$Type == "Tipsy"){
+        kernel = "WC4"
       } else if (galaxy_data$head$Type == "Magneticum"){
         kernel = "WC6"
       } else if (galaxy_data$head$Type == "HorizonAGN" | galaxy_data$head$Type == "Illustris-TNG"){
