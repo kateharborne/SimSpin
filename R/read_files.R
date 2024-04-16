@@ -147,6 +147,7 @@
   if (fs == 32 + 48*ngas + 36*ndark + 44*nstar){
     pad = readBin(data, "int", n = 1, endian = endian)
   } else if (fs != 28 + 48*ngas + 36*ndark + 44*nstar){
+    close(data)
     stop()
   }
 
@@ -194,8 +195,7 @@
 
     } else {
       sfe = 0.1
-      warning("Unable to find parameter file. Assuming Star Formation Efficiency = 0.1 SFR/Msol_gas. \n
-              Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input.")
+      warning("Unable to find parameter file. Assuming Star Formation Efficiency = 0.1 SFR/Msol_gas. \n Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input. \n")
     }
 
     gas_part$SFR = gas_part$Mass * sfe
@@ -244,29 +244,11 @@
 
   if (file.exists(paste0(f,".timeform"))){
     age_data = file(paste0(f,".timeform"), "rb")
-    stars_formed = readBin(age_data, "numeric", n = nstar, size = 4, endian = endian)
+    stars_formed = readBin(age_data, "numeric", n = nstar, size = 4, endian = endian) # time since the start of the simulation, given in Myr
     close(age_data)
 
-    if (any(stringr::str_detect(list.files(dirname(f)), ".param"))){
-
-      param = read.delim(list.files(dirname(f), full.names = T)[stringr::str_detect(list.files(dirname(f)), ".param")],
-                         blank.lines.skip = T, sep = "=", comment.char = "#")
-
-      min_timestep = as.numeric(param[which(stringr::str_detect(param$achInFile, "dDelta")), 2][1])
-      remove(param)
-
-    } else {
-
-      min_timestep  = 2.12e-6
-      warning("Unable to find parameter file. Assuming time step = 2.12e-06. \n
-              Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input.")
-    }
-
-    stars_formed = stars_formed*1e6 # formation time of stars in yrs
-
-    age_of_sim = (time/min_timestep)*1e6 # age of simulation in years
-
-    stars_age = age_of_sim-stars_formed
+    stars_formed = stars_formed*1e-3 # formation time of stars in Gyrs
+    stars_age = (9.427098) - stars_formed
     remove(stars_formed)
   }
 
@@ -283,7 +265,7 @@
 
   head = list("Npart" = c(0, ngas, 0, 0, nstar, 0), # number of gas and stars
               "Time" = time, "Redshift" = ((1/time)-1), # relevent simulation data
-              "Nall" = (ngas+nstars), "Type"="Tipsy") # number of particles in the original file
+              "Nall" = (ngas+nstar), "Type"="Tipsy") # number of particles in the original file
 
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
