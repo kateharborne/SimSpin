@@ -22,7 +22,7 @@ In this vignette, we will take you through the process of constructing such a da
   1. Setup the observation by defining your `telescope` and `observing_strategy`.
   1. Build your data cube using the `build_datacube`.
 
-From this spectral data cube, observable properties can be measured using standard observational pipelines, such as pPXF. You can see another long-form example [here](http://rpubs.com/kateharborne/713800) demonstrating how the kinematics can be fit using the spectral data cube. 
+From this spectral data cube, observable properties can be measured using standard observational pipelines, such as pPXF. You can see another long-form example [here](https://kateharborne.github.io/SimSpin/examples/fitting_spectra_with_pPXF.html) demonstrating how the kinematics can be fit using the spectral data cube. 
 
 ```{r setup}
 library(SimSpin)
