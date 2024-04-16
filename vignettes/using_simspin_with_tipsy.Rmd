@@ -1,0 +1,79 @@
+---
+title: "Using SimSpin v2.8.4a to process Tipsy format outputs"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using SimSpin v2.8.4a: Tipsy files}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The purpose of this vignette is to allow a user to explore the range of possible outputs that can be produced by SimSpin for a tipsy formatted input file from the Gasoline code. Because the Gasoline code is sparsely documented, we provide this branch of the code (v2.8.4a) as a seperate branch `dev-tipsy` that will not be merged with `main`.
+
+In the example below, you will need to enter the file location of your own tipsy Gasoline output galaxy such that this can be run through the code. The rest of the functions *should* then run without modification. Set the location of your simulation input file below:
+
+```{r}
+f = "~/Downloads/Tipsy_out/GLX.01100"#"PATH/TO/YOUR/OUTPUT"
+```
+
+The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument. 
+
+In this vignette, we will take you through the process of constructing such a data cube from an input tipsy file. This is a simple process comprised of three steps:
+
+  1. Read in your particle data and produce the relevant spectra using the `make_simspin_file` function.
+  1. Setup the observation by defining your `telescope` and `observing_strategy`.
+  1. Build your data cube using the `build_datacube`.
+
+From this spectral data cube, observable properties can be measured using standard observational pipelines, such as pPXF. You can see another long-form example [here](https://kateharborne.github.io/SimSpin/examples/fitting_spectra_with_pPXF.html) demonstrating how the kinematics can be fit using the spectral data cube. 
+
+```{r setup}
+library(SimSpin)
+```
+
+
+--------------------------------------------------------------------------------
+
+# Step 1: Importing the particle files
+
+For Gasoline outputs, you should recieve a directory that contains the output simulation in one named binary file in tipsy format, along with several additional extension files (e.g. `*.timeform`, `*.iord`, `*.massform`, etc.). If you place the parameter file used to build the simulation in the same directory, this information will also be used to format the SimSpin object, else expected defaults for required parameters will be substituted and the user will be warned that this is the case. 
+
+For example:
+```{r}
+tipsy_output = list.files(dirname(f), full.names = T)
+
+if (any(stringr::str_detect(tipsy_output, ".param"))){
+  
+  print(c("There is a parameter file included in this TIPSY BINARY directory.",
+        "Let's make a copy of this directory in a temporary space and remove this to demonstrate the warnings issued by SimSpin in this case.")
+  )
+  
+  tipsy_output_new = tipsy_output[-which(stringr::str_detect(tipsy_output, ".param"))] # make a list of the files to copy, excluding the param file
+  
+  tipsy_dir_without_param = tempdir(check = T) # make a temporary directory to copy the files to
+  
+  for (each in 1:length(tipsy_output_new)){file.copy(from=tipsy_output_new[each], to=tipsy_dir_without_param, overwrite=T, recursive=T, copy.mode=T)} # copy each file
+
+  f_wo_param = paste0(tipsy_dir_without_param, "/", basename(f)) # Tipsy binary in directory without a parameter file
+  
+  ### Making a SimSpin file using this input tipsy file ------------------------
+  
+  SimSpin::make_simspin_file(filename = f_wo_param,
+                             template = "BC03lr",
+                             write_to_file = T,
+                             output = paste0(tipsy_dir_without_param, "/SimSpin_", basename(f), ".Rdata"))
+  # We expect there will be warnings issued by this function, as we do not include the parameter file for which certain conversion factors are defined. 
+  # SimSpin will issue warnings to let you know the assumed parameters. 
+  
+  
+  
+  unlink(tipsy_dir_without_param, recursive = T, force = T)
+}
+
+```
+
