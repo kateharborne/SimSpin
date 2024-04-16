@@ -125,9 +125,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   } else if (file_type == "gadget_binary") {
     galaxy_data = .read_gadget(filename)
   } else if (file_type == "tipsy_binary_big") {
-    galaxy_data = .read_tipsy(filename, endian = "big", cores, verbose=F)
+    galaxy_data = .read_tipsy(filename, endian = "big", verbose=F)
   } else if (file_type == "tipsy_binary_little"){
-    galaxy_data = .read_tipsy(filename, endian = "little", cores, verbose=F)
+    galaxy_data = .read_tipsy(filename, endian = "little", verbose=F)
   }
 
   header$Type = galaxy_data$head$Type
