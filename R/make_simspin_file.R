@@ -143,6 +143,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       header$Alignment = "Specified"
     }
     galaxy_data = .align_galaxy(galaxy_data, half_mass) # align 3D shape of galaxy
+    gc()
   } else {
     header$Alignment = "None"
     if (!is.na(half_mass[1])){
@@ -217,6 +218,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       sed = .spectral_weights(Metallicity = bulge_Z,
                               Age = bulge_age,
                               Template = temp, cores = cores)
+
+      gc()
 
     }
 
