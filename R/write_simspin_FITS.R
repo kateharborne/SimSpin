@@ -803,7 +803,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
         image_keyvalues$EXTNAME = extnames[i]
 
         # Write each subsequent image to the next HDU
-        if (i < 7){ # write observed mass, velocity and dispersion images to the file
+        if (i < 8){ # write observed mass, velocity and dispersion images to the file
           Rfits::Rfits_write_image(data = simspin_datacube$observed_images[[which(names(simspin_datacube$observed_images) == image_names[i])]],
                                    filename = cube_file_name, ext=extnum[i],
                                    keyvalues = image_keyvalues, keycomments = image_keycomments,
