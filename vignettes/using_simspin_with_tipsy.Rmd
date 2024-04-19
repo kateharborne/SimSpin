@@ -85,8 +85,8 @@ To smooth the gas distribution in an SPH model, we would set the input parameter
 First, initialise a telescope and observing strategy:
 
 ```{r}
-MUSE = SimSpin::telescope(type="MUSE", fov = 10)
-strategy = SimSpin::observing_strategy(dist_z=0.05, inc_deg=70, blur=T, fwhm=0.6)
+MUSE = SimSpin::telescope(type="MUSE", fov = 5)
+strategy = SimSpin::observing_strategy(dist_z = 0.05, inc_deg=70, blur=F)
 ```
 
 Further examples of supported instruments, or how to define your own, can be found online: https://kateharborne.github.io/SimSpin/basic_usage/
