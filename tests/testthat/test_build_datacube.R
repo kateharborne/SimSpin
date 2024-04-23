@@ -721,6 +721,8 @@ test_that("Data cubes can be written to a single files", {
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS"))) == velocity_number_of_hdu_snfalse+1)
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))[velocity_raw_mass_loc] == "RAW_MASS")
   expect_true(is.na(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS")))[(velocity_variance_loc+1)] == "STAT"))
+  expect_false(all(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS"))[["OBS_MASS"]]$imDat ==
+                     Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS"))[["RAW_MASS"]]$imDat))
 
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="MUSE", fov = 10, signal_to_noise = NA),
@@ -754,6 +756,8 @@ test_that("Data cubes can be written to a single files", {
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))) == (gas_number_of_hdu_snfalse+1))
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[[gas_obs_sfr_loc]]$keyvalues$EXTNAME == "OBS_SFR")
+  expect_false(all(Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[["OBS_SFR"]]$imDat ==
+                     Rfits::Rfits_read(paste0(temp_loc, "/ss_magneticum.FITS"))[["RAW_SFR"]]$imDat))
 
   expect_length(build_datacube(simspin_file = ss_hdf5,
                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 10, spatial_res = 0.25, fov=50),

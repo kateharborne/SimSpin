@@ -1,6 +1,6 @@
-# SimSpin v2.8.4 News
+# SimSpin v2.8.5 News
 
-### Last edit: 26/03/2024
+### Last edit: 23/04/2024
 
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
@@ -17,7 +17,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 26/03/24 | *Bug fix.* Updating the read in functions for cosmological models input to prevent the code falling over when attributes are not provided for Datasets that are unnecesary for SimSpin to function. This means HDF5 files extracted directly from the TNG database for galaxy cutouts will now produce outputs successfully, fixing Issue #95. | 2.8.4 | | Kate Harborne |
+| 23/04/24 | *Bug fix.* Fixing a bug in `write_simspin_FITS.R` where the observed SFR maps were not being written to the FITS file as an index was incorrect - now fixed and checks written to ensure that the `OBS_SFR` and `RAW_SFR` map extensions are not identical. | 2.8.5 | | Kate Harborne |
+| 26/03/24 | *Bug fix.* Updating the read in functions for cosmological models input to prevent the code falling over when attributes are not provided for Datasets that are unnecesary for SimSpin to function. This means HDF5 files extracted directly from the TNG database for galaxy cutouts will now produce outputs successfully, fixing Issue #95. | 2.8.4 | cdb17c1a2aaa1f2b8ea973eaad44fb22a625663b | Kate Harborne |
 | 13/03/24 | Adding observation-ally mapped mass and SFR images to the output `$observed_images` - the raw images are not blurred with the PSF, but for comparison with other observed properties, this PSF convolution is necessary. Now mass maps are output on all `method="velocity"` cubes as default and SFR maps on all `method="gas"` or `"sf gas"`.  | 2.8.3 | 2e878f77bd7f3415c02591678c1694be1b990b7d | Kate Harborne |
 | 29/02/24 | *Bug fix.* Updating `make_simspin_file` to account for the `Time` at which the input simulation was extracted (for proper assignment of stellar ages relative to the snapshot, not z=0). Fixing issue #98.| 2.8.2 | 0469ff454756e7b6195bf927b7c867fd02f20743 | Kate Harborne |
 | 10/01/24 | Also updating treatment for `mass_flag` = TRUE. No longer will the `observed_images` outputs change for the flag, the flux map will always be included. However, the kinematic maps observed will be weighted differently (by mass instead of the flux), which is now recorded in the `observation` log and output to FITS with a new header unit denoting mass rather than flux weighting. | 2.8.1 | 352c5601b04767e10d2598358b164f1b203a8d54 | Kate Harborne |
