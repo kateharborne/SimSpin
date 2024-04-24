@@ -114,6 +114,13 @@ voronoi = function(part_in_spaxel, obs, particle_limit, roundness_limit = 0.3, u
       each = each + 1
     }
 
+    if(all(is.na(vorbin_spaxels$bin_number))){
+      if(verbose){
+        print(paste("Pixels have been binned, but unable to reach the requested limit. \n Maximum particles-per-pixel possible with given constraints is", vorbin_spaxels$N[1]))
+      }
+
+    }
+
   }
 
   # iterate through pixels unable to be binned and add them to the nearest bin
@@ -276,15 +283,15 @@ voronoi = function(part_in_spaxel, obs, particle_limit, roundness_limit = 0.3, u
     vorbin_spaxel$joined_ids[index_to_bin][[1]] =
       c(vorbin_spaxel$joined_ids[index_to_bin][[1]], vorbin_spaxel$joined_ids[id_join][[1]])
 
-    # update the new number of particles per bin
-    vorbin_spaxel$N[index_to_bin] = sum(vorbin_spaxel$N[index_to_bin], vorbin_spaxel$N[id_join])
-
-    xbin_cen = median(c(vorbin_spaxel$xbin[index_to_bin], vorbin_spaxel$xbin[id_join]))
-    ybin_cen = median(c(vorbin_spaxel$ybin[index_to_bin], vorbin_spaxel$ybin[id_join]))
+    xbin_cen = .meanwt(x=c(vorbin_spaxel$xbin[index_to_bin], vorbin_spaxel$xbin[id_join]), wt = c(vorbin_spaxel$N[index_to_bin], vorbin_spaxel$N[id_join])) #median(c(vorbin_spaxel$xbin[index_to_bin], vorbin_spaxel$xbin[id_join]))
+    ybin_cen = .meanwt(x=c(vorbin_spaxel$ybin[index_to_bin], vorbin_spaxel$ybin[id_join]), wt = c(vorbin_spaxel$N[index_to_bin], vorbin_spaxel$N[id_join])) #median(c(vorbin_spaxel$ybin[index_to_bin], vorbin_spaxel$ybin[id_join]))
 
     # updating to the centre of the new bin
     vorbin_spaxel$xbin[index_to_bin] = xbin_cen
     vorbin_spaxel$ybin[index_to_bin] = ybin_cen
+
+    # update the new number of particles per bin
+    vorbin_spaxel$N[index_to_bin] = sum(vorbin_spaxel$N[index_to_bin], vorbin_spaxel$N[id_join])
 
     # updating the area of the bin
     new_area = vorbin_spaxel$area[index_to_bin] + vorbin_spaxel$area[id_join]
