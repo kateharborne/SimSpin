@@ -1619,6 +1619,12 @@ test_that("Voronoi bin maps are produced and saved to the raw_images output", {
   expect_true("voronoi_bins" %in% names(vorbin_velocity$raw_images))
   expect_length(vorbin_velocity$raw_images, (velocity_raw_images_size + 1))
 
+  expect_error(build_datacube(simspin_file = ss_eagle,
+                              telescope = telescope(type = "SAMI"),
+                              observing_strategy = observing_strategy(dist_z = 0.03),
+                              method = "velocity", verbose = F,
+                              voronoi_bin = T, vorbin_limit = 200))
+
   vorbin_velocity_mf = build_datacube(simspin_file = ss_eagle,
                                       telescope = telescope(type = "SAMI"),
                                       observing_strategy = observing_strategy(dist_z = 0.03),
