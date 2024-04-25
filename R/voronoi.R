@@ -114,13 +114,6 @@ voronoi = function(part_in_spaxel, obs, particle_limit, roundness_limit = 0.3, u
       each = each + 1
     }
 
-    if(all(is.na(vorbin_spaxels$bin_number))){
-      if(verbose){
-        print(paste("Pixels have been binned, but unable to reach the requested limit. \n Maximum particles-per-pixel possible with given constraints is", vorbin_spaxels$N[1]))
-      }
-
-    }
-
   }
 
   # iterate through pixels unable to be binned and add them to the nearest bin
@@ -128,6 +121,10 @@ voronoi = function(part_in_spaxel, obs, particle_limit, roundness_limit = 0.3, u
 
     if(verbose){
       print(paste0(length(vorbin_spaxels$bin_number[is.na(vorbin_spaxels$bin_number)]), " unbinned pixels..."))
+    }
+
+    if(all(is.na(vorbin_spaxels$bin_number))){
+      stop(paste0("Error: No pixels have been successfully binned to reach the target N. \n Maximum number of particles per bin: ", max(vorbin_spaxels$N)))
     }
 
     # take a single pixel that has not yet been binned
