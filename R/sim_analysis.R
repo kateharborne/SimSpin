@@ -144,6 +144,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
                                                                "CumulativeMass" = numeric(rbins),
                                                                "Density" = numeric(rbins),
                                                                "SFR"     = numeric(rbins),
+                                                               "Temperature" = numeric(rbins),
                                                                "Metallicity" = numeric(rbins),
                                                                "CircularVelocity" = numeric(rbins),
                                                                "VelocityAnisotropy" = numeric(rbins),
@@ -155,6 +156,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
                                                                  "CumulativeMass" = numeric(rbins),
                                                                  "Density" = numeric(rbins),
                                                                  "SFR"     = numeric(rbins),
+                                                                 "Temperature" = numeric(rbins),
                                                                  "Metallicity" = numeric(rbins),
                                                                  "CircularVelocity" = numeric(rbins),
                                                                  "RotationalVelocity" = numeric(rbins),
@@ -262,6 +264,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Spherical$Mass[binID] = sum(sample$Mass)
       if(type == "stars"){analysis_data$RadialTrends_Spherical$Age[binID] = mean(sample$Age)}
       if(type == "gas"){analysis_data$RadialTrends_Spherical$SFR[binID] = mean(sample$SFR)}
+      if(type == "gas"){analysis_data$RadialTrends_Spherical$Temperature[binID] = mean(sample$Temperature)}
       analysis_data$RadialTrends_Spherical$Metallicity[binID] = mean(sample$Metallicity)
       analysis_data$RadialTrends_Spherical$VelocityAnisotropy[binID] = 1 - ((sd(sample$v_theta)^2 + sd(sample$v_phi)^2) / (2 * sd(sample$v_r)^2))
       analysis_data$RadialTrends_Spherical$SpecificAngularMomentum[binID] = mean(sqrt((sample$Jx^2 + sample$Jy^2 + sample$Jz^2))/sum(sample$Mass))
@@ -270,6 +273,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Spherical$Mass[binID] = NA
       if(type == "stars"){analysis_data$RadialTrends_Spherical$Age[binID] = NA}
       if(type == "gas"){analysis_data$RadialTrends_Spherical$SFR[binID] = NA}
+      if(type == "gas"){analysis_data$RadialTrends_Spherical$Temperature[binID] = NA}
       analysis_data$RadialTrends_Spherical$Metallicity[binID] = NA
       analysis_data$RadialTrends_Spherical$VelocityAnisotropy[binID] = NA
       analysis_data$RadialTrends_Spherical$SpecificAngularMomentum[binID] = NA
@@ -335,8 +339,8 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Cylindrical$Mass[binID] = sum(sample$Mass)
       if(type=="stars"){analysis_data$RadialTrends_Cylindrical$Age[binID] = mean(sample$Age)}
       if(type=="gas"){analysis_data$RadialTrends_Cylindrical$SFR[binID] = mean(sample$SFR)}
+      if(type=="gas"){analysis_data$RadialTrends_Cylindrical$Temperature[binID] = mean(sample$Temperature)}
       analysis_data$RadialTrends_Cylindrical$Metallicity[binID] = mean(sample$Metallicity)
-
       analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = mean(sample$vphi_circ)
       analysis_data$RadialTrends_Cylindrical$RotationalDispersion[binID] = sd(sample$vphi_circ)
       analysis_data$RadialTrends_Cylindrical$Circularity[binID] = mean((sample$Jz/sample$Mass)/sample$j_circ)
@@ -354,6 +358,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Cylindrical$Mass[binID] = NA
       if(type=="stars"){analysis_data$RadialTrends_Cylindrical$Age[binID] = NA}
       if(type=="gas"){analysis_data$RadialTrends_Cylindrical$SFR[binID] = NA}
+      if(type=="gas"){analysis_data$RadialTrends_Cylindrical$Temperature[binID] = NA}
       analysis_data$RadialTrends_Cylindrical$Metallicity[binID] = NA
       analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = NA
       analysis_data$RadialTrends_Cylindrical$RotationalDispersion[binID] = NA

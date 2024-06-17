@@ -1,4 +1,4 @@
-# SimSpin v2.8.6 News
+# SimSpin v2.8.7 News
 
 ### Last edit: 25/04/2024
 
@@ -17,7 +17,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 25/04/24 | *Bug fix.* Providing a meaningful error message from the `voronoi.R` function when you cannot bin enought particles to reach the requested voronoi bin N limit. Resolves issue #105. | 2.8.6 |  | Kate Harborne |
+| 17/06/24 | Adding measurement of radial gas temperature to the output of the `sim_analysis` function | 2.8.7 |  | Kate Harborne |
+| 25/04/24 | *Bug fix.* Providing a meaningful error message from the `voronoi.R` function when you cannot bin enough particles to reach the requested voronoi bin N limit. Resolves issue #105. | 2.8.6 | 4e8f0af0ebc0e43cc31729978deb3a554e039f6b | Kate Harborne |
 | 23/04/24 | *Bug fix.* Fixing a bug in `write_simspin_FITS.R` where the observed SFR maps were not being written to the FITS file as an index was incorrect - now fixed and checks written to ensure that the `OBS_SFR` and `RAW_SFR` map extensions are not identical. | 2.8.5 | 21b5d219de05927918c5569c11e79709cea250df | Kate Harborne |
 | 26/03/24 | *Bug fix.* Updating the read in functions for cosmological models input to prevent the code falling over when attributes are not provided for Datasets that are unnecesary for SimSpin to function. This means HDF5 files extracted directly from the TNG database for galaxy cutouts will now produce outputs successfully, fixing Issue #95. | 2.8.4 | cdb17c1a2aaa1f2b8ea973eaad44fb22a625663b | Kate Harborne |
 | 13/03/24 | Adding observation-ally mapped mass and SFR images to the output `$observed_images` - the raw images are not blurred with the PSF, but for comparison with other observed properties, this PSF convolution is necessary. Now mass maps are output on all `method="velocity"` cubes as default and SFR maps on all `method="gas"` or `"sf gas"`.  | 2.8.3 | 2e878f77bd7f3415c02591678c1694be1b990b7d | Kate Harborne |

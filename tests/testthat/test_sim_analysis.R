@@ -49,6 +49,8 @@ test_that("EAGLE files can be analysed in gas mode", {
   eagle_gas = sim_analysis(ss_eagle, type = "gas")
   expect_length(eagle_gas, sa_out)
   expect_true("MeanSFR" %in% names(eagle_gas$Properties))
+  expect_true("Temperature" %in% names(eagle_gas$RadialTrends_Spherical))
+  expect_true("Temperature" %in% names(eagle_gas$RadialTrends_Cylindrical))
   expect_true(!"MeanAge" %in% names(eagle_gas$Properties))
 })
 
