@@ -32,7 +32,18 @@ In this vignette, we will take you through the process of constructing such a da
 
 From this spectral data cube, observable properties can be measured using standard observational pipelines, such as pPXF. You can see another long-form example [here](https://kateharborne.github.io/SimSpin/examples/fitting_spectra_with_pPXF.html) demonstrating how the kinematics can be fit using the spectral data cube. 
 
+--------------------------------------------------------------------------------
+
+# Step 0: Installing SimSpin (the compatible version)
+
+The `dev-tipsy` branch of SimSpin is (currently) the only one that supports the reading of tipsy files.
+To install a specific branch of the package, we can use the following:
+
 ```{r setup}
+library(devtools)
+install_github("kateharborne/SimSpin", ref="dev-tipsy")
+# this points towards the specific branch of the code
+
 library(SimSpin)
 packageVersion("SimSpin")
 ```
