@@ -40,10 +40,12 @@ The `dev-tipsy` branch of SimSpin is (currently) the only one that supports the 
 To install a specific branch of the package, we can use the following:
 
 ```{r setup}
-library(devtools)
-install_github("kateharborne/SimSpin", ref="dev-tipsy")
-# this points towards the specific branch of the code
-
+# If you don't already have SimSpin installed for tispy files, uncomment the lines below:
+# -------------------------------------------------------- #
+# library(devtools) 
+# install_github("kateharborne/SimSpin", ref="dev-tipsy")  
+# # this points towards the specific branch of the code
+# -------------------------------------------------------- #
 library(SimSpin)
 packageVersion("SimSpin")
 ```
