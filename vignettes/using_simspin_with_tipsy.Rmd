@@ -14,12 +14,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-The purpose of this vignette is to allow a user to explore the range of possible outputs that can be produced by SimSpin for a tipsy formatted input file from the Gasoline code. Because the Gasoline code is sparsely documented, we provide this branch of the code (v2.8.4a) as a seperate branch `dev-tipsy` that will not be merged with `main`.
+The purpose of this vignette is to allow a user to explore the range of possible outputs that can be produced by SimSpin for a tipsy formatted input file from the Gasoline code. Because the Gasoline code is sparsely documented, we provide this branch of the code (v2.8.5.1) as a seperate branch `dev-tipsy` that will not be merged with `main`.
 
 In the example below, you will need to enter the file location of your own tipsy Gasoline output galaxy such that this can be run through the code. The rest of the functions *should* then run without modification. Set the location of your simulation input file below:
 
 ```{r}
-f = "~/Downloads/Tipsy_out/GLX.01100"#"PATH/TO/YOUR/OUTPUT"
+f = "~/Downloads/drive-download-20240621T012306Z-001/GLX.01500"#"PATH/TO/YOUR/OUTPUT"
 ```
 
 The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument. 
@@ -48,7 +48,7 @@ library(SimSpin)
 packageVersion("SimSpin")
 ```
 
-Ensure that the package version of the loaded code is "v2.8.4.1" as this is the version that includes support for tipsy output files from the Gasoline code.
+Ensure that the package version of the loaded code is "v2.8.5.1" as this is the version that includes support for tipsy output files from the Gasoline code.
 
 --------------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ Ensure that the package version of the loaded code is "v2.8.4.1" as this is the 
 
 To begin a SimSpin observation, we begin by converting the input simulation into a consistent format. This step creates an R-formatted file that is intended to be universal in structure (to aid in comparing between different simulations) and to allow efficient repeat observations of the same system due to the construction of the file. It is a pre-processing step that allows the user to smooth the gas distribution (in the scenario that the softening lengths of the gas is significantly larger than the spaxel size of the intended observation) and pre-computes the assignment of stellar particles to particular stellar templates.
 
-For Gasoline outputs, you should have your outputs formatted in a directory that contains the output simulation in one named binary file in tipsy format, along with several additional extension files (e.g. `*.timeform`, `*.iord`, `*.massform`, etc.). If you place the parameter file used to build the simulation in the same directory, this information will also be used to format the SimSpin object, else expected defaults for required parameters will be substituted and the user will be warned that this is the case. 
+For Gasoline outputs, you should have your outputs formatted in a directory that contains the output simulation in one named binary file in tipsy format, along with several additional extension files (e.g. required files include `*.timeform`, `*.iord`, `*.massform`, `*.OxMassFrac`). If you place the parameter file used to build the simulation in the same directory, this information will also be used to format the SimSpin object, else expected defaults for required parameters will be substituted and the user will be warned that this is the case. 
 
 If you do not have the parameter file in the output directory, you should see a warning issued when teh following code chunk is run. Else, it should proceed without warnings raised. 
 
