@@ -13,13 +13,14 @@
 .gcm1_to_msolkm1    = 5.02785e-29
 .gcm3_to_msolkm3    = 5.02785e-28
 .gcm3_to_msolkpc3   = 1.477e+31
-.g_constant_cgs     = 6.67430e-11
+.g_constant_cgs     = 6.67430e-8
 .g_in_kpcMsolkms2   = 4.3009e-6
 .s_to_yr            = 3.171e-8
 .mass_of_proton     = 1.67262e-24  # grams
 .adiabatic_index    = 5/3          # heat is contained
 .Boltzmann_constant = 1.38066e-16  # cm^2 g s^-2 K-1
-
+.msol_to_kg         = 1.989e+30
+.kpc_to_km          = 3.086e+16
 
 # globalVariable definitions
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_luminosity",

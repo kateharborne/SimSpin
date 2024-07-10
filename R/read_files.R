@@ -151,6 +151,26 @@
     stop()
   }
 
+  # determining units
+  if (any(stringr::str_detect(list.files(dirname(f)), ".param"))){
+
+    param = read.delim(list.files(dirname(f), full.names = T)[stringr::str_detect(list.files(dirname(f)), ".param")],
+                       blank.lines.skip = T, sep = "=", comment.char = "#")
+
+    d_Unit = as.numeric(param[which(stringr::str_detect(param$achInFile, "dKpcUnit")), 2])
+    m_Unit = as.numeric(param[which(stringr::str_detect(param$achInFile, "dMsolUnit")), 2])
+
+    remove(param)
+
+  } else {
+    d_Unit = 1
+    m_Unit = 1
+    warning("Unable to find parameter file. Assuming distance unit = 1 kpc and mass unit = 1 Msol and G = 1. \n Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input. \n")
+  }
+
+  G = 1 # NB: This is assumed! Can't find where it's specified
+  v_unit = sqrt(((.g_constant_cgs * 1e-15 / 1e-3) / .kpc_to_km) * .msol_to_kg)
+
   # beginning with the gas properties
   if (ngas > 0){
     # initialise the gas table
@@ -165,6 +185,14 @@
                                  "V7", "V8", "V9", "V10", "V11", "V12"),
                          new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Density",
                                  "Temperature", "SmoothingLength", "Metallicity", "Phi"))
+
+    gas_part$Mass = gas_part$Mass * m_Unit
+    gas_part$x = gas_part$x * d_Unit
+    gas_part$y = gas_part$y * d_Unit
+    gas_part$z = gas_part$z * d_Unit
+    gas_part$vx = gas_part$vx * v_Unit
+    gas_part$vy = gas_part$vy * v_Unit
+    gas_part$vz = gas_part$vz * v_Unit
 
     # Helium mass fraction including correction based on metallicity, from
     # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
@@ -222,6 +250,14 @@
                                  "V7", "V8", "V9", "V10", "V11"),
                          new = c("Mass", "x", "y", "z", "vx", "vy", "vz", "Metallicity",
                                  "StellarFormationTime", "SofteningLength", "Phi"))
+
+    star_part$Mass = star_part$Mass * m_Unit
+    star_part$x = star_part$x * d_Unit
+    star_part$y = star_part$y * d_Unit
+    star_part$z = star_part$z * d_Unit
+    star_part$vx = star_part$vx * v_Unit
+    star_part$vy = star_part$vy * v_Unit
+    star_part$vz = star_part$vz * v_Unit
 
     star_part$ID = 1:nstar
 
