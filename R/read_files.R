@@ -169,7 +169,7 @@
   }
 
   G = 1 # NB: This is assumed! Can't find where it's specified
-  v_unit = sqrt(((.g_constant_cgs * 1e-15 / 1e-3) / .kpc_to_km) * .msol_to_kg)
+  v_Unit = sqrt(((.g_constant_cgs * 1e-15 / 1e-3) / .kpc_to_km) * .msol_to_kg)
 
   # beginning with the gas properties
   if (ngas > 0){
