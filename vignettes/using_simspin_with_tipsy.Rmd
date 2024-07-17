@@ -51,7 +51,7 @@ library(SimSpin)
 packageVersion("SimSpin")
 ```
 
-Ensure that the package version of the loaded code is "v2.8.5.1" as this is the version that includes support for tipsy output files from the Gasoline code.
+Ensure that the package version of the loaded code is "v2.8.7.1" as this is the version that includes support for tipsy output files from the Gasoline code.
 
 --------------------------------------------------------------------------------
 
