@@ -100,7 +100,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
       stellar_data$z = stellar_data$z - centre[3]
       star_r2 = stellar_data$x^2 + stellar_data$y^2 + stellar_data$z^2
       star_vcen = c(median(stellar_data$vx[star_r2 < 100]), # using the median velocities within
-                    median(stellar_data$vy[star_r2 < 100]), # 10kpc of the galaxy centre to define
+                    median(stellar_data$vy[star_r2 < 100]), # 100kpc of the galaxy centre to define
                     median(stellar_data$vz[star_r2 < 100])) # the central velocity
       stellar_data$vx = stellar_data$vx - star_vcen[1]
       stellar_data$vy = stellar_data$vy - star_vcen[2]
