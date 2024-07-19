@@ -773,9 +773,9 @@ test_that("No errors when HDF5 files input only have a single gas particle - Mag
     data[["PartType0/"]]$link_delete(paste0(PT0_attr[i]))
 
     data[[paste0("PartType0/",PT0_attr[i])]] = gas[[i]]
-    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling") = aexp
-    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling") = hexp
-    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs") = cgs
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent") = aexp
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent") = hexp
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor") = cgs
   }
 
   hdf5r::h5close(data)
