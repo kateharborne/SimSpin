@@ -668,4 +668,122 @@ test_that("Expect header information in each of the built simspin files.", {
 
 })
 
+# Testing that a single gas particle doesn't cause errors in simspin file creation
+test_that("No errors when HDF5 files input only have a single gas particle - TNG", {
 
+  file.copy(from = ss_illustris, to = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), overwrite = T)
+  data = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+
+  # read_files lines 676-713
+  PT0_attr = hdf5r::list.datasets(data[["PartType0"]])    # get list of fields
+
+  expected_names_gas = c("Coordinates", "Density", "Masses", "ParticleIDs",
+                         "GFM_Metals", "GFM_Metallicity",
+                         "StarFormationRate", "Velocities",
+                         "ElectronAbundance", "InternalEnergy")
+  PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
+
+  n_gas_prop = length(PT0_attr)                           # how many fields?
+  gas = vector("list", n_gas_prop)                        # make a vector
+  names(gas) = PT0_attr                                   # assign field names to elements
+
+  # loop through the fields,
+  # assign them their conversion factor attributes,
+  # and then convert their data
+  for (i in 1:n_gas_prop){
+    aexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling")},
+                    error = function(e){NULL})
+    hexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling")},
+                    error = function(e){NULL})
+    cgs  = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs")},
+                    error = function(e){NULL})
+    if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+      aexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")},
+                      error = function(e){NULL})
+      hexp = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")},
+                      error = function(e){NULL})
+      cgs  = tryCatch(expr = {hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")},
+                      error = function(e){NULL})
+      if (any(is.null(aexp), is.null(hexp), is.null(cgs))){
+        stop("Error: Attributes listed incorrectly. \n
+               Please check that the scaling factors for conversion between comoving and physical coordinates are included in the input file as attributes for each dataset. \n
+               See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#hydrodynamical-simulations for more details.")}
+    }
+    if (cgs == 0) {cgs = 1}                                                   # converting 0 values to 1
+
+    gas[[i]] =
+      hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]])
+
+    if (length(dim(gas[[i]]))==2){
+      gas[[i]] = gas[[i]][,1]
+    } else {
+      gas[[i]] = gas[[i]][1]
+    }
+
+    data[["PartType0/"]]$link_delete(paste0(PT0_attr[i]))
+
+    data[[paste0("PartType0/",PT0_attr[i])]] = gas[[i]]
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling") = aexp
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling") = hexp
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs") = cgs
+  }
+
+  hdf5r::h5close(data)
+
+  ss_file = make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"), write_to_file = F)
+
+  expect_length(ss_file, ss_file_length)
+
+  unlink(paste0(temp_loc, "/SimSpin_example_illustris_copy.hdf5"))
+
+})
+
+test_that("No errors when HDF5 files input only have a single gas particle - Magneticum", {
+
+  file.copy(from = ss_magneticum, to = paste0(temp_loc, "/SimSpin_example_magneticum_copy.hdf5"), overwrite = T)
+  data = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_magneticum_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+
+  PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+
+  expected_names_gas = c("Coordinates", "Density", "Mass", "ParticleIDs",
+                         "Metallicity",  "StarFormationRate", "Velocity",
+                         "SmoothingLength", "Temperature", "InternalEnergy")
+  PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
+
+  n_gas_prop = length(PT0_attr)
+  gas = vector("list", n_gas_prop)
+  names(gas) = PT0_attr
+
+  for (i in 1:n_gas_prop){
+    aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")
+    hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")
+    cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")
+    gas[[i]] =
+      hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]])
+
+    gas[[i]] =
+      hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]])
+
+    if (length(dim(gas[[i]]))==2){
+      gas[[i]] = gas[[i]][,1]
+    } else {
+      gas[[i]] = gas[[i]][1]
+    }
+
+    data[["PartType0/"]]$link_delete(paste0(PT0_attr[i]))
+
+    data[[paste0("PartType0/",PT0_attr[i])]] = gas[[i]]
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent") = aexp
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent") = hexp
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor") = cgs
+  }
+
+  hdf5r::h5close(data)
+
+  ss_file = make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_magneticum_copy.hdf5"), write_to_file = F)
+
+  expect_length(ss_file, ss_file_length)
+
+  unlink(paste0(temp_loc, "/SimSpin_example_magneticum_copy.hdf5"))
+
+})

@@ -867,8 +867,11 @@
   if ("GFM_Metals" %in% current_names){
     id_to_remove = which(current_names == "GFM_Metals")
 
-    particle_list$`ElementAbundance/Oxygen` = particle_list$GFM_Metals[5,]
-    particle_list$`ElementAbundance/Hydrogen` = particle_list$GFM_Metals[1,]
+    one_p_flag = FALSE
+    if (is.null(dim(particle_list$Coordinates))){one_p_flag = TRUE}
+
+    particle_list$`ElementAbundance/Oxygen` = if(one_p_flag){particle_list$GFM_Metals[5]}else{particle_list$GFM_Metals[5,]}
+    particle_list$`ElementAbundance/Hydrogen` = if(one_p_flag){particle_list$GFM_Metals[1]}else{particle_list$GFM_Metals[1,]}
 
     particle_list = particle_list[-id_to_remove]
   }
