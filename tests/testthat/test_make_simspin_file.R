@@ -724,7 +724,7 @@ test_that("No errors when HDF5 files input only have a single gas particle - TNG
 
     data[[paste0("PartType0/",PT0_attr[i])]] = gas[[i]]
     hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling") = aexp
-    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling") = h
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling") = hexp
     hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs") = cgs
   }
 
@@ -774,7 +774,7 @@ test_that("No errors when HDF5 files input only have a single gas particle - Mag
 
     data[[paste0("PartType0/",PT0_attr[i])]] = gas[[i]]
     hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "a_scaling") = aexp
-    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling") = h
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h_scaling") = hexp
     hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "to_cgs") = cgs
   }
 
