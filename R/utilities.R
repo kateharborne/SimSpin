@@ -49,7 +49,20 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 } # weighted variance
 
 # A function for fitting a Gaussian Hermit distribution to the LOSVD
-.losvd_fit = function(par, x, losvd){
+.losvd_fit_vsig= function(par, x, losvd){
+
+  vel = par[1]
+  sig = par[2]
+  k  = 1
+
+  w = (x - vel)/sig
+
+  measured_vlos = (k * exp(-0.5*(w^2)))
+  return=sum((measured_vlos-losvd)^2)
+}
+
+# A function for fitting a Gaussian Hermit distribution to the LOSVD
+.losvd_fit_h3_h4 = function(par, x, losvd){
 
   vel = par[1]
   sig = par[2]
