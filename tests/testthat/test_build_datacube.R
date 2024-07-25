@@ -1065,6 +1065,59 @@ unlink(c(paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.F
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS")))
 
+test_that("Writing files gives sensible errors when incorrect parameters specified", {
+
+  cube = build_datacube(simspin_file = ss_gadget,
+                        telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                        observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                        write_fits = F)
+
+  mask = cube$raw_images$particle_image
+  mask[which(cube$raw_images$particle_image <= 1)] = NA
+
+  # Input simspin_datacube is incorrectly a string
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = "cube", split_save = F,
+                                  mask = mask, object_name = "ss_gadget",
+                                  telescope_name = "SimSpin",
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = "ss_gadget.Rdata"))
+  # Input split_save should be logical, not a string
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = cube, split_save = "F",
+                                  mask = mask, object_name = "ss_gadget",
+                                  telescope_name = "SimSpin",
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = "ss_gadget.Rdata"))
+  # Input simspin_file is incorrectly an Robject
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = cube, split_save = F,
+                                  mask = mask, object_name = "ss_gadget",
+                                  telescope_name = "SimSpin",
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = ss_gadget))
+  # Input mask is incorrectly a logical
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = cube, split_save = F,
+                                  mask = T, object_name = "ss_gadget",
+                                  telescope_name = "SimSpin",
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = "ss_gadget.Rdata"))
+
+  # Input string is incorrectly a logical
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = cube, split_save = F,
+                                  mask = T, object_name = "ss_gadget",
+                                  telescope_name = NA,
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = "ss_gadget.Rdata"))
+
+
+  remove(cube, mask)
+
+
+})
+
 
 # Testing that build_datacube will give warning if the spectra given is low res ----
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {
