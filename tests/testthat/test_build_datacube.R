@@ -1760,3 +1760,50 @@ test_that("Voronoi binned images can be blurred with the PSF", {
   expect_true("voronoi_bins" %in% names(vorbin_sfgas$raw_images))
 
 })
+
+test_that("moments specifications all work when = 2", {
+
+  gadget_velocity = build_datacube(simspin_file = ss_gadget,
+                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                   method = "velocity", moments=2,
+                                   verbose = T)
+  expect_length(gadget_velocity, built_cube_size)
+  expect_length(gadget_velocity$raw_images, velocity_raw_images_size)
+  expect_length(gadget_velocity$observed_images, velocity_observed_images_size)
+  expect_true(all(is.na(gadget_velocity$observed_images$h3_image)))
+
+  gadget_velocity_mom4 = build_datacube(simspin_file = ss_gadget,
+                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                   method = "velocity", moments=4,
+                                   verbose = T)
+
+  expect_length(gadget_velocity_mom4, built_cube_size)
+  expect_length(gadget_velocity_mom4$raw_images, velocity_raw_images_size)
+  expect_length(gadget_velocity_mom4$observed_images, velocity_observed_images_size)
+  expect_false(all(is.na(gadget_velocity_mom4$observed_images$h3_image)))
+
+  expect_false(all(gadget_velocity_mom4$observed_images$velocity_image == gadget_velocity$observed_images$velocity_image))
+
+})
+
+test_that("moments specifications fail work when != 2 & != 4", {
+  expect_error(build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "sf gas", moments=3, verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10))
+
+  expect_error(build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "velocity", moments=3, verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10))
+
+  expect_error(build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "spectral", moments=3, verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10))
+})
