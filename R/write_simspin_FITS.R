@@ -75,7 +75,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
     stop("Error: `split_save` should be provided as a logical TRUE or FALSE.\n Please adjust and try again.")
   }
 
-  if (!is.na(mask) & !is.double(mask)){
+  if (!all(is.na(mask)) & !is.double(mask)){
     stop("Error: `mask` should be provided either as a logical NA, or as a 2-dimensional numeric array.\n Please adjust and try again.")
   }
 
