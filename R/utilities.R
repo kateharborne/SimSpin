@@ -62,7 +62,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 }
 
 # A function for fitting a Gaussian Hermit distribution to the LOSVD
-.losvd_fit_h3_h4 = function(par, x, losvd){
+.losvd_fit_h3h4 = function(par, x, losvd){
 
   vel = par[1]
   sig = par[2]
@@ -78,13 +78,21 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   return=sum((measured_vlos-losvd)^2)
 }
 
-.losvd_out = function(x, vel, sig, h3, h4){
+.losvd_out_h3h4 = function(x, vel, sig, h3, h4){
   k=1
   w = (x - vel)/sig
   H3 = (1/sqrt(6))  * (((2*sqrt(2))* w^3) - ((3*sqrt(2)) * w))
   H4 = (1/sqrt(24)) * ((4* w^4) - (12 * w^2) + 3)
 
   measured_vlos = (k * exp(-0.5*(w^2))) * (1 + (h3*H3) + (h4*H4))
+  return(measured_vlos)
+}
+
+.losvd_out_vsig = function(x, vel, sig){
+  k=1
+  w = (x - vel)/sig
+
+  measured_vlos = (k * exp(-0.5*(w^2)))
   return(measured_vlos)
 }
 
