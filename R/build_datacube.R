@@ -484,7 +484,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
           sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
 
           kin   = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
-                                         fn    = .losvd_fit_h3_h4,
+                                         fn    = .losvd_fit_h3h4,
                                          x     = observation$vbin_seq,
                                          losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
                                          method="BFGS", control=list(reltol=1e-9))$par},
@@ -608,27 +608,54 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     dims = dim(output$raw_images$velocity_image)
 
-    for (c in 1:dims[1]){
-      for (d in 1:dims[2]){
-        vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
-        sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
+    if (moments == 4){
+      for (c in 1:dims[1]){
+        for (d in 1:dims[2]){
+          vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+          sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
 
-        kin  = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
-                                      fn    = .losvd_fit,
-                                      x     = observation$vbin_seq,
-                                      losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                      method="BFGS", control=list(reltol=1e-9))$par},
-                        error = function(e){c(0,0,0,0)})
+          kin  = tryCatch({stats::optim(par   = c(vel_ini,sd_ini,0,0),
+                                        fn    = .losvd_fit_h3h4,
+                                        x     = observation$vbin_seq,
+                                        losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
+                                        method="BFGS", control=list(reltol=1e-9))$par},
+                          error = function(e){c(0,0,0,0)})
 
-        output$observed_images$velocity_image[c,d]   = kin[1]
-        output$observed_images$dispersion_image[c,d] = kin[2]
-        output$observed_images$h3_image[c,d]       = kin[3]
-        output$observed_images$h4_image[c,d]       = kin[4]
-        output$observed_images$residuals[c,d]      = mean(abs(.losvd_out(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
-                                                              output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
+          output$observed_images$velocity_image[c,d]   = kin[1]
+          output$observed_images$dispersion_image[c,d] = kin[2]
+          output$observed_images$h3_image[c,d]       = kin[3]
+          output$observed_images$h4_image[c,d]       = kin[4]
+          output$observed_images$residuals[c,d]      = mean(abs(.losvd_out_h3h4(x=observation$vbin_seq, vel=kin[1], sig=kin[2], h3=kin[3], h4=kin[4]) -
+                                                                  output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
 
+        }
       }
     }
+
+    if (moments == 2){
+      for (c in 1:dims[1]){
+        for (d in 1:dims[2]){
+          vel_ini = .meanwt(observation$vbin_seq, output$velocity_cube[c,d,])
+          sd_ini  = sqrt(.varwt(observation$vbin_seq, output$velocity_cube[c,d,], vel_ini))
+
+          kin  = tryCatch({stats::optim(par   = c(vel_ini,sd_ini),
+                                        fn    = .losvd_fit_vsig,
+                                        x     = observation$vbin_seq,
+                                        losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
+                                        method="BFGS", control=list(reltol=1e-9))$par},
+                          error = function(e){c(0,0)})
+
+          output$observed_images$velocity_image[c,d]   = kin[1]
+          output$observed_images$dispersion_image[c,d] = kin[2]
+          output$observed_images$h3_image[c,d]       = NA
+          output$observed_images$h4_image[c,d]       = NA
+          output$observed_images$residuals[c,d]      = mean(abs(.losvd_out_vsig(x=observation$vbin_seq, vel=kin[1], sig=kin[2]) -
+                                                                  output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
+
+        }
+      }
+    }
+
 
     if (verbose){cat("Done! \n")}
 
