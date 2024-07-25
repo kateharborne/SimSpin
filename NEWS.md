@@ -1,6 +1,6 @@
-# SimSpin v2.8.8 News
+# SimSpin v2.9.0 News
 
-### Last edit: 19/07/2024
+### Last edit: 25/07/2024
 
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
@@ -17,7 +17,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 19/07/24 | *Bug fix.* `.check_names()` function fails for TNG outputs if one 1 gas particle is contained in the snapshot due to indexing errors. Added in a catch for this error to prevent unnecessary code failure. | 2.8.8 |  | Kate Harborne |
+| 25/07/24 | *New feature!* Added the `moments` parameter to `build_datacube` function. You can now specify how many moments to fit the LOSVD. Either moments=2 (i.e. fitting a Gaussian to give v_los and sigma_los) or moments=4 (i.e. fitting a Gauss-Hermite polynomial to give v_los, sigma_los, h3 and h4). Fits moments=4 by default, in line with old behaviour of the code. Also *bug fix* to ensure the input variables to `write_simspin_FITS` are of the correct type and to give meaningful errors if not (resolving issue #109). | 2.9.0 |  | Kate Harborne |
+| 19/07/24 | *Bug fix.* `.check_names()` function fails for TNG outputs if one 1 gas particle is contained in the snapshot due to indexing errors. Added in a catch for this error to prevent unnecessary code failure. | 2.8.8 | b0d53def1f52e12a6da502843a89f49434d88508 | Kate Harborne |
 | 17/06/24 | Adding measurement of radial gas temperature to the output of the `sim_analysis` function | 2.8.7 | ad32eb746479240c4106296999957d6ff74aecdd | Kate Harborne |
 | 25/04/24 | *Bug fix.* Providing a meaningful error message from the `voronoi.R` function when you cannot bin enough particles to reach the requested voronoi bin N limit. Resolves issue #105. | 2.8.6 | 4e8f0af0ebc0e43cc31729978deb3a554e039f6b | Kate Harborne |
 | 23/04/24 | *Bug fix.* Fixing a bug in `write_simspin_FITS.R` where the observed SFR maps were not being written to the FITS file as an index was incorrect - now fixed and checks written to ensure that the `OBS_SFR` and `RAW_SFR` map extensions are not identical. | 2.8.5 | 21b5d219de05927918c5569c11e79709cea250df | Kate Harborne |
