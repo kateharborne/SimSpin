@@ -1065,6 +1065,59 @@ unlink(c(paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.F
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS")))
 
+test_that("Writing files gives sensible errors when incorrect parameters specified", {
+
+  cube = build_datacube(simspin_file = ss_gadget,
+                        telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                        observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                        write_fits = F)
+
+  mask = cube$raw_images$particle_image
+  mask[which(cube$raw_images$particle_image <= 1)] = NA
+
+  # Input simspin_datacube is incorrectly a string
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = "cube", split_save = F,
+                                  mask = mask, object_name = "ss_gadget",
+                                  telescope_name = "SimSpin",
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = "ss_gadget.Rdata"))
+  # Input split_save should be logical, not a string
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = cube, split_save = "F",
+                                  mask = mask, object_name = "ss_gadget",
+                                  telescope_name = "SimSpin",
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = "ss_gadget.Rdata"))
+  # Input simspin_file is incorrectly an Robject
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = cube, split_save = F,
+                                  mask = mask, object_name = "ss_gadget",
+                                  telescope_name = "SimSpin",
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = ss_gadget))
+  # Input mask is incorrectly a logical
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = cube, split_save = F,
+                                  mask = T, object_name = "ss_gadget",
+                                  telescope_name = "SimSpin",
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = "ss_gadget.Rdata"))
+
+  # Input string is incorrectly a logical
+  expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+                                  simspin_datacube = cube, split_save = F,
+                                  mask = T, object_name = "ss_gadget",
+                                  telescope_name = NA,
+                                  instrument_name = "SAMI", observer_name = "K Harborne",
+                                  input_simspin_file = "ss_gadget.Rdata"))
+
+
+  remove(cube, mask)
+
+
+})
+
 
 # Testing that build_datacube will give warning if the spectra given is low res ----
 test_that("build_datacube issues warning when spectral resolution < LSF fwhm.", {
@@ -1759,4 +1812,51 @@ test_that("Voronoi binned images can be blurred with the PSF", {
 
   expect_true("voronoi_bins" %in% names(vorbin_sfgas$raw_images))
 
+})
+
+test_that("moments specifications all work when = 2", {
+
+  gadget_velocity = build_datacube(simspin_file = ss_gadget,
+                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                   method = "velocity", moments=2,
+                                   verbose = T)
+  expect_length(gadget_velocity, built_cube_size)
+  expect_length(gadget_velocity$raw_images, velocity_raw_images_size)
+  expect_length(gadget_velocity$observed_images, velocity_observed_images_size)
+  expect_true(all(is.na(gadget_velocity$observed_images$h3_image)))
+
+  gadget_velocity_mom4 = build_datacube(simspin_file = ss_gadget,
+                                   telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                   method = "velocity", moments=4,
+                                   verbose = T)
+
+  expect_length(gadget_velocity_mom4, built_cube_size)
+  expect_length(gadget_velocity_mom4$raw_images, velocity_raw_images_size)
+  expect_length(gadget_velocity_mom4$observed_images, velocity_observed_images_size)
+  expect_false(all(is.na(gadget_velocity_mom4$observed_images$h3_image)))
+
+  expect_false(all(gadget_velocity_mom4$observed_images$velocity_image == gadget_velocity$observed_images$velocity_image))
+
+})
+
+test_that("moments specifications fail work when != 2 & != 4", {
+  expect_error(build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "sf gas", moments=3, verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10))
+
+  expect_error(build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "velocity", moments=3, verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10))
+
+  expect_error(build_datacube(simspin_file = ss_eagle,
+                                   telescope = telescope(type = "SAMI"),
+                                   observing_strategy = observing_strategy(dist_z = 0.03, blur = T),
+                                   method = "spectral", moments=3, verbose = F,
+                                   voronoi_bin = T, vorbin_limit = 10))
 })

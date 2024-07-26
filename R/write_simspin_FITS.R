@@ -56,6 +56,30 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                               input_simspin_file, split_save=F, mask=NA,
                               galaxy_centre = c(0,0,0)){
 
+  # Running checks on inputs ---------------------------------------------------
+  if (!is.character(input_simspin_file)){
+    stop("Error: `input_simspin_file` is expected as a string, describing the path to the input SimSpin file. \n Please adjust and try again.")
+  }
+
+  if (!is.list(simspin_datacube)){
+    stop("Error: `simspin_datacube` is expected as an R object list, as output by `build_datacube`. \n Please adjust and try again.")
+  }
+
+  if (!all(is.character(object_name), is.character(telescope_name),
+           is.character(instrument_name), is.character(observer_name),
+           is.character(output_file))){
+    stop("Error: One of `output_file`, `object_name`, `telescope_name`, `instrument_name`, `observer_name` is expected as a string, but was not provided in the correct format. \n Please adjust and try again.")
+  }
+
+  if (!is.logical(split_save)){
+    stop("Error: `split_save` should be provided as a logical TRUE or FALSE.\n Please adjust and try again.")
+  }
+
+  if (!all(is.na(mask)) & !is.double(mask)){
+    stop("Error: `mask` should be provided either as a logical NA, or as a 2-dimensional numeric array.\n Please adjust and try again.")
+  }
+
+
   # Sorting names for each file ------------------------------------------------
   output_name = rev(stringr::str_split(output_file, "/")[[1]])[1]
   output_dir  = stringr::str_remove(output_file, output_name)

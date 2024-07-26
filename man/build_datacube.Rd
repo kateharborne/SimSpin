@@ -9,6 +9,7 @@ build_datacube(
   telescope,
   observing_strategy,
   method,
+  moments = 4,
   verbose = F,
   write_fits = F,
   output_location,
@@ -39,6 +40,10 @@ help for more details.}
 \item{method}{String to describe whether cubes output are "spectral", "gas",
 "sf gas" or "velocity" (as in SimSpin v1) along the z-axis. Default is
 "spectral".}
+
+\item{moments}{Integer "2" or "4". Default is "4". When method="velocity",
+"gas" or "sf_gas", this parameter dictates if the kinematics are fit with
+a Gaussian (moments="2") or Gauss-Hermite polynomial (moments="4").}
 
 \item{verbose}{Default is \code{FALSE}. If you would like the code to give
 updates about its progress, change this parameter to \code{TRUE}.}
