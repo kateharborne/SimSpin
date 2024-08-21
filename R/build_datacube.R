@@ -115,6 +115,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     stop("ERROR: Invalid `moments` requested. Please specify `2` or `4` for the Gaussian or Gauss-Hermite polynomial fit.")
   }
 
+  observation$moments = moments
+
   method = stringr::str_to_lower(method)
 
   if (method != "spectral" &
