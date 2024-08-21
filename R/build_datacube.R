@@ -115,8 +115,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
     stop("ERROR: Invalid `moments` requested. Please specify `2` or `4` for the Gaussian or Gauss-Hermite polynomial fit.")
   }
 
-  observation$moments = moments
-
   method = stringr::str_to_lower(method)
 
   if (method != "spectral" &
@@ -217,6 +215,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       temp = SimSpin::BC03lr
     }
 
+  observation$moments = moments
 
   # Twisting galaxy about the z-axis to look from an angle
   twisted_data = twist_galaxy(galaxy_data, twist_rad = observation$twist_rad)
