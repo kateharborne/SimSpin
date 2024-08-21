@@ -1826,6 +1826,10 @@ test_that("moments specifications all work when = 2", {
   expect_length(gadget_velocity$raw_images, velocity_raw_images_size)
   expect_length(gadget_velocity$observed_images, velocity_observed_images_size)
   expect_true(all((gadget_velocity$observed_images$h3_image==0)))
+  expect_true(gadget_velocity$observation$moments == 2)
+  fits_2mom = Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mom2.FITS"))
+  expect_true("moments" %in% fits_2mom$OB_TABLE$Name)
+  expect_true(fits_2mom$OB_TABLE$Value[fits_2mom$OB_TABLE$Name == "moments"] == 2)
 
   gadget_velocity_mom4 = build_datacube(simspin_file = ss_gadget,
                                    telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
@@ -1838,6 +1842,10 @@ test_that("moments specifications all work when = 2", {
   expect_length(gadget_velocity_mom4$raw_images, velocity_raw_images_size)
   expect_length(gadget_velocity_mom4$observed_images, velocity_observed_images_size)
   expect_false(all((gadget_velocity_mom4$observed_images$h3_image==0)))
+  expect_true(gadget_velocity_mom4$observation$moments == 4)
+  fits_4mom = Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mom4.FITS"))
+  expect_true("moments" %in% fits_4mom$OB_TABLE$Name)
+  expect_true(fits_4mom$OB_TABLE$Value[fits_4mom$OB_TABLE$Name == "moments"] == 4)
 
   expect_false(all(gadget_velocity_mom4$observed_images$velocity_image == gadget_velocity$observed_images$velocity_image))
 
