@@ -320,7 +320,7 @@ test_that("EAGLE files can be built - gas mode and be identical in series and pa
   eagle_gas = build_datacube(simspin_file = ss_eagle,
                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                             method = "gas")
+                             method = "gas", moments = 2, verbose=T)
   expect_length(eagle_gas, built_cube_size)
   expect_length(eagle_gas$raw_images, gas_raw_images_size)
   expect_length(eagle_gas$observed_images, gas_observed_images_size)
@@ -329,7 +329,7 @@ test_that("EAGLE files can be built - gas mode and be identical in series and pa
   eagle_parallel_gas = build_datacube(simspin_file = ss_eagle,
                                       telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                                       observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                      method = "gas",
+                                      method = "gas", moments=2,
                                       cores = 2)
   expect_length(eagle_parallel_gas, built_cube_size)
   expect_length(eagle_parallel_gas$raw_images, gas_raw_images_size)
@@ -1819,27 +1819,41 @@ test_that("moments specifications all work when = 2", {
   gadget_velocity = build_datacube(simspin_file = ss_gadget,
                                    telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                    observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                   method = "velocity", moments=2,
+                                   method = "velocity", moments=2, write_fits = T,
+                                   output_location = paste0(temp_loc, "/ss_gadget_mom2.FITS"),
                                    verbose = T)
   expect_length(gadget_velocity, built_cube_size)
   expect_length(gadget_velocity$raw_images, velocity_raw_images_size)
   expect_length(gadget_velocity$observed_images, velocity_observed_images_size)
-  expect_true(all(is.na(gadget_velocity$observed_images$h3_image)))
+  expect_true(all((gadget_velocity$observed_images$h3_image==0)))
+  expect_true(gadget_velocity$observation$moments == 2)
+  fits_2mom = Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mom2.FITS"))
+  expect_true("moments" %in% fits_2mom$OB_TABLE$Name)
+  expect_true(fits_2mom$OB_TABLE$Value[fits_2mom$OB_TABLE$Name == "moments"] == 2)
 
   gadget_velocity_mom4 = build_datacube(simspin_file = ss_gadget,
                                    telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
                                    observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                                   method = "velocity", moments=4,
+                                   method = "velocity", moments=4, write_fits = T,
+                                   output_location = paste0(temp_loc, "/ss_gadget_mom4.FITS"),
                                    verbose = T)
 
   expect_length(gadget_velocity_mom4, built_cube_size)
   expect_length(gadget_velocity_mom4$raw_images, velocity_raw_images_size)
   expect_length(gadget_velocity_mom4$observed_images, velocity_observed_images_size)
-  expect_false(all(is.na(gadget_velocity_mom4$observed_images$h3_image)))
+  expect_false(all((gadget_velocity_mom4$observed_images$h3_image==0)))
+  expect_true(gadget_velocity_mom4$observation$moments == 4)
+  fits_4mom = Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget_mom4.FITS"))
+  expect_true("moments" %in% fits_4mom$OB_TABLE$Name)
+  expect_true(fits_4mom$OB_TABLE$Value[fits_4mom$OB_TABLE$Name == "moments"] == 4)
 
   expect_false(all(gadget_velocity_mom4$observed_images$velocity_image == gadget_velocity$observed_images$velocity_image))
 
 })
+
+unlink(c(paste0(temp_loc, "/ss_gadget_mom2.FITS"),
+         paste0(temp_loc, "/ss_gadget_mom4.FITS")))
+
 
 test_that("moments specifications fail work when != 2 & != 4", {
   expect_error(build_datacube(simspin_file = ss_eagle,

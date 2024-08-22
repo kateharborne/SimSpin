@@ -186,9 +186,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       stop(c("Error: No gas particles exist in this SimSpin file. \n",
              "Please specify a different method ('velocity' or 'spectral') and try again. \n"))
     }
-  } else {
-    stop(c("Error: Invalid method. \n",
-           "Please specify observation$method = 'spectral', 'velocity', 'sf gas', or 'gas' and try again. \n"))
   }
 
   if (!data.table::is.data.table(galaxy_data)){
@@ -215,6 +212,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       temp = SimSpin::BC03lr
     }
 
+  observation$moments = moments
 
   # Twisting galaxy about the z-axis to look from an angle
   twisted_data = twist_galaxy(galaxy_data, twist_rad = observation$twist_rad)
@@ -515,8 +513,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
           output$observed_images$velocity_image[c,d]   = kin[1]
           output$observed_images$dispersion_image[c,d] = kin[2]
-          output$observed_images$h3_image[c,d]         = NA
-          output$observed_images$h4_image[c,d]         = NA
+          output$observed_images$h3_image[c,d]         = 0
+          output$observed_images$h4_image[c,d]         = 0
           output$observed_images$residuals[c,d]        = mean(abs(.losvd_out_vsig(x=observation$vbin_seq, vel=kin[1], sig=kin[2]) -
                                                                     output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
         }
@@ -647,8 +645,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
           output$observed_images$velocity_image[c,d]   = kin[1]
           output$observed_images$dispersion_image[c,d] = kin[2]
-          output$observed_images$h3_image[c,d]       = NA
-          output$observed_images$h4_image[c,d]       = NA
+          output$observed_images$h3_image[c,d]       = 0
+          output$observed_images$h4_image[c,d]       = 0
           output$observed_images$residuals[c,d]      = mean(abs(.losvd_out_vsig(x=observation$vbin_seq, vel=kin[1], sig=kin[2]) -
                                                                   output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T)) ), na.rm=T)
 
