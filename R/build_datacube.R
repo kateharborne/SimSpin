@@ -186,9 +186,6 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       stop(c("Error: No gas particles exist in this SimSpin file. \n",
              "Please specify a different method ('velocity' or 'spectral') and try again. \n"))
     }
-  } else {
-    stop(c("Error: Invalid method. \n",
-           "Please specify observation$method = 'spectral', 'velocity', 'sf gas', or 'gas' and try again. \n"))
   }
 
   if (!data.table::is.data.table(galaxy_data)){

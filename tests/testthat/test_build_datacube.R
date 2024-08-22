@@ -320,7 +320,7 @@ test_that("EAGLE files can be built - gas mode and be identical in series and pa
   eagle_gas = build_datacube(simspin_file = ss_eagle,
                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
-                             method = "gas")
+                             method = "gas", moments = 2, verbose=T)
   expect_length(eagle_gas, built_cube_size)
   expect_length(eagle_gas$raw_images, gas_raw_images_size)
   expect_length(eagle_gas$observed_images, gas_observed_images_size)
