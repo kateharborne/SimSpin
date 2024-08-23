@@ -68,16 +68,23 @@ If you do not have the parameter file in the output directory, you should see a 
 =======
 ```{r setup}
 library(SimSpin)
+packageVersion("SimSpin")
 ```
 
+Ensure that the package version of the loaded code is "v2.8.4.1" as this is the version that includes support for tipsy output files from the Gasoline code.
 
 --------------------------------------------------------------------------------
 
-# Step 1: Importing the particle files
+# Step 1: Importing the Gasoline simulation files
 
-For Gasoline outputs, you should recieve a directory that contains the output simulation in one named binary file in tipsy format, along with several additional extension files (e.g. `*.timeform`, `*.iord`, `*.massform`, etc.). If you place the parameter file used to build the simulation in the same directory, this information will also be used to format the SimSpin object, else expected defaults for required parameters will be substituted and the user will be warned that this is the case. 
+To begin a SimSpin observation, we begin by converting the input simulation into a consistent format. This step creates an R-formatted file that is intended to be universal in structure (to aid in comparing between different simulations) and to allow efficient repeat observations of the same system due to the construction of the file. It is a pre-processing step that allows the user to smooth the gas distribution (in the scenario that the softening lengths of the gas is significantly larger than the spaxel size of the intended observation) and pre-computes the assignment of stellar particles to particular stellar templates.
 
-For example:
+For Gasoline outputs, you should have your outputs formatted in a directory that contains the output simulation in one named binary file in tipsy format, along with several additional extension files (e.g. `*.timeform`, `*.iord`, `*.massform`, etc.). If you place the parameter file used to build the simulation in the same directory, this information will also be used to format the SimSpin object, else expected defaults for required parameters will be substituted and the user will be warned that this is the case. 
+
+If you do not have the parameter file in the output directory, you should see a warning issued when teh following code chunk is run. Else, it should proceed without warnings raised. 
+
+**Be aware that the speed at which this chunk will execute will scale with the size of the simulation. For a file containing ~9x10^6 particles (stellar and gas) will take ~10 min to run this initial `make_simspin_file` function, though later data cube construction steps should then be faster. I'd suggest going and getting a coffee! **
+
 ```{r}
 tipsy_output = list.files(dirname(f), full.names = T)
 
@@ -112,8 +119,8 @@ To smooth the gas distribution in an SPH model, we would set the input parameter
 First, initialise a telescope and observing strategy:
 
 ```{r}
-MUSE = SimSpin::telescope(type="MUSE", fov = 5)
-strategy = SimSpin::observing_strategy(dist_z = 0.05, inc_deg=70, blur=F)
+MUSE = SimSpin::telescope(type="MUSE", fov = 10)
+strategy = SimSpin::observing_strategy(dist_z=0.05, inc_deg=70, blur=T, fwhm=0.6)
 ```
 
 Further examples of supported instruments, or how to define your own, can be found online: https://kateharborne.github.io/SimSpin/basic_usage/
