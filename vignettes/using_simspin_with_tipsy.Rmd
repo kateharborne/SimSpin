@@ -14,12 +14,15 @@ knitr::opts_chunk$set(
 )
 ```
 
+
 The purpose of this vignette is to allow a user to explore the range of possible outputs that can be produced by SimSpin for a tipsy formatted input file from the Gasoline code. Because the Gasoline code is sparsely documented, we provide this branch of the code (v2.8.5.1) as a seperate branch `dev-tipsy` that will not be merged with `main`.
 
 In the example below, you will need to enter the file location of your own tipsy Gasoline output galaxy such that this can be run through the code. The rest of the functions *should* then run without modification. Set the location of your simulation input file below:
 
 ```{r}
+
 f = "~/Downloads/drive-download-20240621T012306Z-001/GLX.01500"#"PATH/TO/YOUR/OUTPUT"
+
 ```
 
 The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument. 
@@ -62,6 +65,19 @@ If you do not have the parameter file in the output directory, you should see a 
 
 **Be aware that the speed at which this chunk will execute will scale with the size of the simulation. For a file containing ~9x10^6 particles (stellar and gas) will take ~10 min to run this initial `make_simspin_file` function, though later data cube construction steps should then be faster. I'd suggest going and getting a coffee! **
 
+=======
+```{r setup}
+library(SimSpin)
+```
+
+
+--------------------------------------------------------------------------------
+
+# Step 1: Importing the particle files
+
+For Gasoline outputs, you should recieve a directory that contains the output simulation in one named binary file in tipsy format, along with several additional extension files (e.g. `*.timeform`, `*.iord`, `*.massform`, etc.). If you place the parameter file used to build the simulation in the same directory, this information will also be used to format the SimSpin object, else expected defaults for required parameters will be substituted and the user will be warned that this is the case. 
+
+For example:
 ```{r}
 tipsy_output = list.files(dirname(f), full.names = T)
 
