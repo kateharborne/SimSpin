@@ -153,7 +153,7 @@
 
   # beginning with the gas properties
   if (ngas > 0){
-    # initialise the gas table
+    # initialize the gas table
     if (verbose){cat("There are ", ngas, " gas particles in this file. Building gas_part.")}
 
     gas_part = readBin(data, "numeric", n = ngas*12, size = 4, endian = endian)
@@ -250,6 +250,28 @@
     stars_formed = stars_formed*1e-3 # formation time of stars in Gyrs
     stars_age = (9.427098) - stars_formed
     remove(stars_formed)
+
+    if (any(stringr::str_detect(list.files(dirname(f)), ".param"))){
+
+      param = read.delim(list.files(dirname(f), full.names = T)[stringr::str_detect(list.files(dirname(f)), ".param")],
+                         blank.lines.skip = T, sep = "=", comment.char = "#")
+
+      max_runtime = as.numeric(param[which(stringr::str_detect(param$achInFile, "nSteps")), 2])
+      min_timestep = as.numeric(param[which(stringr::str_detect(param$achInFile, "dDelta")), 2])
+      remove(param)
+
+    } else {
+      min_timestep = 2.12113e-06
+      max_runtime  = 1000
+      warning("Unable to find parameter file. Assuming minimum time step = 2.12113e-06 and maximum run time = 1000 Myr. \n
+              Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input.")
+    }
+
+
+    stars_formed = stars_formed*1e6 # age in yrs
+
+    initial_stars = which(stars_formed<(min_timestep*1e6))
+    stars_formed[initial_stars] = (max_runtime*1e6) # set age of initial stars as age of the simulation
   }
 
   if (file.exists(paste0(f,".massform"))){
@@ -264,9 +286,8 @@
   ssp$Initial_Mass = stars_mass_formed
 
   head = list("Npart" = c(0, ngas, 0, 0, nstar, 0), # number of gas and stars
-              "Time" = time, "Redshift" = ((1/time)-1), # relevent simulation data
+              "Time" = time, "Redshift" = ((1/time)-1), # relevant simulation data
               "Nall" = (ngas+nstar), "Type"="Tipsy") # number of particles in the original file
-
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
