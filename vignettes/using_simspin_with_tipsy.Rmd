@@ -19,7 +19,7 @@ The purpose of this vignette is to allow a user to explore the range of possible
 In the example below, you will need to enter the file location of your own tipsy Gasoline output galaxy such that this can be run through the code. The rest of the functions *should* then run without modification. Set the location of your simulation input file below:
 
 ```{r}
-f = "~/Downloads/drive-download-20240621T012306Z-001/GLX.01500"#"PATH/TO/YOUR/OUTPUT"
+f = "/media/keaitch/RED/NIHAO/GLX.01000/GLX.01000"#"PATH/TO/YOUR/OUTPUT"
 ```
 
 The purpose of the SimSpin R-package is to take a particle simulation of a galaxy and produce a spectral data cube in the style of a specified Integral Field Spectroscopy (IFS) instrument. 
@@ -69,9 +69,9 @@ If you do not have the parameter file in the output directory, you should see a 
 tipsy_output = list.files(dirname(f), full.names = T)
 
 if (any(stringr::str_detect(tipsy_output, ".param"))){
-  print("Values of Star Formation Efficiency set in the parameter file included in this directory will be used for SimSpin.")
+  print("Units as set in the parameter file included in this directory will be used for SimSpin.")
 } else {
-  print("No parameter file included in this directory. Default value of Star Formation Efficiency (0.1 SFR/Msol_gas) will be used for SimSpin.")
+  print("No parameter file included in this directory. Assumed units (distance unit = 1 kpc and mass unit = 1 Msol and G = 1) will be used for SimSpin.")
 }
 
 ### Making a SimSpin file using this input tipsy file ------------------------
