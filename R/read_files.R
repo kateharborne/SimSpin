@@ -286,6 +286,7 @@
     fname = stringi::stri_split_fixed(f, '/', simplify = T)
     t0 = stringi::stri_split_fixed(fname[length(fname)], ".", simplify = T) # time at output
     t0 = as.numeric(t0[length(t0)]) * 1e-3 # in Gyr
+
     age_data = file(paste0(f,".timeform"), "rb")
     stars_formed = readBin(age_data, "numeric", n = nstar, size = 4, endian = endian) # time since the start of the simulation, given in Myr
     close(age_data)
@@ -310,14 +311,20 @@
                               mass = sum(Mass)),
                               by = "gas_cell"]
 
+      summed_young$SFR = summed_young$mass / 1e6
+      summed_young$SFR[is.na(summed_young$gas_cell)] = 0
+
       part_in_cell = gas_part[, list(val=list(ID), .N), by = "gas_cell"]
 
-      for (each in 1:length(part_in_cell$gas_cell)){
-        if (length(summed_young$mass[summed_young$gas_cell == part_in_cell$gas_cell[each]]) > 0){
-          gas_part$SFR[part_in_cell$val[[each]]] = summed_young$mass[summed_young$gas_cell == part_in_cell$gas_cell[each]] / 1e6
-        }
+      glue = merge(summed_young, part_in_cell, by = "gas_cell")
+
+      vals = unlist(glue$val)
+
+      gas_part$SFR[vals] = rep(glue$SFR, glue$N.y)
+
+      remove(part_in_cell, glue, summed_young, vals, sfr_stars)
+
       }
-    }
 
     remove(stars_formed, fname, t0)
 
@@ -328,7 +335,7 @@
     stars_mass_formed = readBin(mass_data, "numeric", n = nstar, size = 4, endian = endian)
     close(mass_data)
 
-    stars_mass_formed = stars_mass_formed*1e10 # initial mass in Msol
+    stars_mass_formed = stars_mass_formed*m_Unit*1e10 # initial mass in Msol
 
     ssp$Initial_Mass = stars_mass_formed
   }
