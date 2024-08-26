@@ -46,7 +46,6 @@ To install a specific branch of the package, we can use the following:
 # install_github("kateharborne/SimSpin", ref="dev-tipsy")  
 # # this points towards the specific branch of the code
 # -------------------------------------------------------- #
-
 library(SimSpin)
 packageVersion("SimSpin")
 ```

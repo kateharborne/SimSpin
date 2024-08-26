@@ -170,7 +170,6 @@
 
   G = 1 # NB: This is assumed! Can't find where it's specified
   v_Unit = sqrt(((.g_constant_cgs * G * 1e-15 / 1e-3) / .kpc_to_km) * .msol_to_kg)
-
   t_Unit = d_Unit/v_Unit * 0.97781311
 
 
@@ -198,6 +197,7 @@
     gas_part$vz = gas_part$vz * v_Unit
     gas_part$SmoothingLength = gas_part$SmoothingLength * d_Unit
     gas_part$Density = gas_part$Density * (m_Unit/(d_Unit^3))
+
 
     # Helium mass fraction including correction based on metallicity, from
     # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
@@ -230,6 +230,7 @@
       (cell_x_n * cell_y_n) - cell_x_n
 
     gas_part$SFR = 0 # place holder for after reading in stars
+
 
   }
 
@@ -285,7 +286,6 @@
     fname = stringi::stri_split_fixed(f, '/', simplify = T)
     t0 = stringi::stri_split_fixed(fname[length(fname)], ".", simplify = T) # time at output
     t0 = as.numeric(t0[length(t0)]) * 1e-3 # in Gyr
-
     age_data = file(paste0(f,".timeform"), "rb")
     stars_formed = readBin(age_data, "numeric", n = nstar, size = 4, endian = endian) # time since the start of the simulation, given in Myr
     close(age_data)
@@ -337,6 +337,7 @@
   head = list("Npart" = c(0, ngas, 0, 0, nstar, 0), # number of gas and stars
               "Time" = time, "Redshift" = ((1/time)-1), # relevant simulation data
               "Nall" = (ngas+nstar), "Type"="Tipsy") # number of particles in the original file
+
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
