@@ -169,7 +169,10 @@
   }
 
   G = 1 # NB: This is assumed! Can't find where it's specified
-  v_Unit = sqrt(((.g_constant_cgs * 1e-15 / 1e-3) / .kpc_to_km) * .msol_to_kg)
+  v_Unit = sqrt(((.g_constant_cgs * G * 1e-15 / 1e-3) / .kpc_to_km) * .msol_to_kg)
+
+  t_Unit = d_Unit/v_Unit * 0.97781311
+
 
   # beginning with the gas properties
   if (ngas > 0){
@@ -193,6 +196,8 @@
     gas_part$vx = gas_part$vx * v_Unit
     gas_part$vy = gas_part$vy * v_Unit
     gas_part$vz = gas_part$vz * v_Unit
+    gas_part$SmoothingLength = gas_part$SmoothingLength * d_Unit
+    gas_part$Density = gas_part$Density * (m_Unit/(d_Unit^3))
 
     # Helium mass fraction including correction based on metallicity, from
     # https://pynbody.github.io/pynbody/_modules/pynbody/snapshot/tipsy.html
@@ -211,22 +216,20 @@
     gas_part$InternalEnergy = gas_part$Temperature / (mu *((5/3) - 1))
     gas_part$ThermalDispersion = sqrt((gas_part$InternalEnergy)*(.adiabatic_index - 1))
 
-    #star formation rate, computed based on the SFE and gas mass
+    #gridding gas particle positions for SFR computation
+    cell_size = 0.1 # 100 pc - can be modified in future
+    cell_seq = seq(min(min(gas_part$x), min(gas_part$y), min(gas_part$z))-cell_size,
+                   max(max(gas_part$x), max(gas_part$y), max(gas_part$z))+cell_size, by = cell_size)
+    cell_x_n = as.numeric(length(unique(cut(gas_part$x, breaks=cell_seq, labels=F))))
+    cell_y_n = as.numeric(length(unique(cut(gas_part$y, breaks=cell_seq, labels=F))))
+    cell_z_n = as.numeric(length(unique(cut(gas_part$z, breaks=cell_seq, labels=F))))
 
-    if (any(stringr::str_detect(list.files(dirname(f)), ".param"))){
+    gas_part$gas_cell = cut(gas_part$x, breaks=cell_seq, labels=F) +
+      (cell_x_n * cut(gas_part$y, breaks=cell_seq, labels=F)) +
+      (cell_x_n * cell_y_n * cut(gas_part$z, breaks=cell_seq, labels=F)) -
+      (cell_x_n * cell_y_n) - cell_x_n
 
-      param = read.delim(list.files(dirname(f), full.names = T)[stringr::str_detect(list.files(dirname(f)), ".param")],
-                         blank.lines.skip = T, sep = "=", comment.char = "#")
-
-      sfe = as.numeric(param[which(stringr::str_detect(param$achInFile, "dCStar")), 2])
-      remove(param)
-
-    } else {
-      sfe = 0.1
-      warning("Unable to find parameter file. Assuming Star Formation Efficiency = 0.1 SFR/Msol_gas. \n Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input. \n")
-    }
-
-    gas_part$SFR = gas_part$Mass * sfe
+    gas_part$SFR = 0 # place holder for after reading in stars
 
   }
 
@@ -279,35 +282,45 @@
   }
 
   if (file.exists(paste0(f,".timeform"))){
+    fname = stringi::stri_split_fixed(f, '/', simplify = T)
+    t0 = stringi::stri_split_fixed(fname[length(fname)], ".", simplify = T) # time at output
+    t0 = as.numeric(t0[length(t0)]) * 1e-3 # in Gyr
+
     age_data = file(paste0(f,".timeform"), "rb")
     stars_formed = readBin(age_data, "numeric", n = nstar, size = 4, endian = endian) # time since the start of the simulation, given in Myr
     close(age_data)
 
-    stars_formed = stars_formed*1e-3 # formation time of stars in Gyrs
-    stars_age = (9.427098) - stars_formed
-    remove(stars_formed)
+    stars_formed = stars_formed * t_Unit # formation time of stars in Gyrs
+    stars_age = t0 - stars_formed
+    stars_age[which(stars_age < 0)] = 14 # setting any initial condition stars with large ages to the maximum
+                                         # option for future users to change to a predetermined age distribution if desired
 
-    if (any(stringr::str_detect(list.files(dirname(f)), ".param"))){
+    ssp$Age = stars_age
 
-      param = read.delim(list.files(dirname(f), full.names = T)[stringr::str_detect(list.files(dirname(f)), ".param")],
-                         blank.lines.skip = T, sep = "=", comment.char = "#")
+    if (ngas > 0) { # compute the SFR from stellar formation from coincident cells
+      star_part$gas_cell = cut(star_part$x, breaks=cell_seq, labels=F) +
+        (cell_x_n * cut(star_part$y, breaks=cell_seq, labels=F)) +
+        (cell_x_n * cell_y_n * cut(star_part$z, breaks=cell_seq, labels=F)) -
+        (cell_x_n * cell_y_n) - cell_x_n
 
-      min_timestep = as.numeric(param[which(stringr::str_detect(param$achInFile, "dDelta")), 2][1])
-      remove(param)
+      sfr_stars = which(stars_formed <= 0.01)
 
-    } else {
+      summed_young = star_part[sfr_stars,
+                              list(.N,
+                              mass = sum(Mass)),
+                              by = "gas_cell"]
 
-      min_timestep  = 2.12e-6
-      warning("Unable to find parameter file. Assuming time step = 2.12e-06. \n
-              Add your parameter file `*.param` to the same directory as the output to read this value successfully from the input.")
+      part_in_cell = gas_part[, list(val=list(ID), .N), by = "gas_cell"]
+
+      for (each in 1:length(part_in_cell$gas_cell)){
+        if (length(summed_young$mass[summed_young$gas_cell == part_in_cell$gas_cell[each]]) > 0){
+          gas_part$SFR[part_in_cell$val[[each]]] = summed_young$mass[summed_young$gas_cell == part_in_cell$gas_cell[each]] / 1e6
+        }
+      }
     }
 
-    stars_formed = stars_formed*1e6 # formation time of stars in yrs
+    remove(stars_formed, fname, t0)
 
-    age_of_sim = (time/min_timestep)*1e6 # age of simulation in years
-
-    stars_age = age_of_sim-stars_formed
-    remove(stars_formed)
   }
 
   if (file.exists(paste0(f,".massform"))){
@@ -316,10 +329,10 @@
     close(mass_data)
 
     stars_mass_formed = stars_mass_formed*1e10 # initial mass in Msol
+
+    ssp$Initial_Mass = stars_mass_formed
   }
 
-  ssp$Age = stars_age
-  ssp$Initial_Mass = stars_mass_formed
 
   head = list("Npart" = c(0, ngas, 0, 0, nstar, 0), # number of gas and stars
               "Time" = time, "Redshift" = ((1/time)-1), # relevant simulation data
