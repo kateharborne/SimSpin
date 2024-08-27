@@ -1,6 +1,6 @@
-# SimSpin v2.9.1 News
+# SimSpin v2.9.2 News
 
-### Last edit: 21/08/2024
+### Last edit: 27/08/2024
 
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
@@ -17,7 +17,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 21/08/24 | Adding the `moments` parameter to output observation summary and ensuring this is written to out output FITS file. Also modifying the output h3 and h4 images in `moments=2` mode to be 0's rather than NA's to avoid warning messages when writing output to FITS. | 2.9.1 |  | Kate Harborne |
+| 27/08/24 | *Bug fix* Adding an extra logic test for .check_names() so that if only 11 particles were included in the files, the Magneticum catch for single particles doesn't trigger on non-Magneticum files. | 2.9.2 |  | Kate Harborne |
+| 21/08/24 | Adding the `moments` parameter to output observation summary and ensuring this is written to out output FITS file. Also modifying the output h3 and h4 images in `moments=2` mode to be 0's rather than NA's to avoid warning messages when writing output to FITS. | 2.9.1 | e69a91e5175a71c3b1d1985dd3e729ac71d430a4 | Kate Harborne |
 | 25/07/24 | *New feature!* Added the `moments` parameter to `build_datacube` function. You can now specify how many moments to fit the LOSVD. Either moments=2 (i.e. fitting a Gaussian to give v_los and sigma_los) or moments=4 (i.e. fitting a Gauss-Hermite polynomial to give v_los, sigma_los, h3 and h4). Fits moments=4 by default, in line with old behaviour of the code. Also *bug fix* to ensure the input variables to `write_simspin_FITS` are of the correct type and to give meaningful errors if not (resolving issue #109). | 2.9.0 | f7ae49853c9821ac992502eb3e7ce3b10c7986c2 | Kate Harborne |
 | 19/07/24 | *Bug fix.* `.check_names()` function fails for TNG outputs if one 1 gas particle is contained in the snapshot due to indexing errors. Added in a catch for this error to prevent unnecessary code failure. | 2.8.8 | b0d53def1f52e12a6da502843a89f49434d88508 | Kate Harborne |
 | 17/06/24 | Adding measurement of radial gas temperature to the output of the `sim_analysis` function | 2.8.7 | ad32eb746479240c4106296999957d6ff74aecdd | Kate Harborne |
