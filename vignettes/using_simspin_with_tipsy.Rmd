@@ -99,7 +99,7 @@ To smooth the gas distribution in an SPH model, we would set the input parameter
 First, initialise a telescope and observing strategy:
 
 ```{r}
-MUSE = SimSpin::telescope(type="MUSE", fov = 5)
+MUSE = SimSpin::telescope(type="MUSE", fov = 1)
 strategy = SimSpin::observing_strategy(dist_z = 0.05, inc_deg=70, blur=F)
 ```
 
@@ -112,7 +112,7 @@ observed_tipsy_cube = build_datacube(simspin_file = tipsy_simspin_file,
                                      telescope = MUSE,
                                      observing_strategy = strategy,
                                      method = "velocity", 
-                                     write_fits = F)
+                                     write_fits = F, mass_flag = T)
 ```
 
 This file will contain a number of images. To construct a spectral data cube (in which you will then need to run pPXF to derive observed kinematics and stellar population parameters), simply switch `method = "spectral"`.
