@@ -787,3 +787,56 @@ test_that("No errors when HDF5 files input only have a single gas particle - Mag
   unlink(paste0(temp_loc, "/SimSpin_example_magneticum_copy.hdf5"))
 
 })
+
+
+test_that("No errors when other HDF5 files input only have 11 gas particles - EAGLE", {
+
+  file.copy(from = ss_eagle, to = paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"), overwrite = T)
+  data = hdf5r::h5file(paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"), mode = "r+") # read in the eagle file and rename the RubLabel
+
+  PT0_attr = hdf5r::list.datasets(data[["PartType0"]])
+
+  expected_names_gas = c("Coordinates", "Density", "Mass", "ParticleIDs",
+                         "ElementAbundance/Oxygen", "SmoothedElementAbundance/Oxygen",
+                         "ElementAbundance/Hydrogen", "SmoothedElementAbundance/Hydrogen",
+                         "SmoothedMetallicity", "Metallicity",
+                         "StarFormationRate", "Velocity", "SmoothingLength",
+                         "Temperature", "InternalEnergy")
+
+  PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
+
+  n_gas_prop = length(PT0_attr)
+  gas = vector("list", n_gas_prop)
+  names(gas) = PT0_attr
+
+  for (i in 1:n_gas_prop){
+    aexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent")
+    hexp = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent")
+    cgs  = hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor")
+    gas[[i]] =
+      hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]])
+
+    if (length(dim(gas[[i]]))==2){
+      gas[[i]] = gas[[i]][,1:11]
+    } else {
+      gas[[i]] = gas[[i]][1:11]
+    }
+  }
+
+  for (i in 1:n_gas_prop){
+    data[["PartType0/"]]$link_delete(paste0(PT0_attr[i]))
+    data[[paste0("PartType0/",PT0_attr[i])]] = gas[[i]]
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent") = aexp
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "h-scale-exponent") = hexp
+    hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "CGSConversionFactor") = cgs
+  }
+
+  hdf5r::h5close(data)
+
+  ss_file = make_simspin_file(filename = paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"), write_to_file = F)
+
+  expect_length(ss_file, ss_file_length)
+
+  unlink(paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"))
+
+})
