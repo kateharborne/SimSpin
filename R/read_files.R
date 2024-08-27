@@ -877,7 +877,7 @@
   }
 
   if (!is.null(nrow(particle_list$Metallicity)) |
-      length(particle_list$Metallicity)[1] == 11){
+      length(particle_list$Metallicity)[1] == 11 & length(particle_list$ParticleIDs) != 11){
 
     one_p_flag = FALSE
     if (is.null(dim(particle_list$Coordinates))){one_p_flag = TRUE}
