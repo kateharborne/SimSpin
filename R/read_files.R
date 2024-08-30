@@ -285,17 +285,19 @@
     fname = stringi::stri_split_fixed(f, '/', simplify = T)
     t0 = stringi::stri_split_fixed(fname[length(fname)], ".", simplify = T) # time at output
     t0 = as.numeric(t0[length(t0)]) * 1e-3 # in Gyr
+    time = t0
 
     age_data = file(paste0(f,".timeform"), "rb")
     stars_formed = readBin(age_data, "numeric", n = nstar, size = 4, endian = endian) # time since the start of the simulation, given in Myr
     close(age_data)
 
     stars_formed = stars_formed * t_Unit # formation time of stars in Gyrs
+
     stars_age = t0 - stars_formed
-    stars_age[which(stars_age < 0)] = 14 # setting any initial condition stars with large ages to the maximum
+    stars_formed[which(stars_age < 0)] = 14 + t0 # setting any initial condition stars with large ages to the maximum
                                          # option for future users to change to a predetermined age distribution if desired
 
-    ssp$Age = stars_age
+    ssp$Age = stars_formed
 
     if (ngas > 0) { # compute the SFR from stellar formation from coincident cells
       star_part$gas_cell = cut(star_part$x, breaks=cell_seq, labels=F) +
