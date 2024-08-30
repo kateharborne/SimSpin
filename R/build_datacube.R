@@ -485,7 +485,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                          fn    = .losvd_fit_h3h4,
                                          x     = observation$vbin_seq,
                                          losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                         method="BFGS", control=list(reltol=1e-9))$par},
+                                         method="L-BFGS-B", lower = c(NA, 0, NA, NA),
+                                         control=list(pgtol=1e-9))$par},
                            error = function(e){c(0,0,0,0)})
 
           output$observed_images$velocity_image[c,d]   = kin[1]
@@ -508,7 +509,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                          fn    = .losvd_fit_vsig,
                                          x     = observation$vbin_seq,
                                          losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                         method="BFGS", control=list(reltol=1e-9))$par},
+                                         method="L-BFGS-B", lower = c(NA, 0),
+                                         control=list(pgtol=1e-9))$par},
                            error = function(e){c(0,0)})
 
           output$observed_images$velocity_image[c,d]   = kin[1]
@@ -616,7 +618,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                         fn    = .losvd_fit_h3h4,
                                         x     = observation$vbin_seq,
                                         losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                        method="BFGS", control=list(reltol=1e-9))$par},
+                                        method="L-BFGS-B", lower = c(NA, 0, NA, NA),
+                                        control=list(pgtol=1e-9))$par},
                           error = function(e){c(0,0,0,0)})
 
           output$observed_images$velocity_image[c,d]   = kin[1]
@@ -640,7 +643,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                         fn    = .losvd_fit_vsig,
                                         x     = observation$vbin_seq,
                                         losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                        method="BFGS", control=list(reltol=1e-9))$par},
+                                        method="L-BFGS-B", lower = c(NA, 0),
+                                        control=list(pgtol=1e-9))$par},
                           error = function(e){c(0,0)})
 
           output$observed_images$velocity_image[c,d]   = kin[1]

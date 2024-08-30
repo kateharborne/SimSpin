@@ -821,9 +821,7 @@ test_that("No errors when other HDF5 files input only have 11 gas particles - EA
     } else {
       gas[[i]] = gas[[i]][1:11]
     }
-  }
 
-  for (i in 1:n_gas_prop){
     data[["PartType0/"]]$link_delete(paste0(PT0_attr[i]))
     data[[paste0("PartType0/",PT0_attr[i])]] = gas[[i]]
     hdf5r::h5attr(data[[paste0("PartType0/",PT0_attr[i])]], "aexp-scale-exponent") = aexp
