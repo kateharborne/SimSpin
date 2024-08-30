@@ -164,47 +164,15 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     # reassign any age==0 particles to have a small non-zero age
     galaxy_data$ssp$Age[galaxy_data$ssp$Age==0] = 1e-9
 
-    # if there are greater than 1e6 stellar particles, bin stellar particles on age/Z position
-    if (length(galaxy_data$star_part$ID) > 1e6){
-      age_grid = 10^(seq(log10(min(galaxy_data$ssp$Age))-0.02, log10(max(galaxy_data$ssp$Age))+0.02, by = 0.02))
-      Z_grid   = 10^(seq(log10(min(galaxy_data$ssp$Metallicity))-0.1, log10(max(galaxy_data$ssp$Metallicity))+0.1, by = 0.1))
+    galaxy_data$star_part[, Metallicity := galaxy_data$ssp$Metallicity, ]
+    galaxy_data$star_part[, Age := galaxy_data$ssp$Age, ]
+    galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
+    galaxy_data$star_part[, sed_id := seq(1, length(galaxy_data$star_part$ID)), ]
 
-      age_cen  = 10^(seq(log10(min(galaxy_data$ssp$Age))-0.01, log10(max(galaxy_data$ssp$Age))+0.01, by = 0.02))
-      Z_cen    = 10^(seq(log10(min(galaxy_data$ssp$Metallicity))-0.05, log10(max(galaxy_data$ssp$Metallicity))+0.05, by = 0.1))
-
-      AZ       = data.frame("ages" = rep(age_cen, length = length(age_cen)*length(Z_cen)),
-                            "metallicities" = rep(Z_cen, each = length(age_cen)),
-                            "id" = seq(1, length(age_cen)*length(Z_cen)))
-
-      az_pos = cut(galaxy_data$ssp$Age, breaks = age_grid, labels = F) +
-        (length(age_cen) * cut(galaxy_data$ssp$Metallicity, breaks = Z_grid, labels = F)) - length(age_cen)
-
-      AZ_bins = AZ[sort(unique(az_pos)),]
-      AZ_bins$sed_id = seq(1, length(AZ_bins$id))
-
-      # adding info to stellar_particle data
-      galaxy_data$star_part[, sed_id := AZ_bins$sed_id[match(az_pos,AZ_bins$id)], ]
-      galaxy_data$star_part[, Metallicity := galaxy_data$ssp$Metallicity, ]
-      galaxy_data$star_part[, Age := galaxy_data$ssp$Age, ]
-      galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
-
-      sed  = .spectral_weights(Metallicity = AZ_bins$metallicities,
-                               Age = AZ_bins$ages,
-                               Template = temp, cores = cores)
-
-    } else {
-
-      galaxy_data$star_part[, Metallicity := galaxy_data$ssp$Metallicity, ]
-      galaxy_data$star_part[, Age := galaxy_data$ssp$Age, ]
-      galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
-      galaxy_data$star_part[, sed_id := seq(1, length(galaxy_data$star_part$ID)), ]
-
-      sed  = .spectral_weights(Metallicity = galaxy_data$ssp$Metallicity,
-                               Age = galaxy_data$ssp$Age,
-                               Template = temp, cores = cores)
-      # returns a list of spectra ids from the template set and the associated weights for A and Z
-
-    }
+    sed  = .spectral_weights(Metallicity = galaxy_data$ssp$Metallicity,
+                             Age = galaxy_data$ssp$Age,
+                             Template = temp, cores = cores)
+    # returns a list of spectra ids from the template set and the associated weights for A and Z
 
   } else if (header$Type == "nbody"){ # if working with N-body
 
