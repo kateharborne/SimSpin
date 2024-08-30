@@ -294,10 +294,10 @@
     stars_formed = stars_formed * t_Unit # formation time of stars in Gyrs
 
     stars_age = t0 - stars_formed
-    stars_formed[which(stars_age < 0)] = 14 + t0 # setting any initial condition stars with large ages to the maximum
+    stars_age[which(stars_age < 0)] = 14 # setting any initial condition stars with large ages to the maximum
                                          # option for future users to change to a predetermined age distribution if desired
 
-    ssp$Age = stars_formed
+    ssp$Age = stars_age
 
     if (ngas > 0) { # compute the SFR from stellar formation from coincident cells
       star_part$gas_cell = cut(star_part$x, breaks=cell_seq, labels=F) +
