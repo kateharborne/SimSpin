@@ -188,6 +188,10 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       galaxy_data$star_part[, Age := galaxy_data$ssp$Age, ]
       galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
 
+      sed  = .spectral_weights(Metallicity = AZ_bins$metallicities,
+                               Age = AZ_bins$ages,
+                               Template = temp, cores = cores)
+
     } else {
 
       galaxy_data$star_part[, Metallicity := galaxy_data$ssp$Metallicity, ]
@@ -195,12 +199,12 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
       galaxy_data$star_part[, Initial_Mass := galaxy_data$ssp$Initial_Mass, ]
       galaxy_data$star_part[, sed_id := seq(1, length(galaxy_data$star_part$ID)), ]
 
-    }
+      sed  = .spectral_weights(Metallicity = galaxy_data$ssp$Metallicity,
+                               Age = galaxy_data$ssp$Age,
+                               Template = temp, cores = cores)
+      # returns a list of spectra ids from the template set and the associated weights for A and Z
 
-    sed  = .spectral_weights(Metallicity = galaxy_data$ssp$Metallicity,
-                             Age = galaxy_data$ssp$Age,
-                             Template = temp, cores = cores)
-    # returns a list of spectra ids from the template set and the associated weights for A and Z
+    }
 
   } else if (header$Type == "nbody"){ # if working with N-body
 
