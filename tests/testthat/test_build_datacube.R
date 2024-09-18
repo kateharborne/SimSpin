@@ -12,6 +12,7 @@ ss_pd_eagle      = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package 
 ss_pd_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
 ss_pd_horizon    = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", package = "SimSpin")
 ss_pd_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", package = "SimSpin")
+ss_pd_colibre    = system.file("extdata", "SimSpin_example_Colibre.hdf5", package = "SimSpin")
 
 ss_gadget_old = system.file("extdata", "SimSpin_example_Gadget_spectra.Rdata", package = "SimSpin")
 ss_gadget     = make_simspin_file(ss_pd_gadget, write_to_file = FALSE)
@@ -20,6 +21,7 @@ ss_eagle      = make_simspin_file(ss_pd_eagle, write_to_file = FALSE, template =
 ss_magneticum = make_simspin_file(ss_pd_magneticum, write_to_file = FALSE, template = "BC03hr", sph_spawn_n=10)
 ss_horizon    = make_simspin_file(ss_pd_horizon, write_to_file = FALSE, template = "BC03lr")
 ss_illustris  = make_simspin_file(ss_pd_illustris, write_to_file = FALSE, template = "BC03lr")
+ss_colibre    = make_simspin_file(ss_pd_colibre, write_to_file = FALSE, template = "BC03lr", sph_spawn_n=10)
 
 temp_loc = tempdir()
 
@@ -174,6 +176,29 @@ test_that("IllustrisTNG files can be built - spectral mode and be identical in s
 
 })
 
+test_that("Colibre files can be built - spectral mode and be identical in series and parallel", {
+  colibre_spectra = build_datacube(simspin_file = ss_colibre,
+                                     telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                     observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T))
+  expect_length(colibre_spectra, built_cube_size)
+  expect_length(colibre_spectra$raw_images, spectra_raw_images_size)
+  expect_null(colibre_spectra$observed_images)
+
+  colibre_parallel_spectra = build_datacube(simspin_file = ss_colibre,
+                                              telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),
+                                              observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                              cores = 2)
+  expect_length(colibre_parallel_spectra, built_cube_size)
+  expect_length(colibre_parallel_spectra$raw_images, spectra_raw_images_size)
+  expect_null(colibre_parallel_spectra$observed_images)
+
+  expect_true(all.equal(colibre_spectra$spectral_cube, colibre_parallel_spectra$spectral_cube))
+  expect_true(all.equal(colibre_spectra$raw_images$flux_image, colibre_parallel_spectra$raw_images$flux_image))
+  expect_true(all.equal(colibre_spectra$raw_images$velocity_image, colibre_parallel_spectra$raw_images$velocity_image))
+  expect_true(all.equal(colibre_spectra$raw_images$dispersion_image, colibre_parallel_spectra$raw_images$dispersion_image))
+
+})
+
 # Testing that build_datacube works in velocity mode ----
 test_that("Gadget files can be built - velocity mode.", {
   gadget_velocity = build_datacube(simspin_file = ss_gadget,
@@ -314,6 +339,37 @@ test_that("IllustrisTNG files can be built - velocity mode and be identical in s
 
 })
 
+test_that("Colibre files can be built - velocity mode and be identical in series and parallel.", {
+  colibre_velocity = build_datacube(simspin_file = ss_colibre,
+                                      telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                      observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                      method = "velocity", mass_flag = T)
+  expect_length(colibre_velocity, built_cube_size)
+  expect_length(colibre_velocity$raw_images, velocity_raw_images_size)
+  expect_length(colibre_velocity$observed_images, velocity_observed_images_size)
+  expect_true(colibre_velocity$observation$mass_flag)
+
+  colibre_parallel_velocity = build_datacube(simspin_file = ss_colibre,
+                                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                               method = "velocity", mass_flag = T,
+                                               cores = 2)
+  expect_length(colibre_parallel_velocity, built_cube_size)
+  expect_length(colibre_parallel_velocity$raw_images, velocity_raw_images_size)
+  expect_length(colibre_parallel_velocity$observed_images, velocity_observed_images_size)
+  expect_true(colibre_parallel_velocity$observation$mass_flag)
+
+  expect_true(all.equal(colibre_velocity$velocity_cube, colibre_parallel_velocity$velocity_cube))
+  expect_true(all.equal(colibre_velocity$raw_images$flux_image, colibre_parallel_velocity$raw_images$flux_image))
+  expect_true(all.equal(colibre_velocity$raw_images$velocity_image, colibre_parallel_velocity$raw_images$velocity_image))
+  expect_true(all.equal(colibre_velocity$raw_images$dispersion_image, colibre_parallel_velocity$raw_images$dispersion_image))
+  expect_true(all.equal(colibre_velocity$observed_images$flux_image, colibre_parallel_velocity$observed_images$flux_image))
+  expect_true(all.equal(colibre_velocity$observed_images$velocity_image, colibre_parallel_velocity$observed_images$velocity_image))
+  expect_true(all.equal(colibre_velocity$observed_images$dispersion_image, colibre_parallel_velocity$observed_images$dispersion_image))
+
+})
+
+
 # Testing that build_datacube works in gas mode ----
 
 test_that("EAGLE files can be built - gas mode and be identical in series and parallel.", {
@@ -453,6 +509,41 @@ test_that("IllustrisTNG files can be built - gas mode and be identical in series
 
 })
 
+test_that("Colibre files can be built - gas mode and be identical in series and parallel.", {
+  colibre_gas = build_datacube(simspin_file = ss_colibre,
+                                 telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                 observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 0, twist_deg = 90, blur = F),
+                                 method = "gas")
+  expect_length(colibre_gas, built_cube_size)
+  expect_length(colibre_gas$raw_images, gas_raw_images_size)
+  expect_length(colibre_gas$observed_images, gas_observed_images_size)
+
+  colibre_parallel_gas = build_datacube(simspin_file = ss_colibre,
+                                          telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                          observing_strategy = observing_strategy(dist_z = 0.1, inc_deg = 0, twist_deg = 90, blur = F),
+                                          method = "gas",
+                                          cores = 2)
+  expect_length(colibre_parallel_gas, built_cube_size)
+  expect_length(colibre_parallel_gas$raw_images, gas_raw_images_size)
+  expect_length(colibre_parallel_gas$observed_images, gas_observed_images_size)
+
+  expect_true(all.equal(colibre_gas$velocity_cube, colibre_parallel_gas$velocity_cube))
+  expect_true(all.equal(colibre_gas$raw_images$mass_image, colibre_parallel_gas$raw_images$mass_image))
+  expect_true(all.equal(colibre_gas$raw_images$velocity_image, colibre_parallel_gas$raw_images$velocity_image))
+  expect_true(all.equal(colibre_gas$raw_images$dispersion_image, colibre_parallel_gas$raw_images$dispersion_image))
+  expect_true(all.equal(colibre_gas$raw_images$SFR_image, colibre_parallel_gas$raw_images$SFR_image))
+  expect_true(all.equal(colibre_gas$raw_images$metallicity_image, colibre_parallel_gas$raw_images$metallicity_image))
+  expect_true(all.equal(colibre_gas$raw_images$OH_image, colibre_parallel_gas$raw_images$OH_image))
+  expect_true(all.equal(colibre_gas$raw_images$particle_image, colibre_parallel_gas$raw_images$particle_image))
+  expect_true(all.equal(colibre_gas$observed_images$mass_image, colibre_parallel_gas$observed_images$mass_image))
+  expect_true(all.equal(colibre_gas$observed_images$velocity_image, colibre_parallel_gas$observed_images$velocity_image))
+  expect_true(all.equal(colibre_gas$observed_images$dispersion_image, colibre_parallel_gas$observed_images$dispersion_image))
+  expect_true(all.equal(colibre_gas$observed_images$h3_image, colibre_parallel_gas$observed_images$h3_image))
+  expect_true(all.equal(colibre_gas$observed_images$h4_image, colibre_parallel_gas$observed_images$h4_image))
+
+})
+
+
 # Testing that build_datacube works in sf gas mode ----
 
 test_that("EAGLE files can be built - sf gas mode and be identical in series and parallel.", {
@@ -521,6 +612,40 @@ test_that("Magneticum files can be built - sf gas mode and be identical in serie
   expect_true(all.equal(magneticum_sf_gas$observed_images$dispersion_image, magneticum_parallel_sf_gas$observed_images$dispersion_image))
   expect_true(all.equal(magneticum_sf_gas$observed_images$h3_image, magneticum_parallel_sf_gas$observed_images$h3_image))
   expect_true(all.equal(magneticum_sf_gas$observed_images$h4_image, magneticum_parallel_sf_gas$observed_images$h4_image))
+
+})
+
+test_that("Colibre files can be built - sf gas mode and be identical in series and parallel.", {
+  colibre_sf_gas = build_datacube(simspin_file = ss_colibre,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                method = "sf gas")
+  expect_length(colibre_sf_gas, built_cube_size)
+  expect_length(colibre_sf_gas$raw_images, gas_raw_images_size)
+  expect_length(colibre_sf_gas$observed_images, gas_observed_images_size)
+
+  colibre_parallel_sf_gas = build_datacube(simspin_file = ss_colibre,
+                                         telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                         observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                         method = "sf gas",
+                                         cores = 2)
+  expect_length(colibre_parallel_sf_gas, built_cube_size)
+  expect_length(colibre_parallel_sf_gas$raw_images, gas_raw_images_size)
+  expect_length(colibre_parallel_sf_gas$observed_images, gas_observed_images_size)
+
+  expect_true(all.equal(colibre_sf_gas$velocity_cube, colibre_parallel_sf_gas$velocity_cube))
+  expect_true(all.equal(colibre_sf_gas$raw_images$mass_image, colibre_parallel_sf_gas$raw_images$mass_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$velocity_image, colibre_parallel_sf_gas$raw_images$velocity_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$dispersion_image, colibre_parallel_sf_gas$raw_images$dispersion_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$SFR_image, colibre_parallel_sf_gas$raw_images$SFR_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$metallicity_image, colibre_parallel_sf_gas$raw_images$metallicity_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$OH_image, colibre_parallel_sf_gas$raw_images$OH_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$particle_image, colibre_parallel_sf_gas$raw_images$particle_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$mass_image, colibre_parallel_sf_gas$observed_images$mass_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$velocity_image, colibre_parallel_sf_gas$observed_images$velocity_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$dispersion_image, colibre_parallel_sf_gas$observed_images$dispersion_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$h3_image, colibre_parallel_sf_gas$observed_images$h3_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$h4_image, colibre_parallel_sf_gas$observed_images$h4_image))
 
 })
 
@@ -735,6 +860,18 @@ test_that("Data cubes can be written to a single files", {
   expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_eagle.FITS"))) == gas_number_of_hdu_snfalse)
   expect_true(stringr::str_detect(Rfits::Rfits_read_header_raw(paste0(temp_loc, "/ss_eagle.FITS")), "Msol"))
 
+  expect_length(build_datacube(simspin_file = ss_colibre,
+                               telescope = telescope(type="MUSE", fov = 10, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.27, inc_deg = 60, blur = T, fwhm = 0.6),
+                               method="gas",
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_colibre.FITS"),
+                               split_save=F), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre.FITS")))
+  expect_true(length(Rfits::Rfits_read(paste0(temp_loc, "/ss_colibre.FITS"))) == gas_number_of_hdu_snfalse)
+  expect_true(stringr::str_detect(Rfits::Rfits_read_header_raw(paste0(temp_loc, "/ss_colibre.FITS")), "Msol"))
+
+
   expect_length(build_datacube(simspin_file = ss_eagle,
                                telescope = telescope(type="MUSE", fov = 10, signal_to_noise = 30),
                                observing_strategy = observing_strategy(dist_z = 0.27, inc_deg = 60, blur = T, fwhm = 0.6),
@@ -808,6 +945,7 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm.FITS",
          paste0(temp_loc, "/ss_gadget_mft_snf.FITS"),
          paste0(temp_loc, "/ss_gadget_mft_snf_voronoi.FITS"),
          paste0(temp_loc, "/ss_eagle.FITS"),
+         paste0(temp_loc, "/ss_colibre.FITS"),
          paste0(temp_loc, "/ss_eagle_snt.FITS"),
          paste0(temp_loc, "/ss_magenticum.FITS"),
          paste0(temp_loc, "/ss_hdf5.FITS"),
@@ -826,7 +964,8 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_mass_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS"))
-  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_ageM_image.FITS"))
+  expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_ageL_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS"))
   expect_true(file.exists("GalaxyID_unknown_inc45deg_seeing2fwhm_raw_voronoi_bins.FITS"))
@@ -854,7 +993,8 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_age_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_ageM_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_ageL_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_inv_variance_cube.FITS")))
@@ -916,10 +1056,28 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_flux_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_velocity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_dispersion_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_age_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_ageM_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_ageL_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS")))
   expect_false(file.exists(paste0(temp_loc, "/ss_hdf5_inv_variance_cube.FITS")))
+
+  expect_length(build_datacube(simspin_file = ss_colibre,
+                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                               observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                               write_fits = T, output_location = paste0(temp_loc, "/ss_colibre.FITS"),
+                               split_save=T), built_cube_size)
+
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_spectral_cube.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_observation_summary.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_raw_flux_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_raw_velocity_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_raw_dispersion_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_raw_ageM_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_raw_ageL_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_raw_metallicity_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_colibre_raw_particle_image.FITS")))
+  expect_false(file.exists(paste0(temp_loc, "/ss_colibre_inv_variance_cube.FITS")))
 
 })
 
@@ -929,7 +1087,8 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_mass_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS",
-         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_ageM_image.FITS",
+         "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_ageL_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS",
          "GalaxyID_unknown_inc45deg_seeing2fwhm_raw_voronoi_bins.FITS",
@@ -946,7 +1105,8 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_gadget_raw_mass_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_raw_age_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_ageM_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_ageL_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS"),
          paste0(temp_loc, "/ss_gadget_inv_variance_cube.FITS"),
@@ -989,9 +1149,21 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_hdf5_raw_mass_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_velocity_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_dispersion_image.FITS"),
-         paste0(temp_loc, "/ss_hdf5_raw_age_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_raw_ageM_image.FITS"),
+         paste0(temp_loc, "/ss_hdf5_raw_ageL_image.FITS"),
          paste0(temp_loc, "/ss_hdf5_raw_metallicity_image.FITS"),
-         paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS")
+         paste0(temp_loc, "/ss_hdf5_raw_particle_image.FITS"),
+
+         paste0(temp_loc, "/ss_colibre_spectral_cube.FITS"),
+         paste0(temp_loc, "/ss_colibre_observation_summary.FITS"),
+         paste0(temp_loc, "/ss_colibre_raw_flux_image.FITS"),
+         paste0(temp_loc, "/ss_colibre_raw_mass_image.FITS"),
+         paste0(temp_loc, "/ss_colibre_raw_velocity_image.FITS"),
+         paste0(temp_loc, "/ss_colibre_raw_dispersion_image.FITS"),
+         paste0(temp_loc, "/ss_colibre_raw_ageM_image.FITS"),
+         paste0(temp_loc, "/ss_colibre_raw_ageL_image.FITS"),
+         paste0(temp_loc, "/ss_colibre_raw_metallicity_image.FITS"),
+         paste0(temp_loc, "/ss_colibre_raw_particle_image.FITS")
 ))
 
 test_that("Mask can be included in FITS files correctly", {
@@ -1032,7 +1204,8 @@ unlink(c(paste0(temp_loc, "/ss_gadget.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_mass_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS"),
-         paste0(temp_loc, "/ss_gadget_raw_age_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_ageM_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_raw_ageL_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_metallicity_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_particle_image.FITS"),
          paste0(temp_loc, "/ss_gadget_mask.FITS")))
@@ -1050,7 +1223,8 @@ test_that("FITS files will be written with automatic names at directory given by
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_mass_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS")))
-  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_ageM_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_ageL_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS")))
 })
@@ -1061,7 +1235,8 @@ unlink(c(paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.F
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_mass_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_velocity_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_dispersion_image.FITS"),
-         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_age_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_ageM_image.FITS"),
+         paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_ageL_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_metallicity_image.FITS"),
          paste0(temp_loc,"/GalaxyID_unknown_inc45deg_seeing2fwhm_raw_particle_image.FITS")))
 

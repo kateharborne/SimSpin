@@ -124,6 +124,10 @@ test_that("Error when output file already exists and overwrite = F - IllustrisTN
   expect_error(make_simspin_file(ss_illustris, output = paste(temp_loc, "/illustris_test", sep="")))
 })
 
+test_that("Error when output file already exists and overwrite = F - Colibre",{
+  expect_error(make_simspin_file(ss_colibre, output = paste(temp_loc, "/colibre_test", sep="")))
+})
+
 # Test that function can output to environment
 test_that("Function works to output List to environment", {
   ss_file = make_simspin_file(ss_gadget, write_to_file = FALSE)
