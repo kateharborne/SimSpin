@@ -958,8 +958,8 @@
     names(particle_list) <- current_names
   }
 
-  if ("ElementMassFraction/Hydrogen" %in% current_names){
-    current_names[which(current_names == "ElementMassFraction/Hydrogen")] <- "ElementAbundance/Hydrogen"
+  if ("ElementMassFractions/Hydrogen" %in% current_names){
+    current_names[which(current_names == "ElementMassFractions/Hydrogen")] <- "ElementAbundance/Hydrogen"
     names(particle_list) <- current_names
   }
 
@@ -968,8 +968,8 @@
     names(particle_list) <- current_names
   }
 
-  if ("ElementMassFraction/Oxygen" %in% current_names){
-    current_names[which(current_names == "ElementMassFraction/Oxygen")] <- "ElementAbundance/Oxygen"
+  if ("ElementMassFractions/Oxygen" %in% current_names){
+    current_names[which(current_names == "ElementMassFractions/Oxygen")] <- "ElementAbundance/Oxygen"
     names(particle_list) <- current_names
   }
 
