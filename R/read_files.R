@@ -178,7 +178,7 @@
   if (magneticum){output = .magneticum_read_hdf5(data, head, cores)}
   if (horizonagn){output = .horizonagn_read_hdf5(data, head, cores)}
   if (illustristng){output = .illustristng_read_hdf5(data, head, cores)}
-  if (colibre){output = .colibre(data, head, cores)}
+  if (colibre){output = .colibre_read_hdf5(data, head, cores)}
 
   hdf5r::h5close(data)
 
@@ -962,7 +962,8 @@
 
   } else {star_part=NULL; ssp=NULL}
 
-  head$Type = "EAGLE"
+  head$Type = "Colibre"
+
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
