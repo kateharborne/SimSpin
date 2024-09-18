@@ -354,10 +354,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       flux_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
-      age_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      ageM_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      ageL_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
       particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
+      voronoi_bins = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
       mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
       )
 
@@ -425,11 +426,12 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       flux_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
-      age_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      metallicity_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      ageM_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      ageL_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
       mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
       particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[6]], dim = c(observation$sbin, observation$sbin))
+      voronoi_bins = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
       flux_image = array(data = summed_images$filter_luminosity, dim = c(observation$sbin, observation$sbin)),
