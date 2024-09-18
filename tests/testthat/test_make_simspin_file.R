@@ -12,6 +12,7 @@ ss_eagle      = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "
 ss_magneticum = system.file("extdata", "SimSpin_example_Magneticum.hdf5", package = "SimSpin")
 ss_horizon    = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", package = "SimSpin")
 ss_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", package = "SimSpin")
+ss_colibre    = system.file("extdata", "SimSpin_example_Colibre.hdf5", package = "SimSpin")
 
 ss_file_length = 4
 ss_file_header_length = 15
@@ -82,6 +83,19 @@ test_that("Initial run of each simulation type - IllustrisTNG", {
   expect_true(nrow(TNG$spectral_weights) == 8)
   expect_false(any(is.na(TNG$gas_part$ThermalDispersion)))
   expect_true(all(TNG$gas_part$ThermalDispersion[TNG$gas_part$Temperature < 1e4] == 11))
+
+})
+
+test_that("Initial run of each simulation type - Colibre", {
+  expect_null(make_simspin_file(ss_colibre, output = paste(temp_loc, "/colibre_test", sep="")))
+
+  colibre = readRDS(paste(temp_loc, "/colibre_test", sep=""))
+  expect_length(colibre, ss_file_length)
+  expect_true(colibre$header$Type == "Colibre")
+  expect_true(length(colibre$gas_part) == 16)
+  expect_true(nrow(colibre$spectral_weights) == 8)
+  expect_false(any(is.na(colibre$gas_part$ThermalDispersion)))
+  expect_true(all(colibre$gas_part$ThermalDispersion[colibre$gas_part$Temperature < 1e4] == 11))
 
 })
 
@@ -340,7 +354,8 @@ test_that("Temperature does not go outside a reasonable range",{
 
 unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", sep=""),
          paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep=""),
-         paste(temp_loc, "/horizon_test", sep=""), paste(temp_loc, "/illustris_test", sep="")))
+         paste(temp_loc, "/horizon_test", sep=""), paste(temp_loc, "/illustris_test", sep=""),
+         paste(temp_loc, "/colibre_test", sep="")))
 
 # Testing that the centre parameter works as expected ------------
 test_that("Objects are centered correctly based on the specified central coordinates", {
