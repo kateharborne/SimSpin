@@ -25,26 +25,26 @@ temp_loc = tempdir()
 
 built_cube_size = 5
 ob_table_loc = 3
-variance_loc_spectral = 11
+variance_loc_spectral = 12
 
-spectra_raw_images_size = 7
+spectra_raw_images_size = 8
 spectra_observed_images_size = NULL
-spectra_number_of_hdu_sntrue = 11
-spectra_number_of_hdu_snfalse = 10
+spectra_number_of_hdu_sntrue = 12
+spectra_number_of_hdu_snfalse = 11
 spectral_raw_vel_loc = 5
 
-velocity_raw_images_size = 7
+velocity_raw_images_size = 8
 velocity_observed_images_size = 7
 
-velocity_number_of_hdu_sntrue = 18
-velocity_number_of_hdu_snfalse = 17
+velocity_number_of_hdu_sntrue = 19
+velocity_number_of_hdu_snfalse = 18
 velocity_obs_vel_loc = 5
 velocity_obs_h3_loc = 7
 velocity_obs_h4_loc = 8
 velocity_obs_res_loc = 9
 velocity_obs_mass_loc = 10
 velocity_raw_mass_loc = 12
-velocity_variance_loc = 18
+velocity_variance_loc = 19
 
 gas_raw_images_size = 7
 gas_observed_images_size = 7
