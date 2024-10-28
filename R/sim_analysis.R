@@ -237,7 +237,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
   # For circularly-binned properties -------------------------------------------
   galaxy_data$R = sqrt((galaxy_data$x^2) + (galaxy_data$y^2))
   galaxy_data$phi_circ = atan2(y = galaxy_data$y, x = galaxy_data$x)
-  galaxy_data$vR = galaxy_data$vy*sin(galaxy_data$phi_circ) + galaxy_data$vx*cos(galaxy_data$phi_circ)
+  galaxy_data$v_r_circ = galaxy_data$vy*sin(galaxy_data$phi_circ) + galaxy_data$vx*cos(galaxy_data$phi_circ)
   galaxy_data$vphi_circ = galaxy_data$vy*cos(galaxy_data$phi_circ) - galaxy_data$vx*sin(galaxy_data$phi_circ)
 
   galaxy_data$Jx = galaxy_data$Mass * ((galaxy_data$y * galaxy_data$vz) - (galaxy_data$z * galaxy_data$vy))
@@ -344,11 +344,11 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = mean(sample$vphi_circ)
       analysis_data$RadialTrends_Cylindrical$RotationalDispersion[binID] = sd(sample$vphi_circ)
       analysis_data$RadialTrends_Cylindrical$Circularity[binID] = mean((sample$Jz/sample$Mass)/sample$j_circ)
-      analysis_data$RadialTrends_Cylindrical$KappaRot[binID] = sum(sample$Mass*(sample$vphi_circ)^2)/sum(sample$Mass*sample$v_r)
-      analysis_data$RadialTrends_Cylindrical$KappaCoRot[binID] = sum(co_sample$Mass*(co_sample$vphi_circ)^2)/sum(co_sample$Mass*co_sample$v_r)
+      analysis_data$RadialTrends_Cylindrical$KappaRot[binID] = sum(sample$Mass*(sample$vphi_circ)^2)/sum(sample$Mass*sample$v_r_circ)
+      analysis_data$RadialTrends_Cylindrical$KappaCoRot[binID] = sum(co_sample$Mass*(co_sample$vphi_circ)^2)/sum(co_sample$Mass*co_sample$v_r_circ)
 
       analysis_data$RadialTrends_Cylindrical$SpinParameter_Wilkinson[binID] = mean(sample$vphi_circ)/
-        sqrt((mean(sample$vphi_circ^2))+((sd(sample$vz^2) + sd(sample$vR^2) + sd(sample$vphi_circ^2))/3))
+        sqrt((mean(sample$vphi_circ^2))+((sd(sample$vz^2) + sd(sample$v_r_circ^2) + sd(sample$vphi_circ^2))/3))
 
       analysis_data$RadialTrends_Cylindrical$DisktoTotal[binID] = sum(sample$Mass[which(((sample$Jz/sample$Mass)/sample$j_circ) > 0.7)])/sum(sample$Mass)
       analysis_data$RadialTrends_Cylindrical$SpheroidtoTotal[binID] = (2*sum(sample$Mass[which(sample$vphi_circ < 0)]))/sum(sample$Mass)
