@@ -1,6 +1,6 @@
-# SimSpin v2.9.3 News
+# SimSpin v2.9.4 News
 
-### Last edit: 30/08/2024
+### Last edit: 28/10/2024
 
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
@@ -17,7 +17,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 30/08/24 | *Bug fix* Ensuring output dispersion measured can't be less than 0. | 2.9.3 |  | Kate Harborne |
+| 28/10/24 | *Bug fix* Making sure Kappa and KappaCo use the correct radial velocity component (cylindrical parameter, not spherical). | 2.9.4 |  | Kate Harborne |
+| 30/08/24 | *Bug fix* Ensuring output dispersion measured can't be less than 0. | 2.9.3 | 16eb8a6e139c63bcb5cbb9107c878af0b6adcaf4 | Kate Harborne |
 | 27/08/24 | *Bug fix* Adding an extra logic test for .check_names() so that if only 11 particles were included in the files, the Magneticum catch for single particles doesn't trigger on non-Magneticum files. | 2.9.2 | 38bf34d305ce50d35baf7056e1d306da6e432bba | Kate Harborne |
 | 21/08/24 | Adding the `moments` parameter to output observation summary and ensuring this is written to out output FITS file. Also modifying the output h3 and h4 images in `moments=2` mode to be 0's rather than NA's to avoid warning messages when writing output to FITS. | 2.9.1 | e69a91e5175a71c3b1d1985dd3e729ac71d430a4 | Kate Harborne |
 | 25/07/24 | *New feature!* Added the `moments` parameter to `build_datacube` function. You can now specify how many moments to fit the LOSVD. Either moments=2 (i.e. fitting a Gaussian to give v_los and sigma_los) or moments=4 (i.e. fitting a Gauss-Hermite polynomial to give v_los, sigma_los, h3 and h4). Fits moments=4 by default, in line with old behaviour of the code. Also *bug fix* to ensure the input variables to `write_simspin_FITS` are of the correct type and to give meaningful errors if not (resolving issue #109). | 2.9.0 | f7ae49853c9821ac992502eb3e7ce3b10c7986c2 | Kate Harborne |
