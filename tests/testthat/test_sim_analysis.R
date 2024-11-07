@@ -29,6 +29,8 @@ test_that("EAGLE files can be analysed", {
   expect_length(eagle_stars, sa_out)
   expect_true(!"MeanSFR" %in% names(eagle_stars$Properties))
   expect_true("MeanAge" %in% names(eagle_stars$Properties))
+  expect_true(all(eagle_stars$RadialTrends_Cylindrical$KappaCoRot < 1))
+  expect_true(all(eagle_stars$RadialTrends_Cylindrical$KappaRot < 1))
 })
 
 test_that("Magenticum files can be analysed", {
@@ -57,3 +59,5 @@ test_that("EAGLE files can be analysed in gas mode", {
 test_that("Magenticum files can be analysed in gas mode", {
   expect_length(sim_analysis(ss_magneticum, type = "gas"), sa_out)
 })
+
+
