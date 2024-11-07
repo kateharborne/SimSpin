@@ -220,6 +220,7 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
     analysis_data$RadialTrends_Spherical$Shape_q = numeric(rbins)
   }
 
+  galaxy_data$vel_mag = sqrt((galaxy_data$vx^2) + (galaxy_data$vy^2) + (galaxy_data$vz^2))
 
   # For spherical-binned properties ---------------------------------------------
   galaxy_data$r = sqrt((galaxy_data$x^2) + (galaxy_data$y^2) + (galaxy_data$z^2))
@@ -344,8 +345,8 @@ sim_analysis = function(simspin_file, type = "stars", half_mass = NA, bin_breaks
       analysis_data$RadialTrends_Cylindrical$RotationalVelocity[binID] = mean(sample$vphi_circ)
       analysis_data$RadialTrends_Cylindrical$RotationalDispersion[binID] = sd(sample$vphi_circ)
       analysis_data$RadialTrends_Cylindrical$Circularity[binID] = mean((sample$Jz/sample$Mass)/sample$j_circ)
-      analysis_data$RadialTrends_Cylindrical$KappaRot[binID] = sum(sample$Mass*(sample$vphi_circ)^2)/sum(sample$Mass*sample$v_r_circ)
-      analysis_data$RadialTrends_Cylindrical$KappaCoRot[binID] = sum(co_sample$Mass*(co_sample$vphi_circ)^2)/sum(co_sample$Mass*co_sample$v_r_circ)
+      analysis_data$RadialTrends_Cylindrical$KappaRot[binID] = sum(sample$Mass*(sample$vphi_circ)^2)/sum(sample$Mass*(sample$vel_mag)^2)
+      analysis_data$RadialTrends_Cylindrical$KappaCoRot[binID] = sum(co_sample$Mass*(co_sample$vphi_circ)^2)/sum(co_sample$Mass*(co_sample$vel_mag)^2)
 
       analysis_data$RadialTrends_Cylindrical$SpinParameter_Wilkinson[binID] = mean(sample$vphi_circ)/
         sqrt((mean(sample$vphi_circ^2))+((sd(sample$vz^2) + sd(sample$v_r_circ^2) + sd(sample$vphi_circ^2))/3))
