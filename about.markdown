@@ -7,7 +7,7 @@ permalink: /about/
 last_modified_date: "Wed 10 Jan 2024 15:57:00 AWST"
 ---
 
-# SimSpin v2.8.1
+# SimSpin v2.9.5
 {: .fs-9 }
 
 A package for producing mock observations of simulations
