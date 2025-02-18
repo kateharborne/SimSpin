@@ -52,9 +52,10 @@ Instructions for downloading these libraries are provided below for Mac OSX and 
 ---
 
 ### Mac OSX
-In order to install `SimSpin` you will need a copy of  **XCode** (11 or greater), which can be downloaded and installed from the Apple App Store for free. 
+In order to install `SimSpin` you will need a copy of  **XCode** (11 or greater) and **XQuartz**, which can be downloaded and installed from the Apple App Store for free. 
 
 [Install XCode](https://apps.apple.com/us/app/xcode/id497799835?mt=12){: .btn }
+[Install XQuartz](https://www.xquartz.org/){: .btn }
 
 Once complete, you will also need to ensure that the Command Line Tools have also been installed by running the following line from within a Terminal window. 
 *This is only necessary for Xcode versions prior to v13.1.*
@@ -70,6 +71,25 @@ brew install fftw
 brew install hdf5
 ```
 
+You will also need to ensure that the correct C compilers are used when compiling the code in following steps. This is easily done on the command line from within a Terminal window. First check to see if you have anything defined in your Makevars file.
+
+```
+less ~/.R/Makevars
+```
+If the file does not exist, make one. Else edit this file to point the C compiler to `gcc`:
+
+```
+CC = gcc
+CXX = g++
+CXX1X = g++
+CXX11 = g++
+
+CFLAGS = -O3 -Wall -mtune=native -march=native -Ofast -std=gnu99
+CXXFLAGS = -O3 -Wall -mtune=native -march=native -Ofast -std=c++0x
+CXX1XFLAGS = -O3 -Wall -mtune=native -march=native  -Ofast -std=c++0x
+CXX11FLAGS = -O3 -Wall -mtune=native -march=native  -Ofast -std=c++0x
+```
+You can then move to the next step of the installation. 
 
 ---
 
