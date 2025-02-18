@@ -58,7 +58,6 @@ In order to install `SimSpin` you will need a copy of  **XCode** (11 or greater)
 [Install XQuartz](https://www.xquartz.org/){: .btn }
 
 Once complete, you will also need to ensure that the Command Line Tools have also been installed by running the following line from within a Terminal window. 
-*This is only necessary for Xcode versions prior to v13.1.*
 
 ```
 xcode-select --install 
@@ -71,7 +70,7 @@ brew install fftw
 brew install hdf5
 ```
 
-You will also need to ensure that the correct C compilers are used when compiling the code in following steps. This is easily done on the command line from within a Terminal window. First check to see if you have anything defined in your Makevars file.
+You will also need to ensure that R points towards the correct C compilers when installing SimSpin. This is easily done on the command line from within a Terminal window. First check to see if you have anything defined in your Makevars file.
 
 ```
 less ~/.R/Makevars
@@ -89,7 +88,7 @@ CXXFLAGS = -O3 -Wall -mtune=native -march=native -Ofast -std=c++0x
 CXX1XFLAGS = -O3 -Wall -mtune=native -march=native  -Ofast -std=c++0x
 CXX11FLAGS = -O3 -Wall -mtune=native -march=native  -Ofast -std=c++0x
 ```
-You can then move to the next step of the installation. 
+If R is running during this process, restart R to ensure these changes take effect. You can then move to the next step of the installation. 
 
 ---
 
