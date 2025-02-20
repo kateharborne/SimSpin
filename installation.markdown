@@ -63,6 +63,8 @@ Once complete, you will also need to ensure that the Command Line Tools have als
 xcode-select --install 
 ```
 
+You may find that you also need to launch the X-code package in order to agree to the terms and conditions.
+
 The FFTW and HDF5 packages can then be installed via the command line using Homebrew. Open a Terminal window and use the following commands:
 
 ```
