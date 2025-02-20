@@ -1,6 +1,6 @@
-# SimSpin v2.9.5 News
+# SimSpin v2.9.6 News
 
-### Last edit: 07/11/2024
+### Last edit: 20/02/2025
 
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
@@ -17,7 +17,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 07/11/24 | *Bug fix* Making sure Kappa and KappaCo use the correct total 3D velocity component and now squaring the velocity and ensuring with a proper test that the resulting value is less than 1 (as it should be!) - always write a test... | 2.9.5 |  | Kate Harborne |
+| 20/02/25 | Modifying the `.check_names` function to take in the simulation type being read. Future-proofing for other simulation inputs that may also store Metallicity as an array, but with different units. | 2.9.6 |  | Kate Harborne |
+| 07/11/24 | *Bug fix* Making sure Kappa and KappaCo use the correct total 3D velocity component and now squaring the velocity and ensuring with a proper test that the resulting value is less than 1 (as it should be!) - always write a test... | 2.9.5 | 234dd2538368555e977a2b873b67c5b2f450c566 | Kate Harborne |
 | 28/10/24 | *Bug fix* Making sure Kappa and KappaCo use the correct radial velocity component (cylindrical parameter, not spherical). | 2.9.4 | 0df75af35f8c8ab89f497ddd465aa821d679e9f3 | Kate Harborne |
 | 30/08/24 | *Bug fix* Ensuring output dispersion measured can't be less than 0. | 2.9.3 | 16eb8a6e139c63bcb5cbb9107c878af0b6adcaf4 | Kate Harborne |
 | 27/08/24 | *Bug fix* Adding an extra logic test for .check_names() so that if only 11 particles were included in the files, the Magneticum catch for single particles doesn't trigger on non-Magneticum files. | 2.9.2 | 38bf34d305ce50d35baf7056e1d306da6e432bba | Kate Harborne |
