@@ -1,14 +1,16 @@
-# Kate Harborne 05/02/24
-#
-# Functions for reading various input simulation files, including:
-#
-# - Gadget binaries
-# - Tipsy binaries
-# - Gadget HDF5
-# - EAGLE
-# - IllustrisTNG
-# - Magneticum
-# - HorizonAGN
+# Author: Kate Harborne
+# Co-author: Alice Serene
+# Date: 20/02/2025
+# Title: read_files.R
+# Description: Hidden from user functions for reading various input simulation
+#              files, including
+#                 - Gadget binaries
+#                 - Tipsy binaries
+#                 - Gadget HDF5
+#                 - EAGLE
+#                 - IllustrisTNG
+#                 - Magneticum
+#                 - HorizonAGN
 
 .get_file_type = function(f){
 
