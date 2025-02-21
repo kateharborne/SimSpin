@@ -363,7 +363,7 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    gas = .check_names(gas)
+    gas = .check_names(gas, type="EAGLE")
     eagle_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(eagle_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for EAGLE PartType0. \n
@@ -418,7 +418,7 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    stars = .check_names(stars)
+    stars = .check_names(stars, type="EAGLE")
 
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
@@ -471,7 +471,7 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    gas = .check_names(gas)
+    gas = .check_names(gas, type="Magneticum")
     magneticum_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(magneticum_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for Magneticum PartType0. \n
@@ -524,7 +524,7 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    stars = .check_names(stars)
+    stars = .check_names(stars, type="Magneticum")
 
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
@@ -583,7 +583,7 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    gas = .check_names(gas)
+    gas = .check_names(gas, type="HAGN")
     horizon_gas_names = c("Temperature", "Pressure")
     if (!all(horizon_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for HorizonAGN PartType0. \n
@@ -637,7 +637,7 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    stars = .check_names(stars)
+    stars = .check_names(stars, type="HAGN")
 
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
@@ -717,7 +717,7 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    gas = .check_names(gas)
+    gas = .check_names(gas, type="TNG")
     illustris_gas_names = c("InternalEnergy", "ElectronAbundance")
     if (!all(illustris_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for IllustrisTNG PartType0. \n
@@ -788,7 +788,7 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    stars = .check_names(stars)
+    stars = .check_names(stars, type="TNG")
 
     # check if the Coordinate field has any dimensions
     one_p_flag = FALSE
@@ -934,7 +934,7 @@
 }
 
 # Function to check existing names in a data set and convert if necessary
-.check_names = function(particle_list){
+.check_names = function(particle_list, type){
 
   current_names = names(particle_list)
 
@@ -943,7 +943,8 @@
     names(particle_list) <- current_names
   }
 
-  if ("SmoothedMetallicity" %in% current_names){
+  if ("SmoothedMetallicity" %in% current_names & type == "EAGLE" |
+      "SmoothedMetallicity" %in% current_names & type == "HAGN"){
     current_names[which(current_names == "SmoothedMetallicity")] <- "Metallicity"
     names(particle_list) <- current_names
   }
@@ -953,7 +954,8 @@
     names(particle_list) <- current_names
   }
 
-  if ("SmoothedElementAbundance/Hydrogen" %in% current_names){
+  if ("SmoothedElementAbundance/Hydrogen" %in% current_names & type == "EAGLE" |
+      "SmoothedElementAbundance/Hydrogen" %in% current_names & type == "HAGN" ){
     current_names[which(current_names == "SmoothedElementAbundance/Hydrogen")] <- "ElementAbundance/Hydrogen"
     names(particle_list) <- current_names
   }
@@ -963,7 +965,8 @@
     names(particle_list) <- current_names
   }
 
-  if ("SmoothedElementAbundance/Oxygen" %in% current_names){
+  if ("SmoothedElementAbundance/Oxygen" %in% current_names & type == "EAGLE" |
+      "SmoothedElementAbundance/Oxygen" %in% current_names & type == "HAGN"){
     current_names[which(current_names == "SmoothedElementAbundance/Oxygen")] <- "ElementAbundance/Oxygen"
     names(particle_list) <- current_names
   }
@@ -973,7 +976,7 @@
     names(particle_list) <- current_names
   }
 
-  if ("Velocities" %in% current_names){
+  if ("Velocities" %in% current_names & type == "TNG"){
     current_names[which(current_names == "Velocities")] <- "Velocity"
     names(particle_list) <- current_names
   }
@@ -983,12 +986,12 @@
     names(particle_list) <- current_names
   }
 
-  if ("Masses" %in% current_names){
+  if ("Masses" %in% current_names & type == "TNG"){
     current_names[which(current_names == "Masses")] <- "Mass"
     names(particle_list) <- current_names
   }
 
-  if ("GFM_StellarFormationTime" %in% current_names){
+  if ("GFM_StellarFormationTime" %in% current_names & type == "TNG"){
     current_names[which(current_names == "GFM_StellarFormationTime")] <- "StellarFormationTime"
     names(particle_list) <- current_names
   }
@@ -1003,12 +1006,12 @@
     names(particle_list) <- current_names
   }
 
-  if ("GFM_Metallicity" %in% current_names){
+  if ("GFM_Metallicity" %in% current_names & type == "TNG"){
     current_names[which(current_names == "GFM_Metallicity")] <- "Metallicity"
     names(particle_list) <- current_names
   }
 
-  if ("GFM_InitialMass" %in% current_names){
+  if ("GFM_InitialMass" %in% current_names & type == "TNG"){
     current_names[which(current_names == "GFM_InitialMass")] <- "InitialMass"
     names(particle_list) <- current_names
   }
@@ -1028,7 +1031,7 @@
     names(particle_list) <- current_names
   }
 
-  if ("GFM_Metals" %in% current_names){
+  if ("GFM_Metals" %in% current_names & type == "TNG"){
     id_to_remove = which(current_names == "GFM_Metals")
 
     one_p_flag = FALSE
@@ -1040,8 +1043,8 @@
     particle_list = particle_list[-id_to_remove]
   }
 
-  if (!is.null(nrow(particle_list$Metallicity)) |
-      length(particle_list$Metallicity)[1] == 11 & length(particle_list$ParticleIDs) != 11){
+  if (!is.null(nrow(particle_list$Metallicity)) & type == "Magenticum" |
+      length(particle_list$Metallicity)[1] == 11 & length(particle_list$ParticleIDs) != 11 & type == "Magenticum"){
 
     one_p_flag = FALSE
     if (is.null(dim(particle_list$Coordinates))){one_p_flag = TRUE}
