@@ -179,6 +179,7 @@
   if (illustristng){output = .illustristng_read_hdf5(data, head, cores)}
   if (colibre){output = .colibre_read_hdf5(data, head, cores)}
 
+
   hdf5r::h5close(data)
 
   return(output)
@@ -993,6 +994,11 @@
     names(particle_list) <- current_names
   }
 
+  if ("Densities" %in% current_names){
+    current_names[which(current_names == "Densities")] <- "Density"
+    names(particle_list) <- current_names
+  }
+
   if ("GFM_StellarFormationTime" %in% current_names & type == "TNG"){
     current_names[which(current_names == "GFM_StellarFormationTime")] <- "StellarFormationTime"
     names(particle_list) <- current_names
@@ -1010,6 +1016,15 @@
 
   if ("GFM_Metallicity" %in% current_names & type == "TNG"){
     current_names[which(current_names == "GFM_Metallicity")] <- "Metallicity"
+    names(particle_list) <- current_names
+  }
+  if ("StarFormationRates" %in% current_names){
+    current_names[which(current_names == "StarFormationRates")] <- "StarFormationRate"
+    names(particle_list) <- current_names
+  }
+
+  if ("SmoothingLengths" %in% current_names){
+    current_names[which(current_names == "SmoothingLengths")] <- "SmoothingLength"
     names(particle_list) <- current_names
   }
 
