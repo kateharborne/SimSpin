@@ -463,7 +463,7 @@ plot_h4   <- function(h4_image, fig = c(0,1,0,1), new=F,
 #'                       telescope = telescope(type="SAMI"),
 #'                       observing_strategy = observing_strategy(),
 #'                       method = "velocity")
-#' plot_age(cube$raw_images$age_image)
+#' plot_age(cube$raw_images$ageL_image)
 
 
 plot_age <- function(age_image, fig = c(0,1,0,1), new=F,
