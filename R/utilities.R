@@ -922,7 +922,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     vel_los[part_in_spaxel$pixel_pos[[i]]] = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
     dis_los[part_in_spaxel$pixel_pos[[i]]] = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
     ageM_map[part_in_spaxel$pixel_pos[[i]]] = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
-    ageL_map[part_in_spaxel$pixel_pos[[i]]] = .meanwt(galaxy_sample$Age, galaxy_sample$Luminosity)
+    ageL_map[part_in_spaxel$pixel_pos[[i]]] = .meanwt(galaxy_sample$Age, galaxy_sample$luminosity)
     met_map[part_in_spaxel$pixel_pos[[i]]] = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
     if (verbose){cat(i, "... ", sep = "")}
@@ -1004,7 +1004,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
                      ageM_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
-                     ageL_map = .meanwt(galaxy_sample$Age, galaxy_sample$Luminosity)
+                     ageL_map = .meanwt(galaxy_sample$Age, galaxy_sample$luminosity)
                      met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
                      result = list(spectra,
@@ -1077,7 +1077,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     vel_los[part_in_spaxel$pixel_pos[[i]]]   = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
     dis_los[part_in_spaxel$pixel_pos[[i]]]   = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
     ageM_map[part_in_spaxel$pixel_pos[[i]]]   = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
-    ageL_map[part_in_spaxel$pixel_pos[[i]]]   = .meanwt(galaxy_sample$Age, galaxy_sample$Luminosity)
+    ageL_map[part_in_spaxel$pixel_pos[[i]]]   = .meanwt(galaxy_sample$Age, galaxy_sample$luminosity)
     met_map[part_in_spaxel$pixel_pos[[i]]]   = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
     if (verbose){cat(i, "... ", sep = "")}
@@ -1123,7 +1123,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
                      vel_los = .meanwt(galaxy_sample$vy, galaxy_sample$Mass)
                      dis_los = sqrt(.varwt(galaxy_sample$vy, galaxy_sample$Mass))
                      ageM_map = .meanwt(galaxy_sample$Age, galaxy_sample$Mass)
-                     ageL_map = .meanwt(galaxy_sample$Age, galaxy_sample$Luminosity)
+                     ageL_map = .meanwt(galaxy_sample$Age, galaxy_sample$luminosity)
                      met_map = .meanwt(galaxy_sample$Metallicity, galaxy_sample$Mass)
 
                      result = list(vel_spec,
