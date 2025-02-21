@@ -855,7 +855,7 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    gas = .check_names(gas)
+    gas = .check_names(gas, type="Colibre")
     colibre_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(colibre_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for COLIBRE PartType0. \n
@@ -908,7 +908,7 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    stars = .check_names(stars)
+    stars = .check_names(stars, type="Colibre")
 
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
@@ -941,7 +941,7 @@
 
   current_names = names(particle_list)
 
-  if ("BirthScaleFactors" %in% current_names){
+  if ("BirthScaleFactors" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "BirthScaleFactors")] <- "StellarFormationTime"
     names(particle_list) <- current_names
   }
@@ -952,7 +952,7 @@
     names(particle_list) <- current_names
   }
 
-  if ("MetalMassFractions" %in% current_names){
+  if ("MetalMassFractions" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "MetalMassFractions")] <- "Metallicity"
     names(particle_list) <- current_names
   }
@@ -963,7 +963,7 @@
     names(particle_list) <- current_names
   }
 
-  if ("ElementMassFractions/Hydrogen" %in% current_names){
+  if ("ElementMassFractions/Hydrogen" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "ElementMassFractions/Hydrogen")] <- "ElementAbundance/Hydrogen"
     names(particle_list) <- current_names
   }
@@ -974,28 +974,25 @@
     names(particle_list) <- current_names
   }
 
-  if ("ElementMassFractions/Oxygen" %in% current_names){
+  if ("ElementMassFractions/Oxygen" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "ElementMassFractions/Oxygen")] <- "ElementAbundance/Oxygen"
     names(particle_list) <- current_names
   }
 
-  if ("Velocities" %in% current_names & type == "TNG"){
+  if ("Velocities" %in% current_names & type == "TNG" |
+      "Velocities" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "Velocities")] <- "Velocity"
     names(particle_list) <- current_names
   }
 
-  if ("Densities" %in% current_names){
+  if ("Densities" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "Densities")] <- "Density"
     names(particle_list) <- current_names
   }
 
-  if ("Masses" %in% current_names & type == "TNG"){
+  if ("Masses" %in% current_names & type == "TNG" |
+      "Masses" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "Masses")] <- "Mass"
-    names(particle_list) <- current_names
-  }
-
-  if ("Densities" %in% current_names){
-    current_names[which(current_names == "Densities")] <- "Density"
     names(particle_list) <- current_names
   }
 
@@ -1004,12 +1001,12 @@
     names(particle_list) <- current_names
   }
 
-  if ("StarFormationRates" %in% current_names){
+  if ("StarFormationRates" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "StarFormationRates")] <- "StarFormationRate"
     names(particle_list) <- current_names
   }
 
-  if ("SmoothingLengths" %in% current_names){
+  if ("SmoothingLengths" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "SmoothingLengths")] <- "SmoothingLength"
     names(particle_list) <- current_names
   }
@@ -1018,12 +1015,13 @@
     current_names[which(current_names == "GFM_Metallicity")] <- "Metallicity"
     names(particle_list) <- current_names
   }
-  if ("StarFormationRates" %in% current_names){
+
+  if ("StarFormationRates" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "StarFormationRates")] <- "StarFormationRate"
     names(particle_list) <- current_names
   }
 
-  if ("SmoothingLengths" %in% current_names){
+  if ("SmoothingLengths" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "SmoothingLengths")] <- "SmoothingLength"
     names(particle_list) <- current_names
   }
@@ -1033,17 +1031,17 @@
     names(particle_list) <- current_names
   }
 
-  if ("InitialMasses" %in% current_names){
+  if ("InitialMasses" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "InitialMasses")] <- "InitialMass"
     names(particle_list) <- current_names
   }
 
-  if ("InternalEnergies" %in% current_names){
+  if ("InternalEnergies" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "InternalEnergies")] <- "InternalEnergy"
     names(particle_list) <- current_names
   }
 
-  if ("Temperatures" %in% current_names){
+  if ("Temperatures" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "Temperatures")] <- "Temperature"
     names(particle_list) <- current_names
   }
