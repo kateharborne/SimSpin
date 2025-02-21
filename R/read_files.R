@@ -890,7 +890,7 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    gas = .check_names(gas)
+    gas = .check_names(gas, type="Colibre")
     colibre_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(colibre_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for COLIBRE PartType0. \n
@@ -943,7 +943,7 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    stars = .check_names(stars)
+    stars = .check_names(stars, type="Colibre")
 
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
@@ -1031,11 +1031,6 @@
     names(particle_list) <- current_names
   }
 
-  if ("Densities" %in% current_names){
-    current_names[which(current_names == "Densities")] <- "Density"
-    names(particle_list) <- current_names
-  }
-
   if ("GFM_StellarFormationTime" %in% current_names & type == "TNG"){
     current_names[which(current_names == "GFM_StellarFormationTime")] <- "StellarFormationTime"
     names(particle_list) <- current_names
@@ -1055,12 +1050,13 @@
     current_names[which(current_names == "GFM_Metallicity")] <- "Metallicity"
     names(particle_list) <- current_names
   }
-  if ("StarFormationRates" %in% current_names){
+
+  if ("StarFormationRates" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "StarFormationRates")] <- "StarFormationRate"
     names(particle_list) <- current_names
   }
 
-  if ("SmoothingLengths" %in% current_names){
+  if ("SmoothingLengths" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "SmoothingLengths")] <- "SmoothingLength"
     names(particle_list) <- current_names
   }
