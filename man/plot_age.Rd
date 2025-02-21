@@ -73,5 +73,5 @@ cube = build_datacube(simspin_file = ss_gadget,
                       telescope = telescope(type="SAMI"),
                       observing_strategy = observing_strategy(),
                       method = "velocity")
-plot_age(cube$raw_images$age_image)
+plot_age(cube$raw_images$ageL_image)
 }
