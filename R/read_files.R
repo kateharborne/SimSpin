@@ -436,7 +436,7 @@
                                        "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores, H0 = head$HubbleParam*100)),
                                  "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
@@ -542,7 +542,7 @@
                                        "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores, H0 = head$HubbleParam*100)),
                                  "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
@@ -655,7 +655,7 @@
                                        "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores, H0 = head$HubbleParam*100)),
                                  "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
@@ -808,7 +808,7 @@
                                        "SFT" = stars$StellarFormationTime)
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = abs(stars$StellarFormationTime), cores = cores)),
+                                 "Age" = as.numeric(.SFTtoAge(a = abs(stars$StellarFormationTime), cores = cores, H0 = head$HubbleParam*100)),
                                  "Metallicity" = stars$Metallicity,
                                  "SFT" = stars$StellarFormationTime)
 
@@ -1094,16 +1094,16 @@
 
 
 # Function for computing the stellar age from the formation time in parallel
-.SFTtoAge = function(a, cores=1){
-  cosdist = function(x) { return (celestial::cosdistTravelTime((1 / x) - 1)); }
+.SFTtoAge = function(a, H0, cores=1){
+  cosdist = function(x, Hubble0) { return (celestial::cosdistTravelTime((1 / x) - 1), H0 = Hubble0); }
   if (cores > 1) {
     doParallel::registerDoParallel(cores = cores)
     i = integer()
-    output = foreach(i = 1:length(a), .packages = "celestial") %dopar% { cosdist(a[i]) }
+    output = foreach(i = 1:length(a), .packages = "celestial") %dopar% { cosdist(a[i], H0) }
     closeAllConnections()
   }
   else {
-    output = lapply(a, cosdist)
+    output = lapply(a, cosdist, Hubble0 = H0)
   }
   return(output)
 }
