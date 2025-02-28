@@ -918,15 +918,15 @@
 
 # Function for computing the stellar age from the formation time in parallel
 .SFTtoAge = function(a, H0, cores=1){
-  cosdist = function(x, Hubble0) { return (celestial::cosdistTravelTime((1 / x) - 1), H0 = Hubble0); }
+  cosdist = function(x) { return (celestial::cosdistTravelTime((1 / x) - 1, H0 = H0)); }
   if (cores > 1) {
     doParallel::registerDoParallel(cores = cores)
     i = integer()
-    output = foreach(i = 1:length(a), .packages = "celestial") %dopar% { cosdist(a[i], H0) }
+    output = foreach(i = 1:length(a), .packages = "celestial") %dopar% { cosdist(a[i]) }
     closeAllConnections()
   }
   else {
-    output = lapply(a, cosdist, Hubble0 = H0)
+    output = lapply(a, cosdist)
   }
   return(output)
 }
