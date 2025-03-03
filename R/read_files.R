@@ -333,6 +333,12 @@
 
 .eagle_read_hdf5 = function(data, head, cores){
 
+  head$Type = "EAGLE"
+  head$H0 = head$HubbleParam * 100
+  names(head)[names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
+  head$OmegaR = NA
+
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
 
@@ -430,14 +436,17 @@
                                        "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores, H0 = head$HubbleParam*100)),
+                                 "Age" = as.numeric(.SFTtoAge(a=stars$StellarFormationTime,
+                                                              cores=cores, H0=head$H0,
+                                                              OmegaM=head$OmegaM,
+                                                              OmegaL=head$OmegaL,
+                                                              OmegaR=head$OmegaR)),
                                  "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
 
   } else {star_part=NULL; ssp=NULL}
 
-  head$Type = "EAGLE"
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
@@ -536,7 +545,11 @@
                                        "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores, H0 = head$HubbleParam*100)),
+                                 "Age" = as.numeric(.SFTtoAge(a=stars$StellarFormationTime,
+                                                              cores=cores, H0=head$H0,
+                                                              OmegaM=head$OmegaM,
+                                                              OmegaL=head$OmegaL,
+                                                              OmegaR=head$OmegaR)),
                                  "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
@@ -544,6 +557,9 @@
   } else {star_part=NULL; ssp=NULL}
 
   head$Type = "Magneticum"
+  names(head)[names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
+  head$OmegaR = NA
 
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
@@ -649,7 +665,11 @@
                                        "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores, H0 = head$HubbleParam*100)),
+                                 "Age" = as.numeric(.SFTtoAge(a=stars$StellarFormationTime,
+                                                              cores=cores, H0=head$H0,
+                                                              OmegaM=head$OmegaM,
+                                                              OmegaL=head$OmegaL,
+                                                              OmegaR=head$OmegaR)),
                                  "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
@@ -657,6 +677,9 @@
   } else {star_part=NULL; ssp=NULL}
 
   head$Type = "Horizon-AGN"
+  names(head)[names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
+  head$OmegaR = NA
 
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
@@ -802,8 +825,11 @@
                                        "SFT" = stars$StellarFormationTime)
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = abs(stars$StellarFormationTime), cores = cores, H0 = head$HubbleParam*100)),
-                                 "Metallicity" = stars$Metallicity,
+                                 "Age" = as.numeric(.SFTtoAge(a=abs(stars$StellarFormationTime),
+                                                              cores=cores, H0=head$H0,
+                                                              OmegaM=head$OmegaM,
+                                                              OmegaL=head$OmegaL,
+                                                              OmegaR=head$OmegaR)),                                 "Metallicity" = stars$Metallicity,
                                  "SFT" = stars$StellarFormationTime)
 
     # remove stellar wind particles and drop unneeded SFT columns
@@ -817,7 +843,9 @@
   } else {star_part=NULL; ssp=NULL}
 
   head$Type = "Illustris-TNG"
-
+  names(head)[names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
+  head$OmegaR = NA
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 }
 
@@ -917,8 +945,8 @@
 
 
 # Function for computing the stellar age from the formation time in parallel
-.SFTtoAge = function(a, H0, cores=1){
-  cosdist = function(x) { return (celestial::cosdistTravelTime((1 / x) - 1, H0 = H0)); }
+.SFTtoAge = function(a, H0, OmegaM, OmegaL, OmegaR, cores=1){
+  cosdist = function(x) { return (celestial::cosdistTravelTime((1 / x) - 1, H0 = H0, OmegaM = OmegaM, OmegaL = OmegaL, OmegaR = OmegaR)); }
   if (cores > 1) {
     doParallel::registerDoParallel(cores = cores)
     i = integer()
