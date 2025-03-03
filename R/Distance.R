@@ -85,8 +85,6 @@ Distance <- function(z, Mpc, kpc_per_arcsec, H0 = 68.4, OmegaM = 0.301, OmegaL =
 #'  Mega-parsecs.
 #' @slot kpc_per_arcsec Describes the projected distance to a galaxy in angular
 #'  units of kilo-parsecs per arcsecond.
-#' @slot ref Describes the cosmological parameters which which to compute
-#'  distances.
 #' @slot H0 Hubble constant. Default as Planck 2018 results where H0 = 68.4.
 #' @slot OmegaM Omega matter, the relative component of energy in mass. Default
 #' as Planck 2018 results where OmegaM = 0.301.
