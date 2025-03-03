@@ -51,7 +51,7 @@ Distance <- function(z, Mpc, kpc_per_arcsec, H0 = 68.4, OmegaM = 0.301, OmegaL =
                                      rule = 1, ties = mean)
 
     kpc_per_arcsec = as.double(kpc_per_arcsec)
-    z = .get_z_from_ang_size(kpc_per_arcsec, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
+    z = .get_z_from_ang_size(kpc_per_arcsec)
     Mpc = celestial::cosdistLumDist(z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # computing distance in units of Mpc
 
     methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec, H0 = H0, OmegaM = OmegaM, OmegaL = OmegaL, OmegaR = OmegaR)
@@ -65,7 +65,7 @@ Distance <- function(z, Mpc, kpc_per_arcsec, H0 = 68.4, OmegaM = 0.301, OmegaL =
 
 
     Mpc = as.double(Mpc)
-    z = .get_z_from_phy_size(Mpc, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
+    z = .get_z_from_phy_size(Mpc)
     kpc_per_arcsec = celestial::cosdistAngScale(z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # angular size given z, kpc/"
 
     methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec, H0 = H0, OmegaM = OmegaM, OmegaL = OmegaL, OmegaR = OmegaR)
