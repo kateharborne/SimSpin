@@ -40,9 +40,6 @@ Mega-parsecs.}
 \item{\code{kpc_per_arcsec}}{Describes the projected distance to a galaxy in angular
 units of kilo-parsecs per arcsecond.}
 
-\item{\code{ref}}{Describes the cosmological parameters which which to compute
-distances.}
-
 \item{\code{H0}}{Hubble constant. Default as Planck 2018 results where H0 = 68.4.}
 
 \item{\code{OmegaM}}{Omega matter, the relative component of energy in mass. Default
