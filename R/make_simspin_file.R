@@ -160,7 +160,11 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     }
 
     # ensure that Ages are described relative to the time "now"
-    galaxy_data$ssp$Age = galaxy_data$ssp$Age - as.numeric(.SFTtoAge(galaxy_data$head$Time, cores = 1, H0 = galaxy_data$head$HubbleParam*100))
+    galaxy_data$ssp$Age = galaxy_data$ssp$Age - as.numeric(.SFTtoAge(galaxy_data$head$Time, cores = 1,
+                                                                     H0 = galaxy_data$head$H0,
+                                                                     OmegaM = galaxy_data$head$OmegaM,
+                                                                     OmegaL = galaxy_data$head$OmegaL,
+                                                                     OmegaR = galaxy_data$head$OmegaR))
 
     # reassign any age==0 particles to have a small non-zero age
     galaxy_data$ssp$Age[galaxy_data$ssp$Age==0] = 1e-9
