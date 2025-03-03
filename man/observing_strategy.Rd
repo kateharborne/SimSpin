@@ -15,7 +15,11 @@ observing_strategy(
   pointing_deg,
   blur = F,
   fwhm = 2,
-  psf = "Gaussian"
+  psf = "Gaussian",
+  H0 = 68.4,
+  OmegaM = 0.301,
+  OmegaL = 0.699,
+  OmegaR = 8.985075e-05
 )
 }
 \arguments{
@@ -67,6 +71,18 @@ given in arcsec.}
 
 \item{psf}{A string to describe the shape of the PSF. Options include
 "Gaussian" or "Moffat". Input is NOT case sensitive.}
+
+\item{H0}{Hubble constant. Default as Planck 2018 results where H0 = 68.4.}
+
+\item{OmegaM}{Omega matter, the relative component of energy in mass. Default
+as Planck 2018 results where OmegaM = 0.301.}
+
+\item{OmegaL}{Omega lambda, the relative component of energy in dark energy.
+Default as Planck 2018 results where OmegaL = 0.699.}
+
+\item{OmegaR}{Omega radiation, the relative component of the energy in
+radiation (including neutrinos). Default as Planck 2018 results where OmegaR
+= 8.985075e-5.}
 }
 \value{
 Returns an object of class "observing_strategy" that describes the
