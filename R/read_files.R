@@ -455,6 +455,7 @@
 .magneticum_read_hdf5 = function(data, head, cores){
 
   head$Type = "Magneticum"
+  head$H0 = head$HubbleParam * 100
   names(head)[names(head) == "Omega0"] = "OmegaM"
   names(head)[names(head) == "OmegaLambda"] = "OmegaL"
   head$OmegaR = 0
@@ -569,6 +570,7 @@
 .horizonagn_read_hdf5 = function(data, head, cores){
 
   head$Type = "Horizon-AGN"
+  head$H0 = head$HubbleParam * 100
   names(head)[names(head) == "Omega0"] = "OmegaM"
   names(head)[names(head) == "OmegaLambda"] = "OmegaL"
   head$OmegaR = 0
@@ -689,6 +691,7 @@
 .illustristng_read_hdf5 = function(data, head, cores){
 
   head$Type = "Illustris-TNG"
+  head$H0 = head$HubbleParam * 100
   names(head)[names(head) == "Omega0"] = "OmegaM"
   names(head)[names(head) == "OmegaLambda"] = "OmegaL"
   head$OmegaR = 0
