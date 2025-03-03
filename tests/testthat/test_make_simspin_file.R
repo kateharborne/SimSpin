@@ -15,7 +15,7 @@ ss_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", pack
 ss_colibre    = system.file("extdata", "SimSpin_example_Colibre.hdf5", package = "SimSpin")
 
 ss_file_length = 4
-ss_file_header_length = 15
+ss_file_header_length = 16
 built_cube_size = 5
 
 temp_loc = tempdir()
