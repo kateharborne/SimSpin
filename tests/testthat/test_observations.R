@@ -324,3 +324,11 @@ test_that("Pointing class errors if multiple parameters specified", {
 test_that("Warning is issued if old input parameter is specified", {
   expect_warning(observing_strategy(z = 0.3))
 })
+
+# Testing that difference cosmologies give different answers -------------------
+test_that("Different cosmological parameters return different answers", {
+  cosmo1 = observing_strategy(dist_z=0.3, H0=67.7, OmegaM=0.299, OmegaL=0.701, OmegaR=0)
+  cosmo2 = observing_strategy(dist_z=0.3, H0=70, OmegaM=0.301, OmegaL=0.699, OmegaR=0)
+  expect_false(Mpc(cosmo1$distance) == Mpc(cosmo2$distance))
+})
+
