@@ -14,7 +14,7 @@ ss_horizon    = system.file("extdata", "SimSpin_example_HorizonAGN.hdf5", packag
 ss_illustris  = system.file("extdata", "SimSpin_example_IllustrisTNG.hdf5", package = "SimSpin")
 
 ss_file_length = 4
-ss_file_header_length = 15
+ss_file_header_length = 16
 built_cube_size = 5
 
 temp_loc = tempdir()
