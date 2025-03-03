@@ -18,6 +18,12 @@
 #'@param kpc_per_arcsec A numeric describing the distance measured to the
 #' observed object in units of angular distance in kilo-parsec per arcsecond.
 #' Precision to +/- 1e-5.
+#'@param ref Default as 'Planck' where H0 = 68.4, OmegaM = 0.301, OmegaL =
+#' 0.699, and OmegaR = 8.985075e-5. Optionally will accept input List with
+#' cosmological parameters defined: 'H0' - Hubble constant, OmegaM' - Omega
+#' matter, the relative component of energy in mass, 'OmegaL' - Omega lambda,
+#' the relative component of energy in dark energy, 'OmegaR' - Omega radiation,
+#' the relative component of the energy in radiation (including neutrinos).
 #'@return Returns an object of class "Distance" that summarises the
 #' projected distance to the object and the associated units.
 #'
@@ -25,13 +31,25 @@
 #'Distance(z = 0.3)
 #'
 
-Distance <- function(z, Mpc, kpc_per_arcsec){
+Distance <- function(z, Mpc, kpc_per_arcsec, ref = "Planck"){
+
+  if (ref == "Planck"){
+    H0 = 68.4
+    OmegaM = 0.301
+    OmegaL = 0.699
+    OmegaR = 8.985075e-05
+  } else if (typeof(ref) == "list"){
+    H0 = ref$H0
+    OmegaM = ref$OmegaM
+    OmegaL = ref$OmegaL
+    OmegaR = ref$OmegaR
+  }
 
   if (!missing(z) & missing(Mpc) & missing(kpc_per_arcsec)){
 
     z = as.double(z)  # redshift distance
-    Mpc = celestial::cosdistLumDist(z, ref="Planck") # computing distance in units of Mpc
-    kpc_per_arcsec = celestial::cosdistAngScale(z, ref="Planck") # angular size given z, kpc/"
+    Mpc = celestial::cosdistLumDist(z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # computing distance in units of Mpc
+    kpc_per_arcsec = celestial::cosdistAngScale(z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # angular size given z, kpc/"
 
     methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
 
@@ -39,7 +57,7 @@ Distance <- function(z, Mpc, kpc_per_arcsec){
 
     kpc_per_arcsec = as.double(kpc_per_arcsec)
     z = .get_z_from_ang_size(kpc_per_arcsec)
-    Mpc = celestial::cosdistLumDist(z, ref="Planck") # computing distance in units of Mpc
+    Mpc = celestial::cosdistLumDist(z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # computing distance in units of Mpc
 
     methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
 
@@ -47,7 +65,7 @@ Distance <- function(z, Mpc, kpc_per_arcsec){
 
     Mpc = as.double(Mpc)
     z = .get_z_from_phy_size(Mpc)
-    kpc_per_arcsec = celestial::cosdistAngScale(z, ref="Planck") # angular size given z, kpc/"
+    kpc_per_arcsec = celestial::cosdistAngScale(z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # angular size given z, kpc/"
 
     methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec)
 
@@ -58,8 +76,8 @@ Distance <- function(z, Mpc, kpc_per_arcsec){
 }
 
 .possible_z        = seq(0, 1.2, length.out = 5000)
-.possible_ang_size = celestial::cosdistAngScale(.possible_z, ref="Planck") # angular size given z, kpc/"
-.possible_phy_size = celestial::cosdistLumDist(.possible_z, ref="Planck")
+.possible_ang_size = celestial::cosdistAngScale(.possible_z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # angular size given z, kpc/"
+.possible_phy_size = celestial::cosdistLumDist(.possible_z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
 
 .get_z_from_ang_size = approxfun(x = .possible_ang_size, y = .possible_z, method = "linear", rule = 1, ties = mean)
 .get_z_from_phy_size = approxfun(x = .possible_phy_size, y = .possible_z, method = "linear", rule = 1, ties = mean)
