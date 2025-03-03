@@ -94,8 +94,9 @@
 
   head = list("Npart" = c(Npart[1], 0, Npart[3], Npart[4], Npart[5], 0), # number of gas and stars
               "Time" = Time, "Redshift" = Redshift, # relevent simulation data
-              "Nall" = Nall, "Type"="nbody") # number of particles in the original file
-
+              "Nall" = Nall, "Type"="nbody", # number of particles in the original file
+              "H0" = HubbleParam*100, "OmegaM" = Omega0, "OmegaL" = OmegaLambda,
+              "OmegaR" = NA)
 
   Npart_sum = cumsum(Npart) # cumulative number of each particle type
 
@@ -127,11 +128,11 @@
   }
 
   # check for missing header fields
-  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable")
+  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable", "Omega0", "OmegaLambda")
 
   if (!all(required_headers %in% names(head))){
     stop("Error. Missing a required header field. \n
-         One of `BoxSize`, `Redshift`, `HubbleParam` or `MassTable` is missing. \n
+         One of `BoxSize`, `Redshift`, `HubbleParam`, `MassTable`, `Omega0` or `OmegaLambda` is missing. \n
          See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
   }
 
