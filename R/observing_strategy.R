@@ -46,14 +46,14 @@
 #' given in arcsec.
 #'@param psf A string to describe the shape of the PSF. Options include
 #' "Gaussian" or "Moffat". Input is NOT case sensitive.
-#'@param ref A string or List describing the cosmological parameters with which
-#' to compute the distance to objects. Default is 'Planck' for which H0 = 68.4,
-#' OmegaM = 0.301, OmegaL = 0.699, and OmegaR = 8.985075e-5. Optionally will
-#' accept input List with cosmological parameters defined: 'H0' - Hubble
-#' constant, OmegaM' - Omega matter, the relative component of energy in mass,
-#' 'OmegaL' - Omega lambda, the relative component of energy in dark energy,
-#' 'OmegaR' - Omega radiation, the relative component of the energy in
-#' radiation (including neutrinos).
+#'@param H0 Hubble constant. Default as Planck 2018 results where H0 = 68.4.
+#'@param OmegaM Omega matter, the relative component of energy in mass. Default
+#' as Planck 2018 results where OmegaM = 0.301.
+#'@param OmegaL Omega lambda, the relative component of energy in dark energy.
+#' Default as Planck 2018 results where OmegaL = 0.699.
+#'@param OmegaR Omega radiation, the relative component of the energy in
+#' radiation (including neutrinos). Default as Planck 2018 results where OmegaR
+#' = 8.985075e-5.
 #'@return Returns an object of class "observing_strategy" that describes the
 #' conditions in which the observation is made. Required to run
 #' \code{build_datacube()}.
@@ -64,7 +64,8 @@
 observing_strategy = function(dist_z = 0.05, dist_Mpc, dist_kpc_per_arcsec, z,
                      inc_deg = 70, twist_deg = 0,
                      pointing_kpc = c(0,0), pointing_deg,
-                     blur = F, fwhm=2, psf="Gaussian", ref="Planck"){
+                     blur = F, fwhm=2, psf="Gaussian", H0=68.4, OmegaM=0.301,
+                     OmegaL=0.699, OmegaR=8.985075e-5){
 
   if (!missing(z)){
     warning("z input will be depreciated in future versions of SimSpin. \n
@@ -74,11 +75,11 @@ observing_strategy = function(dist_z = 0.05, dist_Mpc, dist_kpc_per_arcsec, z,
   }
 
   if (missing(dist_Mpc) & missing(dist_kpc_per_arcsec)){
-    distance = Distance(z = dist_z, ref = ref)
+    distance = Distance(z = dist_z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
   } else if (missing(dist_z) & !missing(dist_Mpc) & missing(dist_kpc_per_arcsec)){
-    distance = Distance(Mpc = dist_Mpc, ref = ref)
+    distance = Distance(Mpc = dist_Mpc, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
   } else if (missing(dist_z) & missing(dist_Mpc) & !missing(dist_kpc_per_arcsec)){
-    distance = Distance(kpc_per_arcsec = dist_kpc_per_arcsec, ref = ref)
+    distance = Distance(kpc_per_arcsec = dist_kpc_per_arcsec, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
   } else {
     stop("Error: Please specify ONE method of projected distance to the observed galaxy. \n
          Please specify ONE of the following input parameters: 'dist_z' OR 'dist_Mpc' OR 'dist_kpc_per_arcsec'. ")
