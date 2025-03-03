@@ -338,7 +338,7 @@
   head$H0 = head$HubbleParam * 100
   names(head)[names(head) == "Omega0"] = "OmegaM"
   names(head)[names(head) == "OmegaLambda"] = "OmegaL"
-  head$OmegaR = NA
+  head$OmegaR = 0
 
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
@@ -454,6 +454,11 @@
 
 .magneticum_read_hdf5 = function(data, head, cores){
 
+  head$Type = "Magneticum"
+  names(head)[names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
+  head$OmegaR = 0
+
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
 
@@ -557,16 +562,16 @@
 
   } else {star_part=NULL; ssp=NULL}
 
-  head$Type = "Magneticum"
-  names(head)[names(head) == "Omega0"] = "OmegaM"
-  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
-  head$OmegaR = NA
-
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
 
 .horizonagn_read_hdf5 = function(data, head, cores){
+
+  head$Type = "Horizon-AGN"
+  names(head)[names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
+  head$OmegaR = 0
 
   head$Time = 1/(1+head$Redshift)
 
@@ -677,16 +682,16 @@
 
   } else {star_part=NULL; ssp=NULL}
 
-  head$Type = "Horizon-AGN"
-  names(head)[names(head) == "Omega0"] = "OmegaM"
-  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
-  head$OmegaR = NA
-
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
 
 .illustristng_read_hdf5 = function(data, head, cores){
+
+  head$Type = "Illustris-TNG"
+  names(head)[names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
+  head$OmegaR = 0
 
   head$Time = 1/(1+head$Redshift)
 
@@ -843,10 +848,6 @@
 
   } else {star_part=NULL; ssp=NULL}
 
-  head$Type = "Illustris-TNG"
-  names(head)[names(head) == "Omega0"] = "OmegaM"
-  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
-  head$OmegaR = NA
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 }
 
