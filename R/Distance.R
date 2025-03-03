@@ -35,13 +35,6 @@
 
 Distance <- function(z, Mpc, kpc_per_arcsec, H0 = 68.4, OmegaM = 0.301, OmegaL = 0.699, OmegaR = 8.985075e-05){
 
-  .possible_z        = seq(0, 1.2, length.out = 5000)
-  .possible_ang_size = celestial::cosdistAngScale(.possible_z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # angular size given z, kpc/"
-  .possible_phy_size = celestial::cosdistLumDist(.possible_z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
-
-  .get_z_from_ang_size = approxfun(x = .possible_ang_size, y = .possible_z, method = "linear", rule = 1, ties = mean)
-  .get_z_from_phy_size = approxfun(x = .possible_phy_size, y = .possible_z, method = "linear", rule = 1, ties = mean)
-
   if (!missing(z) & missing(Mpc) & missing(kpc_per_arcsec)){
 
     z = as.double(z)  # redshift distance
@@ -52,16 +45,27 @@ Distance <- function(z, Mpc, kpc_per_arcsec, H0 = 68.4, OmegaM = 0.301, OmegaL =
 
   } else if (missing(z) & missing(Mpc) & !missing(kpc_per_arcsec)){
 
+    .possible_z        = seq(0, 1.2, length.out = 5000)
+    .possible_ang_size = celestial::cosdistAngScale(.possible_z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # angular size given z, kpc/"
+    .get_z_from_ang_size = approxfun(x = .possible_ang_size, y = .possible_z, method = "linear",
+                                     rule = 1, ties = mean)
+
     kpc_per_arcsec = as.double(kpc_per_arcsec)
-    z = .get_z_from_ang_size(kpc_per_arcsec)
+    z = .get_z_from_ang_size(kpc_per_arcsec, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
     Mpc = celestial::cosdistLumDist(z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # computing distance in units of Mpc
 
     methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec, H0 = H0, OmegaM = OmegaM, OmegaL = OmegaL, OmegaR = OmegaR)
 
   } else if (missing(z) & !missing(Mpc) & missing(kpc_per_arcsec)){
 
+    .possible_z        = seq(0, 1.2, length.out = 5000)
+    .possible_phy_size = celestial::cosdistLumDist(.possible_z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
+    .get_z_from_phy_size = approxfun(x = .possible_phy_size, y = .possible_z, method = "linear",
+                                     rule = 1, ties = mean)
+
+
     Mpc = as.double(Mpc)
-    z = .get_z_from_phy_size(Mpc)
+    z = .get_z_from_phy_size(Mpc, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR)
     kpc_per_arcsec = celestial::cosdistAngScale(z, H0=H0, OmegaM=OmegaM, OmegaL=OmegaL, OmegaR=OmegaR) # angular size given z, kpc/"
 
     methods::new("Distance", z = z, Mpc = Mpc, kpc_per_arcsec = kpc_per_arcsec, H0 = H0, OmegaM = OmegaM, OmegaL = OmegaL, OmegaR = OmegaR)
@@ -71,7 +75,6 @@ Distance <- function(z, Mpc, kpc_per_arcsec, H0 = 68.4, OmegaM = 0.301, OmegaL =
          "Please specify just ONE of the following parameters: z, Mpc, kpc_per_arcsec")
   }
 }
-
 
 # Description of the Distance class --------------------------------------------
 
@@ -84,6 +87,14 @@ Distance <- function(z, Mpc, kpc_per_arcsec, H0 = 68.4, OmegaM = 0.301, OmegaL =
 #'  units of kilo-parsecs per arcsecond.
 #' @slot ref Describes the cosmological parameters which which to compute
 #'  distances.
+#' @slot H0 Hubble constant. Default as Planck 2018 results where H0 = 68.4.
+#' @slot OmegaM Omega matter, the relative component of energy in mass. Default
+#' as Planck 2018 results where OmegaM = 0.301.
+#' @slot OmegaL Omega lambda, the relative component of energy in dark energy.
+#' Default as Planck 2018 results where OmegaL = 0.699.
+#' @slot OmegaR Omega radiation, the relative component of the energy in
+#' radiation (including neutrinos). Default as Planck 2018 results where OmegaR
+#' = 8.985075e-5.
 
 setClass("Distance",
          slots = c(
