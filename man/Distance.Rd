@@ -5,7 +5,15 @@
 \title{A class helper function to describe the projected distance to the observed
 object}
 \usage{
-Distance(z, Mpc, kpc_per_arcsec)
+Distance(
+  z,
+  Mpc,
+  kpc_per_arcsec,
+  H0 = 68.4,
+  OmegaM = 0.301,
+  OmegaL = 0.699,
+  OmegaR = 8.985075e-05
+)
 }
 \arguments{
 \item{z}{A numeric describing the distance measured to the observed
@@ -17,6 +25,18 @@ object in units of physical distance in mega-parsec. Precision to +/- 1e-3.}
 \item{kpc_per_arcsec}{A numeric describing the distance measured to the
 observed object in units of angular distance in kilo-parsec per arcsecond.
 Precision to +/- 1e-5.}
+
+\item{H0}{Hubble constant. Default as Planck 2018 results where H0 = 68.4.}
+
+\item{OmegaM}{Omega matter, the relative component of energy in mass. Default
+as Planck 2018 results where OmegaM = 0.301.}
+
+\item{OmegaL}{Omega lambda, the relative component of energy in dark energy.
+Default as Planck 2018 results where OmegaL = 0.699.}
+
+\item{OmegaR}{Omega radiation, the relative component of the energy in
+radiation (including neutrinos). Default as Planck 2018 results where OmegaR
+= 8.985075e-5.}
 }
 \value{
 Returns an object of class "Distance" that summarises the

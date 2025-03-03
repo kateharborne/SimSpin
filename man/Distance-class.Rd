@@ -39,5 +39,8 @@ Mega-parsecs.}
 
 \item{\code{kpc_per_arcsec}}{Describes the projected distance to a galaxy in angular
 units of kilo-parsecs per arcsecond.}
+
+\item{\code{ref}}{Describes the cosmological parameters which which to compute
+distances.}
 }}
 
