@@ -183,7 +183,6 @@
   if (illustristng){output = .illustristng_read_hdf5(data, head, cores)}
   if (colibre){output = .colibre_read_hdf5(data, head, cores)}
 
-
   hdf5r::h5close(data)
 
   return(output)
