@@ -866,9 +866,9 @@
 
   head$Type = "Colibre"
   head$H0 = head$HubbleParam * 100
-  names(head)[names(head) == "Omega0"] = "OmegaM"
-  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
-  head$OmegaR = 0
+  names(head)[names(head) == "Omega_m"] = "OmegaM"
+  names(head)[names(head) == "Omega_lambda"] = "OmegaL"
+  names(head)[names(head) == "Omega_r"] = "OmegaR"
 
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
