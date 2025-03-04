@@ -130,18 +130,18 @@
   }
 
   # check for missing header fields
-  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable", "Omega0", "OmegaLambda")
+  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable")
 
   if (!all(required_headers %in% names(head))){
     stop("Error. Missing a required header field. \n
-         One of `BoxSize`, `Redshift`, `HubbleParam`, `MassTable`, `Omega0` or `OmegaLambda` is missing. \n
+         One of `BoxSize`, `Redshift`, `HubbleParam`, `MassTable` is missing. \n
          See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
   }
 
-  other_headers = c("NumPart_ThisFile", "NumPart_Total")
+  other_headers = c("NumPart_ThisFile", "NumPart_Total", "Omega0", "OmegaLambda", "Omega_m", "Omega_lambda", "Omega_r")
   if (!any(other_headers %in% names(head))){
     stop("Error. Missing a required header field. \n
-         One of `NumPart_ThisFile` or `NumPart_Total` is missing. \n
+         One of `NumPart_ThisFile`, `NumPart_Total` or Omega parameters are missing. \n
          See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
   }
 
