@@ -1,6 +1,6 @@
-# SimSpin v2.9.6 News
+# SimSpin v2.10.0 News
 
-### Last edit: 20/02/2025
+### Last edit: 03/03/2025
 
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
