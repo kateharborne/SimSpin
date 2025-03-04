@@ -1049,17 +1049,7 @@
     names(particle_list) <- current_names
   }
 
-  if ("StarFormationRates" %in% current_names & type == "Colibre"){
-    current_names[which(current_names == "StarFormationRates")] <- "StarFormationRate"
-    names(particle_list) <- current_names
-  }
-
-  if ("SmoothingLengths" %in% current_names & type == "Colibre"){
-    current_names[which(current_names == "SmoothingLengths")] <- "SmoothingLength"
-    names(particle_list) <- current_names
-  }
-
-  if ("GFM_InitialMass" %in% current_names & type == "TNG"){
+ if ("GFM_InitialMass" %in% current_names & type == "TNG"){
     current_names[which(current_names == "GFM_InitialMass")] <- "InitialMass"
     names(particle_list) <- current_names
   }
