@@ -71,6 +71,7 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                 "Template_LSF" = numeric(1),
                 "Template_waveres" = numeric(1),
                 "Centre" = centre,
+                "Cosmology" = list(H0=68.4, OmegaM=0.301, OmegaL=0.699, OmegaR=8.985075e-5),
                 "HalfMass" = half_mass,
                 "TotalStellarMass" = numeric(1),
                 "TotalGasMass" = numeric(1),
@@ -159,7 +160,11 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     }
 
     # ensure that Ages are described relative to the time "now"
-    galaxy_data$ssp$Age = galaxy_data$ssp$Age - as.numeric(.SFTtoAge(galaxy_data$head$Time, cores = 1))
+    galaxy_data$ssp$Age = galaxy_data$ssp$Age - as.numeric(.SFTtoAge(galaxy_data$head$Time, cores = 1,
+                                                                     H0 = galaxy_data$head$H0,
+                                                                     OmegaM = galaxy_data$head$OmegaM,
+                                                                     OmegaL = galaxy_data$head$OmegaL,
+                                                                     OmegaR = galaxy_data$head$OmegaR))
 
     # reassign any age==0 particles to have a small non-zero age
     galaxy_data$ssp$Age[galaxy_data$ssp$Age==0] = 1e-9
@@ -218,7 +223,14 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
 
   } else {sed = NULL} # if only gas in the file
 
-  if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" | galaxy_data$head$Type == "Horizon-AGN" | galaxy_data$head$Type == "Illustris-TNG"){
+  if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" |
+      galaxy_data$head$Type == "Horizon-AGN" | galaxy_data$head$Type == "Illustris-TNG"){
+
+    header$Cosmology$H0 = galaxy_data$head$H0
+    header$Cosmology$OmegaM = galaxy_data$head$OmegaM
+    header$Cosmology$OmegaL = galaxy_data$head$OmegaL
+    header$Cosmology$OmegaR = galaxy_data$head$OmegaR
+
     if (length(galaxy_data$gas_part$SmoothingLength)>0 & sph_spawn_n>1){ # if we need to spawn gas particles because we are working with SPH models
 
       gas_part_names = names(galaxy_data$gas_part)

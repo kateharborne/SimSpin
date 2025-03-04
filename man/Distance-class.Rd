@@ -39,5 +39,17 @@ Mega-parsecs.}
 
 \item{\code{kpc_per_arcsec}}{Describes the projected distance to a galaxy in angular
 units of kilo-parsecs per arcsecond.}
+
+\item{\code{H0}}{Hubble constant. Default as Planck 2018 results where H0 = 68.4.}
+
+\item{\code{OmegaM}}{Omega matter, the relative component of energy in mass. Default
+as Planck 2018 results where OmegaM = 0.301.}
+
+\item{\code{OmegaL}}{Omega lambda, the relative component of energy in dark energy.
+Default as Planck 2018 results where OmegaL = 0.699.}
+
+\item{\code{OmegaR}}{Omega radiation, the relative component of the energy in
+radiation (including neutrinos). Default as Planck 2018 results where OmegaR
+= 8.985075e-5.}
 }}
 

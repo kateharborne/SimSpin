@@ -127,3 +127,16 @@ test_that("kernel weights sum to 1", {
   expect_equal(sum(.generate_uniform_sphere(100, kernel = "WC6")$weight), 1)
   expect_equal(sum(.generate_uniform_sphere(100, kernel = "M4")$weight), 1)
 })
+
+test_that("stellar ages change depending on H0", {
+
+  expect_false(
+    as.numeric(.SFTtoAge(0.3, H0 = 100, OmegaM = 0.3, OmegaL = 0.7, OmegaR=0)) ==
+     as.numeric(.SFTtoAge(0.3, H0 = 70, OmegaM = 0.3, OmegaL = 0.7, OmegaR=0))
+    )
+
+  expect_false(
+    all(as.numeric(.SFTtoAge(seq(0.01,1, length.out=100), H0 = 100, OmegaM = 0.3, OmegaL = 0.7, OmegaR=0, cores=2)) ==
+      as.numeric(.SFTtoAge(seq(0.01,1, length.out=100), H0 = 70, OmegaM = 0.3, OmegaL = 0.7, OmegaR=0, cores = 2)))
+    )
+})
