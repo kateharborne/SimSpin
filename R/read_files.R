@@ -180,7 +180,6 @@
   if (illustristng){output = .illustristng_read_hdf5(data, head, cores)}
   if (colibre){output = .colibre_read_hdf5(data, head, cores)}
 
-
   hdf5r::h5close(data)
 
   return(output)
@@ -889,6 +888,7 @@
     }
 
     gas = .check_names(gas, type="Colibre")
+
     colibre_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(colibre_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for COLIBRE PartType0. \n
