@@ -490,6 +490,7 @@
     }
 
     gas = .check_names(gas, type="Magneticum")
+
     magneticum_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(magneticum_gas_names %in% names(gas))){
       stop("Error. Missing a necessary dataset for Magneticum PartType0. \n
@@ -861,6 +862,12 @@
 
 .colibre_read_hdf5 = function(data, head, cores){
 
+  head$Type = "Colibre"
+  head$H0 = head$HubbleParam * 100
+  names(head)[names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "OmegaLambda"] = "OmegaL"
+  head$OmegaR = 0
+
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
 
@@ -956,14 +963,16 @@
                                        "Mass" = stars$Mass*.g_to_msol) # Mass in solar masses
 
     ssp = data.table::data.table("Initial_Mass" = stars$InitialMass*.g_to_msol,
-                                 "Age" = as.numeric(.SFTtoAge(a = stars$StellarFormationTime, cores = cores)),
+                                 "Age" = as.numeric(.SFTtoAge(a=stars$StellarFormationTime,
+                                                              cores=cores, H0=head$H0,
+                                                              OmegaM=head$OmegaM,
+                                                              OmegaL=head$OmegaL,
+                                                              OmegaR=head$OmegaR)),
                                  "Metallicity" = stars$Metallicity)
 
     remove(stars); remove(PT4_attr)
 
   } else {star_part=NULL; ssp=NULL}
-
-  head$Type = "Colibre"
 
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
@@ -1081,8 +1090,8 @@
     particle_list = particle_list[-id_to_remove]
   }
 
-  if (!is.null(nrow(particle_list$Metallicity)) & type == "Magenticum" |
-      length(particle_list$Metallicity)[1] == 11 & length(particle_list$ParticleIDs) != 11 & type == "Magenticum"){
+  if (!is.null(nrow(particle_list$Metallicity)) & type == "Magneticum" |
+      length(particle_list$Metallicity)[1] == 11 & length(particle_list$ParticleIDs) != 11 & type == "Magneticum"){
 
     one_p_flag = FALSE
     if (is.null(dim(particle_list$Coordinates))){one_p_flag = TRUE}
