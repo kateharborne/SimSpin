@@ -78,6 +78,14 @@ The list will contain the following 4 elements:
     | `Template`         | the spectral template used to construct spectra for each stellar particle. |
     | `Template_LSF`     | the line-spread-function assoicated with the template spectra in angstrom. |
     | `Template_waveres` | the wavelength resolution given by the binning size in angstrom.  |
+    | `Centre`           | the coordinates of the galaxy upon which SimSpin will centre further observations. |
+    | `Cosmology`        | a list containing the cosmological parameters of the input simulation including the parameters `H0` (the Hubble constant), `OmegaM` (Omega matter, the relative component of energy in mass), `OmegaL` (Omega lambda, the relative component of energy in dark energy) and `OmegaR` (Omega radiation, the relative component of the energy in radiation).
+    | `HalfMass`         | the mass at which the alignment is computed. |
+    | `TotalStellarMass` | the total mass of stars in this simulation cutout. |
+    | `TotalGasMass`     | the total mass of gas in this simulation cutout. |
+    | `Alignment`        | a keyword to record how the alignment has been computed. If a half mass value is specified, this keyword will read "specified". If no half-mass is requested and the input simulation is an N-body model, this keyword will read "None" and the simulation will not be rotated under the assumption that the object already has a disk fixed within the x-y plane. If no half-mass is requested, the object will be aligned at the default radius (i.e. at a radius where half the total mass in the cutout occurs) and the keyword reads "Default". |
+    | `Npart`            | the total number of particles within the simulation cutout (gas + stars). |
+    | `SmoothingN`       | the `sph_spawn_n` value passed to `make_simspin_file` at runtime. |
     | `Origin`           | the version of SimSpin used to build the file. |
     | `Date`             | the date and time at which the SimSpin file was built. |
 
