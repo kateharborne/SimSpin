@@ -339,6 +339,8 @@ test_that("IllustrisTNG files can be built - velocity mode and be identical in s
   expect_length(illustris_parallel_velocity$observed_images, velocity_observed_images_size)
   expect_true(illustris_parallel_velocity$observation$mass_flag)
 
+  expect_true(all(illustris_parallel_velocity$observed_images$velocity_image != 0))
+
   expect_true(all.equal(illustris_velocity$velocity_cube, illustris_parallel_velocity$velocity_cube))
   expect_true(all.equal(illustris_velocity$raw_images$flux_image, illustris_parallel_velocity$raw_images$flux_image))
   expect_true(all.equal(illustris_velocity$raw_images$velocity_image, illustris_parallel_velocity$raw_images$velocity_image))
