@@ -22,6 +22,8 @@
 
   block = readBin(data, "integer", n=1)
 
+  close(data)
+
   if (block == 256){
 
     return(output = "gadget_binary")
