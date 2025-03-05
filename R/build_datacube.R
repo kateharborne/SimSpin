@@ -236,8 +236,13 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   # function for adding flux information to stellar methods
   if (observation$method == "spectral" | observation$method == "velocity"){
-    galaxy_data = .compute_flux(observation, galaxy_data, simspin_data,
-                                template=temp, verbose, spectra_flag)
+    if (cores > 1){
+      galaxy_data = .compute_flux_mc(observation, galaxy_data, simspin_data,
+                                  template=temp, verbose, spectra_flag, cores)
+    } else {
+      galaxy_data = .compute_flux(observation, galaxy_data, simspin_data,
+                                  template=temp, verbose, spectra_flag)
+    }
   }
 
   if (length(galaxy_data$ID) == 0){
