@@ -13,6 +13,7 @@
 #                 - HorizonAGN
 #                 - Colibre
 
+
 .get_file_type = function(f){
 
   # Input files could be in binary or HDF5 format. Investigate format before
@@ -976,6 +977,7 @@
 
   } else {star_part=NULL; ssp=NULL}
 
+  head$Type = "Colibre"
   return(list(star_part=star_part, gas_part=gas_part, head=head, ssp=ssp))
 
 }
@@ -1125,7 +1127,6 @@
   return(particle_list)
 
 }
-
 
 # Function for computing the stellar age from the formation time in parallel
 .SFTtoAge = function(a, H0, OmegaM, OmegaL, OmegaR, cores=1){
