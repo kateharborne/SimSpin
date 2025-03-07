@@ -224,7 +224,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   } else {sed = NULL} # if only gas in the file
 
   if (galaxy_data$head$Type == "EAGLE" | galaxy_data$head$Type == "Magneticum" |
-      galaxy_data$head$Type == "Horizon-AGN" | galaxy_data$head$Type == "Illustris-TNG"){
+      galaxy_data$head$Type == "Horizon-AGN" | galaxy_data$head$Type == "Illustris-TNG" |
+      galaxy_data$head$Type == "Colibre"){
 
     header$Cosmology$H0 = galaxy_data$head$H0
     header$Cosmology$OmegaM = galaxy_data$head$OmegaM
@@ -254,7 +255,8 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
         kernel = "WC2"
       } else if (galaxy_data$head$Type == "Magneticum"){
         kernel = "WC6"
-      } else if (galaxy_data$head$Type == "HorizonAGN" | galaxy_data$head$Type == "Illustris-TNG"){
+      } else if (galaxy_data$head$Type == "HorizonAGN" | galaxy_data$head$Type == "Illustris-TNG" |
+                 galaxy_data$head$Type == "Colibre"){
         kernel = "M4"
       } else {
         kernel = "WC2"
