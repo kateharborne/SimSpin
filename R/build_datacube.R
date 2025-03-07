@@ -705,7 +705,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                        simspin_datacube = output, object_name = object_name,
                        telescope_name = telescope_name, instrument_name = telescope$type,
                        observer_name = observer_name, split_save=split_save,
-                       input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
+                       input_simspin_file_path = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
   }
 
   return(output)
