@@ -445,7 +445,9 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h4_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       residuals = array(0.0, dim = c(observation$sbin, observation$sbin)),
-      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
+      ageM_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
+      ageL_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("velocity_cube"   = cube,
