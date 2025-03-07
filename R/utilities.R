@@ -927,6 +927,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
     if (verbose){cat(i, "... ", sep = "")}
   }
+
   return(list(spectra,
               vel_los, dis_los, ageM_map, ageL_map, met_map,
               vorbin_map))
@@ -1021,6 +1022,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   ageL_dist = matrix(unlist(output[[5]]))
   met_dist = matrix(unlist(output[[6]]))
   vorbin_dist = matrix(unlist(output[[7]]))
+
 
   for (bin in 1:nrow(part_in_spaxel)){
 
