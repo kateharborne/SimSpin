@@ -1,6 +1,6 @@
-# SimSpin v2.9.6 News
+# SimSpin v2.10.1 News
 
-### Last edit: 20/02/2025
+### Last edit: 07/03/2025
 
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
@@ -17,7 +17,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 03/03/25 | *Bug fix* Ensuring that the stellar ages and distance parameters such as the measured luminoisity distance are properly computed using the relevant cosmological parameters. In the past, these were all using Planck cosmology, rather than varying to reflect the cosmological parameters of the input simulation. | 2.10.0 |  | Kate Harborne |
+| 07/03/25 | *Bug fix* `tryCatch` in `build_datacube` meant we were missing the errors from LOSVD fit due to `optim` returning non-finite values when approaching the lower bound for dispersion (i.e. sigma = 0). Fixed Issue #121 by adjusting this lower bound to be small but non-zero. Further adjusted the naming convention in `write_simspin_file` for the `input_simspin_file` > `input_simspin_file_path` for clarity. Old code will not fail, but will issue a warning. Closing Issue #109. | 2.10.1 |  | Kate Harborne |
+| 03/03/25 | *Bug fix* Ensuring that the stellar ages and distance parameters such as the measured luminoisity distance are properly computed using the relevant cosmological parameters. In the past, these were all using Planck cosmology, rather than varying to reflect the cosmological parameters of the input simulation. | 2.10.0 | b5ffdde967a61bc08690702e5d93dab7e025e3f1 | Kate Harborne |
 | 20/02/25 | Modifying the `.check_names` function to take in the simulation type being read. Future-proofing for other simulation inputs that may also store Metallicity as an array, but with different units. | 2.9.6 | 09d9b692b06938cbda280dbd40de003c532df26b | Kate Harborne |
 | 07/11/24 | *Bug fix* Making sure Kappa and KappaCo use the correct total 3D velocity component and now squaring the velocity and ensuring with a proper test that the resulting value is less than 1 (as it should be!) - always write a test... | 2.9.5 | 234dd2538368555e977a2b873b67c5b2f450c566 | Kate Harborne |
 | 28/10/24 | *Bug fix* Making sure Kappa and KappaCo use the correct radial velocity component (cylindrical parameter, not spherical). | 2.9.4 | 0df75af35f8c8ab89f497ddd465aa821d679e9f3 | Kate Harborne |
