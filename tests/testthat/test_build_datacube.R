@@ -36,7 +36,7 @@ spectra_number_of_hdu_snfalse = 11
 spectral_raw_vel_loc = 5
 
 velocity_raw_images_size = 8
-velocity_observed_images_size = 7
+velocity_observed_images_size = 9
 
 velocity_number_of_hdu_sntrue = 19
 velocity_number_of_hdu_snfalse = 18
@@ -45,8 +45,10 @@ velocity_obs_h3_loc = 7
 velocity_obs_h4_loc = 8
 velocity_obs_res_loc = 9
 velocity_obs_mass_loc = 10
-velocity_raw_mass_loc = 12
-velocity_variance_loc = 19
+velocity_obs_ageM_loc = 11
+velocity_obs_ageL_loc = 12
+velocity_raw_mass_loc = 14
+velocity_variance_loc = 21
 
 gas_raw_images_size = 7
 gas_observed_images_size = 7
@@ -781,6 +783,8 @@ test_that("Data cubes can be written to a single files", {
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_h4_loc]]$keyvalues$EXTNAME == "OBS_H4")
   expect_true(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))[[velocity_obs_res_loc]]$keyvalues$EXTNAME == "RESIDUAL")
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS")))[ob_table_loc] == "OB_TABLE")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS")))[velocity_obs_ageM_loc] == "OBS_AGEM")
+  expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS")))[velocity_obs_ageL_loc] == "OBS_AGEL")
   expect_true(names(Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS")))[velocity_raw_mass_loc] == "RAW_MASS")
 
   expect_length(build_datacube(simspin_file = ss_gadget,
@@ -992,6 +996,9 @@ test_that("Data cubes can be written to multiple files", {
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_dispersion_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_h3_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_h4_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_mass_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_ageM_image.FITS")))
+  expect_true(file.exists(paste0(temp_loc, "/ss_gadget_obs_ageL_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS")))
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_raw_dispersion_image.FITS")))
@@ -1103,6 +1110,9 @@ unlink(c("GalaxyID_unknown_inc45deg_seeing2fwhm_spectral_cube.FITS",
          paste0(temp_loc, "/ss_gadget_obs_dispersion_image.FITS"),
          paste0(temp_loc, "/ss_gadget_obs_h3_image.FITS"),
          paste0(temp_loc, "/ss_gadget_obs_h4_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_obs_mass_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_obs_ageM_image.FITS"),
+         paste0(temp_loc, "/ss_gadget_obs_ageL_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_flux_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_mass_image.FITS"),
          paste0(temp_loc, "/ss_gadget_raw_velocity_image.FITS"),
