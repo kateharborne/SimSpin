@@ -1086,8 +1086,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   }
 
-  return(list(vel_spec, #lum_map, band_map,
-              vel_los, dis_los, ageM_map, ageL_map, met_map, #mass_map, part_map,
+  return(list(vel_spec,
+              vel_los, dis_los, ageM_map, ageL_map, met_map,
               vorbin_map))
 }
 
