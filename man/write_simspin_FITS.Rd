@@ -11,6 +11,7 @@ write_simspin_FITS(
   telescope_name,
   instrument_name,
   observer_name,
+  input_simspin_file_path,
   input_simspin_file,
   split_save = F,
   mask = NA,
@@ -32,8 +33,11 @@ telescope.}
 
 \item{observer_name}{A string that describes the name of the observer.}
 
-\item{input_simspin_file}{A string describing the original SimSpin file
-(i.e. the file output from make_simspin_file).}
+\item{input_simspin_file_path}{A string describing the path to the original
+SimSpin file (i.e. the location of the file output from make_simspin_file).}
+
+\item{input_simspin_file}{Placeholder for `input_simspin_file_path` to prevent
+code failure. Will be removed in SimSpin (> v2).}
 
 \item{split_save}{Boolean describing whether to split the output from
 \code{build_datacube()} into multiple files. If TRUE, several FITS files
@@ -72,7 +76,7 @@ write_simspin_FITS(output_file = paste(temp_loc, "cube.FITS", sep=""),
                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
                   telescope_name = "AAO", instrument_name = "SAMI",
                   observer_name = "K.E.Harborne",
-                  input_simspin_file = paste(temp_loc, "spectra.Rdata", sep=""))
+                  input_simspin_file_path = paste(temp_loc, "spectra.Rdata", sep=""))
 unlink(paste(temp_loc, "spectra.fst", sep=""))
 unlink(paste(temp_loc, "cube.FITS", sep=""))
 }

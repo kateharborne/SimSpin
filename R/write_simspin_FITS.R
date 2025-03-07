@@ -22,6 +22,8 @@
 #'@param observer_name A string that describes the name of the observer.
 #'@param input_simspin_file_path A string describing the path to the original
 #' SimSpin file (i.e. the location of the file output from make_simspin_file).
+#'@param input_simspin_file Placeholder for `input_simspin_file_path` to prevent
+#' code failure. Will be removed in SimSpin (> v2).
 #'@param split_save Boolean describing whether to split the output from
 #' \code{build_datacube()} into multiple files. If TRUE, several FITS files
 #' will be saved with file names that reflect their content (i.e.
@@ -53,12 +55,13 @@
 
 write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                               telescope_name, instrument_name, observer_name,
-                              input_simspin_file_path, split_save=F, mask=NA,
-                              galaxy_centre = c(0,0,0), ...){
+                              input_simspin_file_path, input_simspin_file,
+                              split_save=F, mask=NA,
+                              galaxy_centre = c(0,0,0)){
 
   # Running checks on inputs ---------------------------------------------------
   if (missing(input_simspin_file_path)){
-    if (exists(input_simspin_file)){
+    if (!missing(input_simspin_file)){
       warning("Warning: No provided `input_simspin_file_path`. \n  You have provided `input_simspin_file` instead, which will unavailable in future SimSpin versions (>v2). \n Please adjust and try again.")
       input_simspin_file_path = input_simspin_file
       remove(input_simspin_file)
