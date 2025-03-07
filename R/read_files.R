@@ -1060,7 +1060,7 @@
     names(particle_list) <- current_names
   }
 
- if ("GFM_InitialMass" %in% current_names & type == "TNG"){
+  if ("GFM_InitialMass" %in% current_names & type == "TNG"){
     current_names[which(current_names == "GFM_InitialMass")] <- "InitialMass"
     names(particle_list) <- current_names
   }
