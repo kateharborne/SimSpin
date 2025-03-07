@@ -252,6 +252,10 @@ test_that("Test that sph_spawn functionality works", {
                                overwrite = T, cores = 1, sph_spawn_n = 10))
   expect_null(make_simspin_file(ss_illustris, template = "BC03lr", output = paste(temp_loc, "/illustris_test", sep=""),
                                overwrite = T, cores = 2, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_colibre, template = "BC03lr", output = paste(temp_loc, "/colibre_test", sep=""),
+                                overwrite = T, cores = 1, sph_spawn_n = 10))
+  expect_null(make_simspin_file(ss_colibre, template = "BC03lr", output = paste(temp_loc, "/colibre_test", sep=""),
+                                overwrite = T, cores = 2, sph_spawn_n = 10))
 
   test_horizon = readRDS(paste(temp_loc, "/horizon_test", sep=""))
   expect_true(data.table::is.data.table(test_horizon$gas_part))
@@ -293,6 +297,14 @@ test_that("Test that sph_spawn functionality works on multiple cores - Illustris
   expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
   expect_length(gas_data_c1$gas_part$ID, 1000) # sph_spawn_n = 10, original file contains 100 gas particles
   expect_length(gas_data_c2$gas_part$ID, 1000)
+})
+
+test_that("Test that sph_spawn functionality works on multiple cores - Colibre", {
+  gas_data_c1 = make_simspin_file(ss_colibre, template = "BC03", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
+  gas_data_c2 = make_simspin_file(ss_colibre, template = "BC03", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
+  expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
+  expect_length(gas_data_c1$gas_part$ID, 620) # sph_spawn_n = 10, original file contains 100 gas particles
+  expect_length(gas_data_c2$gas_part$ID, 620)
 })
 
 # Test that the added header information works as expected ---------------------
