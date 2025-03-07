@@ -38,8 +38,8 @@ spectral_raw_vel_loc = 5
 velocity_raw_images_size = 8
 velocity_observed_images_size = 9
 
-velocity_number_of_hdu_sntrue = 19
-velocity_number_of_hdu_snfalse = 18
+velocity_number_of_hdu_sntrue = 21
+velocity_number_of_hdu_snfalse = 20
 velocity_obs_vel_loc = 5
 velocity_obs_h3_loc = 7
 velocity_obs_h4_loc = 8
