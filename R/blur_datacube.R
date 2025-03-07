@@ -89,6 +89,14 @@ blur_datacube = function(datacube_output){
     blur_mass_image = ProFit::profitBruteConv(datacube_output$observed_images$mass_image, observation$psf_kernel) * aperture_region
     datacube_output$observed_images$mass_image = blur_mass_image
 
+    blur_ageM_image = array(data = 0.0, dim = cube_dims[c(1,2)])
+    blur_ageM_image = ProFit::profitBruteConv(datacube_output$observed_images$ageM_image, observation$psf_kernel) * aperture_region
+    datacube_output$observed_images$ageM_image = blur_ageM_image
+
+    blur_ageL_image = array(data = 0.0, dim = cube_dims[c(1,2)])
+    blur_ageL_image = ProFit::profitBruteConv(datacube_output$observed_images$ageL_image, observation$psf_kernel) * aperture_region
+    datacube_output$observed_images$ageL_image = blur_ageL_image
+
     if (observation$method == "gas" | observation$method == "sf gas"){  # if your observation is of gas, blur the sfr map
       blur_sfr_image = array(data = 0.0, dim = cube_dims[c(1,2)])
       blur_sfr_image = ProFit::profitBruteConv(datacube_output$observed_images$SFR_image, observation$psf_kernel) * aperture_region
