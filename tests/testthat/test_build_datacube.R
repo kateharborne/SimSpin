@@ -200,15 +200,17 @@ test_that("HDF5 files can be built - velocity mode.", {
 
 test_that("EAGLE files can be built - velocity mode and be identical in series and parallel.", {
   eagle_velocity = build_datacube(simspin_file = ss_eagle,
-                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                  telescope = telescope(type="IFU", aperture_shape = "square", lsf_fwhm = 3.6, signal_to_noise = NA),
                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                   method = "velocity")
   expect_length(eagle_velocity, built_cube_size)
   expect_length(eagle_velocity$raw_images, velocity_raw_images_size)
   expect_length(eagle_velocity$observed_images, velocity_observed_images_size)
 
+  expect_false(any(eagle_velocity$observed_images$velocity_image == 0))
+
   eagle_parallel_velocity = build_datacube(simspin_file = ss_eagle,
-                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                           telescope = telescope(type="IFU", aperture_shape = "square", lsf_fwhm = 3.6, signal_to_noise = NA),
                                            observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                            method = "velocity",
                                            cores = 2)
@@ -303,8 +305,6 @@ test_that("IllustrisTNG files can be built - velocity mode and be identical in s
   expect_length(illustris_parallel_velocity$raw_images, velocity_raw_images_size)
   expect_length(illustris_parallel_velocity$observed_images, velocity_observed_images_size)
   expect_true(illustris_parallel_velocity$observation$mass_flag)
-
-  expect_true(all(illustris_parallel_velocity$observed_images$velocity_image != 0))
 
   expect_true(all.equal(illustris_velocity$velocity_cube, illustris_parallel_velocity$velocity_cube))
   expect_true(all.equal(illustris_velocity$raw_images$flux_image, illustris_parallel_velocity$raw_images$flux_image))
