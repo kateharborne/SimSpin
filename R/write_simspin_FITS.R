@@ -20,8 +20,10 @@
 #'@param instrument_name A string that describes the used instrument on that
 #' telescope.
 #'@param observer_name A string that describes the name of the observer.
-#'@param input_simspin_file A string describing the original SimSpin file
-#' (i.e. the file output from make_simspin_file).
+#'@param input_simspin_file_path A string describing the path to the original
+#' SimSpin file (i.e. the location of the file output from make_simspin_file).
+#'@param input_simspin_file Placeholder for `input_simspin_file_path` to prevent
+#' code failure. Will be removed in SimSpin (> v2).
 #'@param split_save Boolean describing whether to split the output from
 #' \code{build_datacube()} into multiple files. If TRUE, several FITS files
 #' will be saved with file names that reflect their content (i.e.
@@ -45,7 +47,7 @@
 #'                   simspin_datacube = cube, object_name = "SimSpin EAGLE example",
 #'                   telescope_name = "AAO", instrument_name = "SAMI",
 #'                   observer_name = "K.E.Harborne",
-#'                   input_simspin_file = paste(temp_loc, "spectra.Rdata", sep=""))
+#'                   input_simspin_file_path = paste(temp_loc, "spectra.Rdata", sep=""))
 #'unlink(paste(temp_loc, "spectra.fst", sep=""))
 #'unlink(paste(temp_loc, "cube.FITS", sep=""))
 #'}
@@ -53,12 +55,21 @@
 
 write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                               telescope_name, instrument_name, observer_name,
-                              input_simspin_file, split_save=F, mask=NA,
+                              input_simspin_file_path, input_simspin_file,
+                              split_save=F, mask=NA,
                               galaxy_centre = c(0,0,0)){
 
   # Running checks on inputs ---------------------------------------------------
-  if (!is.character(input_simspin_file)){
-    stop("Error: `input_simspin_file` is expected as a string, describing the path to the input SimSpin file. \n Please adjust and try again.")
+  if (missing(input_simspin_file_path)){
+    if (!missing(input_simspin_file)){
+      warning("Warning: No provided `input_simspin_file_path`. \n  You have provided `input_simspin_file` instead, which will unavailable in future SimSpin versions (>v2). \n  Please adjust for future iterations.")
+      input_simspin_file_path = input_simspin_file
+      remove(input_simspin_file)
+    }
+  }
+
+  if (!is.character(input_simspin_file_path)){
+    stop("Error: `input_simspin_file_path` is expected as a string, describing the path to the input SimSpin file. \n Please adjust and try again.")
   }
 
   if (!is.list(simspin_datacube)){
@@ -121,7 +132,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
                           "PI-COI"="UNKNOWN", "OBSERVER"=observer_name, "REDSHIFT"=observation$z,
                           "PIPEFILE"=output_name,
                           "BUNIT"=if(mass_flag){"Msol"}else{"erg/s/cm**2"},
-                          "ARCFILE"=input_simspin_file,
+                          "ARCFILE"=input_simspin_file_path,
                           "DATAMD5"="4aece79473a5c88f6533382655e948bf",
                           "OBJECT"=object_name)
 

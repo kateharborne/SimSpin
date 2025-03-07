@@ -200,15 +200,17 @@ test_that("HDF5 files can be built - velocity mode.", {
 
 test_that("EAGLE files can be built - velocity mode and be identical in series and parallel.", {
   eagle_velocity = build_datacube(simspin_file = ss_eagle,
-                                  telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                  telescope = telescope(type="IFU", aperture_shape = "square", lsf_fwhm = 3.6, signal_to_noise = NA),
                                   observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                   method = "velocity")
   expect_length(eagle_velocity, built_cube_size)
   expect_length(eagle_velocity$raw_images, velocity_raw_images_size)
   expect_length(eagle_velocity$observed_images, velocity_observed_images_size)
 
+  expect_false(any(eagle_velocity$observed_images$velocity_image == 0))
+
   eagle_parallel_velocity = build_datacube(simspin_file = ss_eagle,
-                                           telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                           telescope = telescope(type="IFU", aperture_shape = "square", lsf_fwhm = 3.6, signal_to_noise = NA),
                                            observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
                                            method = "velocity",
                                            cores = 2)
@@ -1008,19 +1010,19 @@ test_that("Mask can be included in FITS files correctly", {
                      mask = mask, object_name = "ss_gadget",
                      telescope_name = "SimSpin",
                      instrument_name = "SAMI", observer_name = "K Harborne",
-                     input_simspin_file = "ss_gadget.Rdata")
+                     input_simspin_file_path = "ss_gadget.Rdata")
 
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget.FITS")))
   fits_w_mask = Rfits::Rfits_read(paste0(temp_loc, "/ss_gadget.FITS"))
   expect_true(length(fits_w_mask) == (spectra_number_of_hdu_sntrue+1))
   expect_true(fits_w_mask[[(spectra_number_of_hdu_sntrue+1)]]$keyvalues$EXTNAME == "MASK")
 
-  write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
+  expect_warning(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
                      simspin_datacube = cube, split_save = T,
                      mask = mask, object_name = "ss_gadget",
                      telescope_name = "SimSpin",
                      instrument_name = "SAMI", observer_name = "K Harborne",
-                     input_simspin_file = "ss_gadget.Rdata")
+                     input_simspin_file = "ss_gadget.Rdata"))
 
   expect_true(file.exists(paste0(temp_loc, "/ss_gadget_mask.FITS")))
 })
@@ -1081,28 +1083,28 @@ test_that("Writing files gives sensible errors when incorrect parameters specifi
                                   mask = mask, object_name = "ss_gadget",
                                   telescope_name = "SimSpin",
                                   instrument_name = "SAMI", observer_name = "K Harborne",
-                                  input_simspin_file = "ss_gadget.Rdata"))
+                                  input_simspin_file_path = "ss_gadget.Rdata"))
   # Input split_save should be logical, not a string
   expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
                                   simspin_datacube = cube, split_save = "F",
                                   mask = mask, object_name = "ss_gadget",
                                   telescope_name = "SimSpin",
                                   instrument_name = "SAMI", observer_name = "K Harborne",
-                                  input_simspin_file = "ss_gadget.Rdata"))
+                                  input_simspin_file_path = "ss_gadget.Rdata"))
   # Input simspin_file is incorrectly an Robject
   expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
                                   simspin_datacube = cube, split_save = F,
                                   mask = mask, object_name = "ss_gadget",
                                   telescope_name = "SimSpin",
                                   instrument_name = "SAMI", observer_name = "K Harborne",
-                                  input_simspin_file = ss_gadget))
+                                  input_simspin_file_path = ss_gadget))
   # Input mask is incorrectly a logical
   expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
                                   simspin_datacube = cube, split_save = F,
                                   mask = T, object_name = "ss_gadget",
                                   telescope_name = "SimSpin",
                                   instrument_name = "SAMI", observer_name = "K Harborne",
-                                  input_simspin_file = "ss_gadget.Rdata"))
+                                  input_simspin_file_path = "ss_gadget.Rdata"))
 
   # Input string is incorrectly a logical
   expect_error(write_simspin_FITS(output_file = paste0(temp_loc, "/ss_gadget.FITS"),
@@ -1110,7 +1112,7 @@ test_that("Writing files gives sensible errors when incorrect parameters specifi
                                   mask = T, object_name = "ss_gadget",
                                   telescope_name = NA,
                                   instrument_name = "SAMI", observer_name = "K Harborne",
-                                  input_simspin_file = "ss_gadget.Rdata"))
+                                  input_simspin_file_path = "ss_gadget.Rdata"))
 
 
   remove(cube, mask)

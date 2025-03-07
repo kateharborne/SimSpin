@@ -236,8 +236,13 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
   # function for adding flux information to stellar methods
   if (observation$method == "spectral" | observation$method == "velocity"){
-    galaxy_data = .compute_flux(observation, galaxy_data, simspin_data,
-                                template=temp, verbose, spectra_flag)
+    if (cores > 1){
+      galaxy_data = .compute_flux_mc(observation, galaxy_data, simspin_data,
+                                  template=temp, verbose, spectra_flag, cores)
+    } else {
+      galaxy_data = .compute_flux(observation, galaxy_data, simspin_data,
+                                  template=temp, verbose, spectra_flag)
+    }
   }
 
   if (length(galaxy_data$ID) == 0){
@@ -485,7 +490,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                          fn    = .losvd_fit_h3h4,
                                          x     = observation$vbin_seq,
                                          losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                         method="L-BFGS-B", lower = c(NA, 0, NA, NA),
+                                         method="L-BFGS-B", lower = c(NA, 1e-10, NA, NA),
                                          control=list(pgtol=1e-9))$par},
                            error = function(e){c(0,0,0,0)})
 
@@ -509,7 +514,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                          fn    = .losvd_fit_vsig,
                                          x     = observation$vbin_seq,
                                          losvd = (output$velocity_cube[c,d,]/(max(output$velocity_cube[c,d,], na.rm=T))),
-                                         method="L-BFGS-B", lower = c(NA, 0),
+                                         method="L-BFGS-B", lower = c(NA, 1e-10),
                                          control=list(pgtol=1e-9))$par},
                            error = function(e){c(0,0)})
 
@@ -700,7 +705,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                        simspin_datacube = output, object_name = object_name,
                        telescope_name = telescope_name, instrument_name = telescope$type,
                        observer_name = observer_name, split_save=split_save,
-                       input_simspin_file = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
+                       input_simspin_file_path = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
   }
 
   return(output)
