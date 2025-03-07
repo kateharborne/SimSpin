@@ -62,7 +62,7 @@ write_simspin_FITS = function(output_file, simspin_datacube, object_name,
   # Running checks on inputs ---------------------------------------------------
   if (missing(input_simspin_file_path)){
     if (!missing(input_simspin_file)){
-      warning("Warning: No provided `input_simspin_file_path`. \n  You have provided `input_simspin_file` instead, which will unavailable in future SimSpin versions (>v2). \n Please adjust and try again.")
+      warning("Warning: No provided `input_simspin_file_path`. \n  You have provided `input_simspin_file` instead, which will unavailable in future SimSpin versions (>v2). \n  Please adjust for future iterations.")
       input_simspin_file_path = input_simspin_file
       remove(input_simspin_file)
     }
