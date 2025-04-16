@@ -184,7 +184,8 @@ test_that("Gadget files can be built - velocity mode.", {
   expect_length(gadget_velocity, built_cube_size)
   expect_length(gadget_velocity$raw_images, velocity_raw_images_size)
   expect_length(gadget_velocity$observed_images, velocity_observed_images_size)
-
+  expect_true(all(gadget_velocity$observed_images$dispersion_image > gadget_velocity$observation$vbin_error/2 |
+                    gadget_velocity$observed_images$dispersion_image== 0))
 })
 
 test_that("HDF5 files can be built - velocity mode.", {
@@ -195,7 +196,8 @@ test_that("HDF5 files can be built - velocity mode.", {
   expect_length(hdf5_velocity, built_cube_size)
   expect_length(hdf5_velocity$raw_images, velocity_raw_images_size)
   expect_length(hdf5_velocity$observed_images, velocity_observed_images_size)
-
+  expect_true(all(hdf5_velocity$observed_images$dispersion_image > hdf5_velocity$observation$vbin_error/2 |
+                    hdf5_velocity$observed_images$dispersion_image== 0))
 })
 
 test_that("EAGLE files can be built - velocity mode and be identical in series and parallel.", {
@@ -225,6 +227,8 @@ test_that("EAGLE files can be built - velocity mode and be identical in series a
   expect_true(all.equal(eagle_velocity$observed_images$flux_image, eagle_parallel_velocity$observed_images$flux_image))
   expect_true(all.equal(eagle_velocity$observed_images$velocity_image, eagle_parallel_velocity$observed_images$velocity_image))
   expect_true(all.equal(eagle_velocity$observed_images$dispersion_image, eagle_parallel_velocity$observed_images$dispersion_image))
+  expect_true(all(eagle_velocity$observed_images$dispersion_image > eagle_velocity$observation$vbin_error/2 |
+                    eagle_velocity$observed_images$dispersion_image== 0))
 
 })
 
@@ -253,6 +257,8 @@ test_that("Magneticum files can be built - velocity mode and be identical in ser
   expect_true(all.equal(magneticum_velocity$observed_images$flux_image, magneticum_parallel_velocity$observed_images$flux_image))
   expect_true(all.equal(magneticum_velocity$observed_images$velocity_image, magneticum_parallel_velocity$observed_images$velocity_image))
   expect_true(all.equal(magneticum_velocity$observed_images$dispersion_image, magneticum_parallel_velocity$observed_images$dispersion_image))
+  expect_true(all(magneticum_velocity$observed_images$dispersion_image > magneticum_velocity$observation$vbin_error/2 |
+                    magneticum_velocity$observed_images$dispersion_image== 0))
 
 })
 
@@ -283,6 +289,8 @@ test_that("HorizonAGN files can be built - velocity mode and be identical in ser
   expect_true(all.equal(horizon_velocity$observed_images$flux_image, horizon_parallel_velocity$observed_images$flux_image))
   expect_true(all.equal(horizon_velocity$observed_images$velocity_image, horizon_parallel_velocity$observed_images$velocity_image))
   expect_true(all.equal(horizon_velocity$observed_images$dispersion_image, horizon_parallel_velocity$observed_images$dispersion_image))
+  expect_true(all(horizon_velocity$observed_images$dispersion_image > horizon_velocity$observation$vbin_error/2 |
+                    horizon_velocity$observed_images$dispersion_image== 0))
 
 })
 
@@ -313,6 +321,8 @@ test_that("IllustrisTNG files can be built - velocity mode and be identical in s
   expect_true(all.equal(illustris_velocity$observed_images$flux_image, illustris_parallel_velocity$observed_images$flux_image))
   expect_true(all.equal(illustris_velocity$observed_images$velocity_image, illustris_parallel_velocity$observed_images$velocity_image))
   expect_true(all.equal(illustris_velocity$observed_images$dispersion_image, illustris_parallel_velocity$observed_images$dispersion_image))
+  expect_true(all(illustris_velocity$observed_images$dispersion_image > illustris_velocity$observation$vbin_error/2 |
+                    illustris_velocity$observed_images$dispersion_image== 0))
 
 })
 
@@ -350,6 +360,8 @@ test_that("EAGLE files can be built - gas mode and be identical in series and pa
   expect_true(all.equal(eagle_gas$observed_images$dispersion_image, eagle_parallel_gas$observed_images$dispersion_image))
   expect_true(all.equal(eagle_gas$observed_images$h3_image, eagle_parallel_gas$observed_images$h3_image))
   expect_true(all.equal(eagle_gas$observed_images$h4_image, eagle_parallel_gas$observed_images$h4_image))
+  expect_true(all(eagle_gas$observed_images$dispersion_image > eagle_gas$observation$vbin_error/2 |
+                    eagle_gas$observed_images$dispersion_image== 0))
 
 })
 
@@ -384,6 +396,8 @@ test_that("Magneticum files can be built - gas mode and be identical in series a
   expect_true(all.equal(magneticum_gas$observed_images$dispersion_image, magneticum_parallel_gas$observed_images$dispersion_image))
   expect_true(all.equal(magneticum_gas$observed_images$h3_image, magneticum_parallel_gas$observed_images$h3_image))
   expect_true(all.equal(magneticum_gas$observed_images$h4_image, magneticum_parallel_gas$observed_images$h4_image))
+  expect_true(all(magneticum_gas$observed_images$dispersion_image > magneticum_gas$observation$vbin_error/2 |
+                    magneticum_gas$observed_images$dispersion_image== 0))
 
 })
 
@@ -418,6 +432,8 @@ test_that("HorizonAGN files can be built - gas mode and be identical in series a
   expect_true(all.equal(horizon_gas$observed_images$dispersion_image, horizon_parallel_gas$observed_images$dispersion_image))
   expect_true(all.equal(horizon_gas$observed_images$h3_image, horizon_parallel_gas$observed_images$h3_image))
   expect_true(all.equal(horizon_gas$observed_images$h4_image, horizon_parallel_gas$observed_images$h4_image))
+  expect_true(all(horizon_gas$observed_images$dispersion_image > horizon_gas$observation$vbin_error/2 |
+                    horizon_gas$observed_images$dispersion_image== 0))
 
 })
 
@@ -452,6 +468,8 @@ test_that("IllustrisTNG files can be built - gas mode and be identical in series
   expect_true(all.equal(illustris_gas$observed_images$dispersion_image, illustris_parallel_gas$observed_images$dispersion_image))
   expect_true(all.equal(illustris_gas$observed_images$h3_image, illustris_parallel_gas$observed_images$h3_image))
   expect_true(all.equal(illustris_gas$observed_images$h4_image, illustris_parallel_gas$observed_images$h4_image))
+  expect_true(all(illustris_gas$observed_images$dispersion_image > illustris_gas$observation$vbin_error/2 |
+                    illustris_gas$observed_images$dispersion_image== 0))
 
 })
 
@@ -488,6 +506,8 @@ test_that("EAGLE files can be built - sf gas mode and be identical in series and
   expect_true(all.equal(eagle_sf_gas$observed_images$dispersion_image, eagle_parallel_sf_gas$observed_images$dispersion_image))
   expect_true(all.equal(eagle_sf_gas$observed_images$h3_image, eagle_parallel_sf_gas$observed_images$h3_image))
   expect_true(all.equal(eagle_sf_gas$observed_images$h4_image, eagle_parallel_sf_gas$observed_images$h4_image))
+  expect_true(all(eagle_sf_gas$observed_images$dispersion_image > eagle_sf_gas$observation$vbin_error/2 |
+                    eagle_sf_gas$observed_images$dispersion_image== 0))
 
 })
 
@@ -523,6 +543,8 @@ test_that("Magneticum files can be built - sf gas mode and be identical in serie
   expect_true(all.equal(magneticum_sf_gas$observed_images$dispersion_image, magneticum_parallel_sf_gas$observed_images$dispersion_image))
   expect_true(all.equal(magneticum_sf_gas$observed_images$h3_image, magneticum_parallel_sf_gas$observed_images$h3_image))
   expect_true(all.equal(magneticum_sf_gas$observed_images$h4_image, magneticum_parallel_sf_gas$observed_images$h4_image))
+  expect_true(all(magneticum_sf_gas$observed_images$dispersion_image > magneticum_sf_gas$observation$vbin_error/2 |
+                    magneticum_sf_gas$observed_images$dispersion_image== 0))
 
 })
 
