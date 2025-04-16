@@ -494,6 +494,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                          control=list(pgtol=1e-9))$par},
                            error = function(e){c(0,0,0,0)})
 
+          if (kin[2] == observation$vbin_error/2){kin = c(0,0,0,0)}
+
           output$observed_images$velocity_image[c,d]   = kin[1]
           output$observed_images$dispersion_image[c,d] = kin[2]
           output$observed_images$h3_image[c,d]         = kin[3]
@@ -517,6 +519,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                          method="L-BFGS-B", lower = c(NA, observation$vbin_error/2),
                                          control=list(pgtol=1e-9))$par},
                            error = function(e){c(0,0)})
+
+          if (kin[2] == observation$vbin_error/2){kin = c(0,0)}
 
           output$observed_images$velocity_image[c,d]   = kin[1]
           output$observed_images$dispersion_image[c,d] = kin[2]
@@ -627,6 +631,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                         control=list(pgtol=1e-9))$par},
                           error = function(e){c(0,0,0,0)})
 
+          if (kin[2] == observation$vbin_error/2){kin = c(0,0,0,0)}
+
           output$observed_images$velocity_image[c,d]   = kin[1]
           output$observed_images$dispersion_image[c,d] = kin[2]
           output$observed_images$h3_image[c,d]       = kin[3]
@@ -651,6 +657,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                         method="L-BFGS-B", lower = c(NA, observation$vbin_error/2),
                                         control=list(pgtol=1e-9))$par},
                           error = function(e){c(0,0)})
+
+          if (kin[2] == observation$vbin_error/2){kin = c(0,0)}
 
           output$observed_images$velocity_image[c,d]   = kin[1]
           output$observed_images$dispersion_image[c,d] = kin[2]
