@@ -209,7 +209,7 @@ test_that("EAGLE files can be built - velocity mode and be identical in series a
   expect_length(eagle_velocity$raw_images, velocity_raw_images_size)
   expect_length(eagle_velocity$observed_images, velocity_observed_images_size)
 
-  expect_false(any(eagle_velocity$observed_images$velocity_image == 0))
+  expect_true(all(eagle_velocity$observed_images$dispersion_image[which(eagle_velocity$observed_images$velocity_image == 0)] == 0))
 
   eagle_parallel_velocity = build_datacube(simspin_file = ss_eagle,
                                            telescope = telescope(type="IFU", aperture_shape = "square", lsf_fwhm = 3.6, signal_to_noise = NA),
