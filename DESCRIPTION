@@ -38,8 +38,8 @@ Suggests:
     knitr,
     rmarkdown
 Remotes:
-    github::asgr/Rfits@master,
-    github::ICRAR/ProFit@master,
-    github::asgr/magicaxis@06eb2e0e98f303ebe2033923ec183be7afd0736a
+    Rfits=github::asgr/Rfits@master,
+    ProFit=github::ICRAR/ProFit@master,
+    magicaxis=github::asgr/magicaxis@06eb2e0e98f303ebe2033923ec183be7afd0736a
 VignetteBuilder: knitr
 LazyDataCompression: xz
