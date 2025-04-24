@@ -1,4 +1,4 @@
-# SimSpin v2.10.3 News
+# SimSpin v2.10.4 News
 
 ### Last edit: 24/03/2025
 
@@ -16,7 +16,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 24/04/25 | *New feature!* Adding support for reading and processing COLIBRE files as cut out using SWIFTsimio. | 2.10.3 |  | Kate Harborne |
+| 24/04/25 | *Bug fix* Variance cube should not be just the inverse of the added noise, updated to reflect the inverse variance in the full velocity/spectral cube. | 2.10.4 |  | Kate Harborne |
+| 24/04/25 | *New feature!* Adding support for reading and processing COLIBRE files as cut out using SWIFTsimio. | 2.10.3 | 476135d54d8133eaafee981a9ebffcd636d01d7b | Kate Harborne |
 | 16/04/25 | *Bug fix* `optim` returning the lower bound for dispersion (i.e. sigma = 1e10) frequently. Changing the lower bound value to a physically meaningful lower limit (i.e. FWHM_inst/2) and setting any fit values below this to 0. | 2.10.2 | e088ae99e1079f69616f767357475f70c9604394 | Kate Harborne |
 | 07/03/25 | *Bug fix* `tryCatch` in `build_datacube` meant we were missing the errors from LOSVD fit due to `optim` returning non-finite values when approaching the lower bound for dispersion (i.e. sigma = 0). Fixed Issue #121 by adjusting this lower bound to be small but non-zero. Further adjusted the naming convention in `write_simspin_file` for the `input_simspin_file` > `input_simspin_file_path` for clarity. Old code will not fail, but will issue a warning. Closing Issue #109. | 2.10.1 | 35c647470566faf8f831382863506883af57aa47 | Kate Harborne |
 | 03/03/25 | *Bug fix* Ensuring that the stellar ages and distance parameters such as the measured luminoisity distance are properly computed using the relevant cosmological parameters. In the past, these were all using Planck cosmology, rather than varying to reflect the cosmological parameters of the input simulation. | 2.10.0 | b5ffdde967a61bc08690702e5d93dab7e025e3f1 | Kate Harborne |
