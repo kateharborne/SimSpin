@@ -848,7 +848,8 @@
                                                               cores=cores, H0=head$H0,
                                                               OmegaM=head$OmegaM,
                                                               OmegaL=head$OmegaL,
-                                                              OmegaR=head$OmegaR)),                                 "Metallicity" = stars$Metallicity,
+                                                              OmegaR=head$OmegaR)),
+                                 "Metallicity" = stars$Metallicity,
                                  "SFT" = stars$StellarFormationTime)
 
     # remove stellar wind particles and drop unneeded SFT columns
@@ -1145,11 +1146,11 @@
   if (cores > 1) {
     doParallel::registerDoParallel(cores = cores)
     i = integer()
-    output = foreach(i = 1:length(a), .packages = "celestial") %dopar% { cosdist(a[i]) }
+    output = foreach(i = 1:length(a), .packages = "celestial") %dopar% { cosdist(a[i], H0) }
     closeAllConnections()
   }
   else {
-    output = lapply(a, cosdist)
+    output = lapply(a, cosdist, Hubble0 = H0)
   }
   return(output)
 }
