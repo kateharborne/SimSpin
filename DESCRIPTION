@@ -38,7 +38,7 @@ Suggests:
     knitr,
     rmarkdown
 Remotes:
-    github::asgr/Rfits@master,
+    github::asgr/Rfits@last-cfitsio,
     github::ICRAR/ProFit@master,
     github::asgr/magicaxis@06eb2e0e98f303ebe2033923ec183be7afd0736a
 VignetteBuilder: knitr

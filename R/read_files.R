@@ -847,7 +847,8 @@
                                                               cores=cores, H0=head$H0,
                                                               OmegaM=head$OmegaM,
                                                               OmegaL=head$OmegaL,
-                                                              OmegaR=head$OmegaR)),                                 "Metallicity" = stars$Metallicity,
+                                                              OmegaR=head$OmegaR)),
+                                 "Metallicity" = stars$Metallicity,
                                  "SFT" = stars$StellarFormationTime)
 
     # remove stellar wind particles and drop unneeded SFT columns

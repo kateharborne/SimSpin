@@ -2,7 +2,6 @@
 
 ### Last edit: 24/03/2025
 
-
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
 Version-ing follows a semantic formula:
