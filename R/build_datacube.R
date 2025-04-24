@@ -399,7 +399,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                 (observation$signal_to_noise*sqrt(raw_images$flux_image)))
 
       output$spectral_cube = output$spectral_cube + noise_cube
-      output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube = 1/(output$spectral_cube)^2
       output$variance_cube[is.infinite(output$variance_cube)] = 0
       remove(noise_cube)
     }
@@ -477,7 +477,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       if (any(output$velocity_cube<0)){
         output$velocity_cube[which(output$velocity_cube<0)] = 0
       } # removing negative values introduced at the edges of the LOSVD
-      output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube = 1/(output$velocity_cube)^2
       output$variance_cube[is.infinite(output$variance_cube)] = 0
       remove(noise_cube)
     }
@@ -614,7 +614,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       if (any(output$velocity_cube<0)){
         output$velocity_cube[which(output$velocity_cube<0)] = 0
       } # removing negative values introduced at the edges of the LOSVD
-      output$variance_cube = 1/(noise_cube)^2
+      output$variance_cube = 1/(output$velocity_cube)^2
       output$variance_cube[is.infinite(output$variance_cube)] = 0
       remove(noise_cube)
     }
