@@ -1095,8 +1095,8 @@
     particle_list = particle_list[-id_to_remove]
   }
 
-  if (!is.null(nrow(particle_list$Metallicity)) & type == "Magenticum" |
-      length(particle_list$Metallicity)[1] == 11 & length(particle_list$ParticleIDs) != 11 & type == "Magenticum"){
+  if (!is.null(nrow(particle_list$Metallicity)) & type == "Magneticum" |
+      length(particle_list$Metallicity)[1] == 11 & length(particle_list$ParticleIDs) != 11 & type == "Magneticum"){
 
     one_p_flag = FALSE
     if (is.null(dim(particle_list$Coordinates))){one_p_flag = TRUE}
