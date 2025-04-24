@@ -131,7 +131,7 @@
   }
 
   # check for missing header fields
-  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable")
+  required_headers = c("BoxSize", "Redshift", "HubbleParam", "MassTable", "Omega0", "OmegaLambda")
 
   if (!all(required_headers %in% names(head))){
     stop("Error. Missing a required header field. \n
