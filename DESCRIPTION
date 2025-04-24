@@ -1,7 +1,7 @@
 Package: SimSpin
 Type: Package
 Title: SimSpin - A package for the kinematic analysis of galaxy simulations
-Version: 2.10.2
+Version: 2.10.3
 Author: Katherine Harborne
 Co-author: Alice Serene
 Maintainer: <katherine.harborne@icrar.org>
@@ -38,7 +38,7 @@ Suggests:
     knitr,
     rmarkdown
 Remotes:
-    github::asgr/Rfits@last-cfitsio,
+    github::asgr/Rfits@master,
     github::ICRAR/ProFit@master,
     github::asgr/magicaxis@06eb2e0e98f303ebe2033923ec183be7afd0736a
 VignetteBuilder: knitr

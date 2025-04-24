@@ -709,6 +709,40 @@ test_that("Colibre files can be built - sf gas mode and be identical in series a
 
 })
 
+test_that("Colibre files can be built - sf gas mode and be identical in series and parallel.", {
+  colibre_sf_gas = build_datacube(simspin_file = ss_colibre,
+                                telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                method = "sf gas")
+  expect_length(colibre_sf_gas, built_cube_size)
+  expect_length(colibre_sf_gas$raw_images, gas_raw_images_size)
+  expect_length(colibre_sf_gas$observed_images, gas_observed_images_size)
+
+  colibre_parallel_sf_gas = build_datacube(simspin_file = ss_colibre,
+                                         telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = NA),
+                                         observing_strategy = observing_strategy(dist_z = 0.03, inc_deg = 45, blur = T),
+                                         method = "sf gas",
+                                         cores = 2)
+  expect_length(colibre_parallel_sf_gas, built_cube_size)
+  expect_length(colibre_parallel_sf_gas$raw_images, gas_raw_images_size)
+  expect_length(colibre_parallel_sf_gas$observed_images, gas_observed_images_size)
+
+  expect_true(all.equal(colibre_sf_gas$velocity_cube, colibre_parallel_sf_gas$velocity_cube))
+  expect_true(all.equal(colibre_sf_gas$raw_images$mass_image, colibre_parallel_sf_gas$raw_images$mass_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$velocity_image, colibre_parallel_sf_gas$raw_images$velocity_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$dispersion_image, colibre_parallel_sf_gas$raw_images$dispersion_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$SFR_image, colibre_parallel_sf_gas$raw_images$SFR_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$metallicity_image, colibre_parallel_sf_gas$raw_images$metallicity_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$OH_image, colibre_parallel_sf_gas$raw_images$OH_image))
+  expect_true(all.equal(colibre_sf_gas$raw_images$particle_image, colibre_parallel_sf_gas$raw_images$particle_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$mass_image, colibre_parallel_sf_gas$observed_images$mass_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$velocity_image, colibre_parallel_sf_gas$observed_images$velocity_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$dispersion_image, colibre_parallel_sf_gas$observed_images$dispersion_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$h3_image, colibre_parallel_sf_gas$observed_images$h3_image))
+  expect_true(all.equal(colibre_sf_gas$observed_images$h4_image, colibre_parallel_sf_gas$observed_images$h4_image))
+
+})
+
 test_that("HorizonAGN files error to be built due to insufficient particle number - sf gas mode.", {
   expect_error(build_datacube(simspin_file = ss_horizon,
                               telescope = telescope(type="IFU", lsf_fwhm = 3.6, signal_to_noise = 3),

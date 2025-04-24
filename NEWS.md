@@ -1,7 +1,6 @@
-# SimSpin v2.10.2 News
+# SimSpin v2.10.3 News
 
-### Last edit: 16/04/2025
-
+### Last edit: 24/03/2025
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -17,7 +16,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 16/04/25 | *Bug fix* `optim` returning the lower bound for dispersion (i.e. sigma = 1e10) frequently. Changing the lower bound value to a physically meaningful lower limit (i.e. FWHM_inst/2) and setting any fit values below this to 0. | 2.10.2 |  | Kate Harborne |
+| 24/04/25 | *New feature!* Adding support for reading and processing COLIBRE files as cut out using SWIFTsimio. | 2.10.3 |  | Kate Harborne |
+| 16/04/25 | *Bug fix* `optim` returning the lower bound for dispersion (i.e. sigma = 1e10) frequently. Changing the lower bound value to a physically meaningful lower limit (i.e. FWHM_inst/2) and setting any fit values below this to 0. | 2.10.2 | e088ae99e1079f69616f767357475f70c9604394 | Kate Harborne |
 | 07/03/25 | *Bug fix* `tryCatch` in `build_datacube` meant we were missing the errors from LOSVD fit due to `optim` returning non-finite values when approaching the lower bound for dispersion (i.e. sigma = 0). Fixed Issue #121 by adjusting this lower bound to be small but non-zero. Further adjusted the naming convention in `write_simspin_file` for the `input_simspin_file` > `input_simspin_file_path` for clarity. Old code will not fail, but will issue a warning. Closing Issue #109. | 2.10.1 | 35c647470566faf8f831382863506883af57aa47 | Kate Harborne |
 | 03/03/25 | *Bug fix* Ensuring that the stellar ages and distance parameters such as the measured luminoisity distance are properly computed using the relevant cosmological parameters. In the past, these were all using Planck cosmology, rather than varying to reflect the cosmological parameters of the input simulation. | 2.10.0 | b5ffdde967a61bc08690702e5d93dab7e025e3f1 | Kate Harborne |
 | 20/02/25 | Modifying the `.check_names` function to take in the simulation type being read. Future-proofing for other simulation inputs that may also store Metallicity as an array, but with different units. | 2.9.6 | 09d9b692b06938cbda280dbd40de003c532df26b | Kate Harborne |
