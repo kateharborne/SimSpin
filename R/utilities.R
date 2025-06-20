@@ -19,7 +19,7 @@
 .mass_of_proton     = 1.67262e-24  # grams
 .adiabatic_index    = 5/3          # heat is contained
 .Boltzmann_constant = 1.38066e-16  # cm^2 g s^-2 K-1
-
+.c_to_mps           = 299792458
 
 # globalVariable definitions
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_luminosity",
@@ -650,17 +650,21 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   wave_diff=abs(.qdiff(wave))
 
   if (is.null(dim(flux))){
+    #output = response * flux * wave_diff/sum(response * wave_diff, na.rm = TRUE)
     output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
     return(sum(output, na.rm=TRUE))
   } else {
     for (j in 1:dim(flux)[2]){
     set(flux, j = j,
         value = response * wave * flux[[j]] * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE))
+        #value = response * flux[[j]] * wave_diff/sum(response * wave_diff, na.rm = TRUE))
     }
     return(as.numeric(colSums(flux, na.rm=TRUE)))
   }
 
 }
+# Taken from https://github.com/asgr/ProSpect/blob/8480268712c9c720bca5a5903c52cca64d6ffc44/R/photom.R#L347C1-L350C2
+# to avoid ProSpect dependency and trimmed for the purpose of these internal functions
 
 .compute_flux = function(observation, galaxy_data, simspin_data,
                          template, verbose, spectra_flag){
@@ -689,7 +693,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   wavelength = template$Wave * (observation$z + 1)
   wave_diff_observed  = .qdiff(observation$wave_seq)
-  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
+  filter = stats::approxfun(x = (observation$filter$wave * (observation$z + 1)), y = abs(observation$filter$response))
 
   for (p in 1:nrow(galaxy_data)){
 
@@ -731,8 +735,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
       (1 + observation$z)
 
-
     lum[p] = sum(spectral_dist, na.rm=T)
+
     band_lum[p] = .bandpass(wave = observation$wave_seq,
                             flux = spectral_dist,
                             filter = filter)
@@ -778,7 +782,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   wavelength = template$Wave * (observation$z + 1)
   wave_diff_observed  = .qdiff(observation$wave_seq)
-  filter = stats::approxfun(x = observation$filter$wave, y = abs(observation$filter$response))
+  filter = stats::approxfun(x = (observation$filter$wave * (observation$z + 1)), y = abs(observation$filter$response))
 
   doParallel::registerDoParallel(cores)
 
@@ -824,11 +828,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
       (1 + observation$z)
 
-
     lum = sum(spectral_dist, na.rm=T)
     band_lum = .bandpass(wave = observation$wave_seq,
-                            flux = spectral_dist,
-                            filter = filter)
+                         flux = spectral_dist,
+                         filter = filter)
 
     result = list(lum,
                   band_lum)
