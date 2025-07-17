@@ -642,6 +642,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 # Taken from https://github.com/asgr/ProSpect/blob/d340c64555ba631257513ea4c99b0069cdebf477/R/photom.R#L281
 # to avoid ProSpect dependency and trimmed for the purpose of these internal functions
 
+
 .bandpass=function(wave, flux, filter){
 
   response = filter(wave)
@@ -650,15 +651,15 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   wave_diff=abs(.qdiff(wave))
 
   if (is.null(dim(flux))){
-    #output = response * flux * wave_diff/sum(response * wave_diff, na.rm = TRUE)
     output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
+
     return(sum(output, na.rm=TRUE))
   } else {
     for (j in 1:dim(flux)[2]){
     set(flux, j = j,
         value = response * wave * flux[[j]] * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE))
-        #value = response * flux[[j]] * wave_diff/sum(response * wave_diff, na.rm = TRUE))
     }
+
     return(as.numeric(colSums(flux, na.rm=TRUE)))
   }
 
@@ -735,9 +736,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
       (1 + observation$z)
 
-    lum[p] = sum(spectral_dist, na.rm=T)
+    lum[p] = sum(spectral_dist*wave_diff_observed, na.rm=T) # flux in units erg/s/cm^2
 
-    band_lum[p] = .bandpass(wave = observation$wave_seq,
+    band_lum[p] = .bandpass(wave = observation$wave_seq, # filter flux in units erg/s/cm^2
                             flux = spectral_dist,
                             filter = filter)
 
@@ -828,7 +829,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
       (1 + observation$z)
 
-    lum = sum(spectral_dist, na.rm=T)
+    lum = sum(spectral_dist * wave_diff_observed, na.rm=T)
     band_lum = .bandpass(wave = observation$wave_seq,
                          flux = spectral_dist,
                          filter = filter)
