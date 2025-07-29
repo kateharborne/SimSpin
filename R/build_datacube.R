@@ -56,6 +56,9 @@
 #' pixel, specified by \code{vorbin_limit}. Default is FALSE.
 #'@param vorbin_limit Integer float that describes the minimum number of
 #' particles per pixel within a given bin, only used if \code{voronoi_bin = T}.
+#'@param return_galaxy_data Boolean flag that, when set to TRUE, will return the
+#' particle data with added fluxes and luminosities per particle. Default is
+#' FALSE.
 #'@return Returns a list containing four elements:
 #'\enumerate{
 #' \item \code{spectral_cube} or \code{velocity_cube} - a 3D array containing
@@ -89,7 +92,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                           observer_name="Anonymous",
                           split_save=F,
                           cores=1, mass_flag = F,
-                          voronoi_bin=F, vorbin_limit=10){
+                          voronoi_bin=F, vorbin_limit=10, return_galaxy_data = F){
 
   if (missing(method)){
     if ("method" %in% names(telescope)){
@@ -260,7 +263,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (method == "spectral" | method == "velocity"){
     summed_images = galaxy_data[, list(.N,
                                        luminosity = sum(luminosity),
-                                       filter_luminosity = sum(filter_luminosity),
+                                       flux = median(flux),
+                                       filter_flux = sum(filter_flux),
                                        mass = sum(Mass)),
                                 by = "pixel_pos"]
 
@@ -269,7 +273,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                                                                 %in% summed_images$pixel_pos)),
                                           "N" = 0,
                                           "luminosity" = 0.,
-                                          "filter_luminosity" = 0.,
+                                          "flux" = 0.,
+                                          "filter_flux" = 0.,
                                           "mass" = 0.)
 
     summed_images = data.table::rbindlist(list(summed_images, empty_pixels))
@@ -356,7 +361,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$wave_bin))
     raw_images = list(
-      flux_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin)),
+      flux_image = array(data = summed_images$flux, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
       ageM_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
@@ -364,7 +369,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
       particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
       voronoi_bins = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
-      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin))
+      mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
+      luminosity_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("spectral_cube"    = cube,
@@ -428,7 +434,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
 
     cube = array(data = output[[1]], dim = c(observation$sbin, observation$sbin, observation$vbin))
     raw_images = list(
-      flux_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin)),
+      flux_image = array(data = summed_images$flux, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(data = output[[2]], dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(data = output[[3]], dim = c(observation$sbin, observation$sbin)),
       ageM_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
@@ -436,10 +442,11 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       metallicity_image = array(data = output[[6]], dim = c(observation$sbin, observation$sbin)),
       mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
       particle_image = array(data = summed_images$N, dim = c(observation$sbin, observation$sbin)),
-      voronoi_bins = array(data = output[[7]], dim = c(observation$sbin, observation$sbin))
+      voronoi_bins = array(data = output[[7]], dim = c(observation$sbin, observation$sbin)),
+      luminosity_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin))
       )
     observed_images = list(
-      flux_image = array(data = summed_images$filter_luminosity, dim = c(observation$sbin, observation$sbin)),
+      flux_image = array(data = summed_images$filter_flux, dim = c(observation$sbin, observation$sbin)),
       velocity_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       dispersion_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
       h3_image = array(0.0, dim = c(observation$sbin, observation$sbin)),
@@ -447,7 +454,8 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       residuals = array(0.0, dim = c(observation$sbin, observation$sbin)),
       mass_image = array(data = summed_images$mass, dim = c(observation$sbin, observation$sbin)),
       ageM_image = array(data = output[[4]], dim = c(observation$sbin, observation$sbin)),
-      ageL_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin))
+      ageL_image = array(data = output[[5]], dim = c(observation$sbin, observation$sbin)),
+      luminosity_image = array(data = summed_images$luminosity, dim = c(observation$sbin, observation$sbin))
       )
 
     output = list("velocity_cube"   = cube,
@@ -718,6 +726,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
                        telescope_name = telescope_name, instrument_name = telescope$type,
                        observer_name = observer_name, split_save=split_save,
                        input_simspin_file_path = rev(stringr::str_split(simspin_file, "/")[[1]])[1])
+  }
+
+  if (return_galaxy_data){ # if user would like the galaxy_data table returned, add to output
+    output$galaxy_data = galaxy_data
   }
 
   return(output)
