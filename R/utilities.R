@@ -20,7 +20,6 @@
 .adiabatic_index    = 5/3          # heat is contained
 .Boltzmann_constant = 1.38066e-16  # cm^2 g s^-2 K-1
 
-
 # globalVariable definitions
 globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_luminosity",
                   "Hydrogen", "hcl.colors", "ID", "Initial_Mass", "luminosity", "Mass",
@@ -649,16 +648,18 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   wave_diff=abs(.qdiff(wave))
 
-  if (is.null(dim(flux))){
+  # if (is.null(dim(flux))){
     output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
-    return(sum(output, na.rm=TRUE))
-  } else {
-    for (j in 1:dim(flux)[2]){
-    set(flux, j = j,
-        value = response * wave * flux[[j]] * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE))
-    }
-    return(as.numeric(colSums(flux, na.rm=TRUE)))
-  }
+    #return(sum(output, na.rm=TRUE))
+    return(output)
+
+  # } else {
+  #   for (j in 1:dim(flux)[2]){
+  #   set(flux, j = j,
+  #       value = response * wave * flux[[j]] * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE))
+  #   }
+  #   return(as.numeric(colSums(flux, na.rm=TRUE)))
+  # }
 
 }
 
@@ -685,7 +686,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   if(verbose){cat("Using assigned spectra to compute the flux per particle... \n")}
 
   lum = numeric(length = nrow(galaxy_data))
-  band_lum = numeric(length = nrow(galaxy_data))
+  band_flux = numeric(length = nrow(galaxy_data))
+  flux = numeric(length = nrow(galaxy_data))
 
   wavelength = template$Wave * (observation$z + 1)
   wave_diff_observed  = .qdiff(observation$wave_seq)
@@ -728,21 +730,22 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
     # transform luminosity into flux detected at telescope
     #    flux in units erg/s/cm^2/Ang
-    spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
+    spectral_flux = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
       (1 + observation$z)
 
-
-    lum[p] = sum(spectral_dist, na.rm=T)
-    band_lum[p] = .bandpass(wave = observation$wave_seq,
-                            flux = spectral_dist,
-                            filter = filter)
+    flux[p] = median(spectral_flux, na.rm=T) # output in erg/s/cm^2/Ang
+    band_flux[p] = sum(.bandpass(wave = observation$wave_seq,
+                                 flux = spectral_flux,
+                                 filter = filter), na.rm=T) # output in erg/s/cm^2/Ang
+    lum[p] = sum(luminosity*wave_diff_observed, na.rm=T) # output in Lsun
 
     if(verbose){if(p == 1){cat("Computed flux from spectra 1, ")}else{cat(paste(p), ", ")}}
 
   }
 
   galaxy_data[ , luminosity := lum, ]
-  galaxy_data[ , filter_luminosity := band_lum, ]
+  galaxy_data[ , flux := flux, ]
+  galaxy_data[ , filter_flux := band_flux, ]
 
   if (verbose){cat("\n Done!")}
 
@@ -773,8 +776,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   # read original wavelengths of the template spectra and then applying a shift
   # to those spectra due to redshift, z
 
+  flux = numeric(length = nrow(galaxy_data))
+  band_flux = numeric(length = nrow(galaxy_data))
   lum = numeric(length = nrow(galaxy_data))
-  band_lum = numeric(length = nrow(galaxy_data))
 
   wavelength = template$Wave * (observation$z + 1)
   wave_diff_observed  = .qdiff(observation$wave_seq)
@@ -784,7 +788,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   p = integer()
   output = foreach(p = 1:nrow(galaxy_data), .combine='.comb', .multicombine=TRUE,
-                   .init=list(list(),list())) %dopar% {
+                   .init=list(list(),list(),list())) %dopar% {
 
     # reading particle luminosity in units of Lsol/Ang
     if (spectra_flag == 1){
@@ -821,27 +825,31 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
     # transform luminosity into flux detected at telescope
     #    flux in units erg/s/cm^2/Ang
-    spectral_dist = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
+    spectral_flux = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
       (1 + observation$z)
 
 
-    lum = sum(spectral_dist, na.rm=T)
-    band_lum = .bandpass(wave = observation$wave_seq,
-                            flux = spectral_dist,
-                            filter = filter)
+    flux = median(spectral_flux * wave_diff_observed, na.rm=T)  # output in erg/s/cm^2
+    band_flux = sum(.bandpass(wave = observation$wave_seq,
+                              flux = spectral_flux,
+                              filter = filter) * wave_diff_observed, na.rm=T)  # output in erg/s/cm^2
+    lum = sum(luminosity * wave_diff_observed, na.rm=T)  # output in Lsun
 
-    result = list(lum,
-                  band_lum)
+    result = list(flux,
+                  band_flux,
+                  lum)
     return(result)
     closeAllConnections()
 
   }
 
-  lum = matrix(unlist(output[[1]]))
-  band_lum = matrix(unlist(output[[2]]))
+  flux = matrix(unlist(output[[1]]))
+  band_flux = matrix(unlist(output[[2]]))
+  lum = matrix(unlist(output[[3]]))
 
   galaxy_data[ , luminosity := lum, ]
-  galaxy_data[ , filter_luminosity := band_lum, ]
+  galaxy_data[ , flux := flux, ]
+  galaxy_data[ , filter_flux := band_flux, ]
 
   return(galaxy_data)
 
