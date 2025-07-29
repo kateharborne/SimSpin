@@ -649,7 +649,8 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   wave_diff=abs(.qdiff(wave))
 
   # if (is.null(dim(flux))){
-    output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
+    #output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
+    output = response * flux
     #return(sum(output, na.rm=TRUE))
     return(output)
 
@@ -733,10 +734,10 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
     spectral_flux = (luminosity*.lsol_to_erg) / (4 * pi * (observation$lum_dist*.mpc_to_cm)^2) /
       (1 + observation$z)
 
-    flux[p] = median(spectral_flux, na.rm=T) # output in erg/s/cm^2/Ang
+    flux[p] = sum(spectral_flux * wave_diff_observed, na.rm=T) # output in erg/s/cm^2
     band_flux[p] = sum(.bandpass(wave = observation$wave_seq,
                                  flux = spectral_flux,
-                                 filter = filter), na.rm=T) # output in erg/s/cm^2/Ang
+                                 filter = filter) * wave_diff_observed, na.rm=T) # output in erg/s/cm^2
     lum[p] = sum(luminosity*wave_diff_observed, na.rm=T) # output in Lsun
 
     if(verbose){if(p == 1){cat("Computed flux from spectra 1, ")}else{cat(paste(p), ", ")}}
@@ -829,7 +830,7 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
       (1 + observation$z)
 
 
-    flux = median(spectral_flux * wave_diff_observed, na.rm=T)  # output in erg/s/cm^2
+    flux = sum(spectral_flux * wave_diff_observed, na.rm=T)  # output in erg/s/cm^2
     band_flux = sum(.bandpass(wave = observation$wave_seq,
                               flux = spectral_flux,
                               filter = filter) * wave_diff_observed, na.rm=T)  # output in erg/s/cm^2
