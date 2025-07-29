@@ -263,7 +263,7 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
   if (method == "spectral" | method == "velocity"){
     summed_images = galaxy_data[, list(.N,
                                        luminosity = sum(luminosity),
-                                       flux = median(flux),
+                                       flux = sum(flux),
                                        filter_flux = sum(filter_flux),
                                        mass = sum(Mass)),
                                 by = "pixel_pos"]
