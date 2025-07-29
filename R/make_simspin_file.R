@@ -184,41 +184,53 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     n_disk = galaxy_data$head$Npart[3]; n_bulge = galaxy_data$head$Npart[4] # number of disk and bulge particles
     n_stars = n_disk + n_bulge # total number of "stars"
 
-    galaxy_data$star_part$Initial_Mass = galaxy_data$star_part$Mass[Npart_sum[2]+1:Npart_sum[4]]/2 # assuming the initial mass is half of the current mass
-    galaxy_data$star_part$Age          = numeric(n_stars)
-    galaxy_data$star_part$Metallicity  = numeric(n_stars)
-    galaxy_data$star_part$sed_id       = numeric(n_stars)
+    if (all(c("Age", "Metallicity") %in% names(galaxy_data$star_part))){ # for N-body files in which ages and metals are given analytically
 
-    if (n_disk > 0 & n_bulge > 0){ # assigning ages and metallicities to disk and bulge particles (if present in snap)
-      galaxy_data$star_part$Age[1:n_disk] = disk_age
-      galaxy_data$star_part$Age[(n_disk+1):n_stars] = bulge_age
-      galaxy_data$star_part$Metallicity[1:n_disk] = disk_Z
-      galaxy_data$star_part$Metallicity[(n_disk+1):n_stars] = bulge_Z
-      galaxy_data$star_part$sed_id[1:n_disk] = 1
-      galaxy_data$star_part$sed_id[(n_disk+1):n_stars] = 2
+      galaxy_data$star_part[, Initial_Mass := galaxy_data$star_part$Mass, ]
+      galaxy_data$star_part[, sed_id := seq(1, length(galaxy_data$star_part$ID)), ]
 
-      sed = .spectral_weights(Metallicity = c(disk_Z, bulge_Z),
-                              Age = c(disk_age, bulge_age),
-                              Template = temp, cores = cores)
+      sed  = .spectral_weights(Metallicity = galaxy_data$star_part$Metallicity,
+                               Age = galaxy_data$star_part$Age,
+                               Template = temp, cores = cores)
 
-    } else if (n_disk > 0 & n_bulge == 0){
-      galaxy_data$star_part$Age = disk_age
-      galaxy_data$star_part$Metallicity = disk_Z
-      galaxy_data$star_part$sed_id = 1
+    } else {
 
-      sed = .spectral_weights(Metallicity = disk_Z,
-                              Age = disk_age,
-                              Template = temp, cores = cores)
+      galaxy_data$star_part$Initial_Mass = galaxy_data$star_part$Mass[Npart_sum[2]+1:Npart_sum[4]]/2 # assuming the initial mass is half of the current mass
+      galaxy_data$star_part$Age          = numeric(n_stars)
+      galaxy_data$star_part$Metallicity  = numeric(n_stars)
+      galaxy_data$star_part$sed_id       = numeric(n_stars)
 
-    } else if (n_disk == 0 & n_bulge > 0){
-      galaxy_data$star_part$Age = bulge_age
-      galaxy_data$star_part$Metallicity = bulge_Z
-      galaxy_data$star_part$sed_id = 1
+      if (n_disk > 0 & n_bulge > 0){ # assigning ages and metallicities to disk and bulge particles (if present in snap)
+        galaxy_data$star_part$Age[1:n_disk] = disk_age
+        galaxy_data$star_part$Age[(n_disk+1):n_stars] = bulge_age
+        galaxy_data$star_part$Metallicity[1:n_disk] = disk_Z
+        galaxy_data$star_part$Metallicity[(n_disk+1):n_stars] = bulge_Z
+        galaxy_data$star_part$sed_id[1:n_disk] = 1
+        galaxy_data$star_part$sed_id[(n_disk+1):n_stars] = 2
 
-      sed = .spectral_weights(Metallicity = bulge_Z,
-                              Age = bulge_age,
-                              Template = temp, cores = cores)
+        sed = .spectral_weights(Metallicity = c(disk_Z, bulge_Z),
+                                Age = c(disk_age, bulge_age),
+                                Template = temp, cores = cores)
 
+      } else if (n_disk > 0 & n_bulge == 0){
+        galaxy_data$star_part$Age = disk_age
+        galaxy_data$star_part$Metallicity = disk_Z
+        galaxy_data$star_part$sed_id = 1
+
+        sed = .spectral_weights(Metallicity = disk_Z,
+                                Age = disk_age,
+                                Template = temp, cores = cores)
+
+      } else if (n_disk == 0 & n_bulge > 0){
+        galaxy_data$star_part$Age = bulge_age
+        galaxy_data$star_part$Metallicity = bulge_Z
+        galaxy_data$star_part$sed_id = 1
+
+        sed = .spectral_weights(Metallicity = bulge_Z,
+                                Age = bulge_age,
+                                Template = temp, cores = cores)
+
+      }
     }
 
   } else {sed = NULL} # if only gas in the file
