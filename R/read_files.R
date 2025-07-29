@@ -256,6 +256,11 @@
                                        "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
                                        "Mass" = stars$Masses*1e10) # Mass in solar masses
 
+    if (all(c("Age", "Metallicity") %in% names(stars))){
+      disk_part$Age = stars$Age
+      disk_part$Metallicity = stars$Metallicity
+    }
+
     remove(stars); remove(PT2_attr)
 
     PT3_attr = hdf5r::list.datasets(data[["PartType3"]])
@@ -278,6 +283,11 @@
                                        "vy"  = c(disk_part$vy, if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]}),
                                        "vz"  = c(disk_part$vz, if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]}),
                                        "Mass" = c(disk_part$Mass, stars$Masses*1e10)) # Mass in solar masses
+
+    if (all(c("Age", "Metallicity") %in% names(stars))){
+      star_part$Age = c(disk_part$Age, stars$Age)
+      star_part$Metallicity = c(disk_part$Metallicity, stars$Metallicity)
+    }
 
     remove(stars); remove(PT3_attr); remove(disk_part)
 
@@ -303,6 +313,11 @@
                                        "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
                                        "Mass" = stars$Masses*1e10) # Mass in solar masses
 
+    if (all(c("Age", "Metallicity") %in% names(stars))){
+      star_part$Age = stars$Age
+      star_part$Metallicity = stars$Metallicity
+    }
+
     remove(stars); remove(PT2_attr)
   } else if ("PartType3" %in% groups){
 
@@ -326,6 +341,11 @@
                                        "vy"  = if(one_p_flag){stars$Velocities[2]}else{stars$Velocities[2,]},
                                        "vz"  = if(one_p_flag){stars$Velocities[3]}else{stars$Velocities[3,]},
                                        "Mass" = stars$Masses*1e10) # Mass in solar masses
+
+    if (all(c("Age", "Metallicity") %in% names(stars))){
+      star_part$Age = stars$Age
+      star_part$Metallicity = stars$Metallicity
+    }
 
     remove(stars); remove(PT3_attr);
 
