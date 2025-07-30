@@ -647,20 +647,9 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   response[is.na(response)] = 0
 
   wave_diff=abs(.qdiff(wave))
+  output = response * flux
 
-  # if (is.null(dim(flux))){
-    #output = response * wave * flux * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE)
-    output = response * flux
-    #return(sum(output, na.rm=TRUE))
-    return(output)
-
-  # } else {
-  #   for (j in 1:dim(flux)[2]){
-  #   set(flux, j = j,
-  #       value = response * wave * flux[[j]] * wave_diff/sum(response * wave * wave_diff, na.rm = TRUE))
-  #   }
-  #   return(as.numeric(colSums(flux, na.rm=TRUE)))
-  # }
+  return(output)
 
 }
 
