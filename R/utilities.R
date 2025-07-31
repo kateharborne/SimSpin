@@ -645,8 +645,6 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
 
   response = filter(wave)
   response[is.na(response)] = 0
-
-  wave_diff=abs(.qdiff(wave))
   output = response * flux
 
   return(output)
