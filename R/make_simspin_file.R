@@ -62,7 +62,7 @@
 make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              disk_Z=0.024, bulge_Z=0.001, template="BC03lr",
                              write_to_file=TRUE, output, overwrite = F,
-                             centre=NA, half_mass=NA, sph_spawn_n=1){
+                             centre=NA, half_mass=NA, sph_spawn_n=1, initial_cond_star_age = 14){
 
   header = list("InputFile" = filename,
                 "OutputFile" = NULL,
@@ -125,9 +125,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   } else if (file_type == "gadget_binary") {
     galaxy_data = .read_gadget(filename)
   } else if (file_type == "tipsy_binary_big") {
-    galaxy_data = .read_tipsy(filename, endian = "big", verbose=F)
+    galaxy_data = .read_tipsy(filename, endian = "big", verbose=F, initialstarage = initial_cond_star_age)
   } else if (file_type == "tipsy_binary_little"){
-    galaxy_data = .read_tipsy(filename, endian = "little", verbose=F)
+    galaxy_data = .read_tipsy(filename, endian = "little", verbose=F, initialstarage = initial_cond_star_age)
   }
 
   header$Type = galaxy_data$head$Type
