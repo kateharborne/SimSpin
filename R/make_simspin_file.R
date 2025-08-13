@@ -49,6 +49,8 @@
 #' particles used to model the gas distribution. This value may need to be
 #' tested for convergence depending on the resolution of the grid used to image
 #' the gas properties at the `build_datacube()` stage.
+#'@param initial_cond_star_age Numeric giving the age of the initial condition 
+#' stars from the simulation in units of Gyr. Default is 14 Gyr. 
 #'@return Returns an .Rdata file that contains a list of particle positions,
 #' velocities, and spectral weights (or a list containing the same information
 #' to the environment without writing to file, when `write_to_file = F`).
