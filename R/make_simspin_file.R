@@ -49,6 +49,8 @@
 #' particles used to model the gas distribution. This value may need to be
 #' tested for convergence depending on the resolution of the grid used to image
 #' the gas properties at the `build_datacube()` stage.
+#'@param initial_cond_star_age Numeric giving the age of the initial condition 
+#' stars from the simulation in units of Gyr. Default is 14 Gyr. 
 #'@return Returns an .Rdata file that contains a list of particle positions,
 #' velocities, and spectral weights (or a list containing the same information
 #' to the environment without writing to file, when `write_to_file = F`).
@@ -62,7 +64,7 @@
 make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
                              disk_Z=0.024, bulge_Z=0.001, template="BC03lr",
                              write_to_file=TRUE, output, overwrite = F,
-                             centre=NA, half_mass=NA, sph_spawn_n=1){
+                             centre=NA, half_mass=NA, sph_spawn_n=1, initial_cond_star_age = 14){
 
   header = list("InputFile" = filename,
                 "OutputFile" = NULL,
@@ -125,9 +127,9 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
   } else if (file_type == "gadget_binary") {
     galaxy_data = .read_gadget(filename)
   } else if (file_type == "tipsy_binary_big") {
-    galaxy_data = .read_tipsy(filename, endian = "big", verbose=F)
+    galaxy_data = .read_tipsy(filename, endian = "big", verbose=F, initialstarage = initial_cond_star_age)
   } else if (file_type == "tipsy_binary_little"){
-    galaxy_data = .read_tipsy(filename, endian = "little", verbose=F)
+    galaxy_data = .read_tipsy(filename, endian = "little", verbose=F, initialstarage = initial_cond_star_age)
   }
 
   header$Type = galaxy_data$head$Type

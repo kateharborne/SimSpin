@@ -131,7 +131,7 @@
 }
 
 # Function for reading tipsy binary files
-.read_tipsy = function(f, endian, verbose=F){
+.read_tipsy = function(f, endian, verbose=F, initialstarage = 14){
 
   fs = file.info(f)$size
 
@@ -291,10 +291,10 @@
     stars_formed = readBin(age_data, "numeric", n = nstar, size = 4, endian = endian) # time since the start of the simulation, given in Myr
     close(age_data)
 
-    stars_formed = stars_formed * t_Unit # formation time of stars in Gyrs
+    stars_formed = star_part$StellarFormationTime * t_Unit # formation time of stars in Gyrs
 
     stars_age = t0 - stars_formed
-    stars_age[which(stars_age < 0)] = 14 # setting any initial condition stars with large ages to the maximum
+    stars_age[which(stars_age < 0)] = initialstarage # setting any initial condition stars with large ages to the maximum
                                          # option for future users to change to a predetermined age distribution if desired
 
     ssp$Age = stars_age
