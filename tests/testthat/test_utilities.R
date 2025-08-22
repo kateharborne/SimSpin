@@ -96,6 +96,13 @@ test_that("SED is returned as a list when only one age and metallicity are given
   expect_true(data.table::is.data.table(.spectral_weights(Metallicity = 1e-4, Age = 5, Template = temp, cores = 1)))
 })
 
+test_that("spectral weights are returned as a list when only in minimum BC03 age bin", {
+  temp = SimSpin::BC03lr
+  expect_type(.spectral_weights(Metallicity = 1e-4, Age = 6e-5, Template = temp, cores = 1), "list")
+  expect_true(data.table::is.data.table(.spectral_weights(Metallicity = 1e-4, Age = 6e-5, Template = temp, cores = 1)))
+  expect_false(any(is.na(.spectral_weights(Metallicity = 1e-4, Age = 6e-5, Template = temp, cores = 1))))
+})
+
 test_that("Filters and templates can be loaded successfully", {
   BC03lr = SimSpin::BC03lr
   BC03hr = SimSpin::BC03hr
