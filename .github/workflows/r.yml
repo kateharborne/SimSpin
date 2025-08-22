@@ -35,7 +35,8 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
       # suppress warnings of rgl package
       RGL_USE_NULL: true
-      CC: gcc -std=gnu17
+      CC: gcc 
+      CFLAGS: -O3 -Wall -mtune=native -Ofast -std=gnu17
 
     steps:
       - uses: actions/checkout@v2
