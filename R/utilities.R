@@ -462,6 +462,12 @@ globalVariables(c(".N", ":=", "Age", "Carbon", "CellSize", "Density", "filter_lu
   if(log){
     params = log(params)
     x = log(x)
+    if(any(is.infinite(params))){
+      params[is.infinite(params)] = 0
+    }
+    if(any(is.infinite(x))){
+      x[is.infinite(x)] = 0
+    }
   }
   interp = approx(params, 1:length(params), xout=x)$y
   IDlo = floor(interp)
