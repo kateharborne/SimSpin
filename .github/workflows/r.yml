@@ -46,7 +46,10 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          run: 'echo "CC = gcc -std=gnu17" > ~/.R/Makevars'
+
+      - name: Makevars
+        if: runner.os == 'macOS'
+        run: 'echo "CC = gcc -std=gnu17" > ~/.R/Makevars'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
