@@ -59,7 +59,7 @@ From within R, you can display the package documentation by typing `?SimSpin` an
 
 Longer examples are published [online](https://kateharborne.github.io/SimSpin/basic_usage/) and demonstrate a walk-through the basic code operation for SimSpin v2.5.0.
 
-If you have any further questions or requests for features in the code, report an issue or drop an email to [katherine.harborne\@uwa.edu.au](mailto:katherine.harborne@uwa.edu.au).
+If you have any further questions or requests for features in the code, report an issue or drop an email to [katherine.e.harborne\@durham.ac.uk](mailto:katherine.e.harborne@durham.ac.uk).
 
 ### Citation
 

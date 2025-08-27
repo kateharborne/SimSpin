@@ -47,6 +47,10 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Makevars
+        if: runner.os == 'macOS'
+        run: 'mkdir ~/.R ; echo "CC = gcc -std=gnu17" > ~/.R/Makevars'
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: rcmdcheck
