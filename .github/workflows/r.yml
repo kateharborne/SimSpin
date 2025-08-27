@@ -35,8 +35,6 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
       # suppress warnings of rgl package
       RGL_USE_NULL: true
-      CC: gcc 
-      CFLAGS: -O3 -Wall -mtune=native -Ofast -std=gnu17
 
     steps:
       - uses: actions/checkout@v2
@@ -48,6 +46,7 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+          run: 'echo "CC = gcc -std=gnu17" > ~/.R/Makevars'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
