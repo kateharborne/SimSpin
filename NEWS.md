@@ -1,6 +1,6 @@
-# SimSpin v2.10.4 News
+# SimSpin v2.10.5 News
 
-### Last edit: 24/03/2025
+### Last edit: 22/08/2025
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -16,7 +16,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 24/04/25 | *Bug fix* Variance cube should not be just the inverse of the added noise, updated to reflect the inverse variance in the full velocity/spectral cube. | 2.10.4 |  | Kate Harborne |
+| 22/08/25 | *Bug fix* NaN's triggered in spectral weights when using BC03 templates and stars have ages closest to the lowest bin (age = 0). Interpolation done in log space causing -Inf values that cannot be interpolated. Added fix and tests to check this in future. | 2.10.5 |  | Kate Harborne |
+| 24/04/25 | *Bug fix* Variance cube should not be just the inverse of the added noise, updated to reflect the inverse variance in the full velocity/spectral cube. | 2.10.4 | 968252ffdc131f85c592f5771162ad54c4242dc5 | Kate Harborne |
 | 24/04/25 | *New feature!* Adding support for reading and processing COLIBRE files as cut out using SWIFTsimio. | 2.10.3 | 476135d54d8133eaafee981a9ebffcd636d01d7b | Kate Harborne |
 | 16/04/25 | *Bug fix* `optim` returning the lower bound for dispersion (i.e. sigma = 1e10) frequently. Changing the lower bound value to a physically meaningful lower limit (i.e. FWHM_inst/2) and setting any fit values below this to 0. | 2.10.2 | e088ae99e1079f69616f767357475f70c9604394 | Kate Harborne |
 | 07/03/25 | *Bug fix* `tryCatch` in `build_datacube` meant we were missing the errors from LOSVD fit due to `optim` returning non-finite values when approaching the lower bound for dispersion (i.e. sigma = 0). Fixed Issue #121 by adjusting this lower bound to be small but non-zero. Further adjusted the naming convention in `write_simspin_file` for the `input_simspin_file` > `input_simspin_file_path` for clarity. Old code will not fail, but will issue a warning. Closing Issue #109. | 2.10.1 | 35c647470566faf8f831382863506883af57aa47 | Kate Harborne |
