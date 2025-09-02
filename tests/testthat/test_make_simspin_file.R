@@ -240,9 +240,9 @@ test_that("Test that sph_spawn functionality works", {
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
   expect_null(make_simspin_file(ss_eagle, template = "EMILES", output = paste(temp_loc, "/eagle_test", sep=""),
                                 overwrite = T, cores = 2, sph_spawn_n = 10))
-  expect_null(make_simspin_file(ss_magneticum, template = "BC03lr", output = paste(temp_loc, "/magneticum_test", sep=""),
+  expect_null(make_simspin_file(ss_magneticum, template = "BPASS", output = paste(temp_loc, "/magneticum_test", sep=""),
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
-  expect_null(make_simspin_file(ss_magneticum, template = "BC03lr", output = paste(temp_loc, "/magneticum_test", sep=""),
+  expect_null(make_simspin_file(ss_magneticum, template = "BPASS", output = paste(temp_loc, "/magneticum_test", sep=""),
                                 overwrite = T, cores = 2, sph_spawn_n = 10))
   expect_null(make_simspin_file(ss_horizon, template = "BC03hr", output = paste(temp_loc, "/horizon_test", sep=""),
                                 overwrite = T, cores = 1, sph_spawn_n = 10))
@@ -276,8 +276,8 @@ test_that("Test that sph_spawn functionality works on multiple cores - EAGLE", {
 })
 
 test_that("Test that sph_spawn functionality works on multiple cores - Magneticum", {
-  gas_data_c1 = make_simspin_file(ss_magneticum, template = "EMILES", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
-  gas_data_c2 = make_simspin_file(ss_magneticum, template = "EMILES", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
+  gas_data_c1 = make_simspin_file(ss_magneticum, template = "BPASS", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
+  gas_data_c2 = make_simspin_file(ss_magneticum, template = "BPASS", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
   expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
   expect_length(gas_data_c1$gas_part$ID, 1000) # sph_spawn_n = 10, original file contains 100 gas particles
   expect_length(gas_data_c2$gas_part$ID, 1000)
@@ -300,8 +300,8 @@ test_that("Test that sph_spawn functionality works on multiple cores - Illustris
 })
 
 test_that("Test that sph_spawn functionality works on multiple cores - Colibre", {
-  gas_data_c1 = make_simspin_file(ss_colibre, template = "BC03", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
-  gas_data_c2 = make_simspin_file(ss_colibre, template = "BC03", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
+  gas_data_c1 = make_simspin_file(ss_colibre, template = "BPASS", write_to_file = FALSE, cores = 1, sph_spawn_n = 10)
+  gas_data_c2 = make_simspin_file(ss_colibre, template = "BPASS", write_to_file = FALSE, cores = 2, sph_spawn_n = 10)
   expect_equal(gas_data_c1$gas_part$ID, gas_data_c2$gas_part$ID)
   expect_length(gas_data_c1$gas_part$ID, 620) # sph_spawn_n = 10, original file contains 100 gas particles
   expect_length(gas_data_c2$gas_part$ID, 620)
@@ -326,7 +326,7 @@ test_that("Testing that the header data works as expected", {
   expect_equal(gadget$header$Template, "EMILES")
   expect_equal(hdf5$header$Template, "BC03lr")
   expect_equal(eagle$header$Template, "EMILES")
-  expect_equal(magneticum$header$Template, "BC03lr")
+  expect_equal(magneticum$header$Template, "BPASS")
   expect_equal(horizon$header$Template, "BC03hr")
   expect_equal(illustris$header$Template, "BC03lr")                             # correct?
 
