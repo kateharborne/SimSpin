@@ -23,8 +23,9 @@
 #' of all metal elements above He over the total mass).
 #'@param template The stellar templates from which to derive the SEDs. Options
 #' include "BC03lr" (GALEXEV low resolution, Bruzual & Charlot 2003), "BC03hr"
-#' (GALEXEV high resolution, Bruzual & Charlot 2003) or "EMILES" (Vazdekis et
-#' al, 2016).
+#' (GALEXEV high resolution, Bruzual & Charlot 2003), "EMILES" (Vazdekis et
+#' al, 2016) or "BPASS" (Binary Population and Spectral Synthesis, Stanway and
+#' Eldridge, 2018, MNRAS, 479, 75).
 #'@param write_to_file Boolean to specify whether the list produced should be
 #' written to a ".Rdata" file or output to the environment. Default is TRUE, so
 #' that files can be re-observed without having to generate spectra each time.
@@ -109,9 +110,14 @@ make_simspin_file = function(filename, cores=1, disk_age=5, bulge_age=10,
     header$Template = "EMILES"
     header$Template_LSF = 2.51 # as according to Vazdekis et al (2016) MNRAS 463, pg 3409-3436
     header$Template_waveres = min(diff(temp$Wave))
+  } else if (temp_name == "BPASS"){
+    temp = SimSpin::BPASS
+    header$Template = "BPASS"
+    header$Template_LSF = 3 # assumed according to Stanway and Eldridge, 2018, MNRAS, 479, 75, similar to Bruzal & Charlot (2003)
+    header$Template_waveres = min(diff(temp$Wave))
   } else {
     stop(cat("Error: template specified is unavailable.", "\n",
-             "Please specify template = 'BC03', 'BC03lr', 'BC03hr' or 'EMILES'"))
+             "Please specify template = 'BC03', 'BC03lr', 'BC03hr', 'EMILES', or 'BPASS'"))
   }
 
   if (sph_spawn_n%%1!=0){
