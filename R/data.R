@@ -87,7 +87,9 @@
 #' the metallicity of the population. Each list element then contains a numeric matrix, with each row describing the
 #' spectrum that would be associated with a population of a given age.}
 #' }
+#' @details Everything has been computed for a Chabrier IMF and the Padova 1994 isochrones
 #' @source \url{http://www.bruzual.org/bc03}
+#' @references BC03/GALEXev: Bruzual and Charlot, 2003, MNRAS, 344, 1000 \cr Padova 1994 isochrones: Bertelli et al., 1994, A\&AS, 106, 275 \cr Chabrier IMF: Chabrier, 2003, PASP, 115, 763
 #'
 "BC03lr"
 
@@ -110,7 +112,9 @@
 #' the metallicity of the population. Each list element then contains a numeric matrix, with each row describing the
 #' spectrum that would be associated with a population of a given age.}
 #' }
+#' @details Everything has been computed for a Chabrier IMF and the Padova 1994 isochrones
 #' @source \url{http://www.bruzual.org/bc03}
+#' @references BC03/GALEXev: Bruzual and Charlot, 2003, MNRAS, 344, 1000 \cr Padova 1994 isochrones: Bertelli et al., 1994, A\&AS, 106, 275 \cr Chabrier IMF: Chabrier, 2003, PASP, 115, 763
 #'
 "BC03hr"
 
@@ -131,6 +135,32 @@
 #' the metallicity of the population. Each list element then contains a numeric matrix, with each row describing the
 #' spectrum that would be associated with a population of a given age.}
 #' }
+#' @details Everything has been computed for a Chabrier IMF and the BaSTI isochrones.
 #' @source \url{http://miles.iac.es/}
+#' @references EMILES: Vazdekis et al, 2016, MNRAS, 463, 3409 \cr Padova 1994 isochrones: Bertelli et al., 1994, A&AS, 106, 275 \cr Chabrier IMF: Chabrier, 2003, PASP, 115, 763
 #'
 "EMILES"
+
+#' BPASS - BPASS v2.2.1 Binaries Stellar Library
+#'
+#' A dataset containing the grid of spectral templates for a stellar population
+#' with a given stellar age and metallicity. At each age/metallicity bin, a
+#' template spectrum is given in units of solar luminoisities per angstrom for
+#' 1 solar mass of star formation. Values are given at a series of wavelengths,
+#' contained within the dataset.
+#'
+#' @format A list with 4 elements:
+#' \describe{
+#' \item{Z}{A numeric array that describes the 13 possible metallicity bins provided by the template spectra.}
+#' \item{Age}{A numeric array that describes the 51 possible age bins provided by the template spectra.}
+#' \item{Wave}{A numeric array that describes the 842 wavelengths (in Angstrom) at which the spectrum is provided.}
+#' \item{Zspec}{A list containing the template spectrum for a galaxy. The first level of the list corresponds to
+#' the metallicity of the population. Each list element then contains a numeric matrix, with each row describing the
+#' spectrum that would be associated with a population of a given age.}
+#' }
+#' @details Everything has been computed for a Chabrier IMF out to 300 Msol binary variant of BPASS v2.2.1.
+#' @source \url{https://bpass.auckland.ac.nz/9.html}
+#' @references Stanway and Eldridge, 2018, MNRAS, 479, 75
+#'
+"BPASS"
+
