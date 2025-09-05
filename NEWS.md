@@ -1,6 +1,6 @@
-# SimSpin v2.10.5 News
+# SimSpin v2.11.0 News
 
-### Last edit: 22/08/2025
+### Last edit: 05/09/2025
 
 Below is a table containing a summary of all changes made to SimSpin, since the date this file was created on 26/08/2021.
 
@@ -16,7 +16,8 @@ All changes are noted in the changelog table below.
 
 | Date     	| Summary of change                                                                                                                                                                                                                                                                                                                                                                                                        	| Version 	| Commit                                   	| Author            |
 |----------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|---------	|------------------------------------------	| ----------------- |
-| 22/08/25 | *Bug fix* NaN's triggered in spectral weights when using BC03 templates and stars have ages closest to the lowest bin (age = 0). Interpolation done in log space causing -Inf values that cannot be interpolated. Added fix and tests to check this in future. | 2.10.5 |  | Kate Harborne |
+| 05/09/25 | *Feature* Added BPASS binary stellar population templates to SimSpin. | 2.11.0 |  | Kate Harborne |
+| 22/08/25 | *Bug fix* NaN's triggered in spectral weights when using BC03 templates and stars have ages closest to the lowest bin (age = 0). Interpolation done in log space causing -Inf values that cannot be interpolated. Added fix and tests to check this in future. | 2.10.5 | 68f26faff6799dbbf5c934aa702316a223786743 | Kate Harborne |
 | 24/04/25 | *Bug fix* Variance cube should not be just the inverse of the added noise, updated to reflect the inverse variance in the full velocity/spectral cube. | 2.10.4 | 968252ffdc131f85c592f5771162ad54c4242dc5 | Kate Harborne |
 | 24/04/25 | *New feature!* Adding support for reading and processing COLIBRE files as cut out using SWIFTsimio. | 2.10.3 | 476135d54d8133eaafee981a9ebffcd636d01d7b | Kate Harborne |
 | 16/04/25 | *Bug fix* `optim` returning the lower bound for dispersion (i.e. sigma = 1e10) frequently. Changing the lower bound value to a physically meaningful lower limit (i.e. FWHM_inst/2) and setting any fit values below this to 0. | 2.10.2 | e088ae99e1079f69616f767357475f70c9604394 | Kate Harborne |
