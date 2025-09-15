@@ -208,8 +208,10 @@ build_datacube = function(simspin_file, telescope, observing_strategy,
       temp = SimSpin::EMILES
     } else if (simspin_data$header$Template == "BC03hr"){
       temp = SimSpin::BC03hr
-    } else {
+    } else if (simspin_data$header$Template == "BC03lr"){
       temp = SimSpin::BC03lr
+    } else if (simspin_data$header$Template == "BPASS"){
+      temp = SimSpin::BPASS
     }
 
   observation$moments = moments
