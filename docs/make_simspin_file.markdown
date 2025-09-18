@@ -193,8 +193,7 @@ Available spectral templates include:
 | `BC03lr` | 221       | 0 - 20          | 6       | 0.0001 - 0.05                | 842                      | 91 - 20000               | 3                     | Chabrier | Padova 1994 |
 | `BC03hr` | 221       | 0 - 20          | 6       | 0.0001 - 0.05                | 6521                     | 91 - 20000               | 3                     | Chabrier | Padova 1994 |
 | `EMILES` | 53        | 0.03 - 14       | 12      | 0.0001 - 0.04                | 20356                    | 1680 - 20000             | 2.51                  | Chabrier | BaSTI |
-| `BPASS`  | 51        |                 | 13      |                              |
-842                      |                          | 3                     | Chabrier | 300 Msol binary variant |       
+| `BPASS`  | 51        | 0.001 - 100     | 13      | 0.00001 - 0.04               |842                      | 91 - 20000               | 3                     | Chabrier | 300 Msol binary variant |       
 
 ---
 
