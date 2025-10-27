@@ -5,7 +5,6 @@
 # Description: Hidden from user functions for reading various input simulation
 #              files, including
 #                 - Gadget binaries
-#                 - Tipsy binaries
 #                 - Gadget HDF5
 #                 - EAGLE
 #                 - IllustrisTNG
