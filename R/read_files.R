@@ -1101,8 +1101,6 @@
 }
 
 
-
-
 # Function to check existing names in a data set and convert if necessary
 .check_names = function(particle_list, type){
 
