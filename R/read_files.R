@@ -1091,6 +1091,11 @@
 
     stars = .check_names(stars, type="Generic")
 
+    # catch for stars with formation time below machine precision
+    if (any(stars$StellarFormationTime < .Machine$double.xmin)){
+      stars$StellarFormationTime[which(stars$StellarFormationTime < .Machine$double.xmin)] = min(stars$StellarFormationTime[which(stars$StellarFormationTime > .Machine$double.xmin)], na.rm=T)
+    }
+
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
 
