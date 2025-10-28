@@ -138,13 +138,22 @@
          See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
   }
 
-  other_headers = c("NumPart_ThisFile", "NumPart_Total", "Omega0", "OmegaLambda", "Omega_m", "Omega_lambda", "Omega_r")
+  other_headers = c("NumPart_ThisFile", "NumPart_Total")
   if (!any(other_headers %in% names(head))){
     stop("Error. Missing a required header field. \n
          One of `NumPart_ThisFile`, `NumPart_Total` or Omega parameters are missing. \n
          See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
   }
 
+  cosmo_headers = c("Omega0", "OmegaLambda", "Omega_m", "Omega_lambda", "Omega_r", "OmegaM", "OmegaL", "OmegaR")
+  if (!any(cosmo_headers %in% names(head))){
+    warning("Warning! Missing Omega parameters from header.\n
+    Using default Planck 2018 values OmegaM = 0.301, OmegaL = 0.699, OmegaR = 8.985075e-05.\n
+            See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
+    head$OmegaM = 0.301
+    head$OmegaL = 0.699
+    head$OmegaR = 8.985075e-05
+  }
 
   # default (if header if blank) is a gadget file.
   if(is.null(head$RunLabel) && is.null(head$SimulationName)){
@@ -1003,7 +1012,17 @@
                            "Metallicity",
                            "StarFormationRate", "Velocity", "SmoothingLength",
                            "Temperature", "InternalEnergy")
+
+    if (!"ElementAbundance/Oxygen" %in% PT0_attr & "Oxygen" %in% PT0_attr){
+      expected_names_gas[which(expected_names_gas == "ElementAbundance/Oxygen")] = "Oxygen"
+    }
+    if (!"ElementAbundance/Hydrogen" %in% PT0_attr & "Hydrogen" %in% PT0_attr){
+      expected_names_gas[which(expected_names_gas == "ElementAbundance/Hydrogen")] = "Hydrogen"
+    }
+
     PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
+
+
 
     n_gas_prop = length(PT0_attr)
     gas = vector("list", n_gas_prop)
@@ -1123,6 +1142,11 @@
     names(particle_list) <- current_names
   }
 
+  if ("Hydrogen" %in% current_names & stringr::str_detect(type, "Generic")){
+    current_names[which(current_names == "Hydrogen")] <- "ElementAbundance/Hydrogen"
+    names(particle_list) <- current_names
+  }
+
   if ("SmoothedElementAbundance/Hydrogen" %in% current_names & type == "EAGLE" |
       "SmoothedElementAbundance/Hydrogen" %in% current_names & type == "HAGN" ){
     current_names[which(current_names == "SmoothedElementAbundance/Hydrogen")] <- "ElementAbundance/Hydrogen"
@@ -1131,6 +1155,11 @@
 
   if ("ElementMassFractions/Hydrogen" %in% current_names & type == "Colibre"){
     current_names[which(current_names == "ElementMassFractions/Hydrogen")] <- "ElementAbundance/Hydrogen"
+    names(particle_list) <- current_names
+  }
+
+  if ("Oxygen" %in% current_names & stringr::str_detect(type, "Generic")){
+    current_names[which(current_names == "Oxygen")] <- "ElementAbundance/Oxygen"
     names(particle_list) <- current_names
   }
 
