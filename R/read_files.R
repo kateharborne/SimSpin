@@ -1036,7 +1036,7 @@
         hdf5r::readDataSet(data[[paste0("PartType0/",PT0_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    gas = .check_names(gas, type="Colibre")
+    gas = .check_names(gas, type="Generic")
 
     colibre_gas_names = c("SmoothingLength", "Temperature", "InternalEnergy")
     if (!all(colibre_gas_names %in% names(gas))){
@@ -1090,7 +1090,7 @@
         hdf5r::readDataSet(data[[paste0("PartType4/",PT4_attr[i])]]) * head$Time^(aexp) * head$HubbleParam^(hexp) * cgs
     }
 
-    stars = .check_names(stars, type="Colibre")
+    stars = .check_names(stars, type="Generic")
 
     one_p_flag = FALSE
     if (is.null(dim(stars$Coordinates))){one_p_flag = TRUE}
@@ -1142,7 +1142,7 @@
     names(particle_list) <- current_names
   }
 
-  if ("Hydrogen" %in% current_names & stringr::str_detect(type, "Generic")){
+  if ("Hydrogen" %in% current_names & type == "Generic"){
     current_names[which(current_names == "Hydrogen")] <- "ElementAbundance/Hydrogen"
     names(particle_list) <- current_names
   }
@@ -1158,7 +1158,7 @@
     names(particle_list) <- current_names
   }
 
-  if ("Oxygen" %in% current_names & stringr::str_detect(type, "Generic")){
+  if ("Oxygen" %in% current_names & type == "Generic"){
     current_names[which(current_names == "Oxygen")] <- "ElementAbundance/Oxygen"
     names(particle_list) <- current_names
   }
