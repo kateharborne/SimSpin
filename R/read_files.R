@@ -171,6 +171,7 @@
       magneticum = F
       horizonagn = F
       colibre = F
+      generic = F
       if(stringr::str_detect(stringr::str_to_lower(head$SimulationName), "tng")){illustristng = T}else{illustristng = F}
     } else {
       gadget2 = F
