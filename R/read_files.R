@@ -181,7 +181,7 @@
       if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "magneticum")){magneticum = T}else{magneticum=F}
       if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "horizon")){horizonagn = T}else{horizonagn = F}
       if(stringr::str_detect(stringr::str_to_lower(head$RunLabel), "colibre")){colibre = T}else{colibre = F}
-      if(!all(eagle, illustristng, magneticum, horizonagn, colibre, gadget2)){generic=T}else{generic = F}
+      if(!any(eagle, illustristng, magneticum, horizonagn, colibre, gadget2)){generic=T}else{generic = F}
     }
   }
 
