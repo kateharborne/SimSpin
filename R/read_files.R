@@ -163,6 +163,7 @@
     horizonagn = F
     illustristng = F
     colibre = F
+    generic = F
   } else {
 
     if ("SimulationName" %in% names(head)){
