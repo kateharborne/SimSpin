@@ -996,6 +996,7 @@
 
   head$Type = paste0("Generic read - ", head$RunLabel)
   head$H0 = head$HubbleParam * 100
+  head$Time = 1/(1+head$Redshift)
   names(head)[names(head) == "Omega_m"] = "OmegaM"
   names(head)[names(head) == "Omega_lambda"] = "OmegaL"
   names(head)[names(head) == "Omega_r"] = "OmegaR"
@@ -1021,8 +1022,6 @@
     }
 
     PT0_attr = PT0_attr[which(PT0_attr %in% expected_names_gas)] # trim list to only read in necessary data sets
-
-
 
     n_gas_prop = length(PT0_attr)
     gas = vector("list", n_gas_prop)
