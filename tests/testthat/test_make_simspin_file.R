@@ -20,6 +20,27 @@ built_cube_size = 5
 
 temp_loc = tempdir()
 
+# Modifying EAGLE file to make an additional generic file
+file.copy(from = system.file("extdata", "SimSpin_example_EAGLE.hdf5", package = "SimSpin"),
+          to = paste0(temp_loc, "/SimSpin_example_generic.hdf5"))
+ss_generic = paste0(temp_loc, "/SimSpin_example_generic.hdf5")
+generic_data = hdf5r::h5file(ss_generic, mode="r+")
+hdf5r::h5attr(generic_data[["Header"]], "RunLabel") = "Random"
+generic_data[["PartType0/ElementAbundance"]] = generic_data[["PartType0/SmoothedElementAbundance"]]
+generic_data[["PartType0/Metallicity"]] = generic_data[["PartType0/SmoothedMetallicity"]]
+generic_data[["PartType4/Metallicity"]] = generic_data[["PartType4/SmoothedMetallicity"]]
+hdf5r::h5close(generic_data)
+
+file.copy(from = paste0(temp_loc, "/SimSpin_example_generic.hdf5"),
+          to = paste0(temp_loc, "/SimSpin_example_generic_metals.hdf5"))
+ss_generic_metals = paste0(temp_loc, "/SimSpin_example_generic_metals.hdf5")
+generic_metals_data = hdf5r::h5file(ss_generic_metals, mode="r+")
+generic_metals_data[["PartType0/Oxygen"]] = generic_metals_data[["PartType0/ElementAbundance/Oxygen"]]
+generic_metals_data[["PartType0/Hydrogen"]] = generic_metals_data[["PartType0/ElementAbundance/Hydrogen"]]
+generic_metals_data[["PartType0/Carbon"]] = generic_metals_data[["PartType0/ElementAbundance/Carbon"]]
+hdf5r::h5close(generic_metals_data)
+
+
 # Test that the function runs successfully without error
 test_that("Initial run of each simulation type - Gadget.", {
   expect_null(make_simspin_file(ss_gadget, template = "BC03hr", output = paste(temp_loc, "/gadget_test", sep="")))
@@ -99,6 +120,21 @@ test_that("Initial run of each simulation type - Colibre", {
 
 })
 
+test_that("Initial run of each simulation type - Generic", {
+  # Modify the EAGLE file header to trigger processing via the generic route
+  expect_null(make_simspin_file(ss_generic, output = paste(temp_loc, "/generic_test", sep="")))
+
+  expect_null(make_simspin_file(ss_generic_metals, output = paste(temp_loc, "/generic_metals_test", sep="")))
+
+  generic = readRDS(paste(temp_loc, "/generic_test", sep=""))
+  expect_length(generic, ss_file_length)
+  expect_true(generic$header$Type == "Generic read - Random")
+  expect_true(length(generic$gas_part) == 16)
+  expect_true(nrow(generic$spectral_weights) == 8)
+  expect_false(any(is.na(generic$gas_part$ThermalDispersion)))
+  expect_true(all(generic$gas_part$ThermalDispersion[generic$gas_part$Temperature < 1e4] == 11))
+})
+
 # Test that the function fails when the file already exists
 test_that("Error when output file already exists and overwrite = F - Gadget",{
   expect_error(make_simspin_file(ss_gadget, output = paste(temp_loc, "/gadget_test", sep="")))
@@ -126,6 +162,10 @@ test_that("Error when output file already exists and overwrite = F - IllustrisTN
 
 test_that("Error when output file already exists and overwrite = F - Colibre",{
   expect_error(make_simspin_file(ss_colibre, output = paste(temp_loc, "/colibre_test", sep="")))
+})
+
+test_that("Error when output file already exists and overwrite = F - Generic",{
+  expect_error(make_simspin_file(ss_generic, output = paste(temp_loc, "/generic_test", sep="")))
 })
 
 # Test that function can output to environment
@@ -157,6 +197,7 @@ test_that("Values are successfully associated with variables", {
   hdf5      = readRDS(paste(temp_loc, "/hdf5_test", sep=""))
   eagle     = readRDS(paste(temp_loc, "/eagle_test", sep=""))
   illustris = readRDS(paste(temp_loc, "/illustris_test", sep=""))
+  generic   = readRDS(paste(temp_loc, "/generic_test", sep=""))
 
   expect_true(all(!is.na(gadget$star_part$x)))
   expect_true(all(!is.na(gadget$star_part$y)))
@@ -232,6 +273,30 @@ test_that("Values are successfully associated with variables", {
   expect_true(all(!is.na(illustris$gas_part$Temperature)))
   expect_true(all(!is.na(illustris$gas_part$Metallicity)))
   # SmoothingLength, Carbon/Hydrogen/Oxygen?
+
+  expect_true(all(!is.na(generic$star_part$x)))
+  expect_true(all(!is.na(generic$star_part$y)))
+  expect_true(all(!is.na(generic$star_part$z)))
+  expect_true(all(!is.na(generic$star_part$vx)))
+  expect_true(all(!is.na(generic$star_part$vy)))
+  expect_true(all(!is.na(generic$star_part$vz)))
+  expect_true(all(!is.na(generic$star_part$Mass)))
+  expect_true(all(!is.na(generic$star_part$sed_id)))
+  expect_true(all(!is.na(generic$star_part$Metallicity)))
+  expect_true(all(!is.na(generic$star_part$Age)))
+  expect_true(all(!is.na(generic$star_part$Initial_Mass)))
+
+  expect_true(all(!is.na(generic$gas_part$x)))
+  expect_true(all(!is.na(generic$gas_part$y)))
+  expect_true(all(!is.na(generic$gas_part$z)))
+  expect_true(all(!is.na(generic$gas_part$vx)))
+  expect_true(all(!is.na(generic$gas_part$vy)))
+  expect_true(all(!is.na(generic$gas_part$vz)))
+  expect_true(all(!is.na(generic$gas_part$Mass)))
+  expect_true(all(!is.na(generic$gas_part$SFR)))
+  expect_true(all(!is.na(generic$gas_part$Density)))
+  expect_true(all(!is.na(generic$gas_part$Temperature)))
+  expect_true(all(!is.na(generic$gas_part$Metallicity)))
 })
 
 # Testing the sph_spawn functionality ----
@@ -371,7 +436,8 @@ test_that("Temperature does not go outside a reasonable range",{
 unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", sep=""),
          paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep=""),
          paste(temp_loc, "/horizon_test", sep=""), paste(temp_loc, "/illustris_test", sep=""),
-         paste(temp_loc, "/colibre_test", sep="")))
+         paste(temp_loc, "/colibre_test", sep=""), paste(temp_loc, "/generic_test", sep=""),
+         paste(temp_loc, "/generic_metals_test", sep="")))
 
 # Testing that the centre parameter works as expected ------------
 test_that("Objects are centered correctly based on the specified central coordinates", {
@@ -869,3 +935,5 @@ test_that("No errors when other HDF5 files input only have 11 gas particles - EA
   unlink(paste0(temp_loc, "/SimSpin_example_eagle_copy.hdf5"))
 
 })
+
+unlink(c(ss_generic, ss_generic_metals, temp_loc))
