@@ -999,9 +999,20 @@
   head$Type = paste0("Generic read - ", head$RunLabel)
   head$H0 = head$HubbleParam * 100
   head$Time = 1/(1+head$Redshift)
-  names(head)[names(head) == "Omega_m"] = "OmegaM"
-  names(head)[names(head) == "Omega_lambda"] = "OmegaL"
+  names(head)[names(head) == "Omega_m" | names(head) == "Omega0"] = "OmegaM"
+  names(head)[names(head) == "Omega_lambda" | names(head) == "OmegaLambda"] = "OmegaL"
   names(head)[names(head) == "Omega_r"] = "OmegaR"
+
+  if (all(is.null(head$OmegaM), is.null(head$OmegaL), is.null(head$OmegaR))){
+    warning("Warning! Missing Omega parameters from header.\n
+    Using default Planck 2018 values OmegaM = 0.301, OmegaL = 0.699, OmegaR = 8.985075e-05.\n
+            See https://kateharborne.github.io/SimSpin/examples/generating_hdf5.html#header for more details.")
+    head$OmegaM = 0.301
+    head$OmegaL = 0.699
+    head$OmegaR = 8.985075e-05
+  } else if (is.null(head$OmegaR) & !is.null(head$OmegaM) & !is.null(head$OmegaL)){
+    head$OmegaR = 0
+  }
 
   groups = hdf5r::list.groups(data) # What particle data is present?
   groups = groups[stringr::str_detect(groups, "PartType")] # Pick out PartTypeX groups
