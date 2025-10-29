@@ -31,6 +31,15 @@ generic_data[["PartType0/Metallicity"]] = generic_data[["PartType0/SmoothedMetal
 generic_data[["PartType4/Metallicity"]] = generic_data[["PartType4/SmoothedMetallicity"]]
 hdf5r::h5close(generic_data)
 
+file.copy(from = paste0(temp_loc, "/SimSpin_example_generic.hdf5"),
+          to = paste0(temp_loc, "/SimSpin_example_generic_metals.hdf5"))
+ss_generic_metals = paste0(temp_loc, "/SimSpin_example_generic_metals.hdf5")
+generic_metals_data = hdf5r::h5file(ss_generic_metals, mode="r+")
+generic_metals_data[["PartType0/Oxygen"]] = generic_metals_data[["PartType0/ElementAbundance/Oxygen"]]
+generic_metals_data[["PartType0/Hydrogen"]] = generic_metals_data[["PartType0/ElementAbundance/Hydrogen"]]
+generic_metals_data[["PartType0/Carbon"]] = generic_metals_data[["PartType0/ElementAbundance/Carbon"]]
+hdf5r::h5close(generic_metals_data)
+
 
 # Test that the function runs successfully without error
 test_that("Initial run of each simulation type - Gadget.", {
@@ -114,6 +123,8 @@ test_that("Initial run of each simulation type - Colibre", {
 test_that("Initial run of each simulation type - Generic", {
   # Modify the EAGLE file header to trigger processing via the generic route
   expect_null(make_simspin_file(ss_generic, output = paste(temp_loc, "/generic_test", sep="")))
+
+  expect_null(make_simspin_file(ss_generic_metals, output = paste(temp_loc, "/generic_metals_test", sep="")))
 
   generic = readRDS(paste(temp_loc, "/generic_test", sep=""))
   expect_length(generic, ss_file_length)
@@ -425,7 +436,8 @@ test_that("Temperature does not go outside a reasonable range",{
 unlink(c(paste(temp_loc, "/gadget_test", sep=""), paste(temp_loc, "/hdf5_test", sep=""),
          paste(temp_loc, "/eagle_test", sep=""), paste(temp_loc, "/magneticum_test", sep=""),
          paste(temp_loc, "/horizon_test", sep=""), paste(temp_loc, "/illustris_test", sep=""),
-         paste(temp_loc, "/colibre_test", sep="")))
+         paste(temp_loc, "/colibre_test", sep=""), paste(temp_loc, "/generic_test", sep=""),
+         paste(temp_loc, "/generic_metals_test", sep="")))
 
 # Testing that the centre parameter works as expected ------------
 test_that("Objects are centered correctly based on the specified central coordinates", {
@@ -924,4 +936,4 @@ test_that("No errors when other HDF5 files input only have 11 gas particles - EA
 
 })
 
-unlink(c(ss_generic, temp_loc))
+unlink(c(ss_generic, ss_generic_metals, temp_loc))
